@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<app-navbar></app-navbar>
+<body>
+    <div class="container">
+        <carousel [images]="images"></carousel>
+    </div>
+    <section class="body">
+        <div class="images">
+            <img src="../../assets/images/Tunisia.gif" style="height: 100px; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOAG.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOIRESA.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            
+            <img src="../../assets/images/LOGOINSTM.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGONAS.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOUSAID.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+        </div>
+        <hr>
+        <div class="center-text">
+            <h2 style="margin-top:4rem">BASSIANA GEOATABASE</h2>
+            <h3 class="section-subheading text-muted p-5">WE COVER GEOSPATIAL ANALYSIS</h3>
+        </div>
+        
+        <app-landscape-cards></app-landscape-cards>
+        
+    
+    </section>
+    
+    
+</body>
+<footer class="footer py-4 full-height-footer">
+    <div class="container-fluid">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-4 text-lg-left">Copyright © INSTM 2022</div>
+            <div class="col-lg-4 text-center">
+                <app-custom-fb-buttons></app-custom-fb-buttons>
+            </div>
+            <div class="col-lg-4 text-lg-right">
+                <img class="img-fluid" src="../../assets/images/all_logo.png" style="height: 55px;">
+            </div>
+        </div>
+    </div>
+</footer>
+</html>

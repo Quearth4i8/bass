@@ -1,0 +1,85 @@
+<!-- <nav class="navbar navbar-expand-lg navbar-light bg-none">
+  <div class="container-fluid justify-content-center">
+    <ul>
+      <a class="navbar-brand mx-auto" href="#">BASSIANA</a>
+    </ul>
+      <button class="navbar-toggler" style="margin-left: 10%;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav mx-auto" style="margin-bottom: 15px;">
+
+        <li class="nav-item">
+          <a class="nav-link" href="home">Home</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink1" role="button" aria-expanded="false">
+            IMAS-Ichkeul
+            <span class="custom-dropdown-icon" style="background-image: url('../../assets/images/down.png');"></span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink1">
+            <li><a class="dropdown-item" href="#">Scientific merit</a></li>
+            <li><a class="dropdown-item" href="#">Objectives</a></li>
+            <li><a class="dropdown-item" href="#">Partners &amp; Funder</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" role="button" aria-expanded="false">
+            Bassiana
+            <span class="custom-dropdown-icon" style="background-image: url('../../assets/images/down.png');"></span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink2">
+            <li><a class="dropdown-item" href="#">About BASSIANA</a></li>
+            <li><a class="dropdown-item" href="#">Mission</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="gallery">Gallery</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="events">Events</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="team">Team</a>
+        </li>
+      </ul>
+      <ul>
+        <app-custom-button></app-custom-button>
+      </ul>
+    </div>
+  </div>
+</nav> -->
+<header [ngClass]="{'sticky': isSticky}">
+  <a routerLink="/" class="logo">BASSIANA</a>
+  <ul>
+    <li><a routerLink="#">Home</a></li>
+    <li class="dropdown">
+      <a routerLink="#" class="dropdown-toggle">
+        IMAS-Ichkeul
+        <span><img src="../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+      </a>
+      <ul class="dropdown-menu" style=" padding: 10px;">
+        <li style="padding: 5px 5px;"><a routerLink="#">Scientific merit</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="#">Objectives</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="#">Partners &amp; Funder</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <a routerLink="#" class="dropdown-toggle">
+        Bassiana
+        <span><img src="../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+      </a>
+      <ul class="dropdown-menu" style=" padding: 10px;">
+        <li style="padding: 5px 5px;"><a routerLink="#">About Bassiana</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="#">mission</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="#">Gallery</a></li>
+    <li><a routerLink="#">Events</a></li>
+    <li><a routerLink="#">Team</a></li>
+  </ul>
+  <app-custom-button></app-custom-button>
+</header>
+
+

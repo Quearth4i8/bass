@@ -1,0 +1,22 @@
+<div class="slider-container">
+    <button class="slider-button left" (click)="showPrev()">
+        <img src="../../assets/icons/left-arrow.png" alt="Left arrow">
+    </button>
+    <div class="slider-items" *ngFor="let image of images; let i = index" [ngClass]="{
+        'selected': i === selectedIndex,
+        'prev': i === getPrevIndex(selectedIndex),
+        'next': i === getNextIndex(selectedIndex),
+    }">
+        <img [src]="image.imgSrc" [alt]="image.imgAlt" class="slider-img">
+    </div>
+    <button class="slider-button right" (click)="showNext()">
+        <img src="../../assets/icons/right-arrow.png" alt="Right arrow">
+    </button>
+    <!-- Add text based on current image -->
+    <div class="slider-text" style="padding-top: 75%;" [@fadeIn]>
+        <div class="slider-text">
+          <div class="main-heading">{{ images[selectedIndex].mainText }}</div>
+          <div class="sub-heading">{{ images[selectedIndex].subText }}</div>
+        </div>
+      </div>
+</div>
