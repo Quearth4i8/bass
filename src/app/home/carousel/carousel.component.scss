@@ -1,8 +1,9 @@
 .slider-container {
     position: relative;
     width: 75%;
-    height: 100%;
+    height: 90%;
     margin: auto;
+    margin-top: 1rem;
 
     .slider-items {
         position: absolute;
@@ -64,8 +65,8 @@
         }
     }
     .slider-button img {
-        width: 24px; /* Adjust icon size as needed */
-        height: 24px; /* Adjust icon size as needed */
+        width: 24px;
+        height: 24px;
     }
     
     .slider-button {
@@ -105,7 +106,7 @@
 }
 
 .slider-list {
-    margin-top: 20px; /* Adjust as needed */
+    margin-top: 20px;
 }
 
 .arrow-list li {
@@ -116,25 +117,25 @@
   }
   
   .main-heading {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: bold;
-    color: #333; /* Change color as needed */
+    color: #000000;
   }
   
   .sub-heading {
     font-size: 16px;
-    color: #666; /* Change color as needed */
-    margin-top: 10px; /* Adjust margin as needed */
+    color: #000000;
+    margin-top: 10px;
   }
   
   @media screen and (max-width: 768px) {
     .main-heading {
-      font-size: 20px; /* Adjust font size for smaller screens */
+      font-size: 20px;
     }
   
     .sub-heading {
-      font-size: 14px; /* Adjust font size for smaller screens */
-      margin-top: 8px; /* Adjust margin for smaller screens */
+      font-size: 14px;
+      margin-top: 8px;
     }
   }
   

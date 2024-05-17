@@ -82,10 +82,20 @@ body {
   pointer-events: auto;
 }
 
-.wrapper .icon:hover span,
-.wrapper .icon:hover .tooltip {
-  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
+.icon.facebook span i {
+  color: #3b5998;
 }
+.icon.facebook:hover span i {
+  color: #ffffff;
+}
+.icon.twitter span i {
+  color: #000000;
+}
+.icon.twitter:hover span i {
+  color: #ffffff;
+}
+
+
 
 .wrapper .facebook:hover,
 .wrapper .facebook:hover .tooltip,
@@ -97,27 +107,7 @@ body {
 .wrapper .twitter:hover,
 .wrapper .twitter:hover .tooltip,
 .wrapper .twitter:hover .tooltip::before {
-  background: #1DA1F2;
+  background: #0d2839;
   color: #ffffff;
 }
 
-.wrapper .instagram:hover,
-.wrapper .instagram:hover .tooltip,
-.wrapper .instagram:hover .tooltip::before {
-  background: #E4405F;
-  color: #ffffff;
-}
-
-.wrapper .github:hover,
-.wrapper .github:hover .tooltip,
-.wrapper .github:hover .tooltip::before {
-  background: #333333;
-  color: #ffffff;
-}
-
-.wrapper .youtube:hover,
-.wrapper .youtube:hover .tooltip,
-.wrapper .youtube:hover .tooltip::before {
-  background: #CD201F;
-  color: #ffffff;
-}

@@ -40,7 +40,7 @@ body {
   }
   
   .btn-5 {
-	background: #000;
+	background: #1f2350;
 	color: #fff;
 	line-height: 42px;
 	padding: 0;
@@ -48,12 +48,7 @@ body {
   }
   .btn-5:hover {
 	background: transparent;
-	color: #000;
-	 box-shadow:
-	 -7px -7px 20px 0px #fff9,
-	 -4px -4px 5px 0px #fff9,
-	 7px 7px 20px 0px #0002,
-	 4px 4px 5px 0px #0001;
+	color: #e79954;
   }
   .btn-5:before,
   .btn-5:after{
@@ -63,7 +58,7 @@ body {
 	right:0;
 	height:2px;
 	width:0;
-	background: #000;
+	background: #e79954;
 	transition:400ms ease all;
   }
   .btn-5:after{

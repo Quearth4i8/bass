@@ -5,11 +5,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { CustomButtonComponent } from './custom_buttons/custom-button/custom-button.component';
-import { BodyComponent } from './body/body.component';
-import { LandscapeCardsComponent } from './landscape-cards/landscape-cards.component';
+import { BodyComponent } from './home/body/body.component';
+import { LandscapeCardsComponent } from './home/landscape-cards/landscape-cards.component';
 import { CustomFbButtonsComponent } from './custom_buttons/custom-fb-buttons/custom-fb-buttons.component';
-import { CarouselComponent } from './carousel/carousel.component';
-
+import { CarouselComponent } from './home/carousel/carousel.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
     AppComponent,
@@ -24,6 +25,9 @@ import { CarouselComponent } from './carousel/carousel.component';
     BrowserModule,
     AppRoutingModule,
     HammerModule,
+    BrowserModule, 
+    BrowserAnimationsModule, 
+    FormsModule
   ],
   
   providers: [],

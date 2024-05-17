@@ -66,7 +66,7 @@
   
   header.sticky {
     padding: 5px 100px;
-    background-color: #000;
+    background-color: #1f2350;
   }
   
   header .logo {
@@ -101,14 +101,19 @@
     font-weight: 500;
     transition: 0.6s;
   }
-  
+
   .banner {
     position: relative;
     width: 100%;
     height: 100vh;
     background-size: cover;
   }
-  
+  header ul li a:hover{
+    color: #e79954;
+  }
+  header.sticky ul li a:hover{
+    color: #e79954;
+  }
   header.sticky .logo,
   header.sticky > ul > li > a {
     color: #fff;
@@ -140,7 +145,7 @@
     animation: fadeInFromTopLeft 0.3s ease forwards;
     position: absolute; 
     left: 0;
-    background-color: #000;
+    background-color: #1f2350;
   }
 
   header > ul > li.dropdown .dropdown-menu a {
@@ -153,7 +158,7 @@
   }
 
   header > ul > li.dropdown .dropdown-menu a:hover {
-    color: #757575;
+    color: #e79954;
   }
 
   header > ul > li.dropdown > a.dropdown-toggle::after {

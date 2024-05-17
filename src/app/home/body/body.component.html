@@ -1,0 +1,80 @@
+<body>
+    <div [@backgroundChange]="{ value: currentImageIndex, params: { bgColor: getBackgroundColor(currentImageIndex) } }" style="height: 800px; padding-top: 150px;">
+        <app-navbar></app-navbar>
+        <div class="container">
+          <carousel [images]="images" (imageChange)="onImageChange($event)"></carousel>
+        </div>
+      </div>
+      
+    
+
+
+    <section class="body" style="margin-top: 0px">
+        <div class="images" style="padding-top:2rem">
+            <img src="../../assets/images/Tunisia.gif" style="height: 100px; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOAG.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOIRESA.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+
+            <img src="../../assets/images/LOGOINSTM.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGONAS.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+            <img src="../../assets/images/LOGOUSAID.png" style="height: auto; max-width: 100%; margin-right: 1rem">
+        </div>
+        <hr>
+        <div class="center-text">
+            <h2 style="margin-top:4rem">BASSIANA GEOATABASE</h2>
+            <h3 class="section-subheading text-muted p-5">WE COVER GEOSPATIAL ANALYSIS</h3>
+        </div>
+
+        <app-landscape-cards></app-landscape-cards>
+    </section>
+    <div class="container2">
+        <section class="text-section1">
+            <h1>BASSIANA Ecosystems Database with real-time ecosystem monitoring and evaluation</h1>
+            <h5>Accessing the Ecosystems Database allows users to manage their own data to run any of the dedicated
+                geospatial analysis chains.</h5>
+        </section>
+        <img src="../../assets/images/5.png" alt="Image Description" class="image">
+    </div>
+    <div class="container2">
+        <img src="../../assets/images/6.jpg" alt="Image Description" class="image">
+        <section class="text-section2">
+            <h1>Key element</h1>
+            <h5>The main keys for sustainable development in Ichkeul region are the management of water budget for the
+                Lake. Controlling the water level in the lake will help to safeguard biodiversity in this ecosystem.
+            </h5>
+        </section>
+    </div>
+    <div class="container2">
+        <section class="text-section1">
+            <h1>Initiative of BASSIANA Ecosystems Database</h1>
+            <h5>The website and the Ecosystems Database are the result of the capstone project of team “IMAS-Ichkeul”.
+            </h5>
+        </section>
+        <img src="../../assets/images/7.jpg" alt="Image Description" class="image">
+    </div>
+    <div class="container2">
+        <img src="../../assets/images/8.jpg" alt="Image Description" class="image">
+        <section class="text-section2">
+            <h1>IMAS-Ichkeul</h1>
+            <h5>The IMAS-Ichkeul is a project funded under the Partnerships for Enhanced Engagement in Research (PEER),
+                Cycle 8 program.</h5>
+        </section>
+    </div>
+
+
+</body>
+
+
+<footer class="footer py-4 full-height-footer">
+    <div class="container-fluid">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-4 text-lg-left"style="padding-left:5%">Copyright © INSTM 2022</div>
+            <div class="col-lg-4 text-center">
+                <app-custom-fb-buttons></app-custom-fb-buttons>
+            </div>
+            <div class="col-lg-4 text-lg-right"style="padding-right:5%">
+                <img class="img-fluid" src="../../assets/images/all_logo.png" style="height: 55px;">
+            </div>
+        </div>
+    </div>
+</footer>
