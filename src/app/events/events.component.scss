@@ -1,0 +1,118 @@
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30vh;
+    margin-bottom: 10vh;
+    width: 100%;
+  }
+  
+  .centered-heading {
+    font-size: 50px;
+    font-weight: bold;
+  }
+  
+  .centered-subheading {
+    font-size: 30px;
+    color: #0075f1;
+  }
+
+/******************************************************************************************/
+
+body{
+    background: #e7e7e7;
+    font-family: 'Muli',sans-serif;
+}
+
+.course{
+    background: #fafafa;
+    border-radius: 10px;
+    box-shadow: 0px 10px 10px rgba(0,0,0,.2);
+    display: flex;
+    max-width: 100%;
+    overflow: hidden;
+    width: 1000px;
+    margin-left: 10%;
+}
+.course h6{
+    opacity: .6;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.course h2{
+    letter-spacing: 1px;
+    margin: 10px 0;
+    position: relative;
+}
+
+.preview {
+    background: #0075f1;
+    color: #fff;
+    padding: 30px;
+    width: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Center the text within the h2 */
+}
+
+.preview h2{
+    text-align: center;
+}
+.preview a{
+    color: #fff;
+    font-size: 12px;
+    opacity: .6;
+    margin-top: 30px;
+    text-decoration: none;
+}
+.info{
+    padding: 30px;
+    position: relative;
+    width: 100%;
+}
+.info h6{
+    padding-right: 10px;
+}
+.circle-with-shadow {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #34db7f;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+.info p{
+    font-size: 12px;
+    font-weight: bold;
+}
+@media(max-width: 768px){
+    .course{
+        flex-direction:column ;
+        width: 90%;
+    }
+    .preview{
+        width: 100%;
+    }
+    .preview h2{
+        margin-left: 10px;
+    }
+    .preview a{
+        margin-top: 10px;
+    }
+    .info h2{
+        margin-top: 20px;
+    }
+    .info p{
+        margin-bottom: 50px;
+    }
+    .course{
+        margin-left: 5%;
+    }
+    .info h6{
+        padding-right: 10px;
+    }
+}

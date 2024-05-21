@@ -1,0 +1,16 @@
+
+.full-height-footer {
+    width: 100%;
+    background-color: #f4f4f4;
+    color: rgb(0, 0, 0);
+    margin-top: 5%;
+  }
+.Copyright{
+  align-items: left;
+}
+@media(max-width: 768px){
+  .col-lg-4 {
+    text-align: center;
+    margin: 5px;
+  }
+}

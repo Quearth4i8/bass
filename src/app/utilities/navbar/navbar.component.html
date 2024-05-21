@@ -53,11 +53,11 @@
 <header [ngClass]="{'sticky': isSticky}">
   <a routerLink="/" class="logo">BASSIANA</a>
   <ul>
-    <li><a routerLink="#">Home</a></li>
+    <li><a routerLink="/">Home</a></li>
     <li class="dropdown">
       <a routerLink="#" class="dropdown-toggle">
         IMAS-Ichkeul
-        <span><img src="../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+        <span><img src="../../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
       </a>
       <ul class="dropdown-menu" style=" padding: 10px;">
         <li style="padding: 5px 5px;"><a routerLink="#">Scientific merit</a></li>
@@ -68,15 +68,15 @@
     <li class="dropdown">
       <a routerLink="#" class="dropdown-toggle">
         Bassiana
-        <span><img src="../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+        <span><img src="../../../assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
       </a>
       <ul class="dropdown-menu" style=" padding: 10px;">
         <li style="padding: 5px 5px;"><a routerLink="#">About Bassiana</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="#">mission</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="#">Mission</a></li>
       </ul>
     </li>
-    <li><a routerLink="#">Gallery</a></li>
-    <li><a routerLink="#">Events</a></li>
+    <li><a routerLink="/gallery">Gallery</a></li>
+    <li><a routerLink="/events">Events</a></li>
     <li><a routerLink="#">Team</a></li>
   </ul>
   <app-custom-button></app-custom-button>

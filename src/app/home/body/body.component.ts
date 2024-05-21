@@ -33,7 +33,7 @@ export class BodyComponent {
     {
       imgSrc : 'assets/images/3.png',
       imgAlt : 'image 3',
-      mainText : 'BASSIANA INTERACTIVE Ecosystems DB',
+      mainText : 'BASSIANA INTERACTIVE Ecosystems Database',
       subText : 'BASSIANA database is designed as a means of collecting and exchanging ecosystem data for practical application. These data are provided from different sources of national and international projects and initiatives.',
       bgColor: 'rgba(68, 156, 191, 0.699)'
     },
