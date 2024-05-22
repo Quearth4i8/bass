@@ -15,6 +15,11 @@ import { GalleryComponent } from './gallery/gallery.component';
 import { HomeComponent } from './home/home/home.component';
 import { EventsComponent } from './events/events.component';
 import { FooterComponent } from './utilities/footer/footer.component';
+import { AboutBassianaComponent } from './about-bassiana/about-bassiana.component';
+import { MissionComponent } from './mission/mission.component';
+import { IchkeulComponent } from './ichkeul/ichkeul.component';
+import { ObjectivesComponent } from './objectives/objectives.component';
+import { PartnersComponent } from './partners/partners.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +34,11 @@ import { FooterComponent } from './utilities/footer/footer.component';
     HomeComponent,
     EventsComponent,
     FooterComponent,
+    AboutBassianaComponent,
+    MissionComponent,
+    IchkeulComponent,
+    ObjectivesComponent,
+    PartnersComponent,
   ],
   imports: [
     BrowserModule,
