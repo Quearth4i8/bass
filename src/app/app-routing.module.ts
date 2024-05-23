@@ -8,6 +8,7 @@ import { MissionComponent } from './mission/mission.component';
 import { IchkeulComponent } from './ichkeul/ichkeul.component';
 import { ObjectivesComponent } from './objectives/objectives.component';
 import { PartnersComponent } from './partners/partners.component';
+import { TeamComponent } from './team/team.component';
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'gallery', component: GalleryComponent },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'ichkeul', component:IchkeulComponent},
   { path: 'objectives', component:ObjectivesComponent},
   { path: 'partners', component:PartnersComponent},
+  { path: 'team', component:TeamComponent}
 ];
 
 @NgModule({

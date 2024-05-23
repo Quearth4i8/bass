@@ -20,6 +20,7 @@ import { MissionComponent } from './mission/mission.component';
 import { IchkeulComponent } from './ichkeul/ichkeul.component';
 import { ObjectivesComponent } from './objectives/objectives.component';
 import { PartnersComponent } from './partners/partners.component';
+import { TeamComponent } from './team/team.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { PartnersComponent } from './partners/partners.component';
     IchkeulComponent,
     ObjectivesComponent,
     PartnersComponent,
+    TeamComponent,
   ],
   imports: [
     BrowserModule,
