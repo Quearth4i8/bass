@@ -9,6 +9,7 @@ import { IchkeulComponent } from './ichkeul/ichkeul.component';
 import { ObjectivesComponent } from './objectives/objectives.component';
 import { PartnersComponent } from './partners/partners.component';
 import { TeamComponent } from './team/team.component';
+import { ProjectsComponent } from './projects/projects.component';
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'gallery', component: GalleryComponent },
@@ -18,7 +19,8 @@ const routes: Routes = [
   { path: 'ichkeul', component:IchkeulComponent},
   { path: 'objectives', component:ObjectivesComponent},
   { path: 'partners', component:PartnersComponent},
-  { path: 'team', component:TeamComponent}
+  { path: 'team', component:TeamComponent},
+  { path: 'projects', component:ProjectsComponent}
 ];
 
 @NgModule({

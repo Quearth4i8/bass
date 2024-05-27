@@ -1,0 +1,73 @@
+<app-navbar></app-navbar>
+
+<div class="center-container">
+    <h1 class="centered-heading">Projects</h1>
+</div>
+
+<div class="custom-accordion">
+    <mat-accordion>
+        <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+            <mat-expansion-panel-header [class.open]="panelOpenState" class="custom-panel-header">
+                <mat-panel-title>
+                    INTERREG NEXT MED 2024-2027
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <table>
+                <tr>
+                    <th>Responsable Du projet</th>
+                    <th>Bénéficiaire/Partenaire</th>
+                    <th>Thématique</th>
+                    <th>Programme</th>
+                    <th>Titre du Projet</th>
+                    <th>Acronyme</th>
+                    <th>Budget</th>
+                </tr>
+                <tr>
+                    <td class="c">Béchir BEJAOUI</td>
+                    <td class="c">Applicant</td>
+                    <td>Priorité 2 – Un espace de
+                        coopération plus verte, resilienteet à faibles émissions de Carbone
+                        <br><br>
+                        OS 2.7 Améliorer la protection et la
+                        préservation de la nature et labiodiversité et renforcer les infrastructures vertes, en
+                        particulier en milieu urbain, etréduire toutes les formes de pollution.
+                        A. 2.7.4 Actions transfrontalières visant à la réduction de la pollution
+                        <br><br>
+                        environnementale (en particulierpollution marine) aussi par le
+                        développement des modelés etd’initiatives des réductions des
+                        rejets polluants surtout marins
+                    </td>
+                    <td class="c">INTERREG NEXT MED Italie Tunisie</td>
+                    <td class="c">Gestion Durable des Ecosystèmes Marins : une Approche One-Health
+                        dans le Golfe de Gabès, avec une Analyse Comparative du Golfe de Gela
+                    </td>
+                    <td class="c">SUMME_One Health</td>
+                    <td class="c">1.2 M€</td>
+                </tr>
+                <tr>
+                    <td class="c">Béchir BEJAOUI</td>
+                    <td class="c">Partner</td>
+                    <td>Priorité 2 – Un espace de coopération plus verte, resiliente et à faibles émissions de Carbone
+                        <br><br>
+                        OS 2.7 Améliorer la protection et la préservation de la nature et la biodiversité et renforcer
+                        les
+                        infrastructures vertes, en particulier en milieu urbain, et réduire toutes les formes de
+                        pollution.
+                        <br><br>
+                        A. 2.7.4 Actions transfrontalières visant à la réduction de la pollution environnementale (en particulier
+                        pollution marine) aussi par le développement des modelés et d’initiatives des réductions des
+                        rejets polluants surtout marins
+                    </td>
+                    <td class="c">INTERREG NEXT MED Italie Tunisie</td>
+                    <td class="c">Surveillance et Gestion intégrée des Côtes méditerranéennes</td>
+                    <td class="c"><b>S.G.C MED</b></td>
+                    <td class="c">???</td>
+                </tr>
+            </table>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>
+
+
+
+<app-footer></app-footer>

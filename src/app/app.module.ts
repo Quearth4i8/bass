@@ -21,6 +21,8 @@ import { IchkeulComponent } from './ichkeul/ichkeul.component';
 import { ObjectivesComponent } from './objectives/objectives.component';
 import { PartnersComponent } from './partners/partners.component';
 import { TeamComponent } from './team/team.component';
+import {MatExpansionModule} from '@angular/material/expansion';
+import { ProjectsComponent } from './projects/projects.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +43,7 @@ import { TeamComponent } from './team/team.component';
     ObjectivesComponent,
     PartnersComponent,
     TeamComponent,
+    ProjectsComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,6 +52,7 @@ import { TeamComponent } from './team/team.component';
     BrowserModule, 
     BrowserAnimationsModule, 
     FormsModule,
+    MatExpansionModule,
   ],
   
   providers: [],
