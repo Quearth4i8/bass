@@ -1,0 +1,38 @@
+<header [ngClass]="{'sticky': isSticky}">
+    <a routerLink="/" class="logo">BASSIANA</a>
+  
+  <ul>
+    <li><a routerLink="/">Home</a></li>
+    <li class="dropdown">
+      <a routerLink="#" class="dropdown-toggle">
+        IMAS-Ichkeul
+        <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+      </a>
+      <ul class="dropdown-menu" style=" padding: 10px;">
+        <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
+      </ul>
+    </li>
+    <li class="dropdown">
+      <a routerLink="#" class="dropdown-toggle">
+        Bassiana
+        <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
+      </a>
+      <ul class="dropdown-menu" style=" padding: 10px;">
+        <li style="padding: 5px 5px;"><a routerLink="/about-bassiana">About Bassiana</a></li>
+        <li style="padding: 5px 5px;"><a routerLink="/mission">Mission</a></li>
+      </ul>
+    </li>
+    <li><a routerLink="/gallery">Gallery</a></li>
+    <li><a routerLink="/events">Events</a></li>
+    <li><a routerLink="/team">Team</a></li>
+    
+    <li style="padding: 5px 5px;"><a routerLink="/projects">Projects</a></li>
+    <li><a routerLink="/dataproviders">Data Providers</a></li>
+
+  </ul>
+  <app-custom-button></app-custom-button>
+</header>
+
+

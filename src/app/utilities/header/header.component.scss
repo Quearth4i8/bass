@@ -1,0 +1,60 @@
+.example-spacer {
+    flex: 1 1 auto;
+  }
+
+  
+  .mat-icon-button {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+
+  .custom-toolbar{
+    background-color: #3f4b5b;
+  }
+  .mat-toolbar{
+    color: #f0f0f0 !important;
+  }
+  .mat-icon-button {
+    color: #f0f0f0 !important;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    width: 40px; 
+    height: 40px;
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .neumorphic-button {
+    color: white;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+  
+    &:hover {
+      transform: scale(1.05);
+    }}
+  
+  .neumorphic-button {
+    color: white !important;
+  }
+  
+  
+  
+  .custom-toolbar button:not(:last-child) {
+    margin-right: 10px;
+  }
+  
+
+  
+  body {
+    color: white !important;
+  }
+  
+  .mat-mdc-icon-button{
+    color: white !important;
+  }
+  .custom-dialog-container .mat-dialog-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }

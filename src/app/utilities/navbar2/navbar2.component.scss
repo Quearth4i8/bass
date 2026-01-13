@@ -1,0 +1,239 @@
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #fff;
+  min-height: 200vh;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.6s;
+  padding: 40px 100px;
+  z-index: 100000;
+}
+header.sticky {
+  padding: 5px 100px;
+  background-color: #1f2350;
+}
+header .logo {
+  position: relative;
+  font-weight: 700;
+  color: #000000;
+  text-decoration: none;
+  font-size: 2em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: 0.6s;
+}
+header > ul {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header > ul > li {
+  position: relative;
+  list-style: none;
+}
+
+header > ul > li > a {
+  position: relative;
+  margin: 0 15px;
+  text-decoration: none;
+  color: #000;
+  letter-spacing: 2px;
+  font-weight: 500;
+  transition: 0.6s;
+}
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+}
+header ul li a:hover{
+  color: #e79954;
+}
+header.sticky ul li a:hover{
+  color: #e79954;
+}
+header.sticky .logo,
+header.sticky > ul > li > a {
+  color: #fff;
+}
+
+@keyframes fadeInFromTopLeft {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+header > ul > li.dropdown:hover .dropdown-menu {
+  display: block;
+  animation: fadeInFromTopLeft 0.3s ease forwards;
+  position: absolute; 
+  left: 0;
+}
+header.sticky > ul > li.dropdown:hover .dropdown-menu {
+  display: block;
+  animation: fadeInFromTopLeft 0.3s ease forwards;
+  position: absolute; 
+  left: 0;
+  background-color: #1f2350;
+}
+
+header > ul > li.dropdown .dropdown-menu a {
+  text-decoration: none;
+  color: #000000;
+}
+header.sticky > ul > li.dropdown .dropdown-menu a {
+  text-decoration: none;
+  color: #fff;
+}
+
+header > ul > li.dropdown .dropdown-menu a:hover {
+  color: #e79954;
+}
+
+header > ul > li.dropdown > a.dropdown-toggle::after {
+  display: none;
+}
+
+.custom-dropdown-icon {
+  width: 15px;
+  height: 15px;
+  background-size: cover;
+  display: inline-block;
+  margin-left: 5px;
+}
+
+header > ul > li > a.nav-link {
+  font-weight: bold;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+header > ul > li > a.nav-link:hover {
+  color: #757575;
+}
+header.sticky .icon{
+  filter: invert(1);
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 20px;
+  }
+
+  header.sticky {
+    padding: 10px;
+  }
+
+  header .logo {
+    font-size: 1.5em;
+  }
+
+  header > ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  header > ul > li {
+    margin: 5px;
+  }
+
+  header > ul > li > a {
+    margin: 0;
+    font-size: 0.9em;
+  }
+
+  header > ul > li.dropdown:hover .dropdown-menu {
+    animation: none;
+  }
+
+  header > ul > li.dropdown .dropdown-menu {
+    position: static;
+    display: none;
+  }
+
+  header.sticky > ul > li.dropdown .dropdown-menu {
+    background-color: transparent;
+  }
+
+  .custom-dropdown-icon {
+    display: none;
+  }
+
+  header > ul > li > a.nav-link {
+    font-weight: 500;
+  }
+}
+@media (max-width: 768px) {
+  header {
+    padding: 20px;
+  }
+
+  header.sticky {
+    padding: 10px;
+  }
+
+  header .logo {
+    font-size: 1.5em;
+  }
+
+  header > ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  header > ul > li {
+    margin: 5px;
+  }
+
+  header > ul > li > a {
+    margin: 0;
+    font-size: 0.9em;
+  }
+
+  header > ul > li.dropdown:hover .dropdown-menu {
+    animation: none; 
+  }
+
+  header > ul > li.dropdown .dropdown-menu {
+    position: static;
+    display: none;
+  }
+
+  header.sticky > ul > li.dropdown .dropdown-menu {
+    background-color: transparent;
+  }
+
+  .custom-dropdown-icon {
+    display: none;
+  }
+
+  header > ul > li > a.nav-link {
+    font-weight: 500;
+  }
+}

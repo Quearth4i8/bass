@@ -1,0 +1,170 @@
+<app-navbar2></app-navbar2>
+
+<div class="center-container">
+  <div class="rectangle-and-text">
+    <h1 class="centered-heading">Projects</h1>
+  </div>
+</div>
+
+<!-- Login Form Overlay -->
+<div class="overlay" *ngIf="showForm">
+  <div class="form-container">
+    <div class="wrapper">
+      <form (submit)="login($event)">
+        <h1>Please insert Credentials</h1>
+        <div class="input-box">
+          <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
+          <i class='bx bxs-user'></i>
+        </div>
+        <div class="input-box">
+          <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password"
+            name="password">
+          <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword"
+            (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+        </div>
+        <div class="remember-forgot">
+          <label><input type="checkbox">Remember Me</label>
+          <a href="#">Forgot Password</a>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <div class="register-link">
+          <p>Forgot account? <a href="#">Click here</a></p>
+        </div>
+        <div *ngIf="error" class="error-message" style="color: red; margin-left: 20%;">{{ error }}</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="center-container" *ngIf="!showForm">
+  <div class="custom-accordion">
+    <div *ngFor="let projectGroup of projectGroups; let i = index">
+      <mat-accordion>
+        <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false" class="panel">
+          <mat-expansion-panel-header [class.open]="panelOpenState" class="custom-panel-header">
+            <mat-panel-title class="title">
+              {{ projectGroup.title }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="table-container" *ngIf="projectData[projectGroup.title]">
+            <div class="filter-row" style="display: flex; align-items: center; margin-bottom: 10px;">
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Coordinator..."
+                  [(ngModel)]="columnFilters[i].responsable"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <select
+                  [(ngModel)]="columnFilters[i].partenaire"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+                  <option value="">All Beneficiaries/Partners</option>
+                  <option *ngFor="let partner of getUniquePartners(projectGroup.title)" [value]="partner">{{ partner }}</option>
+                </select>
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Thematic..."
+                  [(ngModel)]="columnFilters[i].thematique"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <select
+                  [(ngModel)]="columnFilters[i].programme"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+                  <option value="">All Programmes</option>
+                  <option *ngFor="let program of getUniquePrograms(projectGroup.title)" [value]="program">{{ program }}</option>
+                </select>
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Title..."
+                  [(ngModel)]="columnFilters[i].titreproj"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Acronym..."
+                  [(ngModel)]="columnFilters[i].acronyme"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Start Year..."
+                  [(ngModel)]="columnFilters[i].startyear"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search End Year..."
+                  [(ngModel)]="columnFilters[i].endyear"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+              <div class="filter-item" style="flex: 1; padding: 0 4px;">
+                <input
+                  type="text"
+                  placeholder="Search Budget..."
+                  [(ngModel)]="columnFilters[i].budget"
+                  (ngModelChange)="filterProjects(projectGroup.title, i)"
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                >
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr style="background-color: rgb(112, 143, 179);">
+                  <th>Project Coordinator</th>
+                  <th>Beneficiary/Partner</th>
+                  <th>Thematic</th>
+                  <th>Programme</th>
+                  <th>Project Title</th>
+                  <th>Acronym</th>
+                  <th>Year <br>(start)</th>
+                  <th>Year <br>(end)</th>
+                  <th>Budget (€)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let project of filteredProjectData[projectGroup.title]">
+                  <td class="c">{{ project.responsable }}</td>
+                  <td class="c">{{ project.partenaire }}</td>
+                  <td>{{ project.thematique }}</td>
+                  <td>{{ project.programme }}</td>
+                  <td>{{ project.titreproj }}</td>
+                  <td class="c">{{ project.acronyme }}</td>
+                  <td class="c">{{ project.startyear }}</td>
+                  <td class="c">{{ project.endyear }}</td>
+                  <td class="c">{{ project.budget | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+</div>
+<app-upbutton></app-upbutton>
+<app-footer></app-footer>

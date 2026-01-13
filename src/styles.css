@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "~primeng/resources/themes/saga-blue/theme.css";
+@import "~primeng/resources/primeng.min.css";
+@import "~primeicons/primeicons.css";
+.custom-backdrop-class {
+  background: rgba(0, 0, 0, 0.5);
+}
+  
+  .custom-dialog-container {
+    z-index: 10001;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+  }
+  
+  .dialog-open .app-header,
+  .dialog-open .sidebar,
+  .dialog-open .content {
+    filter: blur(3px);
+    pointer-events: none;
+  }
+  
+
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

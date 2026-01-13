@@ -1,0 +1,86 @@
+/* Container styles */
+.content {
+  background-color: #2a323d;
+}
+
+.app-sidenav {
+  flex: 0 0 250px;
+  background-color: #333;
+  color: white;
+  padding: 20px;
+}
+
+.content {
+  position: fixed;
+  top: 45px;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 999;
+}
+
+.with-sidebar {
+  left: 190px;
+  padding: 3px;
+  transition: left 0.3s ease, padding-left 0.3s ease;
+}
+
+.without-sidebar {
+  left: 0px;
+  transition: left 0.3s ease, padding-left 0.3s ease;
+}
+
+.product-item .product-item-content {
+  border: 1px solid var(--surface-d);
+  border-radius: 3px;
+  margin: .3rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.product-item .product-image {
+  width: 50%;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* Styles for PrimeNG p-fileUpload */
+::ng-deep .p-fileupload {
+  background-color: #2a323d;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+::ng-deep .p-fileupload .p-fileupload-buttonbar {
+  background-color: #3a4652; /* Adjust the background color of the button bar */
+  border: none;
+}
+
+::ng-deep .p-fileupload .p-fileupload-buttonbar .p-button {
+  background-color: #007bff; /* Adjust the button color */
+  border: none;
+}
+
+::ng-deep .p-fileupload .p-fileupload-buttonbar .p-button:hover {
+  background-color: #0056b3; /* Adjust the hover color of the button */
+}
+
+::ng-deep .p-fileupload .p-fileupload-content {
+  background-color: #3a4652; /* Adjust the content background color */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 0 0 5px 5px;
+}
+
+::ng-deep .p-fileupload-content .p-fileupload-files {
+  margin-top: 10px;
+}
+
+::ng-deep .p-fileupload-content .p-fileupload-file {
+  background-color: #2a323d;
+  border: 1px solid #2a323d;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+

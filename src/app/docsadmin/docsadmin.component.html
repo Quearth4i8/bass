@@ -1,0 +1,23 @@
+<div class="app-header">
+  <app-header></app-header>
+</div>
+
+<div class="container6">
+  <app-sidenavbar></app-sidenavbar>
+</div>
+
+<div class="content" [ngClass]="isSidebarVisible ? 'with-sidebar' : 'without-sidebar'">
+  <div class="file-upload-container">
+    <p-fileUpload
+      name="myfile[]"
+      url="http://your-upload-url"
+      (onUpload)="onUpload($event)"
+      accept="image/*"
+      maxFileSize="1000000"
+    ></p-fileUpload>
+  </div>
+
+  <div>
+    <!-- for later use -->
+  </div>
+</div>

@@ -1,0 +1,104 @@
+.custom-dialog {
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f4f4f4;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.custom-dialog h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.form-group label span {
+    color: red;
+    margin-left: 4px;
+}
+
+.form-group input,
+.form-group select {
+    width: calc(100% - 16px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.save-button {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.save-button button {
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.save-button button:hover {
+    background-color: #45a049;
+}
+
+.error{
+    color: red ;
+    font-size: small;
+    margin-left: 2px;
+}
+
+.project-group-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+}
+
+.project-group-item .buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.update-button, .delete-button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.update-button:hover, .delete-button:hover {
+    background-color: #799cad;
+}
+.delete-button mat-icon{
+
+    color: #bb222f;
+    font-size: 24px;
+}
+.update-button mat-icon {
+    color: #187d80;
+    font-size: 24px;
+}

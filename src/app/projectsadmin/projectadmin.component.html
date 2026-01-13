@@ -1,0 +1,173 @@
+<div class="app-header">
+    <app-header></app-header>
+</div>
+
+<div class="container6">
+    <app-sidenavbar></app-sidenavbar>
+</div>
+
+
+<div class="content" [ngClass]="isSidebarVisible ? 'with-sidebar' : 'without-sidebar'">
+
+
+    <body style="background-color: #2a323d; padding-top: 5vh; padding-bottom: 5vh;">
+
+        <div class="container">
+            <div class="fixed-messages">
+                <p-messages></p-messages>
+            </div>
+            <div class="header">
+                <input type="text" placeholder="Search Coordinator . . ." class="search" (input)="searchProjects2($event)">
+                <input type="text" placeholder="Search Benificary . . ." class="search" (input)="searchProjects3($event)">
+                <input type="text" placeholder="Search Programme . . ." class="search" (input)="searchProjects4($event)">
+                <input type="text" placeholder="Search Acronym . . ." class="search" (input)="searchProjects($event)">
+                <input type="text" placeholder="Search Project Group . . ." class="search" (input)="searchProjects1($event)">
+                <div>
+                    <button (click)="showDialog2()" class="addbtn1">+ Add project group</button>
+                    <button (click)="showDialog()" class="addbtn">+ Add project</button>
+                </div>
+            </div>
+
+            <div class="table-container" style="overflow-x: auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Project Coordinator</th>
+                            <th>Beneficiary/Partner</th>
+                            <th>Thematic</th>
+                            <th>Programme</th>
+                            <th>Project Title</th>
+                            <th>Acronym</th>
+                            <th>Year <br>(start)</th>
+                            <th>Year <br>(end)</th>
+                            <th>Budget (€)</th>
+                            <th>Project Groups</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let project of pagedProjects; let i = index" class="table-row">
+                            <td>{{ pagedProjectsIndex(i) + 1 }}</td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.responsable"
+                                    (input)="onInput($event, project, 'responsable')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{
+                                    project.responsable }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.partenaire"
+                                    (input)="onInput($event, project, 'partenaire')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{
+                                    project.partenaire
+                                    }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.thematique"
+                                    (input)="onInput($event, project, 'thematique')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{
+                                    project.thematique
+                                    }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.programme"
+                                    (input)="onInput($event, project, 'programme')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{
+                                    project.programme
+                                    }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.titreproj"
+                                    (input)="onInput($event, project, 'titreproj')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">
+                                    {{ project.titreproj }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" [(ngModel)]="project.acronyme"
+                                    (input)="onInput($event, project, 'acronyme')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{
+                                    project.acronyme
+                                    }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" [(ngModel)]="project.startyear"
+                                    (input)="onInput($event, project, 'startyear')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display"
+                                    style="width: 100px;">{{
+                                    project.startyear
+                                    }}
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" [(ngModel)]="project.endyear"
+                                    (input)="onInput($event, project, 'endyear')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display"
+                                    style="width: 100px;">{{
+                                    project.endyear
+                                    }}
+                                </div>
+                            </td>
+                            <td class="budget-cell">
+                                <input type="text" [(ngModel)]="project.budget"
+                                    (input)="onInput($event, project, 'budget')" class="edit-input"
+                                    *ngIf="editMode[pagedProjectsIndex(i)]">
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{ project.budget
+                                    |
+                                    number:'1.2-2' }}</div>
+                            </td>
+                            <!-- <td>
+                                <div>{{ project.title }}</div>
+                            </td> -->
+                            <td>
+                                <div *ngIf="!editMode[pagedProjectsIndex(i)]" class="edit-display">{{ project.title }}</div>
+                                <select *ngIf="editMode[pagedProjectsIndex(i)]" [(ngModel)]="project.title" (focus)="dropdownOpenState[i] = true" (blur)="dropdownOpenState[i] = false" class="dropdown">
+                                    <option *ngFor="let group of projectGroupTitles" [value]="group.value" style="color: white;">{{ group.label }}</option>
+                                </select>
+                            </td>
+                            <td class="icon-cell">
+                                <img *ngIf="!editMode[pagedProjectsIndex(i)]" src="assets/icons/pencil.png"
+                                    style="width: 20px; cursor: pointer; filter: invert(100%);"
+                                    (click)="toggleEditMode(pagedProjectsIndex(i))">
+                                <div class="edit-icons" *ngIf="editMode[pagedProjectsIndex(i)]">
+                                    <img src="assets/icons/save.png" style="width: 20px; cursor: pointer;"
+                                        (click)="saveChanges(pagedProjectsIndex(i), true)">
+                                </div>
+                            </td>
+                            <!-- deletebutton -->
+                            <td class="icon-cell">
+                                <img src="assets/icons/close.png" style="width: 20px; cursor: pointer;"
+                                    (click)="confirmDelete(project.id)">
+                            </td>
+
+                        </tr>
+                        <tr *ngIf="projects.length === 0">
+                            <td colspan="10">No projects found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" style="margin-top: 20px;">
+                <button class="pagination-button" (click)="prevPage()" [disabled]="pageIndex === 0">Previous</button>
+                <span class="pagination-info">Page {{ pageIndex + 1 }} / {{ totalPages }}</span>
+                <button class="pagination-button" (click)="nextPage()"
+                    [disabled]="pageIndex === totalPages - 1">Next</button>
+            </div>
+
+        </div>
+    </body>
+</div>
