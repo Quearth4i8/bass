@@ -1,0 +1,58 @@
+<div class="custom-dialog">
+    <h2>Project Data Form</h2>
+    <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="responsable">Project Coordinator <span>*</span></label>
+            <input type="text" id="responsable" name="responsable" [(ngModel)]="projectFormData.responsable" required>
+        </div>
+        <div class="form-group">
+            <label for="partenaire">Beneficiary/Partner <span>*</span></label>
+            <select id="partenaire" name="partenaire" [(ngModel)]="projectFormData.partenaire" required>
+                <option value="">Select</option>
+                <option value="beneficiary">Beneficiary</option>
+                <option value="partner">Partner</option>
+                <option value="principal">Principal Investigator</option>
+                <option value="coordinator">Coordinator</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="thematique">Thematic <span>*</span></label>
+            <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" required>
+        </div>
+        <div class="form-group">
+            <label for="programme">Programme <span>*</span></label>
+            <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" required>
+        </div>
+        <div class="form-group">
+            <label for="titreproj">Project Title <span>*</span></label>
+            <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" required>
+        </div>
+        <div class="form-group">
+            <label for="acronym">Acronym <span>*</span></label>
+            <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" required>
+        </div>
+        <div class="form-group">
+            <label for="startyear">start year <span>*</span></label>
+            <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" required>
+        </div>
+        <div class="form-group">
+            <label for="endyear">end year <span>*</span></label>
+            <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" required>
+        </div>
+        <div class="form-group">
+            <label for="budget">Budget (€) <span>*</span></label>
+            <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" required>
+        </div>
+        <div class="form-group">
+            <label for="title">Project Group <span>*</span></label>
+            <select id="title" name="title" [(ngModel)]="projectFormData.title" required>
+                <option value="">Select</option>
+                <option *ngFor="let title of projectGroupTitles" [value]="title">{{ title }}</option>
+            </select>
+        </div>
+
+        <div class="save-button">
+            <button type="submit">Save</button>
+        </div>
+    </form>
+</div>

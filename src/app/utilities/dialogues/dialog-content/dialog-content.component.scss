@@ -1,0 +1,59 @@
+.custom-dialog {
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ddd; /* Lighter border */
+    border-radius: 8px;
+    background-color: #f4f4f4; /* Slightly darker background */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Soft shadow */
+}
+
+.custom-dialog h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333; /* Dark text color */
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666; /* Medium-dark label color */
+}
+
+.form-group label span {
+    color: red; /* Required indicator color */
+    margin-left: 4px;
+}
+
+.form-group input,
+.form-group select {
+    width: calc(100% - 16px); /* Adjust for padding */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.save-button {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.save-button button {
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.save-button button:hover {
+    background-color: #45a049; /* Darker shade on hover */
+}

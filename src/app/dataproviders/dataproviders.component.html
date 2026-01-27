@@ -1,0 +1,136 @@
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-background">
+    <div class="network-pattern"></div>
+    <div class="gradient-mesh"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-icon">👥</span>
+      <span class="badge-text">Expert Team</span>
+    </div>
+    <h1 class="hero-title">DATA PROVIDERS</h1>
+    <p class="hero-subtitle">Meet the Experts Behind BASSIANA</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Researchers</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">INSTM</span>
+        <span class="stat-label">Institute</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">🌊</span>
+        <span class="stat-label">Marine Focus</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Team Section -->
+<section class="team-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our Research Team</h2>
+      <p class="section-subtitle">Dedicated professionals committed to marine ecosystem research</p>
+    </div>
+    
+    <div class="team-grid">
+      <div class="team-card" *ngFor="let card of cards; let i = index">
+        <div class="card-background">
+          <div class="bg-pattern"></div>
+          <div class="bg-gradient"></div>
+        </div>
+        <div class="card-content">
+          <div class="member-avatar">
+            <div class="avatar-frame">
+              <img [src]="card.image" [alt]="card.name" class="member-image" />
+              <div class="avatar-glow"></div>
+            </div>
+          </div>
+          <div class="member-info">
+            <h3 class="member-name">{{ card.name }}</h3>
+            <p class="member-role">{{ card.text }}</p>
+            <div class="member-badge">
+              <span class="badge-icon">🔬</span>
+              <span class="badge-text">Researcher</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-hover-effect"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Expertise Section -->
+<section class="expertise-section">
+  <div class="container">
+    <div class="expertise-grid">
+      <div class="expertise-card">
+        <div class="expertise-icon">🧬</div>
+        <h3>Biological Research</h3>
+        <p>Marine biodiversity and ecosystem studies</p>
+      </div>
+      <div class="expertise-card">
+        <div class="expertise-icon">⚗️</div>
+        <h3>Chemical Analysis</h3>
+        <p>Water quality and chemical parameters</p>
+      </div>
+      <div class="expertise-card">
+        <div class="expertise-icon">🌡️</div>
+        <h3>Physical Monitoring</h3>
+        <p>Temperature and physical oceanography</p>
+      </div>
+      <div class="expertise-card">
+        <div class="expertise-icon">🐟</div>
+        <h3>Fishery Studies</h3>
+        <p>Fish populations and sustainable fishing</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Collaboration Section -->
+<section class="collaboration-section">
+  <div class="container">
+    <div class="collaboration-content">
+      <div class="collab-text">
+        <h2>Collaborative Excellence</h2>
+        <p>Our team works together to provide comprehensive marine ecosystem data and research, supporting sustainable management and conservation efforts.</p>
+        <div class="collab-features">
+          <div class="feature">
+            <span class="feature-icon">🤝</span>
+            <span>Team Collaboration</span>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">📊</span>
+            <span>Data Excellence</span>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">🔬</span>
+            <span>Research Innovation</span>
+          </div>
+        </div>
+      </div>
+      <div class="collab-visual">
+        <div class="network-diagram">
+          <div class="center-node">🌊</div>
+          <div class="orbit orbit-1">
+            <div class="satellite">👥</div>
+            <div class="satellite">🔬</div>
+          </div>
+          <div class="orbit orbit-2">
+            <div class="satellite">📊</div>
+            <div class="satellite">🧬</div>
+            <div class="satellite">🐟</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-upbutton></app-upbutton>
+<app-footer></app-footer>

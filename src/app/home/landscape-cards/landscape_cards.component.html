@@ -1,0 +1,46 @@
+   <div class="container">
+      <div class="card__container">
+         <article class="card__article" *ngFor="let card of cardData; let i = index">
+            <div class="card__media">
+               <img [src]="card.image" [alt]="card.title" class="card__img" loading="lazy">
+               <div class="card__overlay"></div>
+            </div>
+            <div class="card__content">
+               <div class="card__header">
+                  <span class="card__category">{{ card.category }}</span>
+                  <h3 class="card__title">{{ card.title }}</h3>
+               </div>
+               <p class="card__description">{{ card.description }}</p>
+               <div class="card__actions">
+                  <a class="card__button" (click)="$event.preventDefault(); onReadMore(card.title)">
+                     <span class="button__text">Explore</span>
+                     <div class="button__icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                           <path d="M5 12h14M12 5l7 7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                     </div>
+                  </a>
+               </div>
+            </div>
+         </article>
+      </div>
+   </div>
+
+   <!-- Modal -->
+   <div class="cards-modal-backdrop" *ngIf="modalOpen" (click)="closeModal()"></div>
+   <div class="cards-modal" *ngIf="modalOpen" role="dialog" aria-modal="true" [attr.aria-labelledby]="'cards-modal-title'" [attr.aria-describedby]="'cards-modal-desc'" (click)="$event.stopPropagation()">
+      <button class="modal__close" (click)="closeModal()" aria-label="Close">
+         <span aria-hidden="true">×</span>
+      </button>
+      <div class="modal__header">
+         <div class="modal__icon" [attr.data-type]="modalTitle"></div>
+         <div class="modal__titles">
+            <h3 class="modal__title" id="cards-modal-title">{{ modalTitle }}</h3>
+            <span class="modal__subtitle">Overview</span>
+         </div>
+      </div>
+      <div class="modal__divider"></div>
+      <div class="modal__body">
+         <p class="modal__desc" id="cards-modal-desc">{{ modalDescription }}</p>
+      </div>
+   </div>

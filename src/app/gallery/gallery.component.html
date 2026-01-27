@@ -1,0 +1,40 @@
+<div class="center-container">
+    <h1 class="centered-heading">Gallery</h1>
+    <h3 class="centered-subheading">Ichkeul</h3>
+    
+    <div class="gallery-wrap">
+      <div class="gallery-grid">
+        <figure class="gallery-card" *ngFor="let img of images; let i = index" (click)="openModal(img)">
+          <img [src]="img" [alt]="'Gallery image ' + (i + 1)">
+        </figure>
+      </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal-backdrop" *ngIf="modalOpen" (click)="closeModal()">
+  <button class="modal-close" (click)="$event.stopPropagation(); closeModal()" aria-label="Close">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  
+  <!-- Previous Arrow -->
+  <button class="modal-nav modal-prev" (click)="$event.stopPropagation(); previousImage()" aria-label="Previous image">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  
+  <!-- Next Arrow -->
+  <button class="modal-nav modal-next" (click)="$event.stopPropagation(); nextImage()" aria-label="Next image">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 18l6-6-6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  
+  <img [src]="selectedImage" alt="Zoomed view" class="modal-image" (click)="$event.stopPropagation()">
+</div>
+
+<app-upbutton />
+<app-footer />

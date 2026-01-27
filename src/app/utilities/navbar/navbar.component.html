@@ -1,0 +1,98 @@
+<header [ngClass]="{'sticky': isSticky || (isMobile && isMenuOpen), 'dark-text': getNavbarTextColor() === 'dark' && !isSticky}" class="modern-navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <a routerLink="/" class="brand-logo">
+                <span class="logo-text">BASS</span>
+                <span class="logo-accent">IANA</span>
+            </a>
+        </div>
+        
+        <nav class="navbar-menu" [ngClass]="{'open': isMenuOpen}">
+            <div class="nav-group">
+                <a routerLink="/" class="nav-link" [class.active]="isActiveRoute('/')">
+                    <span class="nav-icon">🏡</span>
+                    <span class="nav-text" [style.color]="getNavbarTextColor() === 'dark' && !isSticky ? '#000000' : null">Home</span>
+                </a>
+                <a routerLink="/gallery" class="nav-link" [class.active]="isActiveRoute('gallery')">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-text" [style.color]="getNavbarTextColor() === 'dark' && !isSticky ? '#000000' : null">Gallery</span>
+                </a>
+                <a routerLink="/events" class="nav-link" [class.active]="isActiveRoute('events')">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text" [style.color]="getNavbarTextColor() === 'dark' && !isSticky ? '#000000' : null">Events</span>
+                </a>
+                <a routerLink="/team" class="nav-link" [class.active]="isActiveRoute('team')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text" [style.color]="getNavbarTextColor() === 'dark' && !isSticky ? '#000000' : null">Team</span>
+                </a>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-dropdown" [ngClass]="{'open': openDropdown==='imas'}">
+                    <button class="dropdown-trigger" (click)="toggleDropdown('imas', $event)">
+                        <span class="nav-text" [style.color]="'#ffffff'">🔬 IMAS-Ichkeul</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="dropdown-menu" [ngClass]="{'show': openDropdown==='imas'}" [style.color]="'#ffffff'">
+                        <a routerLink="/ichkeul" class="dropdown-item" [class.active]="isActiveRoute('ichkeul')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">🔬</span>
+                            <span [style.color]="'#ffffff'">Scientific Merit</span>
+                        </a>
+                        <a routerLink="/objectives" class="dropdown-item" [class.active]="isActiveRoute('objectives')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">🎯</span>
+                            <span [style.color]="'#ffffff'">Objectives</span>
+                        </a>
+                        <a routerLink="/partners" class="dropdown-item" [class.active]="isActiveRoute('partners')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">🤝</span>
+                            <span [style.color]="'#ffffff'">Partners & Funder</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-dropdown" [ngClass]="{'open': openDropdown==='bassiana'}">
+                    <button class="dropdown-trigger" (click)="toggleDropdown('bassiana', $event)">
+                        <span class="nav-text" [style.color]="'#ffffff'">🌊 Bassiana</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="dropdown-menu" [ngClass]="{'show': openDropdown==='bassiana'}" [style.color]="'#ffffff'">
+                        <a routerLink="/about-bassiana" class="dropdown-item" [class.active]="isActiveRoute('about-bassiana')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">📖</span>
+                            <span [style.color]="'#ffffff'">About Bassiana</span>
+                        </a>
+                        <a routerLink="/mission" class="dropdown-item" [class.active]="isActiveRoute('mission')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">🚀</span>
+                            <span [style.color]="'#ffffff'">Mission</span>
+                        </a>
+                        <a routerLink="/projects" class="dropdown-item" [class.active]="isActiveRoute('projects')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">📁</span>
+                            <span [style.color]="'#ffffff'">Projects</span>
+                        </a>
+                        <a routerLink="/dataproviders" class="dropdown-item" [class.active]="isActiveRoute('dataproviders')" (click)="handleDropdownItemClick($event)">
+                            <span class="item-icon">💾</span>
+                            <span [style.color]="'#ffffff'">Data Providers</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-group nav-right">
+                <button class="nav-link music-control-btn" (click)="toggleMusic()" [title]="isMusicPlaying ? 'Pause Background Music' : 'Play Background Music'">
+                    <span class="nav-icon music-icon">{{ isMusicPlaying ? '🔊' : '🔇' }}</span>
+                    <span class="nav-text" [style.color]="getNavbarTextColor() === 'dark' && !isSticky ? '#000000' : null">{{ isMusicPlaying ? 'Music On' : 'Music Off' }}</span>
+                </button>
+                <a href="http://41.229.139.17:8080/imas/login" target="_blank" class="nav-link bassiana-db-btn">
+                    <span class="nav-icon">🗄️</span>
+                    <span class="nav-text">Bassiana DB</span>
+                </a>
+            </div>
+        </nav>
+        
+        <button class="mobile-toggle" type="button" aria-label="Toggle navigation" (click)="toggleMenu()">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+    </div>
+</header>
+
+

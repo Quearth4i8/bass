@@ -1,0 +1,365 @@
+<div class="team-container">
+    <!-- Hero Section with Animated Background -->
+    <div class="hero-section">
+        <div class="animated-bg">
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
+            <div class="floating-shape shape-4"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Meet Our Team</h1>
+            <p class="hero-subtitle">The brilliant minds shaping the future of marine research</p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ getTotalMembers() }}</span>
+                    <span class="stat-label">Team Members</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">Departments</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Countries</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Categories Navigation -->
+    <div class="category-nav">
+        <button class="category-btn active" (click)="activeCategory = 'all'" [class.active]="activeCategory === 'all'">
+            <span class="btn-icon">🌐</span>
+            <span class="btn-text">All Members</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'legal'" [class.active]="activeCategory === 'legal'">
+            <span class="btn-icon">⚖️</span>
+            <span class="btn-text">Legal Entity</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'directors'" [class.active]="activeCategory === 'directors'">
+            <span class="btn-icon">🔬</span>
+            <span class="btn-text">Directors</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'investigators'" [class.active]="activeCategory === 'investigators'">
+            <span class="btn-icon">🔍</span>
+            <span class="btn-text">Investigators</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'supporters'" [class.active]="activeCategory === 'supporters'">
+            <span class="btn-icon">🤝</span>
+            <span class="btn-text">Supporters</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'collaborators'" [class.active]="activeCategory === 'collaborators'">
+            <span class="btn-icon">👥</span>
+            <span class="btn-text">Collaborators</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'admins'" [class.active]="activeCategory === 'admins'">
+            <span class="btn-icon">📋</span>
+            <span class="btn-text">Admins</span>
+        </button>
+        <button class="category-btn" (click)="activeCategory = 'developers'" [class.active]="activeCategory === 'developers'">
+            <span class="btn-icon">💻</span>
+            <span class="btn-text">Developers</span>
+        </button>
+    </div>
+
+    <!-- Team Members Grid -->
+    <div class="team-showcase">
+        <!-- Legal Entity Representatives -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'legal'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">⚖️</span>
+                    Legal Entity Representatives
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid hexagonal">
+                <div class="team-member-card" *ngFor="let member of teamData.legalEntity; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">{{ member.name || 'TBD' }}</h3>
+                                <p class="member-role">{{ member.role }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name || 'TBD' }}</h4>
+                                <p>{{ member.role }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">💼</a>
+                                    <a href="#" class="social-link">🔗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marine Laboratory Directors -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'directors'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">🔬</span>
+                    Marine Laboratory Directors
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid circular">
+                <div class="team-member-card" *ngFor="let member of teamData.marineDirectors; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">{{ member.name || 'TBD' }}</h3>
+                                <p class="member-role">{{ member.role }}</p>
+                                <p class="member-extra" *ngIf="member.description">{{ member.description }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name || 'TBD' }}</h4>
+                                <p>{{ member.role }}</p>
+                                <p *ngIf="member.description">{{ member.description }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">🔬</a>
+                                    <a href="#" class="social-link">📚</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Investigators -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'investigators'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">🔍</span>
+                    Project Investigators
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid featured">
+                <div class="team-member-card large" *ngFor="let member of teamData.investigators; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar large">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">
+                                    <a [href]="member.hasModal ? '#modal' : '#'" 
+                                       [attr.data-toggle]="member.hasModal ? 'modal' : null" 
+                                       class="member-link">
+                                        {{ member.name }}
+                                    </a>
+                                </h3>
+                                <p class="member-role">{{ member.role }}</p>
+                                <p class="member-org">{{ member.organization }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name }}</h4>
+                                <p>{{ member.role }}</p>
+                                <p>{{ member.organization }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">🔍</a>
+                                    <a href="#" class="social-link">🌐</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- International Supporters -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'supporters'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">🤝</span>
+                    International Supporters
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid mosaic">
+                <div class="team-member-card" *ngFor="let member of teamData.supporters; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">{{ member.name }}</h3>
+                                <p class="member-role">{{ member.role }}</p>
+                                <p class="member-org">{{ member.organization }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name }}</h4>
+                                <p>{{ member.role }}</p>
+                                <p>{{ member.organization }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">🌍</a>
+                                    <a href="#" class="social-link">🎓</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collaborators -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'collaborators'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">👥</span>
+                    Collaborators
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid compact">
+                <div class="team-member-card" *ngFor="let member of teamData.collaborators; let i = index" 
+                     [style.animation-delay]="i * 0.05 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar compact">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">{{ member.name }}</h3>
+                                <p class="member-org">{{ member.organization }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name }}</h4>
+                                <p>{{ member.organization }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">🔗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Administration -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'admins'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">📋</span>
+                    Project Administration
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid featured">
+                <div class="team-member-card large" *ngFor="let member of teamData.admins; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar large">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">
+                                    <a [href]="member.hasModal ? '#modal' : '#'" 
+                                       [attr.data-toggle]="member.hasModal ? 'modal' : null" 
+                                       class="member-link">
+                                        {{ member.name }}
+                                    </a>
+                                </h3>
+                                <p class="member-role">{{ member.role }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name }}</h4>
+                                <p>{{ member.role }}</p>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">📧</a>
+                                    <a href="#" class="social-link">📋</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Development Team -->
+        <div class="team-category" *ngIf="activeCategory === 'all' || activeCategory === 'developers'">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <span class="title-icon">💻</span>
+                    Development Team
+                </h2>
+                <div class="category-line"></div>
+            </div>
+            <div class="team-grid tech">
+                <div class="team-member-card" *ngFor="let member of teamData.developers; let i = index" 
+                     [style.animation-delay]="i * 0.1 + 's'">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="member-avatar">
+                                <img [src]="member.image" [alt]="member.name">
+                                <div class="avatar-glow"></div>
+                            </div>
+                            <div class="member-info">
+                                <h3 class="member-name">{{ member.name }}</h3>
+                                <p class="member-role">{{ member.role }}</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="back-content">
+                                <h4>{{ member.name }}</h4>
+                                <p>{{ member.role }}</p>
+                                <div class="tech-stack">
+                                    <span class="tech-tag">🚀</span>
+                                    <span class="tech-tag">💡</span>
+                                    <span class="tech-tag">⚡</span>
+                                </div>
+                                <div class="social-links">
+                                    <a href="#" class="social-link">💻</a>
+                                    <a href="#" class="social-link">🔧</a>
+                                    <a href="#" class="social-link">🌐</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-upbutton></app-upbutton>
+<app-footer></app-footer>

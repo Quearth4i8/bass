@@ -1,0 +1,264 @@
+.content {
+  background-color: #2a323d;
+
+}
+
+.fixed-messages {
+  position: fixed;
+  top: 30px;
+  right: 0;
+  width: 300px;
+  z-index: 1000;
+  margin: 20px;
+}
+
+.container {
+  margin-left: 5%;
+  margin-right: 5%;
+  max-width: 90%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: #3f4b5b;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2vh;
+  margin-bottom: 5vh;
+}
+
+.header input[type="text"]::placeholder {
+  color: rgb(202, 202, 202);
+}
+
+.header input[type="text"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.header button {
+  padding: 8px 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+}
+
+thead {
+  color: white;
+}
+
+th {
+  padding: 12px 15px;
+  text-align: left;
+  color: white;
+  border-bottom: 1px solid #ddd;
+  height: 50px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+td {
+  max-height: 20px;
+  overflow: hidden;
+  padding: 12px 15px;
+  text-align: left;
+  color: white;
+  white-space: nowrap;/*normal*/
+  border-bottom: 1px solid #ddd;
+}
+
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.icon-cell {
+  position: relative;
+  width: 50px;
+  text-align: center;
+}
+
+.icon-cell img {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.edit-icons {
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  z-index: 2;
+}
+
+.icon-cell::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+}
+
+.table-row {
+  height: 60px;
+}
+
+.icon-cell:hover::before {
+  background-color: #546377;
+}
+
+.thematique-column {
+  width: 200px;
+}
+
+.edit-input {
+  width: 100%;
+  height: 50px;
+  padding: 10px;
+  background-color: #3a4652;
+  color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.table-row {
+  height: 60px;
+}
+
+.edit-display {
+  padding: 10px;
+  min-height: 100px;
+}
+
+.search {
+  background-color: #2a323d;
+  color: white;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.pagination-button {
+  width: 100px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.pagination-button:hover {
+  background-color: #e0e0e0;
+}
+
+.pagination-button:disabled {
+  background-color: #ccc;
+  color: #999;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  margin: 0 10px;
+  font-size: 14px;
+  color: #afafaf;
+}
+
+/////////////////////////side bar/////////////////////////////
+
+
+.app-sidenav {
+  flex: 0 0 250px;
+  background-color: #333;
+  padding: 20px;
+}
+
+.content {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 999;
+}
+
+.with-sidebar {
+  left: 190px;
+  padding: 3px;
+  left: 200px;
+  transition: left 0.3s ease, padding-left 0.3s ease;
+}
+
+.without-sidebar {
+  left: 0px;
+  transition: left 0.3s ease, padding-left 0.3s ease;
+}
+
+@media (max-width: 720px) {
+  .search {
+    max-width: 150px;
+    transition: max-width 0.3s ease;
+    /* Smooth transition */
+  }
+}
+
+.custom-dialog-container .mat-dialog-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.addbtn {
+  background-color: #6fb653;
+  margin-left: 20px;
+}
+
+.addbtn:hover {
+  background-color: #8ce26a;
+}
+
+.addbtn1 {
+  background-color: #5392b6;
+}
+
+.addbtn1:hover {
+  background-color: #6ac0e2;
+}
+
+.dropdown {
+  background-color: #3a4652;
+  color: white;
+  padding: 5px;
+  border-radius: 8px;
+}

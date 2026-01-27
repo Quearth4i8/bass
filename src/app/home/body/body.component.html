@@ -1,0 +1,184 @@
+
+<div class="hero-container">
+    <app-navbar></app-navbar>
+    <carousel></carousel>
+    <div class="hero-gradient"></div>
+</div>
+
+<section class="body">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="main-title">BASSIANA</h1>
+            <p class="main-subtitle">Geospatial Analysis for Aquatic Agriculture</p>
+            <div class="wave-divider"></div>
+        </div>
+    </div>
+
+    <!-- Partners Section -->
+    <div class="partners-section">
+        <h3 class="section-title">Our Partners</h3>
+        <div class="partners-grid">
+            <div class="partner-item">
+                <img src="assets/images/Tunisia.gif" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+            <div class="partner-item">
+                <img src="assets/images/LOGOAG.png" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+            <div class="partner-item">
+                <img src="assets/images/LOGOIRESA.png" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+            <div class="partner-item">
+                <img src="assets/images/LOGOINSTM.png" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+            <div class="partner-item">
+                <img src="assets/images/LOGONAS.png" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+            <div class="partner-item">
+                <img src="assets/images/LOGOUSAID.png" loading="lazy" decoding="async" class="partner-logo">
+            </div>
+        </div>
+    </div>
+
+    <!-- Landscape Cards Section -->
+    <div class="cards-section">
+        <app-landscape-cards></app-landscape-cards>
+    </div>
+
+    <!-- Video Showcase Section -->
+    <div class="video-showcase">
+        <div class="video-container">
+            <div class="video-wrapper" #videoWrapper>
+                <video #mainVideo loop muted playsinline preload="metadata" class="main-video">
+                    <source src="assets/videos/1.mp4" type="video/mp4">
+                </video>
+                <div class="video-overlay">
+                    <!-- Empty overlay - no text or center button -->
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn play-pause" (click)="toggleVideo()">
+                        <svg *ngIf="!isVideoPlaying" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 5v14l11-7z" fill="white"/>
+                        </svg>
+                        <svg *ngIf="isVideoPlaying" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="6" y="4" width="4" height="16" fill="white"/>
+                            <rect x="14" y="4" width="4" height="16" fill="white"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn volume" (click)="toggleMute()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z" fill="white"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="control-btn fullscreen" (click)="toggleFullscreen()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="info-card">
+                    <h3>Advanced Marine Monitoring</h3>
+                    <p>Experience cutting-edge technology in oceanographic analysis and marine ecosystem monitoring through our comprehensive video showcase.</p>
+                    <div class="info-stats">
+                        <div class="stat">
+                            <span class="stat-number">50+</span>
+                            <span class="stat-label">Parameters</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">AI</span>
+                            <span class="stat-label">Powered</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-sections">
+        <div class="content-item" *ngFor="let item of contentItems; let i = index" 
+             [class.content-item-left]="i % 2 === 0" 
+             [class.content-item-right]="i % 2 === 1">
+            <div class="feature-card">
+                <div class="feature-side">
+                    <div class="side-accent"></div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">{{ item.title }}</h3>
+                    <p class="feature-description">{{ item.description }}</p>
+                </div>
+                <div class="feature-image">
+                    <img src="{{ item.image }}" alt="{{ item.title }}" class="content-img">
+                    <div class="image-glow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Oceanographic Analysis Section -->
+    <div class="oceanographic-section">
+        <div class="section-header">
+            <div class="header-badge">
+                <span class="badge-text">Analysis</span>
+            </div>
+            <h2 class="section-title">Oceanographic Analysis</h2>
+            <p class="section-subtitle">Advanced monitoring of coastal water patterns and marine ecosystem dynamics</p>
+        </div>
+        
+        <div class="analysis-grid">
+            <div class="video-row" *ngFor="let video of videoData; let i = index">
+                <div class="analysis-card full-width">
+                    <div class="card-visual">
+                        <div class="video-container">
+                            <video autoplay loop muted playsinline preload="metadata" class="analysis-video">
+                                <source src="{{ video.src }}" type="video/mp4">
+                            </video>
+                            <div class="video-overlay">
+                                <div class="play-indicator">
+                                    <div class="pulse-ring"></div>
+                                    <div class="pulse-ring"></div>
+                                    <div class="pulse-ring"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">{{ video.title }}</h3>
+                        <p class="card-description">{{ video.description }}</p>
+                        <div class="card-meta">
+                            <span class="meta-item" *ngIf="i === 0">
+                                <span class="meta-text">Circulation</span>
+                            </span>
+                            <span class="meta-item" *ngIf="i === 1">
+                                <span class="meta-text">Temperature</span>
+                            </span>
+                            <span class="meta-item" *ngIf="i === 2">
+                                <span class="meta-text">Chlorophyll</span>
+                            </span>
+                            <span class="meta-item" *ngIf="i === 3">
+                                <span class="meta-text">Salinity</span>
+                            </span>
+                            <span class="meta-item" *ngIf="i === 4">
+                                <span class="meta-text">Lagoon</span>
+                            </span>
+                            <span class="meta-item">
+                                <span class="meta-text">Real-time</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<app-upbutton></app-upbutton>
+<app-footer></app-footer>
+

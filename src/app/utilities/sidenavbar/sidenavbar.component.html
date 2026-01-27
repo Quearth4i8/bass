@@ -1,0 +1,23 @@
+<div class="sidebar" [ngClass]="{ 'showSidebar': isSidebarVisible, 'hideSidebar': !isSidebarVisible }">
+    <ul>
+      <li>
+        <a routerLink="/" routerLinkActive="">
+          <img src="assets/icons/home.png" style="width: 30px;margin-top: 2px;margin-right: 5px; filter: invert(1);">
+          <span class="menu-text">Home</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/projectadmin" routerLinkActive="">
+          <img src="assets/icons/project.png" style="width: 30px;margin-top: 2px;margin-right: 5px; filter: invert(1);">
+          <span class="menu-text">Projects</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/docsadmin" routerLinkActive="">
+          <img src="assets/icons/docs.png" style="width: 30px;margin-top: 2px;margin-right: 5px; filter: invert(1);">
+          <span class="menu-text">Docs</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
