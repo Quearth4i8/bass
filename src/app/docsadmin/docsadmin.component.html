@@ -1,23 +1,55 @@
-<div class="app-header">
-  <app-header></app-header>
-</div>
+<div class="projects-admin-layout" [class.sidebar-collapsed]="!isSidebarVisible">
+    <app-sidenavbar></app-sidenavbar>
+    <div class="projects-dashboard">
+        <!-- Fixed Messages -->
+        <div class="fixed-messages">
+            <p-messages></p-messages>
+        </div>
 
-<div class="container6">
-  <app-sidenavbar></app-sidenavbar>
-</div>
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>Documents Management</h1>
+                    <p>Upload and manage your documents</p>
+                </div>
+            </div>
+        </div>
 
-<div class="content" [ngClass]="isSidebarVisible ? 'with-sidebar' : 'without-sidebar'">
-  <div class="file-upload-container">
-    <p-fileUpload
-      name="myfile[]"
-      url="http://your-upload-url"
-      (onUpload)="onUpload($event)"
-      accept="image/*"
-      maxFileSize="1000000"
-    ></p-fileUpload>
-  </div>
+        <!-- File Upload Section -->
+        <div class="upload-section">
+            <div class="section-header">
+                <h2>Upload Documents</h2>
+                <p>Drag and drop files or click to browse</p>
+            </div>
+            <div class="file-upload-container">
+                <p-fileUpload
+                    name="myfile[]"
+                    url="http://your-upload-url"
+                    (onUpload)="onUpload($event)"
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                    maxFileSize="1000000"
+                    multiple="true"
+                    chooseLabel="Choose Files"
+                    uploadLabel="Upload"
+                    cancelLabel="Cancel"
+                ></p-fileUpload>
+            </div>
+        </div>
 
-  <div>
-    <!-- for later use -->
-  </div>
+        <!-- Additional Content Section (for future use) -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2>Document Management</h2>
+                <p>Additional features will be available here</p>
+            </div>
+            <div class="content-placeholder">
+                <div class="placeholder-content">
+                    <span class="placeholder-icon">📄</span>
+                    <h3>Coming Soon</h3>
+                    <p>Advanced document management features will be available in future updates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

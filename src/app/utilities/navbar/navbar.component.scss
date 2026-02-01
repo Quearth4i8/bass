@@ -14,17 +14,19 @@ body {
 
 /* Dark text variant for light backgrounds */
 .modern-navbar.dark-text {
-  /* Logo colors for dark text */
+  /* Logo colors for dark text - KEEP WHITE */
   .logo-text {
-    color: #1e293b !important;
-    background: linear-gradient(135deg, #1e293b, #334155) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
+    color: #ffffff !important;
+    -webkit-text-stroke: 1.5px #000000 !important;
+    text-stroke: 1.5px #000000 !important;
+    paint-order: stroke fill !important;
   }
 
   .logo-accent {
-    color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-stroke: 1.5px #000000 !important;
+    text-stroke: 1.5px #000000 !important;
+    paint-order: stroke fill !important;
   }
 
   /* Navigation text colors for dark text */
@@ -102,7 +104,10 @@ header.modern-navbar.dark-text .hamburger-line {
 
 /* Restore specific colors that should remain different */
 .modern-navbar.dark-text .logo-accent {
-  color: #059669 !important;
+  color: #ffffff !important;
+  -webkit-text-stroke: 1.5px #000000 !important;
+  text-stroke: 1.5px #000000 !important;
+  paint-order: stroke fill !important;
 }
 
 .modern-navbar.dark-text .nav-link:hover .nav-text {
@@ -169,16 +174,23 @@ header .dropdown-item * {
 .dropdown-item span span {
   color: #ffffff !important;
 }
+
 .modern-navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: transparent;
-  backdrop-filter: none;
-  border-bottom: 1px solid transparent;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(30, 58, 138, 0);
+  backdrop-filter: blur(0px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0);
+  transition: 
+    background 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    backdrop-filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-bottom 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 100000;
+  transform: translateY(0);
 }
 
 .modern-navbar.sticky {
@@ -215,44 +227,52 @@ header .dropdown-item * {
 }
 
 .logo-text {
-  color: #3b82f6;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
+  -webkit-text-stroke: 1.5px #000000;
+  text-stroke: 1.5px #000000;
+  paint-order: stroke fill;
   transition: all 0.3s ease;
 }
 
 .logo-accent {
-  color: #10b981;
+  color: #ffffff;
+  -webkit-text-stroke: 1.5px #000000;
+  text-stroke: 1.5px #000000;
+  paint-order: stroke fill;
   margin-left: 0.2rem;
   transition: all 0.3s ease;
 }
 
 /* Update logo colors for sticky state */
 .modern-navbar.sticky .logo-text {
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
+  -webkit-text-stroke: 1.5px #000000;
+  text-stroke: 1.5px #000000;
+  paint-order: stroke fill;
 }
 
 .modern-navbar.sticky .logo-accent {
-  color: #10b981;
+  color: #ffffff;
+  -webkit-text-stroke: 1.5px #000000;
+  text-stroke: 1.5px #000000;
+  paint-order: stroke fill;
 }
 
 .brand-logo:hover .logo-text {
-  background: linear-gradient(135deg, #3b82f6, #1e40af);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff !important;
+  -webkit-text-stroke: 1.5px #000000 !important;
+  text-stroke: 1.5px #000000 !important;
+  paint-order: stroke fill !important;
   transition: all 0.3s ease;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .brand-logo:hover .logo-accent {
-  color: #059669;
-  transform: translateY(-2px);
+  color: #ffffff !important;
+  -webkit-text-stroke: 1.5px #000000 !important;
+  text-stroke: 1.5px #000000 !important;
+  paint-order: stroke fill !important;
+  transform: translateY(-2px) scale(1.05);
 }
 
 /* Navigation Menu */

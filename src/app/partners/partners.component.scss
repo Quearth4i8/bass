@@ -308,12 +308,11 @@ body {
 
 .partner-logos-grid {
   display: grid;
-  gap: 1.5rem;
   margin-bottom: 0;
 }
 
 .partner-logos-grid.research-grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .partner-logos-grid:not(.research-grid) {
@@ -322,7 +321,6 @@ body {
 
 .partner-logos-grid .logo-item {
   background: #f8f9fa;
-  border-radius: 15px;
   padding: 1.5rem;
   display: flex;
   align-items: center;

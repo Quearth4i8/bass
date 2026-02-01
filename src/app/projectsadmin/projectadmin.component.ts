@@ -325,13 +325,53 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   showDeleteSuccessMessage() {
     this.messageService.add({
-      severity: 'error',
+      severity: 'success',
       detail: 'Project deleted successfully',
       life: 2000,
       closable: false,
       sticky: false,
       styleClass: 'custom-success-message'
     });
+  }
+
+  getProjectGroups(project: any): string[] {
+    if (!project.idgroupe) return [];
+    const group = this.projectGroupTitles.find(g => g.id === project.idgroupe);
+    return group ? [group.titre] : [];
+  }
+
+  getProjectGroupTitle(groupId: number): string {
+    const group = this.projectGroupTitles.find(g => g.id === groupId);
+    return group ? group.titre : 'No Group';
+  }
+
+  getLastModified(project: any): string {
+    // This would ideally come from the project data
+    // For now, return a formatted date or default
+    return project.lastModified ? new Date(project.lastModified).toLocaleDateString() : 'Recently';
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = Math.ceil(this.projects.length / this.pageSize);
+    return Array.from({ length: totalPages }, (_, i) => i);
+  }
+
+  goToPage(page: number): void {
+    this.pageIndex = page;
+    this.updatePage(page);
+  }
+
+  min(a: number, b: number): number {
+    return Math.min(a, b);
+  }
+
+  ceil(value: number): number {
+    return Math.ceil(value);
+  }
+
+  clearAllFilters(): void {
+    // Clear all search fields and reset to show all projects
+    this.fetchProjects();
   }
 
   ngOnDestroy() {

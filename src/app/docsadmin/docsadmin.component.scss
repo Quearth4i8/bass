@@ -1,86 +1,287 @@
-/* Container styles */
-.content {
-  background-color: #2a323d;
+// Modern Documents Admin Dashboard - Clean & Professional Design
+
+.projects-admin-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background: #f8fafc;
 }
 
-.app-sidenav {
-  flex: 0 0 250px;
-  background-color: #333;
-  color: white;
-  padding: 20px;
-}
-
-.content {
-  position: fixed;
-  top: 45px;
-  right: 0;
-  bottom: 0;
+.projects-dashboard {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
   overflow-y: auto;
-  z-index: 999;
+  background: #f8fafc;
+  margin-left: 280px; // Account for expanded sidebar width
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.with-sidebar {
-  left: 190px;
-  padding: 3px;
-  transition: left 0.3s ease, padding-left 0.3s ease;
+// Adjust when sidebar is collapsed
+.sidebar-collapsed .projects-dashboard {
+  margin-left: 80px; // Account for collapsed sidebar width
 }
 
-.without-sidebar {
-  left: 0px;
-  transition: left 0.3s ease, padding-left 0.3s ease;
+// Mobile behavior
+@media (max-width: 768px) {
+  .projects-dashboard {
+    margin-left: 0; // No margin on mobile as sidebar slides over content
+  }
 }
 
-.product-item .product-item-content {
-  border: 1px solid var(--surface-d);
-  border-radius: 3px;
-  margin: .3rem;
-  text-align: center;
-  padding: 2rem 0;
+// Fixed Messages
+.fixed-messages {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 350px;
 }
 
-.product-item .product-image {
-  width: 50%;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-}
-
-/* Styles for PrimeNG p-fileUpload */
-::ng-deep .p-fileupload {
-  background-color: #2a323d;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-::ng-deep .p-fileupload .p-fileupload-buttonbar {
-  background-color: #3a4652; /* Adjust the background color of the button bar */
-  border: none;
-}
-
-::ng-deep .p-fileupload .p-fileupload-buttonbar .p-button {
-  background-color: #007bff; /* Adjust the button color */
-  border: none;
-}
-
-::ng-deep .p-fileupload .p-fileupload-buttonbar .p-button:hover {
-  background-color: #0056b3; /* Adjust the hover color of the button */
-}
-
-::ng-deep .p-fileupload .p-fileupload-content {
-  background-color: #3a4652; /* Adjust the content background color */
+// Dashboard Header
+.dashboard-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   color: white;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-title {
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+}
+
+// Upload Section
+.upload-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+
+  .section-header {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+  }
+
+  .file-upload-container {
+    // PrimeNG FileUpload styling
+    ::ng-deep .p-fileupload {
+      background-color: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #667eea;
+        background-color: #f3f4f6;
+      }
+    }
+
+    ::ng-deep .p-fileupload .p-fileupload-buttonbar {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    ::ng-deep .p-fileupload .p-fileupload-buttonbar .p-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+    }
+
+    ::ng-deep .p-fileupload .p-fileupload-content {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      color: #374151;
+    }
+
+    ::ng-deep .p-fileupload-content .p-fileupload-files {
+      margin-top: 1rem;
+    }
+
+    ::ng-deep .p-fileupload-content .p-fileupload-file {
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}
+
+// Content Section (placeholder for future features)
+.content-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+
+  .section-header {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+  }
+
+  .content-placeholder {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+
+    .placeholder-content {
+      .placeholder-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.6;
+      }
+
+      h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
   border: none;
-  padding: 10px;
-  border-radius: 0 0 5px 5px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+
+  .btn-icon {
+    font-size: 1rem;
+  }
+
+  &.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  }
+
+  &.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+
+    &:hover {
+      background: #e5e7eb;
+      transform: translateY(-1px);
+    }
+  }
 }
 
-::ng-deep .p-fileupload-content .p-fileupload-files {
-  margin-top: 10px;
-}
+// Responsive Design
+@media (max-width: 768px) {
+  .projects-dashboard {
+    padding: 1rem;
+  }
 
-::ng-deep .p-fileupload-content .p-fileupload-file {
-  background-color: #2a323d;
-  border: 1px solid #2a323d;
-  padding: 5px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-}
+  .dashboard-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
+  .upload-section .section-header {
+    text-align: center;
+  }
+
+  .content-section .section-header {
+    text-align: center;
+  }
+
+  .content-placeholder {
+    padding: 2rem 1rem;
+  }
+}

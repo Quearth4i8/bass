@@ -153,8 +153,8 @@
   right: 0;
   bottom: 0;
   background: radial-gradient(circle at center, 
-    rgba(30, 58, 138, 0.95) 0%, 
-    rgba(30, 64, 175, 0.98) 100%);
+    rgba(25, 25, 25, 0.39) 0%, 
+    rgba(25, 25, 25, 0.378) 100%);
   z-index: 100001;
   display: flex;
   justify-content: center;
@@ -261,14 +261,10 @@
     opacity: 0;
     animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
     transform-origin: center center;
-    box-shadow: 
-      0 25px 50px rgba(30, 64, 175, 0.5),
-      0 10px 20px rgba(59, 130, 246, 0.3),
-      0 0 0 1px rgba(96, 165, 250, 0.2);
     border-radius: 20px;
     object-fit: contain;
     border: 2px solid rgba(96, 165, 250, 0.3);
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    
   }
 }
 

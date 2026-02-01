@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SidebarService } from '../services/sidebarservice';
 
 @Component({
@@ -6,8 +6,7 @@ import { SidebarService } from '../services/sidebarservice';
   templateUrl: 'docsadmin.component.html',
   styleUrls: ['docsadmin.component.scss'],
 })
-export class DocsadminComponent {
-
+export class DocsadminComponent implements OnInit {
   isSidebarVisible = true;
   
   constructor(private sidebarService: SidebarService) {}
@@ -18,6 +17,7 @@ export class DocsadminComponent {
       this.isSidebarVisible = isVisible;
     });
   }
+
   onUpload(event: any): void {
     for (const file of event.files) {
       console.log('File uploaded:', file);
