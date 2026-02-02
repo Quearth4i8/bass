@@ -326,7 +326,15 @@
       }
 
       .nav-indicator {
-        display: none;
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
       }
 
       &.active {

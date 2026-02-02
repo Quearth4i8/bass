@@ -29,6 +29,8 @@ export class SidenavbarComponent implements OnInit, OnDestroy {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.currentRoute = event.urlAfterRedirects.split('/')[1] || '';
+      console.log('Current route detected:', this.currentRoute);
+      console.log('Full URL:', event.urlAfterRedirects);
     });
 
     // Check for mobile screen size
@@ -57,7 +59,9 @@ export class SidenavbarComponent implements OnInit, OnDestroy {
   }
 
   isActiveRoute(route: string): boolean {
-    return this.currentRoute === route;
+    const isActive = this.currentRoute === route;
+    console.log(`Checking if route '${route}' is active:`, isActive, 'Current route:', this.currentRoute);
+    return isActive;
   }
 
   private checkMobile() {
