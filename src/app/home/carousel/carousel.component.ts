@@ -7,10 +7,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 })
 export class CarouselComponent implements OnInit, OnDestroy {
   items = [
-    { img: 'assets/images/4.png', design: 'design', title: 'Real-Time Ecosystem Monotoring & Evaluation', description: 'BASSIANA database is supported by the United States Agency for Development (USAID, USA) and managed by the National Academy of Sciences (NAS, USA) under the Cycle 8 of the Partnerships for Enhanced Engagement in Research (PEER) Program.' },
-    { img: 'assets/images/1.png', design: 'design', title: 'Exchanging Ecosystem Data for Practical Problems Application', description: 'BASSIANA database gathers Biological, Chemical, Physical, Physico-chemical, Sedimentological and Fishery data for a long period at the level of the Mediterranean.' },
-    { img: 'assets/images/2.png', design: 'design', title: 'BASSIANA Ecosystems Database', description: 'Carrying out an environmental approach, especially in oceanography, requires reliable data. The Bassiana interactive database responds perfectly to the mentioned need.' },
-    { img: 'assets/images/3.png', design: 'design', title: 'BASSIANA Interractive Ecosystems Database', description: 'BASSIANA database is designed as a means of collecting and exchanging ecosystem data for practical application. These data are provided from different sources of national and international projects and initiatives.' },
+    { img: 'assets/images/4.png', design: 'design', title: 'Real-Time Ecosystem Monotoring & Evaluation', description: 'IMAS-ICHKEUL database is supported by the United States Agency for Development (USAID, USA) and managed by the National Academy of Sciences (NAS, USA) under the Cycle 8 of the Partnerships for Enhanced Engagement in Research (PEER) Program.' },
+    { img: 'assets/images/1.png', design: 'design', title: 'Exchanging Ecosystem Data for Practical Problems Application', description: 'IMAS-ICHKEUL database gathers Biological, Chemical, Physical, Physico-chemical, Sedimentological and Fishery data for a long period at the level of the Mediterranean.' },
+    { img: 'assets/images/2.png', design: 'design', title: 'IMAS-ICHKEUL Ecosystems Database', description: 'Carrying out an environmental approach, especially in oceanography, requires reliable data. The IMAS-ICHKEUL interactive database responds perfectly to the mentioned need.' },
+    { img: 'assets/images/3.png', design: 'design', title: 'IMAS-ICHKEUL Interractive Ecosystems Database', description: 'IMAS-ICHKEUL database is designed as a means of collecting and exchanging ecosystem data for practical application. These data are provided from different sources of national and international projects and initiatives.' },
   ];
   
   thumbnails = [

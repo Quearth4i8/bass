@@ -55,6 +55,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDeleteGroupDialogComponent } from './utilities/dialogues/confirm-delete-group-dialog/confirm-delete-group-dialog.component';
 import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
+import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 
 @NgModule({
   declarations: [
@@ -88,6 +89,7 @@ import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
     ProjectGroupDialogComponent,
     ConfirmDeleteGroupDialogComponent,
     UpbuttonComponent,
+    ProjectsLandingComponent,
   ],
   imports: [
     BrowserModule,

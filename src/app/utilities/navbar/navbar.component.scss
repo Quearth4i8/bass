@@ -24,6 +24,7 @@
     transition: 0.6s;
     padding: 40px 100px;
     z-index: 100000;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
   }
   header .dropdown-menu {
     background-color: transparent;
@@ -32,20 +33,54 @@
   }
   header.sticky {
     padding: 5px 100px;
-    background-color: #1f2350;
+    background-color: #1a5f7a;
   }
   header .icon {
     filter: invert(1);
   }
   header .logo {
     position: relative;
-    font-weight: 700;
+    font-weight: 800;
     color: #fff;
     text-decoration: none;
     font-size: 2em;
     text-transform: uppercase;
     letter-spacing: 2px;
     transition: 0.6s;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .projects-icon {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  header.sticky .projects-icon {
+    color: #fff;
   }
   header > ul {
     position: relative;
@@ -65,8 +100,9 @@
     text-decoration: none;
     color: #fff;
     letter-spacing: 2px;
-    font-weight: 500;
+    font-weight: 600;
     transition: 0.6s;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.4);
   }
 
   .banner {
@@ -108,7 +144,7 @@
     animation: fadeInFromTopLeft 0.3s ease forwards;
     position: absolute; 
     left: 0;
-    background-color: #1f2350;
+    background-color: #1a5f7a;
   }
 
   header > ul > li.dropdown .dropdown-menu a {
@@ -182,7 +218,7 @@
       display: none;
       flex-direction: column;
       align-items: stretch;
-      background: #1f2350;
+      background: #1a5f7a;
       padding: 6px 20px 12px 20px;
       gap: 0;
       line-height: 1.5;

@@ -90,7 +90,7 @@
         </div>
         <div class="input-group">
           <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Beneficiary/Partner..." (input)="searchProjects3($event)">
+          <input type="text" placeholder="Search Beneficiary..." (input)="searchProjects3($event)">
         </div>
         <div class="input-group">
           <i class='bx bx-search'></i>
@@ -203,14 +203,13 @@
                 <span *ngIf="!editMode[pagedProjectsIndex(i)]">€{{ project.budget | number:'1.0-0' }}</span>
               </td>
               <td class="col-group">
-                <div class="styled-select-wrapper" *ngIf="editMode[pagedProjectsIndex(i)]">
-                  <select [(ngModel)]="project.title" class="styled-select">
-                    <option *ngFor="let group of projectGroupTitles" [value]="group.value">
-                      {{ group.label }}
-                    </option>
-                  </select>
-                  <i class='bx bx-chevron-down select-icon'></i>
-                </div>
+                <select *ngIf="editMode[pagedProjectsIndex(i)]" 
+                        [(ngModel)]="project.title" 
+                        class="cell-select">
+                  <option *ngFor="let group of projectGroupTitles" [value]="group.value">
+                    {{ group.label }}
+                  </option>
+                </select>
                 <span *ngIf="!editMode[pagedProjectsIndex(i)]">{{ project.title }}</span>
               </td>
               <td class="col-actions">

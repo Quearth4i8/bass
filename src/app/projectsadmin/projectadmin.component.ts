@@ -25,6 +25,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   isSidebarVisible = true;
   projectGroupTitles: any[] = [];
   dropdownOpenState: boolean[] = [];
+  groupDropdownOpen: boolean[] = [];
 
   constructor(
     private projectService: ProjectService,
@@ -37,7 +38,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   showDialog() {
     this.ref = this.dialogService.open(DialogContentComponent, {
-      width: '50%'
+      dismissableMask: true,
+      closable: true,
+      style: { 'min-width': '600px' }
     });
 
     if (this.ref) {
@@ -63,7 +66,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   showDialog2() {
     this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
-      width: '50%'
+      dismissableMask: true,
+      closable: true,
+      style: { 'min-width': '450px' }
     });
 
     if (this.ref) {
@@ -130,6 +135,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     const startIndex = this.pageIndex * this.pageSize;
     this.pagedProjects = this.projects.slice(startIndex, startIndex + this.pageSize);
     this.editMode = new Array(this.pagedProjects.length).fill(false);
+    this.groupDropdownOpen = new Array(this.pagedProjects.length).fill(false);
   }
 
   prevPage(): void {
@@ -179,6 +185,33 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   toggleEditMode(index: number): void {
     this.editMode[index] = !this.editMode[index];
+  }
+
+  toggleDropdown(index: number, field: string): void {
+    if (field === 'group') {
+      this.groupDropdownOpen[index] = !this.groupDropdownOpen[index];
+    }
+  }
+
+  isDropdownOpen(index: number, field: string): boolean {
+    if (field === 'group') {
+      return !!this.groupDropdownOpen[index];
+    }
+    return false;
+  }
+
+  selectGroup(index: number, value: string): void {
+    this.projects[index].title = value;
+    this.groupDropdownOpen[index] = false;
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+
+  logout(): void {
+    // Implement logout logic
+    window.location.href = '/';
   }
 
   onInput(event: Event, project: any, field: string): void {

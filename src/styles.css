@@ -6,20 +6,32 @@
 .custom-backdrop-class {
   background: rgba(0, 0, 0, 0.5);
 }
-  
-  .custom-dialog-container {
-    z-index: 10001;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-  }
-  
-  .dialog-open .app-header,
-  .dialog-open .sidebar,
-  .dialog-open .content {
-    filter: blur(3px);
-    pointer-events: none;
-  }
+
+.custom-dialog-container {
+  z-index: 10001;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 0;
+  background: transparent;
+}
+
+.p-dialog {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.p-dialog .p-dialog-header {
+  display: none;
+}
+
+.dialog-open .app-header,
+.dialog-open .sidebar,
+.dialog-open .content {
+  filter: blur(3px);
+  pointer-events: none;
+}
   
 
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

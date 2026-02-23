@@ -1,8 +1,18 @@
 <header [ngClass]="{'sticky': isSticky}">
-    <a routerLink="/" class="logo">BASSIANA</a>
+    <div class="logo-section">
+        <a routerLink="/" class="projects-icon" title="Projects">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </a>
+        <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+    </div>
   
   <ul>
-    <li><a routerLink="/">Home</a></li>
+    <li><a routerLink="/imas-ichkeul">Home</a></li>
     <li class="dropdown">
       <a routerLink="#" class="dropdown-toggle">
         IMAS-Ichkeul
@@ -14,21 +24,9 @@
         <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
       </ul>
     </li>
-    <li class="dropdown">
-      <a routerLink="#" class="dropdown-toggle">
-        Bassiana
-        <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
-      </a>
-      <ul class="dropdown-menu" style=" padding: 10px;">
-        <li style="padding: 5px 5px;"><a routerLink="/about-bassiana">About Bassiana</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="/mission">Mission</a></li>
-      </ul>
-    </li>
     <li><a routerLink="/gallery">Gallery</a></li>
     <li><a routerLink="/events">Events</a></li>
     <li><a routerLink="/team">Team</a></li>
-    
-    <li style="padding: 5px 5px;"><a routerLink="/projects">Projects</a></li>
     <li><a routerLink="/dataproviders">Data Providers</a></li>
 
   </ul>

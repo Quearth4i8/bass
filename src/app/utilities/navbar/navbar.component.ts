@@ -1,4 +1,6 @@
 import { Component, HostListener } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -9,6 +11,15 @@ export class NavbarComponent {
   isSticky: boolean = false;
   isMenuOpen: boolean = false;
   openDropdown: string | null = null;
+  isHomePage: boolean = false;
+
+  constructor(private router: Router) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.isHomePage = event.url === '/' || event.url === '/imas-ichkeul';
+    });
+  }
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll(event: any) {

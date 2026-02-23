@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
@@ -16,6 +16,11 @@ export class ProjectsComponent implements OnInit {
   showForm: boolean = true;
   fadeOut: boolean = false;
   showPassword = false;
+
+  activeTab: number = 0;
+  showFilters: boolean[] = [];
+  partnerDropdownOpen: boolean[] = [];
+  programmeDropdownOpen: boolean[] = [];
 
   projectGroups: any[] = [];
   projectData: { [key: string]: any[] } = {};
@@ -48,6 +53,10 @@ export class ProjectsComponent implements OnInit {
         endyear: '',
         budget: ''
       }));
+      // Initialize dropdown state arrays
+      this.partnerDropdownOpen = new Array(this.projectGroups.length).fill(false);
+      this.programmeDropdownOpen = new Array(this.projectGroups.length).fill(false);
+      this.showFilters = new Array(this.projectGroups.length).fill(false);
       this.projectGroups.forEach(group => {
         this.loadProjects(group.title);
       });
@@ -86,6 +95,22 @@ export class ProjectsComponent implements OnInit {
     const filters = this.columnFilters[index];
 
     this.filteredProjectData[groupTitle] = this.projectData[groupTitle].filter((project: any) => {
+      // General search across all fields
+      if (filters.general) {
+        const searchTerm = filters.general.toLowerCase();
+        const matchesGeneral =
+          project.responsable?.toLowerCase().includes(searchTerm) ||
+          project.partenaire?.toLowerCase().includes(searchTerm) ||
+          project.thematique?.toLowerCase().includes(searchTerm) ||
+          project.programme?.toLowerCase().includes(searchTerm) ||
+          project.titreproj?.toLowerCase().includes(searchTerm) ||
+          project.acronyme?.toLowerCase().includes(searchTerm) ||
+          project.startyear?.toString().includes(searchTerm) ||
+          project.endyear?.toString().includes(searchTerm) ||
+          project.budget?.toString().includes(searchTerm);
+        if (!matchesGeneral) return false;
+      }
+
       return (
         (!filters.responsable || project.responsable?.toLowerCase().includes(filters.responsable.toLowerCase())) &&
         (!filters.partenaire || project.partenaire === filters.partenaire) &&
@@ -114,5 +139,71 @@ export class ProjectsComponent implements OnInit {
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
+  }
+
+  setActiveTab(index: number): void {
+    this.activeTab = index;
+  }
+
+  getTabIcon(title: string): string {
+    const icons: { [key: string]: string } = {
+      'ACHIEVED PROJECTS': '✓',
+      'SUBMITTED PROJECTS': '📤',
+      'ONGOING PROJECTS': '🔄'
+    };
+    return icons[title] || '📋';
+  }
+
+  resetFilters(index: number, title: string): void {
+    this.columnFilters[index] = {
+      responsable: '',
+      partenaire: '',
+      thematique: '',
+      programme: '',
+      titreproj: '',
+      acronyme: '',
+      startyear: '',
+      endyear: '',
+      budget: ''
+    };
+    this.filterProjects(title, index);
+  }
+
+  toggleDropdown(index: number, field: string): void {
+    if (field === 'partner') {
+      this.partnerDropdownOpen[index] = !this.partnerDropdownOpen[index];
+      this.programmeDropdownOpen[index] = false;
+    } else if (field === 'programme') {
+      this.programmeDropdownOpen[index] = !this.programmeDropdownOpen[index];
+      this.partnerDropdownOpen[index] = false;
+    }
+  }
+
+  isDropdownOpen(index: number, field: string): boolean {
+    if (field === 'partner') {
+      return !!this.partnerDropdownOpen[index];
+    } else if (field === 'programme') {
+      return !!this.programmeDropdownOpen[index];
+    }
+    return false;
+  }
+
+  selectOption(index: number, field: string, value: string, title: string): void {
+    this.columnFilters[index][field] = value;
+    this.filterProjects(title, index);
+    // Close all dropdowns
+    this.partnerDropdownOpen[index] = false;
+    this.programmeDropdownOpen[index] = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    // Check if click is outside dropdowns
+    if (!target.closest('.custom-dropdown')) {
+      // Close all dropdowns
+      this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
+      this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
+    }
   }
 }

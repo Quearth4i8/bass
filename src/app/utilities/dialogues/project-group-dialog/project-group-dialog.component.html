@@ -1,36 +1,34 @@
 <div class="custom-dialog">
-    <h2>Add project group</h2>
+    <div class="dialog-header">
+        <h2>Add Project Group</h2>
+    </div>
     <form #projectForm="ngForm" (ngSubmit)="onSubmit(projectForm)">
-        <div class="form-group">
-            <label for="group">New Project Group Name<span>*</span></label>
-            <input type="text" id="group" name="group" [(ngModel)]="projectFormData.title" required>
-            <div *ngIf="projectForm.submitted && !projectForm.controls['group'].valid" class="error">
-                Project group name is required.
+        <div class="dialog-body">
+            <div class="form-group">
+                <label for="group">New Project Group Name <span>*</span></label>
+                <input type="text" id="group" name="group" [(ngModel)]="projectFormData.title" placeholder="Enter group name" required>
+                <div *ngIf="projectForm.submitted && !projectForm.controls['group']?.valid" class="error">
+                    Project group name is required.
+                </div>
+            </div>
+            
+            <div class="existing-groups" *ngIf="projectGroupTitles.length > 0">
+                <label>Existing Project Groups</label>
+                <ul class="groups-list">
+                    <li *ngFor="let title of projectGroupTitles" class="group-item">
+                        <span class="group-name">{{ title }}</span>
+                        <div class="group-actions">
+                            <button type="button" (click)="onDelete(title)" class="btn-icon delete" title="Delete">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="form-group">
-            <label for="existingGroups">Existing Project Groups</label>
-            <ul>
-                <li *ngFor="let title of projectGroupTitles" class="project-group-item">
-                    <span class="title">* {{ title }}</span>
-                    <div class="buttons">
-                        <!-- <button type="button" (click)="onUpdate(title)" class="update-button">
-                            <mat-icon>edit</mat-icon>
-                        </button> -->
-
-                        <!-- <button type="button" (click)="onDelete(title)" class="delete-button">
-                            <mat-icon>delete</mat-icon>
-                        </button> -->
-                        
-                        <button type="button" (click)="onDelete(title)" class="delete-button">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <div class="save-button">
-            <button type="submit">Save</button>
+        <div class="dialog-footer">
+            <button type="button" class="btn-cancel" (click)="ref.close()">Cancel</button>
+            <button type="submit" class="btn-save">Save Group</button>
         </div>
     </form>
 </div>
