@@ -4,60 +4,67 @@
     </div>
     <form (ngSubmit)="onSubmit()">
         <div class="dialog-body">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="responsable">Project Coordinator <span>*</span></label>
-                    <input type="text" id="responsable" name="responsable" [(ngModel)]="projectFormData.responsable" placeholder="Enter coordinator name" required>
-                </div>
-                <div class="form-group">
-                    <label for="partenaire">Beneficiary/Partner <span>*</span></label>
-                    <div class="styled-select-wrapper">
-                        <select id="partenaire" name="partenaire" [(ngModel)]="projectFormData.partenaire" class="styled-select" required>
-                            <option value="">Select type</option>
-                            <option value="beneficiary">Beneficiary</option>
-                            <option value="partner">Partner</option>
-                            <option value="principal">Principal Investigator</option>
-                            <option value="coordinator">Coordinator</option>
-                        </select>
-                        <i class='bx bx-chevron-down select-icon'></i>
+            <div class="dialog-body-scroll" (scroll)="onDialogBodyScroll()">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="responsable">Project Coordinator <span>*</span></label>
+                        <input type="text" id="responsable" name="responsable" [(ngModel)]="projectFormData.responsable" placeholder="Enter coordinator name" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="thematique">Thematic <span>*</span></label>
-                    <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Enter thematic area" required>
-                </div>
-                <div class="form-group">
-                    <label for="programme">Programme <span>*</span></label>
-                    <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Enter programme" required>
-                </div>
-                <div class="form-group full-width">
-                    <label for="titreproj">Project Title <span>*</span></label>
-                    <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Enter full project title" required>
-                </div>
-                <div class="form-group">
-                    <label for="acronym">Acronym <span>*</span></label>
-                    <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" placeholder="e.g., HORIZON-MSCA" required>
-                </div>
-                <div class="form-group">
-                    <label for="startyear">Start Year <span>*</span></label>
-                    <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="2024" required>
-                </div>
-                <div class="form-group">
-                    <label for="endyear">End Year <span>*</span></label>
-                    <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="2027" required>
-                </div>
-                <div class="form-group">
-                    <label for="budget">Budget (€) <span>*</span></label>
-                    <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="Enter amount" required>
-                </div>
-                <div class="form-group">
-                    <label for="title">Project Group <span>*</span></label>
-                    <div class="styled-select-wrapper">
-                        <select id="title" name="title" [(ngModel)]="projectFormData.title" class="styled-select" required>
-                            <option value="">Select group</option>
-                            <option *ngFor="let title of projectGroupTitles" [value]="title">{{ title }}</option>
-                        </select>
-                        <i class='bx bx-chevron-down select-icon'></i>
+                    <div class="form-group">
+                        <label for="partenaire">Beneficiary/Partner <span>*</span></label>
+                        <div class="custom-dropdown" [class.open]="partenaireDropdownOpen">
+                            <div class="dropdown-trigger" (click)="togglePartenaireDropdown($event)">
+                                <span>{{ projectFormData.partenaire ? getPartenaireLabel(projectFormData.partenaire) : 'Select type' }}</span>
+                                <i class='bx bx-chevron-down'></i>
+                            </div>
+                            <div class="dropdown-menu" *ngIf="partenaireDropdownOpen" [ngStyle]="partenaireMenuStyle" [class.opens-up]="partenaireOpensUp">
+                                <div class="dropdown-item" (click)="selectPartenaire('')" [class.selected]="projectFormData.partenaire === ''">Select type</div>
+                                <div class="dropdown-item" (click)="selectPartenaire('beneficiary')" [class.selected]="projectFormData.partenaire === 'beneficiary'">Beneficiary</div>
+                                <div class="dropdown-item" (click)="selectPartenaire('partner')" [class.selected]="projectFormData.partenaire === 'partner'">Partner</div>
+                                <div class="dropdown-item" (click)="selectPartenaire('principal')" [class.selected]="projectFormData.partenaire === 'principal'">Principal Investigator</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="thematique">Thematic <span>*</span></label>
+                        <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Enter thematic area" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="titreproj">Project Title <span>*</span></label>
+                        <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Enter full project title" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="acronym">Acronym <span>*</span></label>
+                        <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" placeholder="Enter Acronym" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="programme">Programme <span>*</span></label>
+                        <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Enter programme" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startyear">Start Year <span>*</span></label>
+                        <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endyear">End Year <span>*</span></label>
+                        <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="2027" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget (€) <span>*</span></label>
+                        <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="Enter amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Project Group <span>*</span></label>
+                        <div class="custom-dropdown" [class.open]="groupDropdownOpen">
+                            <div class="dropdown-trigger" (click)="toggleGroupDropdown($event)">
+                                <span>{{ projectFormData.title || 'Select group' }}</span>
+                                <i class='bx bx-chevron-down'></i>
+                            </div>
+                            <div class="dropdown-menu" *ngIf="groupDropdownOpen" [ngStyle]="groupMenuStyle" [class.opens-up]="groupOpensUp">
+                                <div class="dropdown-item" (click)="selectGroup('')" [class.selected]="projectFormData.title === ''">Select group</div>
+                                <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title">{{ title }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

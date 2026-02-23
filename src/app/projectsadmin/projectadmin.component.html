@@ -61,22 +61,32 @@
           <p>Total Projects</p>
         </div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box clickable" (click)="togglePageDropdown()">
         <div class="stat-icon green">
           <i class='bx bx-layer'></i>
         </div>
         <div class="stat-info">
-          <h2>{{ totalPages }}</h2>
-          <p>Pages</p>
+          <h2>{{ pageIndex + 1 }}</h2>
+          <p>of {{ totalPages }} Pages</p>
+        </div>
+        <div class="page-dropdown" *ngIf="pageDropdownOpen">
+          <div class="dropdown-option" *ngFor="let pageNum of getPageNumbers()" (click)="goToPage($event, pageNum)" [class.selected]="pageIndex === pageNum - 1">
+            Page {{ pageNum }}
+          </div>
         </div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box clickable" (click)="togglePageSizeDropdown()">
         <div class="stat-icon orange">
           <i class='bx bx-list-ul'></i>
         </div>
         <div class="stat-info">
           <h2>{{ pageSize }}</h2>
           <p>Per Page</p>
+        </div>
+        <div class="page-size-dropdown" *ngIf="pageSizeDropdownOpen">
+          <div class="dropdown-option" *ngFor="let size of pageSizeOptions" (click)="changePageSize($event, size)" [class.selected]="pageSize === size">
+            {{ size }}
+          </div>
         </div>
       </div>
     </div>
@@ -108,9 +118,10 @@
     </div>
 
     <!-- Data Table -->
-    <div class="table-container">
-      <div class="table-scroll">
-        <table class="data-table">
+    <div class="content-wrapper" (scroll)="onContentScroll()">
+      <div class="table-container">
+        <div class="table-scroll">
+          <table class="data-table">
           <thead>
             <tr>
               <th class="col-id">#</th>
@@ -238,6 +249,7 @@
           </tbody>
         </table>
       </div>
+    </div>
     </div>
 
     <!-- Pagination -->

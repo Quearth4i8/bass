@@ -1,6 +1,6 @@
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DialogContentComponent } from '../utilities/dialogues/dialog-content/dialog-content.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,6 +26,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   projectGroupTitles: any[] = [];
   dropdownOpenState: boolean[] = [];
   groupDropdownOpen: boolean[] = [];
+  pageSizeDropdownOpen: boolean = false;
+  pageDropdownOpen: boolean = false;
+  pageSizeOptions: number[] = [5, 10, 25, 50, 100];
 
   constructor(
     private projectService: ProjectService,
@@ -35,6 +38,22 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private projectGroupService: ProjectGroupService,
   ) { }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const clickedOnPageDropdown = target.closest('.stat-box.clickable') !== null;
+    
+    if (!clickedOnPageDropdown) {
+      this.pageSizeDropdownOpen = false;
+      this.pageDropdownOpen = false;
+    }
+  }
+
+  onContentScroll(): void {
+    this.pageSizeDropdownOpen = false;
+    this.pageDropdownOpen = false;
+  }
 
   showDialog() {
     this.ref = this.dialogService.open(DialogContentComponent, {
@@ -193,11 +212,44 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  togglePageSizeDropdown(): void {
+    this.pageSizeDropdownOpen = !this.pageSizeDropdownOpen;
+    this.pageDropdownOpen = false; // Close other dropdown
+  }
+
+  togglePageDropdown(): void {
+    this.pageDropdownOpen = !this.pageDropdownOpen;
+    this.pageSizeDropdownOpen = false; // Close other dropdown
+  }
+
+  getPageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  goToPage(event: Event, pageNum: number): void {
+    event.stopPropagation();
+    this.updatePage(pageNum - 1);
+    this.pageDropdownOpen = false;
+  }
+
+  changePageSize(event: Event, size: number): void {
+    event.stopPropagation();
+    this.pageSize = size;
+    this.pageSizeDropdownOpen = false;
+    this.updatePage(0);
+  }
+
   isDropdownOpen(index: number, field: string): boolean {
     if (field === 'group') {
       return !!this.groupDropdownOpen[index];
     }
     return false;
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll(): void {
+    this.pageSizeDropdownOpen = false;
+    this.pageDropdownOpen = false;
   }
 
   selectGroup(index: number, value: string): void {

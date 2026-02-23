@@ -206,4 +206,11 @@ export class ProjectsComponent implements OnInit {
       this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
     }
   }
+
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll(): void {
+    // Close all dropdowns on scroll
+    this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
+    this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
+  }
 }
