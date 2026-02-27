@@ -6,11 +6,12 @@ import { Component, HostListener } from '@angular/core';
   styleUrls: ['./navbar2.component.scss']
 })
 export class Navbar2Component {
-  isSticky: boolean = false;
+  isSticky: boolean = true;
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll(event: any) {
-    this.isSticky = window.scrollY > 0;
+    // Always keep sticky true
+    this.isSticky = true;
   }
   
 }

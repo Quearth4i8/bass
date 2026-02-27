@@ -1,0 +1,261 @@
+<div class="admin-layout">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class='bx bx-menu'></i>
+      </button>
+      <h1 class="page-title">Events Management</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn primary" (click)="showAddDialog()">
+        <i class='bx bx-plus'></i>
+        <span>Add Event</span>
+      </button>
+      <div class="user-menu">
+        <div class="user-avatar" (click)="toggleUserMenu()">
+          <i class='bx bx-user'></i>
+        </div>
+        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
+          <div class="dropdown-item" (click)="showLogoutModal($event)">
+            <i class='bx bx-log-out'></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
+    <nav class="sidebar-nav">
+      <a routerLink="/projectadmin" class="nav-item">
+        <i class='bx bx-home'></i>
+        <span>Projects</span>
+      </a>
+      <a routerLink="/docsadmin" class="nav-item">
+        <i class='bx bx-file'></i>
+        <span>Documents</span>
+      </a>
+      <a routerLink="/budget-charts" class="nav-item">
+        <i class='bx bx-pie-chart-alt-2'></i>
+        <span>Budget Charts</span>
+      </a>
+      <a routerLink="/eventsadmin" class="nav-item active">
+        <i class='bx bx-calendar-event'></i>
+        <span>Events</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <!-- Messages -->
+    <div class="fixed-messages">
+      <p-messages></p-messages>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-icon purple">
+          <i class='bx bx-calendar'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ events.length }}</h2>
+          <p>Total Events</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon green">
+          <i class='bx bx-calendar-check'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ upcomingEvents }}</h2>
+          <p>Upcoming</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon orange">
+          <i class='bx bx-calendar-x'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ pastEvents }}</h2>
+          <p>Past Events</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modern Search Bar -->
+    <div class="search-bar-modern">
+      <div class="search-main">
+        <div class="search-icon-wrapper">
+          <i class='bx bx-search'></i>
+        </div>
+        <input type="text" class="search-input" placeholder="Search events by title, location, or description..." [(ngModel)]="globalSearchTerm" (input)="onGlobalSearch($event)">
+        <button class="filter-toggle-btn" (click)="showAdvancedFilters = !showAdvancedFilters" [class.active]="showAdvancedFilters">
+          <i class='bx bx-filter-alt'></i>
+          <span>Filters</span>
+        </button>
+      </div>
+      
+      <!-- Advanced Filters (Collapsible) -->
+      <div class="advanced-filters" [class.show]="showAdvancedFilters">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label><i class='bx bx-font'></i> Title</label>
+            <input type="text" placeholder="Search title..." [(ngModel)]="filterTitle" (input)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-map'></i> Location</label>
+            <input type="text" placeholder="Search location..." [(ngModel)]="filterLocation" (input)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-calendar'></i> Date From</label>
+            <input type="date" [(ngModel)]="filterDateFrom" (change)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-calendar'></i> Date To</label>
+            <input type="date" [(ngModel)]="filterDateTo" (change)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-sort'></i> Sort By</label>
+            <select [(ngModel)]="sortBy" (change)="applyFilters()">
+              <option value="date">Date</option>
+              <option value="title">Title</option>
+              <option value="location">Location</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="content-wrapper">
+      <div class="table-container">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-id">#</th>
+                <th class="col-title">Event Title</th>
+                <th class="col-project">Project</th>
+                <th class="col-date">Date</th>
+                <th class="col-time">Time</th>
+                <th class="col-location">Location</th>
+                <th class="col-description">Description</th>
+                <th class="col-status">Status</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let event of filteredEvents; let i = index">
+                <td class="col-id">{{ i + 1 }}</td>
+                <td class="col-title">{{ event.title || 'NA' }}</td>
+                <td class="col-project">{{ getProjectName(event.projectId) }}</td>
+                <td class="col-date">{{ event.date | date:'mediumDate' }}</td>
+                <td class="col-time">{{ event.time || 'NA' }}</td>
+                <td class="col-location">{{ event.location || 'NA' }}</td>
+                <td class="col-description">{{ event.description || 'NA' }}</td>
+                <td class="col-status">
+                  <span class="status-badge" [class.upcoming]="isUpcoming(event.date)" [class.past]="!isUpcoming(event.date)">
+                    {{ isUpcoming(event.date) ? 'Upcoming' : 'Past' }}
+                  </span>
+                </td>
+                <td class="col-actions">
+                  <div class="action-btns">
+                    <button class="btn-icon edit" (click)="showEditDialog(event)" title="Edit">
+                      <i class='bx bx-pencil'></i>
+                    </button>
+                    <button class="btn-icon delete" (click)="confirmDelete(event.id)" title="Delete">
+                      <i class='bx bx-trash'></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredEvents.length === 0">
+                <td colspan="8" class="empty-state">
+                  <div class="empty-message">
+                    <i class='bx bx-calendar-event'></i>
+                    <p>No events found</p>
+                    <span>Add your first event using the button above</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="logoutModalVisible" (mousedown)="onOverlayClick($event)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-log-out-circle'></i>
+          <h3>Confirm Logout</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to logout?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
+          <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Event Modal -->
+  <div class="modal-overlay" *ngIf="eventDialogVisible" (mousedown)="onEventOverlayClick($event)">
+    <div class="modal-dialog event-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-calendar-event'></i>
+          <h3>{{ editingEvent ? 'Edit Event' : 'Add New Event' }}</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Event Title *</label>
+            <input type="text" [(ngModel)]="currentEvent.title" placeholder="Enter event title...">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" [(ngModel)]="currentEvent.date">
+            </div>
+            <div class="form-group">
+              <label>Time</label>
+              <input type="time" [(ngModel)]="currentEvent.time">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" [(ngModel)]="currentEvent.location" placeholder="Enter location...">
+            </div>
+            <div class="form-group">
+              <label>Associated Project</label>
+              <select [(ngModel)]="currentEvent.projectId" (change)="onProjectChange()">
+                <option value="">-- General Event --</option>
+                <option *ngFor="let project of projects" [value]="project.id">
+                  {{ project.acronyme ? project.acronyme + ' - ' : '' }}{{ project.title }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea [(ngModel)]="currentEvent.description" rows="3" placeholder="Enter event description..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeEventDialog()">Cancel</button>
+          <button type="button" class="btn-confirm" (click)="saveEvent()">{{ editingEvent ? 'Update' : 'Add' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

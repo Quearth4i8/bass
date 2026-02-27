@@ -13,6 +13,8 @@ import { NgModule } from '@angular/core';
 import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
+import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
+
 const routes: Routes = [
   { path: '', component: ProjectsLandingComponent },
   { path: 'imas-ichkeul', component: HomeComponent },
@@ -26,6 +28,7 @@ const routes: Routes = [
   { path: 'projectadmin', component:ProjectAdminComponent},
   { path: 'docsadmin', component:DocsadminComponent},
   { path: 'budget-charts', component:BudgetChartsComponent},
+  { path: 'eventsadmin', component:EventsadminComponent},
   { path: 'dataproviders', component:DataprovidersComponent},
 ];
 

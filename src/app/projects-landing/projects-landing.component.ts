@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-projects-landing',
@@ -10,7 +11,7 @@ export class ProjectsLandingComponent {
     {
       id: 'imas-ichkeul',
       name: 'IMAS-ICHKEUL',
-      description: 'Interactive Geodatabase for Ecosystem Monitoring and Research',
+      description: 'About IMAS-ICHKEUL',
       image: 'assets/images/4.png',
       active: true
     },
@@ -36,4 +37,13 @@ export class ProjectsLandingComponent {
       active: false
     }
   ];
+
+  constructor(private router: Router) {}
+
+  navigateToProject(projectId: string): void {
+    if (projectId === 'imas-ichkeul') {
+      this.router.navigate(['/imas-ichkeul']);
+    }
+    // Add navigation for other projects when they become active
+  }
 }

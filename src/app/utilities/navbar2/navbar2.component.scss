@@ -22,17 +22,15 @@ header {
   justify-content: space-between;
   align-items: center;
   transition: 0.6s;
-  padding: 40px 100px;
+  padding: 15px 100px;
   z-index: 100000;
-}
-header.sticky {
-  padding: 5px 100px;
   background-color: #1a5f7a;
 }
+
 header .logo {
   position: relative;
   font-weight: 700;
-  color: #000000;
+  color: #fff;
   text-decoration: none;
   font-size: 2em;
   text-transform: uppercase;
@@ -47,7 +45,7 @@ header .logo {
 }
 
 .projects-icon {
-  color: #000;
+  color: #fff;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -58,7 +56,7 @@ header .logo {
   opacity: 0.8;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(255, 255, 255, 0.15);
     opacity: 1;
     transform: scale(1.05);
   }
@@ -93,7 +91,7 @@ header > ul > li > a {
   position: relative;
   margin: 0 15px;
   text-decoration: none;
-  color: #000;
+  color: #fff;
   letter-spacing: 2px;
   font-weight: 500;
   transition: 0.6s;
@@ -105,12 +103,15 @@ header > ul > li > a {
   height: 100vh;
   background-size: cover;
 }
+
 header ul li a:hover{
   color: #e79954;
 }
+
 header.sticky ul li a:hover{
   color: #e79954;
 }
+
 header.sticky .logo,
 header.sticky > ul > li > a {
   color: #fff;
@@ -133,6 +134,7 @@ header > ul > li.dropdown:hover .dropdown-menu {
   position: absolute; 
   left: 0;
 }
+
 header.sticky > ul > li.dropdown:hover .dropdown-menu {
   display: block;
   animation: fadeInFromTopLeft 0.3s ease forwards;
@@ -143,8 +145,9 @@ header.sticky > ul > li.dropdown:hover .dropdown-menu {
 
 header > ul > li.dropdown .dropdown-menu a {
   text-decoration: none;
-  color: #000000;
+  color: #fff;
 }
+
 header.sticky > ul > li.dropdown .dropdown-menu a {
   text-decoration: none;
   color: #fff;
@@ -168,13 +171,14 @@ header > ul > li.dropdown > a.dropdown-toggle::after {
 
 header > ul > li > a.nav-link {
   font-weight: bold;
-  color: #333;
+  color: #fff;
   transition: color 0.3s ease;
 }
 
 header > ul > li > a.nav-link:hover {
   color: #757575;
 }
+
 header.sticky .icon{
   filter: invert(1);
 }

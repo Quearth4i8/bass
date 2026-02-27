@@ -46,7 +46,7 @@ import {FileUploadModule} from 'primeng/fileupload';
 import {DynamicDialogModule} from 'primeng/dynamicdialog';
 import { DialogService } from 'primeng/dynamicdialog';
 import { DialogContentComponent } from './utilities/dialogues/dialog-content/dialog-content.component';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { ProjectGroupDialogComponent } from './utilities/dialogues/project-group-dialog/project-group-dialog.component';
@@ -56,6 +56,7 @@ import { ConfirmDeleteGroupDialogComponent } from './utilities/dialogues/confirm
 import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
+import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
 
 @NgModule({
   declarations: [
@@ -90,6 +91,7 @@ import { ProjectsLandingComponent } from './projects-landing/projects-landing.co
     ConfirmDeleteGroupDialogComponent,
     UpbuttonComponent,
     ProjectsLandingComponent,
+    EventsadminComponent,
   ],
   imports: [
     BrowserModule,
@@ -118,7 +120,7 @@ import { ProjectsLandingComponent } from './projects-landing/projects-landing.co
     DropdownModule,
 ],
   
-  providers: [DialogService,ConfirmationService, provideAnimationsAsync()],
+  providers: [DialogService, ConfirmationService, MessageService, provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

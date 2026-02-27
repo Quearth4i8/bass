@@ -1,80 +1,28 @@
-body {
-	background: #e0e5ec;
+.projects-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
-  h1 {
-	position: relative;
-	text-align: center;
-	color: #353535;
-	font-size: 50px;
-	font-family: "Cormorant Garamond", serif;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
   }
-  
-  p {
-	font-family: 'Lato', sans-serif;
-	font-weight: 300;
-	text-align: center;
-	font-size: 18px;
-	color: #676767;
-  }
-  .frame {
-	width: 90%;
-	margin: 40px auto;
-	text-align: center;
-  }
-  button {
-	margin: 20px;
-	outline: none;
-  }
-  .custom-btn {
-	width: 130px;
-	height: 40px;
-	padding: 10px 25px;
-	border: 2px solid #000;
-	font-family: 'Lato', sans-serif;
-	font-weight: 500;
-	background: transparent;
-	cursor: pointer;
-	transition: all 0.3s ease;
-	position: relative;
-	display: inline-block;
-  }
-  
-  .btn-5 {
-	background: #1a5f7a;
-	color: #fff;
-	line-height: 42px;
-	padding: 0;
-	border: none;
-  }
-  .btn-5:hover {
-	background: transparent;
-	color: #e79954;
-  }
-  .btn-5:before,
-  .btn-5:after{
-	content:'';
-	position:absolute;
-	top:0;
-	right:0;
-	height:2px;
-	width:0;
-	background: #e79954;
-	transition:400ms ease all;
-  }
-  .btn-5:after{
-	right:inherit;
-	top:inherit;
-	left:0;
-	bottom:0;
-  }
-  .btn-5:hover:before,
-  .btn-5:hover:after{
-	width:100%;
-	transition:800ms ease all;
-  }
-  
-  .a {
-	color: white;
-	text-decoration: none;
-  }
-  
+}
