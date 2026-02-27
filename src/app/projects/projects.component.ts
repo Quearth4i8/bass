@@ -15,12 +15,15 @@ export class ProjectsComponent implements OnInit {
   error: string = '';
   showForm: boolean = true;
   fadeOut: boolean = false;
+  contentFadeIn: boolean = false;
   showPassword = false;
 
   activeTab: number = 0;
   showFilters: boolean[] = [];
   partnerDropdownOpen: boolean[] = [];
   programmeDropdownOpen: boolean[] = [];
+  partnerMenuStyle: { [key: string]: string }[] = [];
+  programmeMenuStyle: { [key: string]: string }[] = [];
 
   projectGroups: any[] = [];
   projectData: { [key: string]: any[] } = {};
@@ -75,7 +78,10 @@ export class ProjectsComponent implements OnInit {
 
     if (this.authService.login(this.username, this.password)) {
       if (this.authService.isAdmin()) {
-        this.router.navigate(['/projectadmin']);
+        this.fadeOut = true;
+        setTimeout(() => {
+          this.router.navigate(['/projectadmin'], { replaceUrl: true });
+        }, 350);
       } else if (this.authService.isUser()) {
         this.hideLoginForm();
       }
@@ -88,7 +94,11 @@ export class ProjectsComponent implements OnInit {
     this.fadeOut = true;
     setTimeout(() => {
       this.showForm = false;
+      this.contentFadeIn = true;
     }, 500);
+    setTimeout(() => {
+      this.contentFadeIn = false;
+    }, 900);
   }
 
   filterProjects(groupTitle: string, index: number) {
@@ -169,14 +179,42 @@ export class ProjectsComponent implements OnInit {
     this.filterProjects(title, index);
   }
 
-  toggleDropdown(index: number, field: string): void {
+  toggleDropdown(index: number, field: string, event?: MouseEvent): void {
     if (field === 'partner') {
       this.partnerDropdownOpen[index] = !this.partnerDropdownOpen[index];
       this.programmeDropdownOpen[index] = false;
+      if (this.partnerDropdownOpen[index] && event) {
+        this.partnerMenuStyle[index] = this.computeMenuStyle(event);
+      }
     } else if (field === 'programme') {
       this.programmeDropdownOpen[index] = !this.programmeDropdownOpen[index];
       this.partnerDropdownOpen[index] = false;
+      if (this.programmeDropdownOpen[index] && event) {
+        this.programmeMenuStyle[index] = this.computeMenuStyle(event);
+      }
     }
+  }
+
+  private computeMenuStyle(event: MouseEvent): { [key: string]: string } {
+    const trigger = event.currentTarget as HTMLElement;
+    if (!trigger) return {};
+    
+    const rect = trigger.getBoundingClientRect();
+    const menuMaxHeight = 280;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    // Check if we should open upward
+    const shouldOpenUp = spaceBelow < menuMaxHeight && spaceAbove > spaceBelow;
+    const top = shouldOpenUp 
+      ? Math.max(0, rect.top - menuMaxHeight - 4)
+      : rect.bottom + 4;
+    
+    return {
+      top: `${top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+    };
   }
 
   isDropdownOpen(index: number, field: string): boolean {

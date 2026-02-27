@@ -29,8 +29,8 @@ export class ProjectsLandingComponent {
       active: false
     },
     {
-      id: 'imas',
-      name: 'IMAS',
+      id: 'summonehealth',
+      name: 'SUMME_One Health',
       description: 'Coming Soon',
       image: 'assets/images/3.png',
       active: false

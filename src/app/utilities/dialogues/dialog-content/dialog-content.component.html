@@ -1,6 +1,6 @@
 <div class="custom-dialog">
     <div class="dialog-header">
-        <h2>Add New Project</h2>
+        <h2>{{ isEditMode ? 'Edit Project' : 'Add New Project' }}</h2>
     </div>
     <form (ngSubmit)="onSubmit()">
         <div class="dialog-body">
@@ -14,11 +14,11 @@
                         <label for="partenaire">Beneficiary/Partner <span>*</span></label>
                         <div class="custom-dropdown" [class.open]="partenaireDropdownOpen">
                             <div class="dropdown-trigger" (click)="togglePartenaireDropdown($event)">
-                                <span>{{ projectFormData.partenaire ? getPartenaireLabel(projectFormData.partenaire) : 'Select type' }}</span>
+                                <span>{{ projectFormData.partenaire ? getPartenaireLabel(projectFormData.partenaire) : 'Select' }}</span>
                                 <i class='bx bx-chevron-down'></i>
                             </div>
                             <div class="dropdown-menu" *ngIf="partenaireDropdownOpen" [ngStyle]="partenaireMenuStyle" [class.opens-up]="partenaireOpensUp">
-                                <div class="dropdown-item" (click)="selectPartenaire('')" [class.selected]="projectFormData.partenaire === ''">Select type</div>
+                                <div class="dropdown-item" (click)="selectPartenaire('')" [class.selected]="projectFormData.partenaire === ''">Select</div>
                                 <div class="dropdown-item" (click)="selectPartenaire('beneficiary')" [class.selected]="projectFormData.partenaire === 'beneficiary'">Beneficiary</div>
                                 <div class="dropdown-item" (click)="selectPartenaire('partner')" [class.selected]="projectFormData.partenaire === 'partner'">Partner</div>
                                 <div class="dropdown-item" (click)="selectPartenaire('principal')" [class.selected]="projectFormData.partenaire === 'principal'">Principal Investigator</div>
@@ -27,31 +27,31 @@
                     </div>
                     <div class="form-group full-width">
                         <label for="thematique">Thematic <span>*</span></label>
-                        <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Enter thematic area" required>
+                        <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Enter thematic" required>
                     </div>
                     <div class="form-group full-width">
                         <label for="titreproj">Project Title <span>*</span></label>
-                        <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Enter full project title" required>
+                        <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Enter Project Title" required>
                     </div>
                     <div class="form-group full-width">
                         <label for="acronym">Acronym <span>*</span></label>
                         <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" placeholder="Enter Acronym" required>
                     </div>
                     <div class="form-group full-width">
-                        <label for="programme">Programme <span>*</span></label>
-                        <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Enter programme" required>
+                        <label for="programme">Program <span>*</span></label>
+                        <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Enter Program" required>
                     </div>
                     <div class="form-group">
                         <label for="startyear">Start Year <span>*</span></label>
-                        <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="2024" required>
+                        <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="Start year" required>
                     </div>
                     <div class="form-group">
                         <label for="endyear">End Year <span>*</span></label>
-                        <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="2027" required>
+                        <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="End Year" required>
                     </div>
                     <div class="form-group">
                         <label for="budget">Budget (€) <span>*</span></label>
-                        <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="Enter amount" required>
+                        <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="Enter Budget" required>
                     </div>
                     <div class="form-group">
                         <label for="title">Project Group <span>*</span></label>
@@ -71,7 +71,7 @@
         </div>
         <div class="dialog-footer">
             <button type="button" class="btn-cancel" (click)="ref.close()">Cancel</button>
-            <button type="submit" class="btn-save">Save Project</button>
+            <button type="submit" class="btn-save">{{ isEditMode ? 'Update Project' : 'Save Project' }}</button>
         </div>
     </form>
 </div>

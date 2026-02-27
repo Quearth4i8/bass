@@ -47,7 +47,7 @@ export class ProjectService {
       map(projects => projects.filter(project => project.acronyme.toLowerCase().includes(acronyme.toLowerCase())))
     );
   }
-  getProjectsByProgramme(programme: string): Observable<any[]>{
+  getProjectsByProgram(programme: string): Observable<any[]>{
     const params = new HttpParams().set('programme_like', programme);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
       map(projects => projects.filter(project => project.programme.toLowerCase().includes(programme.toLowerCase())))

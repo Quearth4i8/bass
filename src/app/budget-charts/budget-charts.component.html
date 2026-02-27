@@ -1,0 +1,238 @@
+<div class="admin-layout">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class='bx bx-menu'></i>
+      </button>
+      <h1 class="page-title">Budget Analytics</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn primary" (click)="exportCharts()">
+        <i class='bx bx-download'></i>
+        <span>Export</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
+    <nav class="sidebar-nav">
+      <a routerLink="/projectadmin" class="nav-item">
+        <i class='bx bx-home'></i>
+        <span>Projects</span>
+      </a>
+      <a routerLink="/docsadmin" class="nav-item">
+        <i class='bx bx-file'></i>
+        <span>Documents</span>
+      </a>
+      <a routerLink="/budget-charts" class="nav-item active">
+        <i class='bx bx-pie-chart-alt-2'></i>
+        <span>Budget Charts</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="nav-item logout" (click)="showLogoutModal($event)">
+        <i class='bx bx-log-out'></i>
+        <span>Logout</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-icon">
+          <i class='bx bx-euro'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ formatCurrency(totalBudget) }}</h2>
+          <p>Total Budget</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon">
+          <i class='bx bx-folder'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ getTotalProjects() }}</h2>
+          <p>Total Projects</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon">
+          <i class='bx bx-check-circle'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ getActiveProjects() }}</h2>
+          <p>Active Projects</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-container" *ngIf="!isLoading; else loadingTemplate">
+      <!-- Pie Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2>Budget Distribution</h2>
+          <div class="chart-actions">
+            <button class="chart-btn" (click)="refreshData()">
+              <i class='bx bx-refresh'></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <div class="pie-chart-compact" *ngIf="budgetCategories.length > 0; else noDataTemplate">
+            <div class="chart-canvas doughnut">
+              <p-chart type="doughnut" [data]="doughnutData" [options]="doughnutOptions"></p-chart>
+              <div class="chart-center">
+                <div class="center-amount">{{ formatCurrency(totalBudget) }}</div>
+                <div class="center-label">Total Budget</div>
+              </div>
+            </div>
+            <div class="compact-legend">
+              <div class="legend-grid">
+                <div class="legend-item" *ngFor="let item of budgetCategories">
+                  <div class="legend-color" [style.background-color]="item.color"></div>
+                  <div class="legend-info">
+                    <div class="legend-name">{{ item.name | slice:0:20 }}{{ item.name.length > 20 ? '...' : '' }}</div>
+                    <div class="legend-value">{{ getBudgetPercentage(item.budget) | number:'1.0-1' }}%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Contributors -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2>Top 5 Contributors</h2>
+          <div class="chart-actions">
+            <button class="chart-btn" (click)="toggleChartType()">
+              <i class='bx bx-trophy'></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <div class="top-contributors" *ngIf="barCategories.length > 0; else noDataTemplate">
+            <div class="contributor-item" *ngFor="let item of barCategories; let i = index">
+              <div class="contributor-rank">{{ i + 1 }}</div>
+              <div class="contributor-color" [style.background-color]="item.color"></div>
+              <div class="contributor-info">
+                <div class="contributor-name">{{ item.name }}</div>
+                <div class="contributor-bar">
+                  <div class="contributor-progress" [style.width.%]="getBudgetPercentage(item.budget)" [style.background-color]="item.color"></div>
+                </div>
+              </div>
+              <div class="contributor-value">{{ formatCurrency(item.budget) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Charts Section -->
+    <div class="line-charts-container">
+      <!-- Income Growth Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2>Income Growth Over Years</h2>
+          <div class="chart-actions">
+            <button class="chart-btn" (click)="refreshData()">
+              <i class='bx bx-refresh'></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <div class="chart-canvas line" *ngIf="incomeGrowthData.length > 0; else noDataTemplate">
+            <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget Trend Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h2>Yearly Budget Overview</h2>
+          <div class="chart-actions">
+            <button class="chart-btn" (click)="toggleChartType()">
+              <i class='bx bx-bar-chart'></i>
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <div class="chart-canvas bar-chart-container" *ngIf="incomeGrowthData.length > 0; else noDataTemplate">
+            <p-chart type="bar" [data]="trendData" [options]="barChartOptions"></p-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Budget Details</h2>
+        <div class="table-actions">
+          <button class="chart-btn" (click)="sortData('budget')">
+            <i class='bx bx-sort'></i>
+          </button>
+        </div>
+      </div>
+      <div class="table-content">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Acronym</th>
+              <th>Budget Amount</th>
+              <th>Percentage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of budgetData">
+              <td>
+                <div class="category-cell">
+                  <div class="category-color" [style.background-color]="item.color"></div>
+                  {{ item.name }}
+                </div>
+              </td>
+              <td class="amount-cell">{{ formatCurrency(item.budget) }}</td>
+              <td class="percentage-cell">{{ getBudgetPercentage(item.budget) | number:'1.1-1' }}%</td>
+              <td>
+                <span class="status-badge" [class.active]="item.isActive" [class.inactive]="!item.isActive">
+                  {{ item.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="loading-spinner">
+      <i class='bx bx-loader-alt bx-spin'></i>
+    </div>
+    <p>Loading budget data...</p>
+  </div>
+</ng-template>
+
+<!-- No Data Template -->
+<ng-template #noDataTemplate>
+  <div class="no-data-container">
+    <div class="no-data-icon">
+      <i class='bx bx-bar-chart-alt-2'></i>
+    </div>
+    <h3>No Budget Data Available</h3>
+    <p>Projects with budget information will appear here.</p>
+  </div>
+</ng-template>

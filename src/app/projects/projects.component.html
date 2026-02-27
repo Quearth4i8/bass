@@ -26,37 +26,80 @@
   </div>
 
   <!-- Login Form (shown when not logged in) -->
-  <div class="overlay" *ngIf="showForm">
-    <div class="form-container">
-      <div class="wrapper">
-        <form (submit)="login($event)">
-          <h1>Please insert Credentials</h1>
-          <div class="input-box">
-            <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
-            <i class='bx bxs-user'></i>
+  <div class="overlay" *ngIf="showForm" [class.fade-out]="fadeOut">
+    <div class="login-hero">
+      <div class="hero-left">
+        <div class="hero-chip">
+          <i class='bx bx-shield-quarter'></i>
+          <span>Secure access</span>
+        </div>
+        <h2 class="hero-title">Explore projects and key results</h2>
+        <p class="hero-subtitle">Login to view project groups, filter data, and access the admin tools based on your role.</p>
+
+        <div class="hero-features">
+          <div class="hero-feature">
+            <div class="feature-icon">
+              <i class='bx bx-filter-alt'></i>
+            </div>
+            <div class="feature-text">
+              <h4>Powerful filters</h4>
+              <p>Search by partner, thematic, acronym, program and more.</p>
+            </div>
           </div>
-          <div class="input-box">
-            <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password"
-              name="password">
-            <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword"
-              (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+          <div class="hero-feature">
+            <div class="feature-icon">
+              <i class='bx bx-bar-chart-alt-2'></i>
+            </div>
+            <div class="feature-text">
+              <h4>Clean insights</h4>
+              <p>Quickly browse categorized projects with modern tables.</p>
+            </div>
           </div>
-          <div class="remember-forgot">
-            <label><input type="checkbox">Remember Me</label>
-            <a href="#">Forgot Password</a>
+          <div class="hero-feature">
+            <div class="feature-icon">
+              <i class='bx bx-cog'></i>
+            </div>
+            <div class="feature-text">
+              <h4>Role-based access</h4>
+              <p>Admins can manage projects while users browse listings.</p>
+            </div>
           </div>
-          <button type="submit" class="btn">Login</button>
-          <div class="register-link">
-            <p>Forgot account? <a href="#">Click here</a></p>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="form-container">
+          <div class="wrapper">
+            <form (submit)="login($event)">
+              <h1>Please insert Credentials</h1>
+              <div class="input-box">
+                <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
+                <i class='bx bxs-user'></i>
+              </div>
+              <div class="input-box">
+                <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password"
+                  name="password">
+                <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword"
+                  (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+              </div>
+              <div class="remember-forgot">
+                <label><input type="checkbox">Remember Me</label>
+                <a href="#">Forgot Password</a>
+              </div>
+              <button type="submit" class="btn">Login</button>
+              <div class="register-link">
+                <p>Forgot account? <a href="#">Click here</a></p>
+              </div>
+              <div *ngIf="error" class="error-message" style="color: red; margin-left: 20%;">{{ error }}</div>
+            </form>
           </div>
-          <div *ngIf="error" class="error-message" style="color: red; margin-left: 20%;">{{ error }}</div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Projects Data Display (shown after login) -->
-  <div class="projects-container" *ngIf="!showForm">
+  <div class="projects-container" *ngIf="!showForm" [class.fade-in]="contentFadeIn">
     <!-- Tab Navigation -->
     <div class="tab-nav">
       <button 
@@ -67,7 +110,7 @@
       >
         <span class="tab-icon">{{ getTabIcon(projectGroup.title) }}</span>
         <span class="tab-title">{{ projectGroup.title }}</span>
-        <span class="tab-count">({{ filteredProjectData[projectGroup.title]?.length || 0 }})</span>
+        <span class="tab-count">({{ filteredProjectData[projectGroup.title].length || 0 }})</span>
       </button>
     </div>
 
@@ -111,11 +154,11 @@
             <div class="filter-field">
               <label>Partner</label>
               <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'partner')">
-                <div class="dropdown-trigger" (click)="toggleDropdown(i, 'partner')">
+                <div class="dropdown-trigger" (click)="toggleDropdown(i, 'partner', $event)">
                   <span>{{ columnFilters[i].partenaire || 'All' }}</span>
                   <i class='bx bx-chevron-down'></i>
                 </div>
-                <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'partner')" [class.show]="isDropdownOpen(i, 'partner')">
+                <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'partner')" [class.show]="isDropdownOpen(i, 'partner')" [ngStyle]="partnerMenuStyle[i]">
                   <div class="dropdown-item" [class.selected]="!columnFilters[i].partenaire" (click)="selectOption(i, 'partenaire', '', projectGroup.title)">All</div>
                   <div class="dropdown-item" *ngFor="let partner of getUniquePartners(projectGroup.title)" [class.selected]="columnFilters[i].partenaire === partner" (click)="selectOption(i, 'partenaire', partner, projectGroup.title)">{{ partner }}</div>
                 </div>
@@ -131,13 +174,13 @@
               >
             </div>
             <div class="filter-field">
-              <label>Programme</label>
+              <label>Program</label>
               <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'programme')">
-                <div class="dropdown-trigger" (click)="toggleDropdown(i, 'programme')">
+                <div class="dropdown-trigger" (click)="toggleDropdown(i, 'programme', $event)">
                   <span>{{ columnFilters[i].programme || 'All' }}</span>
                   <i class='bx bx-chevron-down'></i>
                 </div>
-                <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'programme')" [class.show]="isDropdownOpen(i, 'programme')">
+                <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'programme')" [class.show]="isDropdownOpen(i, 'programme')" [ngStyle]="programmeMenuStyle[i]">
                   <div class="dropdown-item" [class.selected]="!columnFilters[i].programme" (click)="selectOption(i, 'programme', '', projectGroup.title)">All</div>
                   <div class="dropdown-item" *ngFor="let program of getUniquePrograms(projectGroup.title)" [class.selected]="columnFilters[i].programme === program" (click)="selectOption(i, 'programme', program, projectGroup.title)">{{ program }}</div>
                 </div>
@@ -199,7 +242,7 @@
                 <th>Project Coordinator</th>
                 <th>Beneficiary/Partner</th>
                 <th>Thematic</th>
-                <th>Programme</th>
+                <th>Program</th>
                 <th>Project Title</th>
                 <th>Acronym</th>
                 <th>Start</th>
@@ -209,15 +252,15 @@
             </thead>
             <tbody>
               <tr *ngFor="let project of filteredProjectData[projectGroup.title]">
-                <td>{{ project.responsable }}</td>
-                <td>{{ project.partenaire }}</td>
-                <td>{{ project.thematique }}</td>
-                <td>{{ project.programme }}</td>
-                <td>{{ project.titreproj }}</td>
-                <td>{{ project.acronyme }}</td>
-                <td>{{ project.startyear }}</td>
-                <td>{{ project.endyear }}</td>
-                <td>{{ project.budget | number:'1.2-2' }}</td>
+                <td>{{ project.responsable || 'NA' }}</td>
+                <td>{{ project.partenaire || 'NA' }}</td>
+                <td>{{ project.thematique || 'NA' }}</td>
+                <td>{{ project.programme || 'NA' }}</td>
+                <td>{{ project.titreproj || 'NA' }}</td>
+                <td>{{ project.acronyme || 'NA' }}</td>
+                <td>{{ project.startyear || 'NA' }}</td>
+                <td>{{ project.endyear || 'NA' }}</td>
+                <td>{{ project.budget ? (project.budget | number:'1.2-2') : 'NA' }}</td>
               </tr>
             </tbody>
           </table>

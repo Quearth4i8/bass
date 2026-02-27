@@ -1,5 +1,5 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
+import { DynamicDialogRef, DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
 import { ProjectService } from 'src/app/services/ProjectService';
 
@@ -16,6 +16,8 @@ export class DialogContentComponent implements OnInit {
   groupMenuStyle: { [key: string]: string } = {};
   partenaireOpensUp: boolean = false;
   groupOpensUp: boolean = false;
+  isEditMode: boolean = false;
+  projectId: number | null = null;
   projectFormData: any = {
     responsable: '',
     partenaire: '',
@@ -33,10 +35,17 @@ export class DialogContentComponent implements OnInit {
     private projectGroupService: ProjectGroupService,
     private projectService: ProjectService,
     public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
   ) {}
 
   ngOnInit(): void {
     this.getProjectGroupTitles();
+    // Check if editing existing project
+    if (this.config.data && this.config.data.project) {
+      this.isEditMode = true;
+      this.projectId = this.config.data.project.id;
+      this.projectFormData = { ...this.config.data.project };
+    }
   }
 
   getProjectGroupTitles(): void {
@@ -46,15 +55,41 @@ export class DialogContentComponent implements OnInit {
   }
 
   onSubmit() {
-    this.projectService.createProject(this.projectFormData).subscribe(
-      (response) => {
-        console.log('Project created successfully:', response);
-        this.ref.close('success');
-      },
-      (error) => {
-        console.error('Error creating project:', error);
-      }
-    );
+    if (this.isEditMode && this.projectId) {
+      // Update existing project
+      const updatedProject = {
+        responsable: this.projectFormData.responsable,
+        partenaire: this.projectFormData.partenaire,
+        thematique: this.projectFormData.thematique,
+        programme: this.projectFormData.programme,
+        titreproj: this.projectFormData.titreproj,
+        acronyme: this.projectFormData.acronyme,
+        budget: this.projectFormData.budget,
+        title: this.projectFormData.title,
+        startyear: this.projectFormData.startyear,
+        endyear: this.projectFormData.endyear,
+      };
+      this.projectService.updateProject(this.projectId, updatedProject).subscribe(
+        (response) => {
+          console.log('Project updated successfully:', response);
+          this.ref.close('success');
+        },
+        (error) => {
+          console.error('Error updating project:', error);
+        }
+      );
+    } else {
+      // Create new project
+      this.projectService.createProject(this.projectFormData).subscribe(
+        (response) => {
+          console.log('Project created successfully:', response);
+          this.ref.close('success');
+        },
+        (error) => {
+          console.error('Error creating project:', error);
+        }
+      );
+    }
   }
 
   onDialogBodyScroll(): void {

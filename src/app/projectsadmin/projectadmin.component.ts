@@ -1,6 +1,7 @@
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DialogContentComponent } from '../utilities/dialogues/dialog-content/dialog-content.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,6 +9,7 @@ import { ConfirmationDialogProjectDeleteComponent } from '../utilities/dialogues
 import { MessageService } from 'primeng/api';
 import { ProjectGroupDialogComponent } from '../utilities/dialogues/project-group-dialog/project-group-dialog.component';
 import { ProjectGroupService } from '../services/ProjectGroupService';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'projectadmin',
@@ -37,6 +39,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private messageService: MessageService,
     private projectGroupService: ProjectGroupService,
+    private authService: AuthService,
+    private router: Router,
   ) { }
 
   @HostListener('document:click', ['$event'])
@@ -55,17 +59,22 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.pageDropdownOpen = false;
   }
 
-  showDialog() {
+  showDialog(project?: any) {
     this.ref = this.dialogService.open(DialogContentComponent, {
       dismissableMask: true,
       closable: true,
-      style: { 'min-width': '600px' }
+      style: { 'min-width': '600px' },
+      data: project ? { project } : undefined
     });
 
     if (this.ref) {
       this.ref.onClose.subscribe((result) => {
         if (result === 'success') {
-          this.showSuccessMessage();
+          if (project) {
+            this.showUpdateInfoMessage();
+          } else {
+            this.showSuccessMessage();
+          }
           this.fetchProjects();
         }
       });
@@ -123,6 +132,11 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (!this.authService.isAuthenticated() || !this.authService.isAdmin()) {
+      this.router.navigate(['/projects'], { replaceUrl: true });
+      return;
+    }
+
     this.fetchProjects();
     this.sidebarService.sidebarVisibility$.subscribe((isVisible) => {
       this.isSidebarVisible = isVisible;
@@ -257,13 +271,40 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.groupDropdownOpen[index] = false;
   }
 
+  logoutModalVisible = false;
+
   toggleSidebar(): void {
     this.isSidebarVisible = !this.isSidebarVisible;
   }
 
+  showLogoutModal(event?: MouseEvent): void {
+    console.log('Logout clicked, showing modal');
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.logoutModalVisible = true;
+  }
+
+  closeLogoutModal(): void {
+    this.logoutModalVisible = false;
+  }
+
+  onOverlayClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeLogoutModal();
+    }
+  }
+
+  confirmLogout(): void {
+    this.logoutModalVisible = false;
+    this.authService.logout();
+    this.router.navigate(['/projects'], { replaceUrl: true });
+  }
+
   logout(): void {
-    // Implement logout logic
-    window.location.href = '/';
+    this.authService.logout();
+    this.router.navigate(['/projects'], { replaceUrl: true });
   }
 
   onInput(event: Event, project: any, field: string): void {
@@ -360,7 +401,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     const searchKeyword = input.value.trim();
 
     if (searchKeyword) {
-      this.projectService.getProjectsByProgramme(searchKeyword).subscribe(
+      this.projectService.getProjectsByProgram(searchKeyword).subscribe(
         (data: any[]) => {
           this.projects = data.sort((a, b) => a.id - b.id);
           this.updatePage(0);

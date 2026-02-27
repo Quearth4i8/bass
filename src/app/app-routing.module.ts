@@ -12,6 +12,7 @@ import { DocsadminComponent } from './docsadmin/docsadmin.component';
 import { NgModule } from '@angular/core';
 import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
+import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
 const routes: Routes = [
   { path: '', component: ProjectsLandingComponent },
   { path: 'imas-ichkeul', component: HomeComponent },
@@ -24,6 +25,7 @@ const routes: Routes = [
   { path: 'projects', component:ProjectsComponent},
   { path: 'projectadmin', component:ProjectAdminComponent},
   { path: 'docsadmin', component:DocsadminComponent},
+  { path: 'budget-charts', component:BudgetChartsComponent},
   { path: 'dataproviders', component:DataprovidersComponent},
 ];
 
