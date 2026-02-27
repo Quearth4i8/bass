@@ -406,6 +406,7 @@
   cursor: pointer;
   position: relative;
   transition: all 0.2s;
+  z-index: 100;
 }
 
 .stat-box.clickable:hover {
@@ -422,7 +423,7 @@
   border: 2px solid #1a5f7a;
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 10000;
   margin-top: 8px;
   overflow: hidden;
 }
@@ -436,7 +437,7 @@
   border: 2px solid #1a5f7a;
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 10000;
   margin-top: 8px;
   overflow: hidden;
   max-height: 250px;
@@ -536,6 +537,190 @@
 
 .input-group input::placeholder {
   color: #94a3b8;
+}
+
+/* Modern Search Bar */
+.search-bar-modern {
+  background: white;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.search-bar-modern:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.search-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #1a5f7a 0%, #159895 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.search-icon-wrapper i {
+  font-size: 24px;
+  color: white;
+}
+
+.search-input {
+  flex: 1;
+  height: 48px;
+  padding: 0 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1a5f7a;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(26, 95, 122, 0.1);
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.filter-toggle-btn.active {
+  background: linear-gradient(135deg, #1a5f7a 0%, #159895 100%);
+  border-color: #1a5f7a;
+  color: white;
+}
+
+.filter-toggle-btn i {
+  font-size: 18px;
+}
+
+/* Advanced Filters */
+.advanced-filters {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.advanced-filters.show {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-field label i {
+  font-size: 14px;
+  color: #1a5f7a;
+}
+
+.filter-field input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.filter-field input:focus {
+  outline: none;
+  border-color: #1a5f7a;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+}
+
+.filter-field input::placeholder {
+  color: #94a3b8;
+}
+
+@media (max-width: 1200px) {
+  .filter-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .search-main {
+    flex-wrap: wrap;
+  }
+  
+  .search-input {
+    width: 100%;
+    order: 2;
+  }
+  
+  .filter-toggle-btn {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Content wrapper for table with scroll */
@@ -899,7 +1084,7 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   max-height: 280px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 10000;
   animation: dropdownSlide 0.2s ease;
   margin-top: 4px;
 }

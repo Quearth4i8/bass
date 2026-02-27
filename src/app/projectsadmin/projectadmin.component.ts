@@ -273,6 +273,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   logoutModalVisible = false;
   isUserMenuOpen = false;
+  showAdvancedFilters = false;
+  globalSearchTerm = '';
 
   toggleSidebar(): void {
     this.isSidebarVisible = !this.isSidebarVisible;
@@ -413,6 +415,33 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
         },
         (error) => {
           console.error('Error searching projects by programme:', error);
+        }
+      );
+    } else {
+      this.fetchProjects();
+    }
+  }
+
+  onGlobalSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const searchKeyword = input.value.trim();
+
+    if (searchKeyword) {
+      // Search across all fields - you can implement a general search API
+      // For now, we'll filter the existing projects
+      this.projectService.getAllProjects().subscribe(
+        (data: any[]) => {
+          this.projects = data.filter(project => 
+            (project.responsable && project.responsable.toLowerCase().includes(searchKeyword.toLowerCase())) ||
+            (project.partenaire && project.partenaire.toLowerCase().includes(searchKeyword.toLowerCase())) ||
+            (project.programme && project.programme.toLowerCase().includes(searchKeyword.toLowerCase())) ||
+            (project.acronyme && project.acronyme.toLowerCase().includes(searchKeyword.toLowerCase())) ||
+            (project.titreproj && project.titreproj.toLowerCase().includes(searchKeyword.toLowerCase()))
+          ).sort((a, b) => a.id - b.id);
+          this.updatePage(0);
+        },
+        (error) => {
+          console.error('Error searching projects:', error);
         }
       );
     } else {

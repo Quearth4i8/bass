@@ -96,28 +96,42 @@
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="search-bar">
-      <div class="search-inputs">
-        <div class="input-group">
+    <!-- Modern Search Bar -->
+    <div class="search-bar-modern">
+      <div class="search-main">
+        <div class="search-icon-wrapper">
           <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Coordinator..." (input)="searchProjects2($event)">
         </div>
-        <div class="input-group">
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Beneficiary/Partner..." (input)="searchProjects3($event)">
-        </div>
-        <div class="input-group">
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Program..." (input)="searchProjects4($event)">
-        </div>
-        <div class="input-group">
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Acronym..." (input)="searchProjects($event)">
-        </div>
-        <div class="input-group">
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search Project Group..." (input)="searchProjects1($event)">
+        <input type="text" class="search-input" placeholder="Search projects by keyword..." [(ngModel)]="globalSearchTerm" (input)="onGlobalSearch($event)">
+        <button class="filter-toggle-btn" (click)="showAdvancedFilters = !showAdvancedFilters" [class.active]="showAdvancedFilters">
+          <i class='bx bx-filter-alt'></i>
+          <span>Filters</span>
+        </button>
+      </div>
+      
+      <!-- Advanced Filters (Collapsible) -->
+      <div class="advanced-filters" [class.show]="showAdvancedFilters">
+        <div class="filter-grid">
+          <div class="filter-field">
+            <label><i class='bx bx-user'></i> Coordinator</label>
+            <input type="text" placeholder="Search coordinator..." (input)="searchProjects2($event)">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-buildings'></i> Partner</label>
+            <input type="text" placeholder="Search partner..." (input)="searchProjects3($event)">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-collection'></i> Program</label>
+            <input type="text" placeholder="Search program..." (input)="searchProjects4($event)">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-font'></i> Acronym</label>
+            <input type="text" placeholder="Search acronym..." (input)="searchProjects($event)">
+          </div>
+          <div class="filter-field">
+            <label><i class='bx bx-folder'></i> Project Group</label>
+            <input type="text" placeholder="Search group..." (input)="searchProjects1($event)">
+          </div>
         </div>
       </div>
     </div>
