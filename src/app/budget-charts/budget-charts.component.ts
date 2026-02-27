@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
+import { AuthService } from '../services/AuthService';
 
 @Component({
   selector: 'app-budget-charts',
@@ -33,9 +34,13 @@ export class BudgetChartsComponent implements OnInit {
   isSidebarVisible = true;
   isLoading = false;
 
+  isUserMenuOpen = false;
+
   constructor(
     private projectService: ProjectService,
-    private sidebarService: SidebarService
+    private sidebarService: SidebarService,
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -329,13 +334,36 @@ export class BudgetChartsComponent implements OnInit {
     };
   }
 
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
   toggleSidebar(): void {
     this.isSidebarVisible = !this.isSidebarVisible;
   }
 
+  logoutModalVisible = false;
+
   showLogoutModal(event: Event): void {
-    // Implement logout modal logic
-    console.log('Logout clicked');
+    console.log('showLogoutModal called');
+    event.preventDefault();
+    event.stopPropagation();
+    this.logoutModalVisible = true;
+    this.isUserMenuOpen = false;
+    console.log('logoutModalVisible set to:', this.logoutModalVisible);
+  }
+
+  closeLogoutModal(): void {
+    console.log('closeLogoutModal called');
+    this.logoutModalVisible = false;
+  }
+
+  confirmLogout(): void {
+    console.log('confirmLogout called - logging out...');
+    this.logoutModalVisible = false;
+    this.authService.logout();
+    console.log('Navigating to /projects');
+    this.router.navigate(['/projects'], { replaceUrl: true });
   }
 
   getBudgetPercentage(budget: number): number {

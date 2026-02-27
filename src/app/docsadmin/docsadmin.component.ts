@@ -13,6 +13,7 @@ export class DocsadminComponent {
 
   isSidebarVisible = true;
   logoutModalVisible = false;
+  isUserMenuOpen = false;
 
   @ViewChild('fileUpload') fileUpload!: FileUpload;
 
@@ -71,6 +72,10 @@ export class DocsadminComponent {
 
   toggleSidebar(): void {
     this.sidebarService.toggleSidebar();
+  }
+
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
   logout(): void {

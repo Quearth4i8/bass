@@ -7,6 +7,19 @@
       </button>
       <h1>Documents Management</h1>
     </div>
+    <div class="header-right">
+      <div class="user-menu">
+        <div class="user-avatar" (click)="toggleUserMenu()">
+          <i class='bx bx-user'></i>
+        </div>
+        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
+          <div class="dropdown-item" (click)="showLogoutModal($event)">
+            <i class='bx bx-log-out'></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- Sidebar -->
@@ -25,12 +38,6 @@
         <span>Budget Charts</span>
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <div class="nav-item logout" (click)="showLogoutModal($event)">
-        <i class='bx bx-log-out'></i>
-        <span>Logout</span>
-      </div>
-    </div>
   </aside>
 
   <!-- Main Content -->

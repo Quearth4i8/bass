@@ -272,9 +272,14 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   logoutModalVisible = false;
+  isUserMenuOpen = false;
 
   toggleSidebar(): void {
     this.isSidebarVisible = !this.isSidebarVisible;
+  }
+
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
   showLogoutModal(event?: MouseEvent): void {

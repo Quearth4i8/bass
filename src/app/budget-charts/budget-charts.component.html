@@ -12,6 +12,17 @@
         <i class='bx bx-download'></i>
         <span>Export</span>
       </button>
+      <div class="user-menu">
+        <div class="user-avatar" (click)="toggleUserMenu()">
+          <i class='bx bx-user'></i>
+        </div>
+        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
+          <div class="dropdown-item" (click)="showLogoutModal($event)">
+            <i class='bx bx-log-out'></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -31,12 +42,6 @@
         <span>Budget Charts</span>
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <div class="nav-item logout" (click)="showLogoutModal($event)">
-        <i class='bx bx-log-out'></i>
-        <span>Logout</span>
-      </div>
-    </div>
   </aside>
 
   <!-- Main Content -->
@@ -214,6 +219,25 @@
       </div>
     </div>
   </main>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="logoutModalVisible" (click)="closeLogoutModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-log-out-circle'></i>
+          <h3>Confirm Logout</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to logout?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
+          <button type="button" class="btn-confirm" (click)="confirmLogout(); $event.stopPropagation()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Loading Template -->
