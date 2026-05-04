@@ -17,6 +17,144 @@ $shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
   padding: 20px 10px;
 }
 
+.landing-admin-area {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+}
+
+.landing-admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.15);
+  color: $white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.landing-admin-btn:hover {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.landing-admin-btn i {
+  font-size: 18px;
+}
+
+
+.landing-admin-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+}
+
+.landing-admin-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.landing-admin-dropdown h3 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: $primary-color;
+  text-align: center;
+}
+
+.landing-dropdown-input {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.landing-dropdown-input input {
+  width: 100%;
+  padding: 12px 44px 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.landing-dropdown-input input:focus {
+  border-color: $primary-color;
+  box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+  outline: none;
+}
+
+.landing-dropdown-input i {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: $primary-color;
+}
+
+.landing-dropdown-login-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.landing-dropdown-login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 95, 122, 0.3);
+}
+
+.landing-dropdown-login-btn.landing-dropdown-logout-btn {
+  background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+}
+
+.landing-dropdown-login-btn.landing-dropdown-logout-btn:hover {
+  background: linear-gradient(135deg, #9b2c2c 0%, #c53030 100%);
+}
+
+.landing-dropdown-error {
+  color: #e53e3e;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
 .portal-header {
   width: 100%;
   max-width: 1600px;
@@ -25,6 +163,7 @@ $shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
   align-items: center;
   margin-bottom: 20px;
   padding: 0 10px;
+  position: relative;
 
   .header-center {
     text-align: center;

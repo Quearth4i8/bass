@@ -1,6 +1,6 @@
-<!-- Login Form Only - Standalone Page -->
+<!-- Projects Page - Always Visible -->
 <div class="login-page">
-  <!-- Animated Background - Outside conditional so it persists -->
+  <!-- Animated Background -->
   <div class="animated-bg">
     <div class="bubble bubble-1"></div>
     <div class="bubble bubble-2"></div>
@@ -9,15 +9,49 @@
     <div class="bubble bubble-5"></div>
   </div>
 
-  <!-- Back Button -->
-  <a routerLink="/" class="back-btn">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 12H5"></path>
-      <path d="M12 19l-7-7 7-7"></path>
-    </svg>
-    Back to Portal
-  </a>
+  <!-- Top Bar: Back Button + Admin Login -->
+  <div class="top-bar">
+    <a routerLink="/" class="back-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
+      </svg>
+      Back to Portal
+    </a>
 
+    <div class="admin-area">
+      <button class="admin-btn" (click)="toggleAdminLogin()">
+        <i class='bx bx-lock-open-alt'></i>
+        Admin
+      </button>
+
+      <div class="admin-login-dropdown" *ngIf="showAdminLogin" (click)="$event.stopPropagation()">
+        <ng-container *ngIf="isAdminLoggedIn; else loginForm">
+          <h3>Admin</h3>
+          <button type="button" class="dropdown-login-btn" (click)="continueToAdmin()">Continue</button>
+          <button type="button" class="dropdown-login-btn dropdown-logout-btn" (click)="adminLogout()">Logout</button>
+        </ng-container>
+
+        <ng-template #loginForm>
+          <form (submit)="login($event)">
+            <h3>Admin Login</h3>
+            <div class="dropdown-input">
+              <input type="text" placeholder="Username" required [(ngModel)]="username" name="admin-username">
+              <i class='bx bxs-user'></i>
+            </div>
+            <div class="dropdown-input">
+              <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password" name="admin-password">
+              <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword" (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+            </div>
+            <button type="submit" class="dropdown-login-btn">Login</button>
+            <div *ngIf="error" class="dropdown-error">{{ error }}</div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Title -->
   <div class="center-container">
     <div class="rectangle-and-text">
       <div class="vertical-rectangle"></div>
@@ -25,81 +59,8 @@
     </div>
   </div>
 
-  <!-- Login Form (shown when not logged in) -->
-  <div class="overlay" *ngIf="showForm" [class.fade-out]="fadeOut">
-    <div class="login-hero">
-      <div class="hero-left">
-        <div class="hero-chip">
-          <i class='bx bx-shield-quarter'></i>
-          <span>Secure access</span>
-        </div>
-        <h2 class="hero-title">Explore projects and key results</h2>
-        <p class="hero-subtitle">Login to view project groups, filter data, and access the admin tools based on your role.</p>
-
-        <div class="hero-features">
-          <div class="hero-feature">
-            <div class="feature-icon">
-              <i class='bx bx-filter-alt'></i>
-            </div>
-            <div class="feature-text">
-              <h4>Powerful filters</h4>
-              <p>Search by partner, thematic, acronym, program and more.</p>
-            </div>
-          </div>
-          <div class="hero-feature">
-            <div class="feature-icon">
-              <i class='bx bx-bar-chart-alt-2'></i>
-            </div>
-            <div class="feature-text">
-              <h4>Clean insights</h4>
-              <p>Quickly browse categorized projects with modern tables.</p>
-            </div>
-          </div>
-          <div class="hero-feature">
-            <div class="feature-icon">
-              <i class='bx bx-cog'></i>
-            </div>
-            <div class="feature-text">
-              <h4>Role-based access</h4>
-              <p>Admins can manage projects while users browse listings.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="hero-right">
-        <div class="form-container">
-          <div class="wrapper">
-            <form (submit)="login($event)">
-              <h1>Please insert Credentials</h1>
-              <div class="input-box">
-                <input type="text" placeholder="Username" required [(ngModel)]="username" name="username">
-                <i class='bx bxs-user'></i>
-              </div>
-              <div class="input-box">
-                <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password"
-                  name="password">
-                <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword"
-                  (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
-              </div>
-              <div class="remember-forgot">
-                <label><input type="checkbox">Remember Me</label>
-                <a href="#">Forgot Password</a>
-              </div>
-              <button type="submit" class="btn">Login</button>
-              <div class="register-link">
-                <p>Forgot account? <a href="#">Click here</a></p>
-              </div>
-              <div *ngIf="error" class="error-message" style="color: red; margin-left: 20%;">{{ error }}</div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Projects Data Display (shown after login) -->
-  <div class="projects-container" *ngIf="!showForm" [class.fade-in]="contentFadeIn">
+  <!-- Projects Data Display - Always Visible -->
+  <div class="projects-container">
     <!-- Tab Navigation -->
     <div class="tab-nav">
       <button 

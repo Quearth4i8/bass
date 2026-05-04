@@ -13,10 +13,12 @@ export class ProjectsComponent implements OnInit {
   username: string = '';
   password: string = '';
   error: string = '';
-  showForm: boolean = true;
+  showAdminLogin: boolean = false;
   fadeOut: boolean = false;
   contentFadeIn: boolean = false;
   showPassword = false;
+  isAdminLoggedIn: boolean = false;
+  adminUsername: string = '';
 
   activeTab: number = 0;
   showFilters: boolean[] = [];
@@ -40,6 +42,15 @@ export class ProjectsComponent implements OnInit {
 
   ngOnInit() {
     this.loadProjectGroups();
+    this.checkAdminSession();
+  }
+
+  private checkAdminSession(): void {
+    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
+      this.isAdminLoggedIn = true;
+      this.adminUsername = this.authService.getUsername();
+      this.showAdminLogin = false;
+    }
   }
 
   loadProjectGroups() {
@@ -73,32 +84,50 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
-  login(event: Event): void {
-    event.preventDefault();
+  toggleAdminLogin(): void {
+    this.showAdminLogin = !this.showAdminLogin;
+    this.error = '';
+  }
 
-    if (this.authService.login(this.username, this.password)) {
-      if (this.authService.isAdmin()) {
-        this.fadeOut = true;
-        setTimeout(() => {
-          this.router.navigate(['/projectadmin'], { replaceUrl: true });
-        }, 350);
-      } else if (this.authService.isUser()) {
-        this.hideLoginForm();
-      }
-    } else {
-      this.error = 'Invalid username or password';
+  continueToAdmin(): void {
+    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
+      this.router.navigate(['/projectadmin']);
     }
   }
 
-  hideLoginForm(): void {
-    this.fadeOut = true;
-    setTimeout(() => {
-      this.showForm = false;
-      this.contentFadeIn = true;
-    }, 500);
-    setTimeout(() => {
-      this.contentFadeIn = false;
-    }, 900);
+  login(event: Event): void {
+    event.preventDefault();
+    this.error = '';
+
+    this.authService.login(this.username, this.password).subscribe({
+      next: (ok) => {
+        if (!ok) {
+          this.error = 'Invalid username or password';
+          return;
+        }
+
+        if (this.authService.isAdmin()) {
+          this.isAdminLoggedIn = true;
+          this.adminUsername = this.authService.getUsername();
+          this.showAdminLogin = false;
+          this.username = '';
+          this.password = '';
+          this.router.navigate(['/projectadmin'], { replaceUrl: true });
+        } else {
+          this.error = 'Admin access required';
+          this.authService.logout();
+        }
+      },
+      error: () => {
+        this.error = 'Invalid username or password';
+      }
+    });
+  }
+
+  adminLogout(): void {
+    this.authService.logout();
+    this.isAdminLoggedIn = false;
+    this.adminUsername = '';
   }
 
   filterProjects(groupTitle: string, index: number) {
@@ -237,11 +266,14 @@ export class ProjectsComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    // Check if click is outside dropdowns
+    // Close filter dropdowns
     if (!target.closest('.custom-dropdown')) {
-      // Close all dropdowns
       this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
       this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
+    }
+    // Close admin login dropdown
+    if (!target.closest('.admin-area')) {
+      this.showAdminLogin = false;
     }
   }
 

@@ -1,6 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
+
+import { AuthService } from './AuthService';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +10,7 @@ import { Observable, map } from 'rxjs';
 export class ProjectService {
   private baseUrl: string;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private auth: AuthService) {
     this.baseUrl = this.getBaseUrl();
   }
 
@@ -56,13 +58,21 @@ export class ProjectService {
   getAllProjects(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/projects`);
   }
+
+  private authHeaders(): { headers: HttpHeaders } {
+    const token = this.auth.getToken();
+    return {
+      headers: token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders()
+    };
+  }
+
   updateProject(id: number, projectDetails: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/projects/${id}`, projectDetails);
+    return this.http.put<any>(`${this.baseUrl}/projects/${id}`, projectDetails, this.authHeaders());
   }
   createProject(projectDetails: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/projects`, projectDetails);
+    return this.http.post<any>(`${this.baseUrl}/projects`, projectDetails, this.authHeaders());
   }
   deleteProject(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/projects/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/projects/${id}`, this.authHeaders());
   }
 }

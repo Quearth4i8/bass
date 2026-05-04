@@ -1,6 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
+import { AuthService } from './AuthService';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +11,7 @@ export class ProjectGroupService {
 
     private baseUrl: string;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private auth: AuthService) {
       this.baseUrl = this.getBaseUrl();
     }
   
@@ -29,13 +31,21 @@ export class ProjectGroupService {
   getProjectGroupTitles(): Observable<string[]> {
     return this.http.get<string[]>(`${this.baseUrl}/projectgroups/titles`);
   }
+
+  private authHeaders(): { headers: HttpHeaders } {
+    const token = this.auth.getToken();
+    return {
+      headers: token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders()
+    };
+  }
+
   createProjectGroup(projectGroup: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/projectgroups`, projectGroup);
+    return this.http.post<any>(`${this.baseUrl}/projectgroups`, projectGroup, this.authHeaders());
   }
   deleteProjectGroupByTitle(title: string): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/projectgroups/title/${title}`);
+    return this.http.delete<any>(`${this.baseUrl}/projectgroups/title/${title}`, this.authHeaders());
   }
   updateProjectGroupByTitle(title: string, projectGroupDetails: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/projectgroups/title/${title}`, projectGroupDetails);
+    return this.http.put<any>(`${this.baseUrl}/projectgroups/title/${title}`, projectGroupDetails, this.authHeaders());
   }
 }

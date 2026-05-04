@@ -1,6 +1,36 @@
 <div class="landing-container">
   <!-- Header with title only -->
   <div class="portal-header">
+    <div class="landing-admin-area">
+      <button class="landing-admin-btn" (click)="toggleAdminLogin()" title="Admin">
+        <i class='bx bx-lock-open-alt'></i>
+      </button>
+
+      <div class="landing-admin-dropdown" *ngIf="showAdminLogin" (click)="$event.stopPropagation()">
+        <ng-container *ngIf="isAdminLoggedIn; else landingLoginForm">
+          <h3>Admin</h3>
+          <button type="button" class="landing-dropdown-login-btn" (click)="continueToAdmin()">Continue</button>
+          <button type="button" class="landing-dropdown-login-btn landing-dropdown-logout-btn" (click)="adminLogout()">Logout</button>
+        </ng-container>
+
+        <ng-template #landingLoginForm>
+          <form (submit)="login($event)">
+            <h3>Admin Login</h3>
+            <div class="landing-dropdown-input">
+              <input type="text" placeholder="Username" required [(ngModel)]="username" name="landing-admin-username">
+              <i class='bx bxs-user'></i>
+            </div>
+            <div class="landing-dropdown-input">
+              <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password" name="landing-admin-password">
+              <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword" (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+            </div>
+            <button type="submit" class="landing-dropdown-login-btn">Login</button>
+            <div *ngIf="error" class="landing-dropdown-error">{{ error }}</div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+
     <div class="header-center">
       <h1>BASSIANA Database Portal</h1>
       <p class="subtitle">Explore our research initiatives</p>

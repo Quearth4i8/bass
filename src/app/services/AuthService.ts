@@ -1,155 +1,126 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private readonly SESSION_KEY = 'bass_auth_session';
-  private readonly SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+  private readonly TOKEN_KEY = 'bass_projects_auth_token';
+  private readonly ROLE_KEY = 'bass_projects_auth_role';
+  private readonly USERNAME_KEY = 'bass_projects_auth_username';
 
-  // Obfuscated credentials (base64 encoded - not secure but better than plain text)
-  private readonly CREDENTIALS = {
-    admin: {
-      username: btoa('adminbassiana'),
-      password: btoa('admin@bassiana'),
-      role: 'admin'
-    },
-    user: {
-      username: btoa('userbassiana'),
-      password: btoa('user@bassiana'),
-      role: 'user'
-    }
-  };
+  private baseUrl: string;
 
-  constructor() {
-    // Check for existing session on startup
-    this.checkExistingSession();
+  constructor(private http: HttpClient) {
+    this.baseUrl = this.getBaseUrl();
   }
 
-  private checkExistingSession(): void {
-    const session = this.getSession();
-    if (session && session.expiresAt > Date.now()) {
-      // Valid session exists
-      return;
-    } else if (session) {
-      // Session expired, clear it
-      this.clearSession();
+  private getBaseUrl(): string {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8085/bassiana';
     }
+    return 'http://41.229.139.17:8080/imasservice/bassiana';
   }
 
-  private getSession(): any {
+  login(username: string, password: string): Observable<boolean> {
+    return this.http
+      .post<any>(`${this.baseUrl}/auth/signin`, { username, password })
+      .pipe(
+        tap((res) => {
+          const token = res?.accessToken || res?.token;
+          const role = res?.role;
+          const serverUsername = res?.username;
+          if (token) {
+            localStorage.setItem(this.TOKEN_KEY, token);
+          }
+          if (role) {
+            localStorage.setItem(this.ROLE_KEY, role);
+          }
+          if (serverUsername) {
+            localStorage.setItem(this.USERNAME_KEY, serverUsername);
+          }
+        }),
+        map((res) => {
+          const token = res?.accessToken || res?.token;
+          return !!token;
+        })
+      );
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.USERNAME_KEY);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  private decodeJwtPayload(token: string): any | null {
     try {
-      const sessionData = sessionStorage.getItem(this.SESSION_KEY);
-      if (!sessionData) return null;
-      
-      // Simple XOR "decryption" with a fixed key
-      const decrypted = this.xorDecrypt(sessionData, 'bassiana2024');
-      return JSON.parse(decrypted);
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+      const json = atob(padded);
+      return json ? JSON.parse(json) : null;
     } catch {
       return null;
     }
   }
 
-  private setSession(role: string): void {
-    const session = {
-      role: role,
-      loggedInAt: Date.now(),
-      expiresAt: Date.now() + this.SESSION_DURATION
-    };
-    
-    // Simple XOR "encryption"
-    const encrypted = this.xorEncrypt(JSON.stringify(session), 'bassiana2024');
-    sessionStorage.setItem(this.SESSION_KEY, encrypted);
-  }
-
-  private clearSession(): void {
-    sessionStorage.removeItem(this.SESSION_KEY);
-  }
-
-  // Simple XOR encryption (obfuscation - not cryptographically secure)
-  private xorEncrypt(data: string, key: string): string {
-    let result = '';
-    for (let i = 0; i < data.length; i++) {
-      result += String.fromCharCode(
-        data.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-      );
-    }
-    return btoa(result);
-  }
-
-  private xorDecrypt(data: string, key: string): string {
-    try {
-      const decoded = atob(data);
-      let result = '';
-      for (let i = 0; i < decoded.length; i++) {
-        result += String.fromCharCode(
-          decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-        );
-      }
-      return result;
-    } catch {
-      return '';
-    }
-  }
-
-  login(username: string, password: string): boolean {
-    // Encode input to compare with stored encoded credentials
-    const encodedUsername = btoa(username);
-    const encodedPassword = btoa(password);
-
-    // Check admin credentials
-    if (encodedUsername === this.CREDENTIALS.admin.username && 
-        encodedPassword === this.CREDENTIALS.admin.password) {
-      this.setSession('admin');
-      return true;
-    }
-
-    // Check user credentials
-    if (encodedUsername === this.CREDENTIALS.user.username && 
-        encodedPassword === this.CREDENTIALS.user.password) {
-      this.setSession('user');
-      return true;
-    }
-
-    return false;
-  }
-
-  logout(): void {
-    this.clearSession();
+  isTokenExpired(leewaySeconds: number = 10): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+    const payload = this.decodeJwtPayload(token);
+    const exp = payload?.exp;
+    if (typeof exp !== 'number') return false;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    return exp <= (nowSeconds + leewaySeconds);
   }
 
   isAuthenticated(): boolean {
-    const session = this.getSession();
-    if (session && session.expiresAt > Date.now()) {
-      return true;
+    const token = this.getToken();
+    if (!token) return false;
+    if (this.isTokenExpired()) {
+      this.logout();
+      return false;
     }
-    // Session expired or invalid
-    if (session) {
-      this.clearSession();
-    }
-    return false;
+    return true;
   }
 
   getRole(): string {
-    const session = this.getSession();
-    return session?.role || '';
+    return localStorage.getItem(this.ROLE_KEY) || '';
+  }
+
+  getUsername(): string {
+    return localStorage.getItem(this.USERNAME_KEY) || '';
   }
 
   isAdmin(): boolean {
-    return this.getRole() === 'admin';
+    return this.getRole() === 'ROLE_PROJECTS_ADMIN';
   }
 
   isUser(): boolean {
-    return this.getRole() === 'user';
+    return this.getRole() === 'ROLE_PROJECTS_USER';
   }
 
-  // Get remaining session time in minutes
-  getSessionRemainingTime(): number {
-    const session = this.getSession();
-    if (!session) return 0;
-    
-    const remaining = session.expiresAt - Date.now();
-    return Math.max(0, Math.floor(remaining / 60000)); // Convert to minutes
+  bootstrapFromToken(): Observable<void> {
+    const token = this.getToken();
+    if (!token) return of(void 0);
+    const payload = this.decodeJwtPayload(token);
+    const role = payload?.role;
+    const username = payload?.username || payload?.sub;
+    if (typeof role === 'string' && !this.getRole()) {
+      localStorage.setItem(this.ROLE_KEY, role);
+    }
+    if (typeof username === 'string' && username && !this.getUsername()) {
+      localStorage.setItem(this.USERNAME_KEY, username);
+    }
+    return of(void 0);
   }
 }
