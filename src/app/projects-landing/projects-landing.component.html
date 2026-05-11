@@ -8,9 +8,11 @@
 
       <div class="landing-admin-dropdown" *ngIf="showAdminLogin" (click)="$event.stopPropagation()">
         <ng-container *ngIf="isAdminLoggedIn; else landingLoginForm">
-          <h3>Admin</h3>
-          <button type="button" class="landing-dropdown-login-btn" (click)="continueToAdmin()">Continue</button>
-          <button type="button" class="landing-dropdown-login-btn landing-dropdown-logout-btn" (click)="adminLogout()">Logout</button>
+          <div class="admin-compact-dropdown">
+            <h3>Admin</h3>
+            <button type="button" class="landing-dropdown-login-btn" (click)="continueToAdmin()">Continue</button>
+            <button type="button" class="landing-dropdown-login-btn landing-dropdown-logout-btn" (click)="adminLogout()">Logout</button>
+          </div>
         </ng-container>
 
         <ng-template #landingLoginForm>
@@ -195,6 +197,6 @@
   </div>
 
   <div class="landing-footer">
-    <p>&copy; 2025 Research Projects Initiative. All rights reserved.</p>
+    <p>&copy; 2026 Research Projects Initiative. All rights reserved.</p>
   </div>
 </div>

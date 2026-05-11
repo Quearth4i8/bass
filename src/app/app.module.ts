@@ -22,7 +22,7 @@ import { PartnersComponent } from './partners/partners.component';
 import { TeamComponent } from './team/team.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { ProjectsComponent } from './projects/projects.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { LoginComponent } from './custom_buttons/login/login.component';
 import { Navbar2Component } from './utilities/navbar2/navbar2.component';
 import { ProjectAdminComponent } from './projectsadmin/projectadmin.component';
@@ -57,6 +57,9 @@ import { DataprovidersComponent } from './dataproviders/dataproviders.component'
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
+import { ManagementComponent } from './management/management.component';
+
+import { AuthInterceptor } from './auth/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -92,6 +95,7 @@ import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
     UpbuttonComponent,
     ProjectsLandingComponent,
     EventsadminComponent,
+    ManagementComponent,
   ],
   imports: [
     BrowserModule,
@@ -120,7 +124,17 @@ import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
     DropdownModule,
 ],
   
-  providers: [DialogService, ConfirmationService, MessageService, provideAnimationsAsync()],
+  providers: [
+    DialogService,
+    ConfirmationService,
+    MessageService,
+    provideAnimationsAsync(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

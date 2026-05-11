@@ -18,37 +18,6 @@
       </svg>
       Back to Portal
     </a>
-
-    <div class="admin-area">
-      <button class="admin-btn" (click)="toggleAdminLogin()">
-        <i class='bx bx-lock-open-alt'></i>
-        Admin
-      </button>
-
-      <div class="admin-login-dropdown" *ngIf="showAdminLogin" (click)="$event.stopPropagation()">
-        <ng-container *ngIf="isAdminLoggedIn; else loginForm">
-          <h3>Admin</h3>
-          <button type="button" class="dropdown-login-btn" (click)="continueToAdmin()">Continue</button>
-          <button type="button" class="dropdown-login-btn dropdown-logout-btn" (click)="adminLogout()">Logout</button>
-        </ng-container>
-
-        <ng-template #loginForm>
-          <form (submit)="login($event)">
-            <h3>Admin Login</h3>
-            <div class="dropdown-input">
-              <input type="text" placeholder="Username" required [(ngModel)]="username" name="admin-username">
-              <i class='bx bxs-user'></i>
-            </div>
-            <div class="dropdown-input">
-              <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" required [(ngModel)]="password" name="admin-password">
-              <i class='bx' [class.bx-show]="!showPassword" [class.bx-hide]="showPassword" (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
-            </div>
-            <button type="submit" class="dropdown-login-btn">Login</button>
-            <div *ngIf="error" class="dropdown-error">{{ error }}</div>
-          </form>
-        </ng-template>
-      </div>
-    </div>
   </div>
 
   <!-- Page Title -->

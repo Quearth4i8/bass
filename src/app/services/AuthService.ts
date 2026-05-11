@@ -24,22 +24,37 @@ export class AuthService {
     return 'http://41.229.139.17:8080/imasservice/bassiana';
   }
 
+  getApiBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  getServerRootUrl(): string {
+    if (this.baseUrl.endsWith('/bassiana')) {
+      return this.baseUrl.slice(0, -'/bassiana'.length);
+    }
+    return this.baseUrl;
+  }
+
   login(username: string, password: string): Observable<boolean> {
     return this.http
       .post<any>(`${this.baseUrl}/auth/signin`, { username, password })
       .pipe(
         tap((res) => {
           const token = res?.accessToken || res?.token;
-          const role = res?.role;
-          const serverUsername = res?.username;
           if (token) {
             localStorage.setItem(this.TOKEN_KEY, token);
           }
-          if (role) {
-            localStorage.setItem(this.ROLE_KEY, role);
-          }
-          if (serverUsername) {
-            localStorage.setItem(this.USERNAME_KEY, serverUsername);
+
+          if (token) {
+            const payload = this.decodeJwtPayload(token);
+            const roleFromToken = payload?.role;
+            const usernameFromToken = payload?.username || payload?.sub;
+            if (typeof roleFromToken === 'string') {
+              localStorage.setItem(this.ROLE_KEY, roleFromToken);
+            }
+            if (typeof usernameFromToken === 'string' && usernameFromToken) {
+              localStorage.setItem(this.USERNAME_KEY, usernameFromToken);
+            }
           }
         }),
         map((res) => {

@@ -14,6 +14,8 @@ import { DataprovidersComponent } from './dataproviders/dataproviders.component'
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
 import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
+import { ManagementComponent } from './management/management.component';
+import { AdminGuard } from './auth/admin.guard';
 
 const routes: Routes = [
   { path: '', component: ProjectsLandingComponent },
@@ -25,10 +27,11 @@ const routes: Routes = [
   { path: 'partners', component:PartnersComponent},
   { path: 'team', component:TeamComponent},
   { path: 'projects', component:ProjectsComponent},
-  { path: 'projectadmin', component:ProjectAdminComponent},
-  { path: 'docsadmin', component:DocsadminComponent},
+  { path: 'projectadmin', component:ProjectAdminComponent, canActivate: [AdminGuard] },
+  { path: 'docsadmin', component:DocsadminComponent, canActivate: [AdminGuard] },
   { path: 'budget-charts', component:BudgetChartsComponent},
-  { path: 'eventsadmin', component:EventsadminComponent},
+  { path: 'eventsadmin', component:EventsadminComponent, canActivate: [AdminGuard] },
+  { path: 'management', component:ManagementComponent, canActivate: [AdminGuard] },
   { path: 'dataproviders', component:DataprovidersComponent},
 ];
 

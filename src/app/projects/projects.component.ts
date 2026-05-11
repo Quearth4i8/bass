@@ -43,6 +43,9 @@ export class ProjectsComponent implements OnInit {
   ngOnInit() {
     this.loadProjectGroups();
     this.checkAdminSession();
+    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
+      this.router.navigate(['/'], { replaceUrl: true });
+    }
   }
 
   private checkAdminSession(): void {

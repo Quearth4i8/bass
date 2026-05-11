@@ -1247,6 +1247,35 @@ th {
   font-weight: 500;
 }
 
+/* Compact Dropdown state for Logout/Continue */
+.admin-compact-dropdown {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-login-dropdown:has(.admin-compact-dropdown) {
+  width: 180px !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+}
+
+.admin-compact-dropdown h3 {
+  margin: 0 0 10px !important;
+  font-size: 15px !important;
+}
+
+.admin-compact-dropdown .dropdown-login-btn {
+  padding: 8px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  margin-bottom: 6px !important;
+}
+
+.admin-compact-dropdown .dropdown-login-btn:last-child {
+  margin-bottom: 0 !important;
+}
+
 /* Adjust center-container for public view */
 .center-container {
   padding-top: 6vh;

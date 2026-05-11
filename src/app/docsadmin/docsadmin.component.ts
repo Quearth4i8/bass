@@ -1,4 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { SidebarService } from '../services/sidebarservice';
 import { FileUpload } from 'primeng/fileupload';
@@ -20,6 +21,7 @@ export class DocsadminComponent {
   constructor(
     private sidebarService: SidebarService,
     private authService: AuthService,
+    private http: HttpClient,
     private router: Router,
   ) {}
 
@@ -86,6 +88,29 @@ export class DocsadminComponent {
   onUpload(event: any): void {
     for (const file of event.files) {
       console.log('File uploaded:', file);
+    }
+  }
+
+  uploadHandler(event: any): void {
+    const files: File[] = event?.files || [];
+    if (!files.length) {
+      return;
+    }
+
+    const uploadUrl = `${this.authService.getServerRootUrl()}/api/imas/upload`;
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+
+      this.http.post(uploadUrl, formData).subscribe({
+        next: () => {
+          console.log('Uploaded file:', file.name);
+        },
+        error: (err) => {
+          console.error('Upload failed for file:', file.name, err);
+        }
+      });
     }
   }
 }

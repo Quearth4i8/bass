@@ -1,0 +1,10 @@
+/* Reuse styles from projectadmin for consistency */
+@import '../projectsadmin/projectadmin.component.scss';
+
+.management-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
