@@ -372,13 +372,18 @@
                       <i class='bx bx-list-ol'></i>
                     </button>
                     <div class="control-separator"></div>
-                    <select class="font-size-select" (change)="onFontSizeChange($event)">
-                      <option value="">Size</option>
-                      <option value="1">Small</option>
-                      <option value="3">Normal</option>
-                      <option value="5">Large</option>
-                      <option value="7">Extra Large</option>
-                    </select>
+                    <div class="custom-dropdown-container">
+                      <button class="font-size-select custom-select-trigger" (click)="toggleFontSizeDropdown($event, i, 'scientific')">
+                        <span>Size</span>
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <ul class="custom-dropdown-menu" *ngIf="openFontSizeDropdown === i && openFontSizeTab === 'scientific'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                        <li (click)="selectFontSize('1')">Small</li>
+                        <li (click)="selectFontSize('3')">Normal</li>
+                        <li (click)="selectFontSize('5')">Large</li>
+                        <li (click)="selectFontSize('7')">Extra Large</li>
+                      </ul>
+                    </div>
                     <div class="control-separator"></div>
                     <div class="special-char-wrapper">
                       <button class="format-btn special-char-btn" (click)="toggleSpecialCharPicker($event, i, 'scientific')" title="Special Characters & Units" [class.active]="specialCharPickerOpen === i && specialCharPickerTab === 'scientific'">
@@ -471,13 +476,18 @@
                       <i class='bx bx-list-ol'></i>
                     </button>
                     <div class="control-separator"></div>
-                    <select class="font-size-select" (change)="onFontSizeChange($event)">
-                      <option value="">Size</option>
-                      <option value="1">Small</option>
-                      <option value="3">Normal</option>
-                      <option value="5">Large</option>
-                      <option value="7">Extra Large</option>
-                    </select>
+                    <div class="custom-dropdown-container">
+                      <button class="font-size-select custom-select-trigger" (click)="toggleFontSizeDropdown($event, i, 'objectives')">
+                        <span>Size</span>
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <ul class="custom-dropdown-menu" *ngIf="openFontSizeDropdown === i && openFontSizeTab === 'objectives'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                        <li (click)="selectFontSize('1')">Small</li>
+                        <li (click)="selectFontSize('3')">Normal</li>
+                        <li (click)="selectFontSize('5')">Large</li>
+                        <li (click)="selectFontSize('7')">Extra Large</li>
+                      </ul>
+                    </div>
                     <div class="control-separator"></div>
                     <div class="special-char-wrapper">
                       <button class="format-btn special-char-btn" (click)="toggleSpecialCharPicker($event, i, 'objectives')" title="Special Characters & Units" [class.active]="specialCharPickerOpen === i && specialCharPickerTab === 'objectives'">
@@ -653,44 +663,372 @@
         <!-- Gallery -->
         <div class="tab-content" *ngIf="activeTab === 'gallery'">
           <div class="content-header">
-            <h3><i class='bx bx-images'></i> Gallery</h3>
-            <p>Upload and manage project images and media.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-images'></i> Gallery</h3>
+              <p>Upload and manage portal project images.</p>
+            </div>
+            <div class="header-actions">
+              <label class="header-btn secondary" for="gallery-upload-input">
+                <i class='bx bx-cloud-upload'></i>
+                <span>Add Images</span>
+              </label>
+              <button class="header-btn primary" (click)="saveGallery()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Image gallery management will be here.</p>
+
+          <input id="gallery-upload-input" type="file" accept="image/*" multiple hidden (change)="onGalleryImagesSelected($event)">
+
+          <div class="gallery-grid">
+            <label class="gallery-upload-tile" for="gallery-upload-input">
+              <div class="upload-icon">
+                <i class='bx bx-plus'></i>
+              </div>
+              <div class="upload-text">
+                <div class="title">Add images</div>
+                <div class="sub">PNG, JPG, WEBP</div>
+              </div>
+            </label>
+
+            <div class="gallery-item" *ngFor="let img of galleryImages; let i = index">
+              <img [src]="img.url" [alt]="img.name || ('Gallery image ' + (i + 1))" (click)="openGalleryViewer(i)">
+              <button class="gallery-delete" type="button" (click)="removeGalleryImage(i); $event.stopPropagation()" title="Remove">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="gallery-empty" *ngIf="galleryImages.length === 0">
+            <i class='bx bx-image'></i>
+            <p>No images uploaded yet. Use <b>Add images</b> to start building the gallery.</p>
+          </div>
+
+          <div class="gallery-viewer-overlay" *ngIf="galleryViewerOpen" (mousedown)="closeGalleryViewer()">
+            <div class="gallery-viewer" (mousedown)="$event.stopPropagation()">
+              <div class="viewer-topbar">
+                <div class="viewer-title">
+                  <span>{{ (galleryViewerIndex + 1) }} / {{ galleryImages.length }}</span>
+                  <span class="viewer-name" *ngIf="galleryImages[galleryViewerIndex]?.name">{{ galleryImages[galleryViewerIndex]?.name }}</span>
+                </div>
+                <div class="viewer-actions">
+                  <button class="viewer-btn" type="button" (click)="zoomOutGallery()" [disabled]="galleryZoom <= 1" title="Zoom out">
+                    <i class='bx bx-minus'></i>
+                  </button>
+                  <button class="viewer-btn" type="button" (click)="resetGalleryZoom()" title="Reset zoom">
+                    <span class="zoom-pill">{{ (galleryZoom * 100) | number:'1.0-0' }}%</span>
+                  </button>
+                  <button class="viewer-btn" type="button" (click)="zoomInGallery()" [disabled]="galleryZoom >= 3" title="Zoom in">
+                    <i class='bx bx-plus'></i>
+                  </button>
+                  <button class="viewer-btn danger" type="button" (click)="closeGalleryViewer()" title="Close">
+                    <i class='bx bx-x'></i>
+                  </button>
+                </div>
+              </div>
+
+              <button class="nav-btn prev" type="button" (click)="prevGalleryImage()" title="Previous">
+                <i class='bx bx-chevron-left'></i>
+              </button>
+              <button class="nav-btn next" type="button" (click)="nextGalleryImage()" title="Next">
+                <i class='bx bx-chevron-right'></i>
+              </button>
+
+              <div class="viewer-stage" (wheel)="onGalleryViewerWheel($event)">
+                <img
+                  class="viewer-image"
+                  [src]="galleryImages[galleryViewerIndex]?.url"
+                  [alt]="galleryImages[galleryViewerIndex]?.name || 'Gallery image'"
+                  [style.transform]="'scale(' + galleryZoom + ')'"
+                />
+              </div>
+
+              <div class="viewer-hint">
+                <span>Use</span>
+                <kbd>←</kbd>
+                <kbd>→</kbd>
+                <span>to navigate,</span>
+                <kbd>+</kbd>
+                <kbd>-</kbd>
+                <span>to zoom,</span>
+                <kbd>Esc</kbd>
+                <span>to close.</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Events -->
         <div class="tab-content" *ngIf="activeTab === 'events'">
           <div class="content-header">
-            <h3><i class='bx bx-calendar'></i> Events</h3>
-            <p>Manage upcoming and past events related to this project.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-calendar'></i> Events</h3>
+              <p>Manage project events, workshops, and milestones.</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" type="button" (click)="addEvent()">
+                <i class='bx bx-plus'></i>
+                <span>Add Event</span>
+              </button>
+              <button class="header-btn primary" (click)="saveEvents()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Project events management will be here.</p>
+
+          <div class="events-list">
+            <div class="event-card" *ngFor="let ev of events; let i = index">
+              <div class="event-card-left">
+                <div class="event-date-block" [class.has-date]="ev.date">
+                  <div class="event-day" *ngIf="ev.date">{{ getEventDay(ev.date) }}</div>
+                  <div class="event-date-display" *ngIf="ev.date">{{ formatEventDate(ev.date) }}</div>
+                  <div class="event-date-empty" *ngIf="!ev.date">
+                    <i class='bx bx-calendar'></i>
+                    <span>No date</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-card-body">
+                <div class="event-top-row">
+                  <div class="event-time-range" *ngIf="ev.timeFrom || ev.timeTo">
+                    <i class='bx bx-time-five'></i>
+                    <span>{{ ev.timeFrom || '—' }} – {{ ev.timeTo || '—' }}</span>
+                  </div>
+                  <span class="event-status-badge" [class.ongoing]="ev.status === 'ongoing'" [class.finished]="ev.status === 'finished'" [class.canceled]="ev.status === 'canceled'">
+                    <span class="status-dot"></span>
+                    {{ ev.status === 'ongoing' ? 'On Going' : (ev.status === 'finished' ? 'Finished' : 'Canceled') }}
+                  </span>
+                </div>
+
+                <div class="event-fields">
+                  <div class="form-row">
+                    <div class="event-field">
+                      <label>Date</label>
+                      <input type="date" [(ngModel)]="ev.date" class="event-input">
+                    </div>
+                    <div class="event-field">
+                      <label>Status</label>
+                      <div class="custom-dropdown-container">
+                        <button class="event-input custom-select-trigger" (click)="toggleEventStatusDropdown($event, i)">
+                          <span class="selected-status">
+                            <span class="status-dot" [class.ongoing]="ev.status === 'ongoing'" [class.finished]="ev.status === 'finished'" [class.canceled]="ev.status === 'canceled'"></span>
+                            {{ ev.status === 'ongoing' ? 'On Going' : (ev.status === 'finished' ? 'Finished' : 'Canceled') }}
+                          </span>
+                          <i class='bx bx-chevron-down'></i>
+                        </button>
+                        <ul class="custom-dropdown-menu" *ngIf="openEventStatusDropdown === i" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                          <li (click)="selectEventStatus('ongoing', i)">
+                            <span class="status-dot ongoing"></span>
+                            On Going
+                          </li>
+                          <li (click)="selectEventStatus('finished', i)">
+                            <span class="status-dot finished"></span>
+                            Finished
+                          </li>
+                          <li (click)="selectEventStatus('canceled', i)">
+                            <span class="status-dot canceled"></span>
+                            Canceled
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="event-field">
+                      <label>Time From</label>
+                      <input type="time" [(ngModel)]="ev.timeFrom" class="event-input">
+                    </div>
+                    <div class="event-field">
+                      <label>Time To</label>
+                      <input type="time" [(ngModel)]="ev.timeTo" class="event-input">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="event-field">
+                      <label>Event Title</label>
+                      <input type="text" [(ngModel)]="ev.title" class="event-input" placeholder="Enter event title...">
+                    </div>
+                    <div class="event-field">
+                      <label>Location</label>
+                      <input type="text" [(ngModel)]="ev.location" class="event-input" placeholder="Enter location...">
+                    </div>
+                  </div>
+
+                  <div class="event-field full-width">
+                    <label>Description</label>
+                    <textarea [(ngModel)]="ev.description" class="event-textarea" placeholder="Describe the event..." rows="2"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-card-actions">
+                <button class="mini-btn" type="button" (click)="moveEvent(i, 'up')" [disabled]="i === 0" title="Move Up">
+                  <i class='bx bx-chevron-up'></i>
+                </button>
+                <button class="mini-btn" type="button" (click)="moveEvent(i, 'down')" [disabled]="i === events.length - 1" title="Move Down">
+                  <i class='bx bx-chevron-down'></i>
+                </button>
+                <button class="mini-btn danger" type="button" (click)="removeEvent(i)" title="Remove Event">
+                  <i class='bx bx-trash'></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="events-empty" *ngIf="events.length === 0">
+            <i class='bx bx-calendar'></i>
+            <p>No events yet. Click <b>Add Event</b> to create one.</p>
           </div>
         </div>
 
         <!-- Team -->
         <div class="tab-content" *ngIf="activeTab === 'team'">
           <div class="content-header">
-            <h3><i class='bx bx-group'></i> Team</h3>
-            <p>Manage project members and their roles.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-group'></i> Team</h3>
+              <p>Manage project members by categories (e.g., Investigators, Researchers, Partners).</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" type="button" (click)="addTeamSection()">
+                <i class='bx bx-plus-circle'></i>
+                <span>Add Section</span>
+              </button>
+              <button class="header-btn primary" (click)="saveTeam()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Team members management will be here.</p>
+
+          <div class="team-sections-list">
+            <div class="team-section-card" *ngFor="let section of teamSections; let sIdx = index">
+              <div class="section-card-header">
+                <div class="section-title-group">
+                  <i class='bx bx-category'></i>
+                  <input type="text" [(ngModel)]="section.title" placeholder="Enter section title (e.g. Principal Investigators)..." class="section-title-input">
+                </div>
+                <div class="section-actions">
+                  <button class="mini-btn" (click)="moveTeamSection(sIdx, 'up')" [disabled]="sIdx === 0">
+                    <i class='bx bx-chevron-up'></i>
+                  </button>
+                  <button class="mini-btn" (click)="moveTeamSection(sIdx, 'down')" [disabled]="sIdx === teamSections.length - 1">
+                    <i class='bx bx-chevron-down'></i>
+                  </button>
+                  <button class="mini-btn danger" (click)="removeTeamSection(sIdx)">
+                    <i class='bx bx-trash'></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="section-members-grid">
+                <div class="member-add-tile" (click)="addTeamMemberToSection(sIdx)">
+                  <i class='bx bx-plus'></i>
+                  <span>Add Member</span>
+                </div>
+                
+                <div class="member-item-card" *ngFor="let member of section.members; let mIdx = index">
+                  <div class="member-photo-box">
+                    <img *ngIf="member.image" [src]="member.image" alt="Member">
+                    <div *ngIf="!member.image" class="member-photo-placeholder">
+                      <i class='bx bx-user'></i>
+                    </div>
+                    <label class="photo-edit-overlay" [for]="'member-img-' + sIdx + '-' + mIdx">
+                      <i class='bx bx-camera'></i>
+                    </label>
+                    <input type="file" [id]="'member-img-' + sIdx + '-' + mIdx" (change)="onTeamMemberImageSelected($event, sIdx, mIdx)" accept="image/*" hidden>
+                  </div>
+
+                  <div class="member-info-fields">
+                    <input type="text" [(ngModel)]="member.name" placeholder="Name" class="member-name-input">
+                    <input type="text" [(ngModel)]="member.role" placeholder="Role" class="member-role-input">
+                  </div>
+
+                  <div class="member-item-actions">
+                    <button class="member-mini-btn" (click)="moveTeamMemberInSection(sIdx, mIdx, 'up')" [disabled]="mIdx === 0">
+                      <i class='bx bx-chevron-left'></i>
+                    </button>
+                    <button class="member-mini-btn danger" (click)="removeTeamMemberFromSection(sIdx, mIdx)">
+                      <i class='bx bx-x'></i>
+                    </button>
+                    <button class="member-mini-btn" (click)="moveTeamMemberInSection(sIdx, mIdx, 'down')" [disabled]="mIdx === section.members.length - 1">
+                      <i class='bx bx-chevron-right'></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="team-empty" *ngIf="teamSections.length === 0">
+            <i class='bx bx-group'></i>
+            <p>No team sections yet. Click <b>Add Section</b> to start building the team.</p>
           </div>
         </div>
 
-        <!-- Data Providers -->
-        <div class="tab-content" *ngIf="activeTab === 'data-providers'">
+        <!-- Participants -->
+        <div class="tab-content" *ngIf="activeTab === 'participants'">
           <div class="content-header">
-            <h3><i class='bx bx-data'></i> Data Providers</h3>
-            <p>Configure external data sources and providers.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-user-voice'></i> Participants</h3>
+              <p>Manage project participants and their roles.</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" type="button" (click)="addParticipant()">
+                <i class='bx bx-user-plus'></i>
+                <span>Add Participant</span>
+              </button>
+              <button class="header-btn primary" (click)="saveParticipants()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Data providers configuration will be here.</p>
+
+          <div class="participants-grid">
+            <div class="member-add-tile" (click)="addParticipant()">
+              <i class='bx bx-plus'></i>
+              <span>Add Participant</span>
+            </div>
+
+            <div class="member-item-card" *ngFor="let p of participants; let i = index">
+              <div class="member-photo-box">
+                <img *ngIf="p.image" [src]="p.image" alt="Participant">
+                <div *ngIf="!p.image" class="member-photo-placeholder">
+                  <i class='bx bx-user'></i>
+                </div>
+                <label class="photo-edit-overlay" [for]="'participant-img-' + i">
+                  <i class='bx bx-camera'></i>
+                </label>
+                <input type="file" [id]="'participant-img-' + i" (change)="onParticipantImageSelected($event, i)" accept="image/*" hidden>
+              </div>
+
+              <div class="member-info-fields">
+                <input type="text" [(ngModel)]="p.name" placeholder="Name" class="member-name-input">
+                <input type="text" [(ngModel)]="p.role" placeholder="Role" class="member-role-input">
+              </div>
+
+              <div class="member-item-actions">
+                <button class="member-mini-btn" (click)="moveParticipant(i, 'up')" [disabled]="i === 0">
+                  <i class='bx bx-chevron-left'></i>
+                </button>
+                <button class="member-mini-btn danger" (click)="removeParticipant(i)">
+                  <i class='bx bx-x'></i>
+                </button>
+                <button class="member-mini-btn" (click)="moveParticipant(i, 'down')" [disabled]="i === participants.length - 1">
+                  <i class='bx bx-chevron-right'></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="team-empty" *ngIf="participants.length === 0">
+            <i class='bx bx-user-voice'></i>
+            <p>No participants yet. Click <b>Add Participant</b> to start.</p>
           </div>
         </div>
       </div>

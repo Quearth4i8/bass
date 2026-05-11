@@ -61,6 +61,37 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 1, url: '', order: 1 }
   ];
 
+  galleryImages: any[] = [];
+
+  galleryViewerOpen = false;
+  galleryViewerIndex = 0;
+  galleryZoom = 1;
+
+  teamSections: any[] = [
+    {
+      id: 1,
+      title: 'Principal Investigators',
+      members: [
+        { id: 1, name: 'Dr. Jane Smith', role: 'Project Coordinator', image: '', order: 1 }
+      ],
+      order: 1
+    }
+  ];
+
+  participants: any[] = [
+    { id: 1, name: 'John Doe', role: 'Data Specialist', image: '', order: 1 }
+  ];
+
+  events: any[] = [
+    { id: 1, date: '2020-11-22', timeFrom: '09:00', timeTo: '17:00', title: 'International Workshop on Wetland Conservation', location: 'Ichkeul National Park, Tunisia', description: 'A workshop bringing together experts to discuss strategies for wetland conservation and sustainable management of the Ichkeul ecosystem.', status: 'finished' }
+  ];
+
+  openEventStatusDropdown: number = -1;
+  openFontSizeDropdown: number = -1;
+  openFontSizeTab: string = '';
+  dropdownMenuStyle: { [key: string]: string } = {};
+  dropdownOpensUp: boolean = false;
+
   specialCharPickerOpen: number = -1;
   specialCharPickerTab: string = '';
   specialCharPickerStyle: { [key: string]: string } = {};
@@ -84,7 +115,7 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 'gallery', label: 'Gallery', icon: 'bx-images' },
     { id: 'events', label: 'Events', icon: 'bx-calendar' },
     { id: 'team', label: 'Team', icon: 'bx-group' },
-    { id: 'data-providers', label: 'Data Providers', icon: 'bx-data' }
+    { id: 'participants', label: 'Participants', icon: 'bx-user-voice' }
   ];
 
   constructor(
@@ -378,6 +409,44 @@ export class PortalProjectsListComponent implements OnInit {
       return;
     }
     this.closeSpecialCharPicker();
+    this.closeDropdowns();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (!this.galleryViewerOpen) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeGalleryViewer();
+      return;
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.prevGalleryImage();
+      return;
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.nextGalleryImage();
+      return;
+    }
+    if (event.key === '+' || event.key === '=' ) {
+      event.preventDefault();
+      this.zoomInGallery();
+      return;
+    }
+    if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      this.zoomOutGallery();
+      return;
+    }
+    if (event.key.toLowerCase() === '0') {
+      event.preventDefault();
+      this.resetGalleryZoom();
+      return;
+    }
   }
 
   insertSpecialChar(char: string): void {
@@ -587,6 +656,328 @@ export class PortalProjectsListComponent implements OnInit {
       funderTextLines: this.funderTextLines,
       funderLogos: this.funderLogos
     });
+  }
+
+  onGalleryImagesSelected(event: any): void {
+    const files: FileList = event.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    Array.from(files).forEach((file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const newId = this.galleryImages.length > 0
+          ? Math.max(...this.galleryImages.map(img => img.id)) + 1
+          : 1;
+        this.galleryImages.push({
+          id: newId,
+          url: e.target.result,
+          name: file.name
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // allow selecting the same file again
+    event.target.value = '';
+  }
+
+  removeGalleryImage(index: number): void {
+    this.galleryImages.splice(index, 1);
+  }
+
+  openGalleryViewer(index: number): void {
+    if (!this.galleryImages || this.galleryImages.length === 0) {
+      return;
+    }
+    this.galleryViewerIndex = Math.max(0, Math.min(index, this.galleryImages.length - 1));
+    this.galleryViewerOpen = true;
+    this.galleryZoom = 1;
+  }
+
+  closeGalleryViewer(): void {
+    this.galleryViewerOpen = false;
+    this.galleryZoom = 1;
+  }
+
+  prevGalleryImage(): void {
+    if (!this.galleryImages || this.galleryImages.length === 0) {
+      return;
+    }
+    this.galleryViewerIndex = (this.galleryViewerIndex - 1 + this.galleryImages.length) % this.galleryImages.length;
+    this.galleryZoom = 1;
+  }
+
+  nextGalleryImage(): void {
+    if (!this.galleryImages || this.galleryImages.length === 0) {
+      return;
+    }
+    this.galleryViewerIndex = (this.galleryViewerIndex + 1) % this.galleryImages.length;
+    this.galleryZoom = 1;
+  }
+
+  zoomInGallery(): void {
+    this.galleryZoom = Math.min(3, Math.round((this.galleryZoom + 0.25) * 100) / 100);
+  }
+
+  zoomOutGallery(): void {
+    this.galleryZoom = Math.max(1, Math.round((this.galleryZoom - 0.25) * 100) / 100);
+  }
+
+  resetGalleryZoom(): void {
+    this.galleryZoom = 1;
+  }
+
+  onGalleryViewerWheel(event: WheelEvent): void {
+    event.preventDefault();
+    if (event.deltaY < 0) {
+      this.zoomInGallery();
+    } else {
+      this.zoomOutGallery();
+    }
+  }
+
+  saveGallery(): void {
+    console.log('Saving Gallery:', this.galleryImages);
+  }
+
+  addEvent(): void {
+    const newId = this.events.length > 0
+      ? Math.max(...this.events.map(e => e.id)) + 1
+      : 1;
+    this.events.push({
+      id: newId,
+      date: '',
+      timeFrom: '',
+      timeTo: '',
+      title: '',
+      location: '',
+      description: '',
+      status: 'ongoing'
+    });
+  }
+
+  removeEvent(index: number): void {
+    this.events.splice(index, 1);
+  }
+
+  moveEvent(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.events[index], this.events[index - 1]] = [this.events[index - 1], this.events[index]];
+    } else if (direction === 'down' && index < this.events.length - 1) {
+      [this.events[index], this.events[index + 1]] = [this.events[index + 1], this.events[index]];
+    }
+  }
+
+  getEventDay(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+  }
+
+  formatEventDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    const day = d.getDate();
+    const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  saveEvents(): void {
+    console.log('Saving Events:', this.events);
+  }
+
+  toggleEventStatusDropdown(event: MouseEvent, index: number): void {
+    event.stopPropagation();
+    if (this.openEventStatusDropdown === index) {
+      this.closeDropdowns();
+      return;
+    }
+    this.closeDropdowns();
+    this.openEventStatusDropdown = index;
+    this.computeDropdownPosition(event);
+  }
+
+  selectEventStatus(status: string, index: number): void {
+    this.events[index].status = status;
+    this.closeDropdowns();
+  }
+
+  toggleFontSizeDropdown(event: MouseEvent, index: number, tab: string): void {
+    event.stopPropagation();
+    if (this.openFontSizeDropdown === index && this.openFontSizeTab === tab) {
+      this.closeDropdowns();
+      return;
+    }
+    this.closeDropdowns();
+    this.openFontSizeDropdown = index;
+    this.openFontSizeTab = tab;
+    this.computeDropdownPosition(event);
+  }
+
+  selectFontSize(size: string): void {
+    if (size) {
+      this.execCommand('fontSize', size);
+    }
+    this.closeDropdowns();
+  }
+
+  private computeDropdownPosition(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const dropdownHeight = 150; // Estimated height
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    this.dropdownOpensUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+    
+    this.dropdownMenuStyle = {
+      position: 'fixed',
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      zIndex: '10001'
+    };
+
+    if (this.dropdownOpensUp) {
+      this.dropdownMenuStyle['bottom'] = `${window.innerHeight - rect.top + 5}px`;
+    } else {
+      this.dropdownMenuStyle['top'] = `${rect.bottom + 5}px`;
+    }
+  }
+
+  closeDropdowns(): void {
+    this.openEventStatusDropdown = -1;
+    this.openFontSizeDropdown = -1;
+    this.openFontSizeTab = '';
+    this.dropdownMenuStyle = {};
+  }
+
+  addTeamSection(): void {
+    const newId = this.teamSections.length > 0
+      ? Math.max(...this.teamSections.map(s => s.id)) + 1
+      : 1;
+    this.teamSections.push({
+      id: newId,
+      title: '',
+      members: [],
+      order: this.teamSections.length + 1
+    });
+  }
+
+  removeTeamSection(index: number): void {
+    this.teamSections.splice(index, 1);
+    this.updateTeamSectionOrder();
+  }
+
+  moveTeamSection(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.teamSections[index], this.teamSections[index - 1]] = [this.teamSections[index - 1], this.teamSections[index]];
+    } else if (direction === 'down' && index < this.teamSections.length - 1) {
+      [this.teamSections[index], this.teamSections[index + 1]] = [this.teamSections[index + 1], this.teamSections[index]];
+    }
+    this.updateTeamSectionOrder();
+  }
+
+  private updateTeamSectionOrder(): void {
+    this.teamSections.forEach((s, i) => s.order = i + 1);
+  }
+
+  addTeamMemberToSection(sectionIndex: number): void {
+    const section = this.teamSections[sectionIndex];
+    const newId = section.members.length > 0
+      ? Math.max(...section.members.map((m: any) => m.id)) + 1
+      : 1;
+    section.members.push({
+      id: newId,
+      name: '',
+      role: '',
+      image: '',
+      order: section.members.length + 1
+    });
+  }
+
+  removeTeamMemberFromSection(sectionIndex: number, memberIndex: number): void {
+    this.teamSections[sectionIndex].members.splice(memberIndex, 1);
+    this.updateTeamMemberOrderInSection(sectionIndex);
+  }
+
+  moveTeamMemberInSection(sectionIndex: number, memberIndex: number, direction: 'up' | 'down'): void {
+    const members = this.teamSections[sectionIndex].members;
+    if (direction === 'up' && memberIndex > 0) {
+      [members[memberIndex], members[memberIndex - 1]] = [members[memberIndex - 1], members[memberIndex]];
+    } else if (direction === 'down' && memberIndex < members.length - 1) {
+      [members[memberIndex], members[memberIndex + 1]] = [members[memberIndex + 1], members[memberIndex]];
+    }
+    this.updateTeamMemberOrderInSection(sectionIndex);
+  }
+
+  private updateTeamMemberOrderInSection(sectionIndex: number): void {
+    this.teamSections[sectionIndex].members.forEach((m: any, i: number) => m.order = i + 1);
+  }
+
+  onTeamMemberImageSelected(event: any, sectionIndex: number, memberIndex: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.teamSections[sectionIndex].members[memberIndex].image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveTeam(): void {
+    console.log('Saving Team Sections:', this.teamSections);
+  }
+
+  addParticipant(): void {
+    const newId = this.participants.length > 0
+      ? Math.max(...this.participants.map(p => p.id)) + 1
+      : 1;
+    this.participants.push({
+      id: newId,
+      name: '',
+      role: '',
+      image: '',
+      order: this.participants.length + 1
+    });
+  }
+
+  removeParticipant(index: number): void {
+    this.participants.splice(index, 1);
+    this.updateParticipantOrder();
+  }
+
+  moveParticipant(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.participants[index], this.participants[index - 1]] = [this.participants[index - 1], this.participants[index]];
+    } else if (direction === 'down' && index < this.participants.length - 1) {
+      [this.participants[index], this.participants[index + 1]] = [this.participants[index + 1], this.participants[index]];
+    }
+    this.updateParticipantOrder();
+  }
+
+  private updateParticipantOrder(): void {
+    this.participants.forEach((p, i) => p.order = i + 1);
+  }
+
+  onParticipantImageSelected(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.participants[index].image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveParticipants(): void {
+    console.log('Saving Participants:', this.participants);
   }
 
   addImage(): void {
