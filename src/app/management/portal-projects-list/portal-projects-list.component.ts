@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { SidebarService } from '../../services/sidebarservice';
 import { AuthService } from '../../services/AuthService';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -37,6 +37,43 @@ export class PortalProjectsListComponent implements OnInit {
 
   homeInfoBlocks: any[] = [
     { id: 1, imageUrl: '', title: '', text: '', order: 1 }
+  ];
+
+  scientificMeritParagraphs: any[] = [
+    { id: 1, content: '', order: 1 }
+  ];
+
+  objectivesParagraphs: any[] = [
+    { id: 1, content: '', order: 1 }
+  ];
+
+  partnersLogos: any[] = [
+    { id: 1, url: '', order: 1 }
+  ];
+
+  funderTextLines: any[] = [
+    { id: 1, text: 'NAS: The National Academy of Sciences', order: 1 },
+    { id: 2, text: 'USAID: United States Agency for International Development, USA', order: 2 },
+    { id: 3, text: 'AID-OAA-A-11-00012', order: 3 }
+  ];
+
+  funderLogos: any[] = [
+    { id: 1, url: '', order: 1 }
+  ];
+
+  specialCharPickerOpen: number = -1;
+  specialCharPickerTab: string = '';
+  specialCharPickerStyle: { [key: string]: string } = {};
+  private lastFocusedEditor: HTMLElement | null = null;
+
+  specialCharCategories: { label: string; chars: string[] }[] = [
+    { label: 'Greek Lowercase', chars: ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','π','ρ','σ','τ','υ','φ','χ','ψ','ω'] },
+    { label: 'Greek Uppercase', chars: ['Α','Β','Γ','Δ','Ε','Ζ','Η','Θ','Ι','Κ','Λ','Μ','Ν','Ξ','Π','Ρ','Σ','Τ','Υ','Φ','Χ','Ψ','Ω'] },
+    { label: 'Math Symbols', chars: ['±','×','÷','≠','≈','≤','≥','∞','∑','∏','√','∫','∂','∇','≡','∝','∈','∉','⊂','⊃','∪','∩','∠','⊥','∥'] },
+    { label: 'Arrows', chars: ['→','←','↑','↓','⇒','⇐','⇑','⇓','↔','⇔','⟶','⟵'] },
+    { label: 'Superscript / Subscript', chars: ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹','₀','₁','₂','₃','₄','₅','₆','₇','₈','₉','⁺','⁻','₊','₋'] },
+    { label: 'Scientific Units', chars: ['Å','μm','nm','mm','cm','m','km','μg','mg','g','kg','μL','mL','L','ms','μs','s','min','h','°C','K','°F','Pa','kPa','MPa','bar','atm','Hz','kHz','MHz','GHz','J','kJ','cal','kcal','eV','W','kW','MW','A','mA','μA','V','mV','kV','Ω','F','H','mol','M','N','Bq','Gy','Sv'] },
+    { label: 'Other', chars: ['%','@','#','&','*','_','~','^','`','|','\\','/','+','=','<','>','[',']','{','}','(',')',':',';','?','!','"','\'','°','‰','℃','℉','′','″','•','…','–','—','©','®','™','§','¶','†','‡','⊕','⊗','⊙','≤','≥','≪','≫'] }
   ];
 
   tabs = [
@@ -244,6 +281,312 @@ export class PortalProjectsListComponent implements OnInit {
 
   private updateInfoBlockOrder(): void {
     this.homeInfoBlocks.forEach((b, i) => b.order = i + 1);
+  }
+
+  addScientificParagraph(): void {
+    const newId = this.scientificMeritParagraphs.length > 0
+      ? Math.max(...this.scientificMeritParagraphs.map(p => p.id)) + 1
+      : 1;
+    this.scientificMeritParagraphs.push({
+      id: newId,
+      content: '',
+      order: this.scientificMeritParagraphs.length + 1
+    });
+  }
+
+  removeScientificParagraph(index: number): void {
+    if (this.scientificMeritParagraphs.length <= 1) {
+      this.scientificMeritParagraphs[0].content = '';
+      return;
+    }
+    this.scientificMeritParagraphs.splice(index, 1);
+    this.updateScientificOrder();
+  }
+
+  moveScientificParagraph(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.scientificMeritParagraphs[index], this.scientificMeritParagraphs[index - 1]] = [this.scientificMeritParagraphs[index - 1], this.scientificMeritParagraphs[index]];
+    } else if (direction === 'down' && index < this.scientificMeritParagraphs.length - 1) {
+      [this.scientificMeritParagraphs[index], this.scientificMeritParagraphs[index + 1]] = [this.scientificMeritParagraphs[index + 1], this.scientificMeritParagraphs[index]];
+    }
+    this.updateScientificOrder();
+  }
+
+  private updateScientificOrder(): void {
+    this.scientificMeritParagraphs.forEach((p, i) => p.order = i + 1);
+  }
+
+  saveScientificMerit(): void {
+    console.log('Saving Scientific Merit:', this.scientificMeritParagraphs);
+    // Backend implementation would go here
+  }
+
+  execCommand(command: string, value: string = ''): void {
+    document.execCommand(command, false, value);
+  }
+
+  toggleSpecialCharPicker(event: MouseEvent, index: number, tab: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.specialCharPickerOpen === index && this.specialCharPickerTab === tab) {
+      this.closeSpecialCharPicker();
+      return;
+    }
+
+    this.specialCharPickerOpen = index;
+    this.specialCharPickerTab = tab;
+
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
+      this.specialCharPickerStyle = {};
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+
+    const pickerWidth = 420;
+    const pickerHeight = 380;
+    const margin = 8;
+
+    const maxLeft = Math.max(margin, window.innerWidth - pickerWidth - margin);
+    const left = Math.min(Math.max(margin, rect.left), maxLeft);
+
+    const maxTop = Math.max(margin, window.innerHeight - pickerHeight - margin);
+    let top = rect.bottom + margin;
+    if (top > maxTop) {
+      top = Math.max(margin, rect.top - pickerHeight - margin);
+    }
+
+    this.specialCharPickerStyle = {
+      left: `${left}px`,
+      top: `${top}px`
+    };
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.specialCharPickerOpen === -1) {
+      return;
+    }
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      this.closeSpecialCharPicker();
+      return;
+    }
+    if (target.closest('.special-char-picker') || target.closest('.special-char-btn')) {
+      return;
+    }
+    this.closeSpecialCharPicker();
+  }
+
+  insertSpecialChar(char: string): void {
+    if (this.lastFocusedEditor) {
+      this.lastFocusedEditor.focus();
+      document.execCommand('insertText', false, char);
+    } else {
+      // Fallback: insert into the currently open picker's editor
+      const prefix = this.specialCharPickerTab === 'objectives' ? 'obj-' : 'p-';
+      const editor = document.getElementById(prefix + this.specialCharPickerOpen);
+      if (editor) {
+        editor.focus();
+        document.execCommand('insertText', false, char);
+      }
+    }
+    // Sync content
+    this.syncEditorContent(this.specialCharPickerOpen, this.specialCharPickerTab);
+  }
+
+  onEditorFocus(event: FocusEvent): void {
+    this.lastFocusedEditor = event.target as HTMLElement;
+  }
+
+  private syncEditorContent(index: number, tab: string): void {
+    const prefix = tab === 'objectives' ? 'obj-' : 'p-';
+    const editor = document.getElementById(prefix + index);
+    if (editor) {
+      if (tab === 'objectives') {
+        this.objectivesParagraphs[index].content = editor.innerHTML;
+      } else {
+        this.scientificMeritParagraphs[index].content = editor.innerHTML;
+      }
+    }
+  }
+
+  closeSpecialCharPicker(): void {
+    this.specialCharPickerOpen = -1;
+    this.specialCharPickerTab = '';
+    this.specialCharPickerStyle = {};
+  }
+
+  onFontSizeChange(event: any): void {
+    const size = event.target.value;
+    if (size) {
+      this.execCommand('fontSize', size);
+    }
+  }
+
+  onContentInput(event: any, index: number, tab: string = 'scientific'): void {
+    if (tab === 'scientific') {
+      this.scientificMeritParagraphs[index].content = event.target.innerHTML;
+    } else if (tab === 'objectives') {
+      this.objectivesParagraphs[index].content = event.target.innerHTML;
+    }
+    this.lastFocusedEditor = event.target as HTMLElement;
+  }
+
+  addObjectivesParagraph(): void {
+    const newId = this.objectivesParagraphs.length > 0
+      ? Math.max(...this.objectivesParagraphs.map(p => p.id)) + 1
+      : 1;
+    this.objectivesParagraphs.push({
+      id: newId,
+      content: '',
+      order: this.objectivesParagraphs.length + 1
+    });
+  }
+
+  removeObjectivesParagraph(index: number): void {
+    if (this.objectivesParagraphs.length <= 1) {
+      this.objectivesParagraphs[0].content = '';
+      return;
+    }
+    this.objectivesParagraphs.splice(index, 1);
+    this.updateObjectivesOrder();
+  }
+
+  moveObjectivesParagraph(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.objectivesParagraphs[index], this.objectivesParagraphs[index - 1]] = [this.objectivesParagraphs[index - 1], this.objectivesParagraphs[index]];
+    } else if (direction === 'down' && index < this.objectivesParagraphs.length - 1) {
+      [this.objectivesParagraphs[index], this.objectivesParagraphs[index + 1]] = [this.objectivesParagraphs[index + 1], this.objectivesParagraphs[index]];
+    }
+    this.updateObjectivesOrder();
+  }
+
+  private updateObjectivesOrder(): void {
+    this.objectivesParagraphs.forEach((p, i) => p.order = i + 1);
+  }
+
+  saveObjectives(): void {
+    console.log('Saving Objectives:', this.objectivesParagraphs);
+  }
+
+  onPartnersLogoSelected(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.partnersLogos[index].url = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  addPartnersLogo(): void {
+    const newId = this.partnersLogos.length > 0
+      ? Math.max(...this.partnersLogos.map(l => l.id)) + 1
+      : 1;
+    this.partnersLogos.push({ id: newId, url: '', order: this.partnersLogos.length + 1 });
+  }
+
+  removePartnersLogo(index: number): void {
+    if (this.partnersLogos.length <= 1) {
+      this.partnersLogos[0].url = '';
+      return;
+    }
+    this.partnersLogos.splice(index, 1);
+    this.updatePartnersLogoOrder();
+  }
+
+  movePartnersLogo(index: number, direction: 'left' | 'right'): void {
+    if (direction === 'left' && index > 0) {
+      [this.partnersLogos[index], this.partnersLogos[index - 1]] = [this.partnersLogos[index - 1], this.partnersLogos[index]];
+    } else if (direction === 'right' && index < this.partnersLogos.length - 1) {
+      [this.partnersLogos[index], this.partnersLogos[index + 1]] = [this.partnersLogos[index + 1], this.partnersLogos[index]];
+    }
+    this.updatePartnersLogoOrder();
+  }
+
+  private updatePartnersLogoOrder(): void {
+    this.partnersLogos.forEach((l, i) => l.order = i + 1);
+  }
+
+  addFunderLine(): void {
+    const newId = this.funderTextLines.length > 0
+      ? Math.max(...this.funderTextLines.map(l => l.id)) + 1
+      : 1;
+    this.funderTextLines.push({ id: newId, text: '', order: this.funderTextLines.length + 1 });
+  }
+
+  removeFunderLine(index: number): void {
+    if (this.funderTextLines.length <= 1) {
+      this.funderTextLines[0].text = '';
+      return;
+    }
+    this.funderTextLines.splice(index, 1);
+    this.updateFunderLineOrder();
+  }
+
+  moveFunderLine(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.funderTextLines[index], this.funderTextLines[index - 1]] = [this.funderTextLines[index - 1], this.funderTextLines[index]];
+    } else if (direction === 'down' && index < this.funderTextLines.length - 1) {
+      [this.funderTextLines[index], this.funderTextLines[index + 1]] = [this.funderTextLines[index + 1], this.funderTextLines[index]];
+    }
+    this.updateFunderLineOrder();
+  }
+
+  private updateFunderLineOrder(): void {
+    this.funderTextLines.forEach((l, i) => l.order = i + 1);
+  }
+
+  onFunderLogoSelected(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.funderLogos[index].url = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  addFunderLogo(): void {
+    const newId = this.funderLogos.length > 0
+      ? Math.max(...this.funderLogos.map(l => l.id)) + 1
+      : 1;
+    this.funderLogos.push({ id: newId, url: '', order: this.funderLogos.length + 1 });
+  }
+
+  removeFunderLogo(index: number): void {
+    if (this.funderLogos.length <= 1) {
+      this.funderLogos[0].url = '';
+      return;
+    }
+    this.funderLogos.splice(index, 1);
+    this.updateFunderLogoOrder();
+  }
+
+  moveFunderLogo(index: number, direction: 'left' | 'right'): void {
+    if (direction === 'left' && index > 0) {
+      [this.funderLogos[index], this.funderLogos[index - 1]] = [this.funderLogos[index - 1], this.funderLogos[index]];
+    } else if (direction === 'right' && index < this.funderLogos.length - 1) {
+      [this.funderLogos[index], this.funderLogos[index + 1]] = [this.funderLogos[index + 1], this.funderLogos[index]];
+    }
+    this.updateFunderLogoOrder();
+  }
+
+  private updateFunderLogoOrder(): void {
+    this.funderLogos.forEach((l, i) => l.order = i + 1);
+  }
+
+  savePartnersFunders(): void {
+    console.log('Saving Partners & Funders:', {
+      partnersLogos: this.partnersLogos,
+      funderTextLines: this.funderTextLines,
+      funderLogos: this.funderLogos
+    });
   }
 
   addImage(): void {

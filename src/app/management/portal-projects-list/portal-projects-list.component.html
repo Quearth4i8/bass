@@ -334,33 +334,319 @@
         <!-- Scientific Merit -->
         <div class="tab-content" *ngIf="activeTab === 'scientific-merit'">
           <div class="content-header">
-            <h3><i class='bx bx-analyse'></i> Scientific Merit</h3>
-            <p>Define the scientific value and impact of this portal project.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-analyse'></i> Scientific Merit</h3>
+              <p>Manage the content for the Scientific Merit page. You can add multiple paragraphs and use basic formatting.</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" (click)="addScientificParagraph()">
+                <i class='bx bx-plus'></i>
+                <span>Add Paragraph</span>
+              </button>
+              <button class="header-btn primary" (click)="saveScientificMerit()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Scientific Merit content configuration will be here.</p>
+
+          <div class="scientific-merit-editor">
+            <div class="paragraph-card" *ngFor="let p of scientificMeritParagraphs; let i = index">
+              <div class="paragraph-header">
+                <div class="header-left-side">
+                  <div class="rich-text-controls">
+                    <button class="format-btn" (click)="execCommand('bold')" title="Bold">
+                      <i class='bx bx-bold'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('italic')" title="Italic">
+                      <i class='bx bx-italic'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('underline')" title="Underline">
+                      <i class='bx bx-underline'></i>
+                    </button>
+                    <div class="control-separator"></div>
+                    <button class="format-btn" (click)="execCommand('insertUnorderedList')" title="Bullet List">
+                      <i class='bx bx-list-ul'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('insertOrderedList')" title="Numbered List">
+                      <i class='bx bx-list-ol'></i>
+                    </button>
+                    <div class="control-separator"></div>
+                    <select class="font-size-select" (change)="onFontSizeChange($event)">
+                      <option value="">Size</option>
+                      <option value="1">Small</option>
+                      <option value="3">Normal</option>
+                      <option value="5">Large</option>
+                      <option value="7">Extra Large</option>
+                    </select>
+                    <div class="control-separator"></div>
+                    <div class="special-char-wrapper">
+                      <button class="format-btn special-char-btn" (click)="toggleSpecialCharPicker($event, i, 'scientific')" title="Special Characters & Units" [class.active]="specialCharPickerOpen === i && specialCharPickerTab === 'scientific'">
+                        <span class="omega-icon">Ω</span>
+                      </button>
+                      <div class="special-char-picker" *ngIf="specialCharPickerOpen === i && specialCharPickerTab === 'scientific'" [ngStyle]="specialCharPickerStyle" (click)="$event.stopPropagation()">
+                        <div class="picker-header">
+                          <span>Special Characters & Units</span>
+                          <button class="picker-close" (click)="closeSpecialCharPicker()">
+                            <i class='bx bx-x'></i>
+                          </button>
+                        </div>
+                        <div class="picker-categories">
+                          <div class="char-category" *ngFor="let cat of specialCharCategories">
+                            <div class="category-label">{{ cat.label }}</div>
+                            <div class="char-grid">
+                              <button class="char-btn" *ngFor="let c of cat.chars" (click)="insertSpecialChar(c)">{{ c }}</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="paragraph-number">Paragraph {{ i + 1 }}</span>
+                </div>
+                <div class="paragraph-actions">
+                  <div class="order-controls">
+                    <button class="mini-btn" (click)="moveScientificParagraph(i, 'up')" [disabled]="i === 0">
+                      <i class='bx bx-chevron-up'></i>
+                    </button>
+                    <button class="mini-btn" (click)="moveScientificParagraph(i, 'down')" [disabled]="i === scientificMeritParagraphs.length - 1">
+                      <i class='bx bx-chevron-down'></i>
+                    </button>
+                  </div>
+                  <button class="remove-btn" (click)="removeScientificParagraph(i)" title="Remove Paragraph">
+                    <i class='bx bx-trash'></i>
+                  </button>
+                </div>
+              </div>
+              <div 
+                class="rich-editor" 
+                [id]="'p-' + i" 
+                contenteditable="true" 
+                (input)="onContentInput($event, i)"
+                (focus)="onEditorFocus($event)"
+                placeholder="Start typing your scientific merit content here...">
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Objectives -->
         <div class="tab-content" *ngIf="activeTab === 'objectives'">
           <div class="content-header">
-            <h3><i class='bx bx-target-lock'></i> Objectives</h3>
-            <p>Manage the key goals and milestones of the project.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-target-lock'></i> Objectives</h3>
+              <p>Manage the key goals and milestones. You can add multiple paragraphs and use basic formatting.</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" (click)="addObjectivesParagraph()">
+                <i class='bx bx-plus'></i>
+                <span>Add Paragraph</span>
+              </button>
+              <button class="header-btn primary" (click)="saveObjectives()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Objectives configuration will be here.</p>
+
+          <div class="scientific-merit-editor">
+            <div class="paragraph-card" *ngFor="let p of objectivesParagraphs; let i = index">
+              <div class="paragraph-header">
+                <div class="header-left-side">
+                  <div class="rich-text-controls">
+                    <button class="format-btn" (click)="execCommand('bold')" title="Bold">
+                      <i class='bx bx-bold'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('italic')" title="Italic">
+                      <i class='bx bx-italic'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('underline')" title="Underline">
+                      <i class='bx bx-underline'></i>
+                    </button>
+                    <div class="control-separator"></div>
+                    <button class="format-btn" (click)="execCommand('insertUnorderedList')" title="Bullet List">
+                      <i class='bx bx-list-ul'></i>
+                    </button>
+                    <button class="format-btn" (click)="execCommand('insertOrderedList')" title="Numbered List">
+                      <i class='bx bx-list-ol'></i>
+                    </button>
+                    <div class="control-separator"></div>
+                    <select class="font-size-select" (change)="onFontSizeChange($event)">
+                      <option value="">Size</option>
+                      <option value="1">Small</option>
+                      <option value="3">Normal</option>
+                      <option value="5">Large</option>
+                      <option value="7">Extra Large</option>
+                    </select>
+                    <div class="control-separator"></div>
+                    <div class="special-char-wrapper">
+                      <button class="format-btn special-char-btn" (click)="toggleSpecialCharPicker($event, i, 'objectives')" title="Special Characters & Units" [class.active]="specialCharPickerOpen === i && specialCharPickerTab === 'objectives'">
+                        <span class="omega-icon">Ω</span>
+                      </button>
+                      <div class="special-char-picker" *ngIf="specialCharPickerOpen === i && specialCharPickerTab === 'objectives'" [ngStyle]="specialCharPickerStyle" (click)="$event.stopPropagation()">
+                        <div class="picker-header">
+                          <span>Special Characters & Units</span>
+                          <button class="picker-close" (click)="closeSpecialCharPicker()">
+                            <i class='bx bx-x'></i>
+                          </button>
+                        </div>
+                        <div class="picker-categories">
+                          <div class="char-category" *ngFor="let cat of specialCharCategories">
+                            <div class="category-label">{{ cat.label }}</div>
+                            <div class="char-grid">
+                              <button class="char-btn" *ngFor="let c of cat.chars" (click)="insertSpecialChar(c)">{{ c }}</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="paragraph-number">Paragraph {{ i + 1 }}</span>
+                </div>
+                <div class="paragraph-actions">
+                  <div class="order-controls">
+                    <button class="mini-btn" (click)="moveObjectivesParagraph(i, 'up')" [disabled]="i === 0">
+                      <i class='bx bx-chevron-up'></i>
+                    </button>
+                    <button class="mini-btn" (click)="moveObjectivesParagraph(i, 'down')" [disabled]="i === objectivesParagraphs.length - 1">
+                      <i class='bx bx-chevron-down'></i>
+                    </button>
+                  </div>
+                  <button class="remove-btn" (click)="removeObjectivesParagraph(i)" title="Remove Paragraph">
+                    <i class='bx bx-trash'></i>
+                  </button>
+                </div>
+              </div>
+              <div 
+                class="rich-editor" 
+                [id]="'obj-' + i" 
+                contenteditable="true" 
+                (input)="onContentInput($event, i, 'objectives')"
+                (focus)="onEditorFocus($event)"
+                placeholder="Start typing your objectives here...">
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Partners & Funder -->
         <div class="tab-content" *ngIf="activeTab === 'partners-funder'">
           <div class="content-header">
-            <h3><i class='bx bx-building-house'></i> Partners & Funder</h3>
-            <p>Configure the organizations and funding bodies involved.</p>
+            <div class="header-info">
+              <h3><i class='bx bx-building-house'></i> Partners & Funder</h3>
+              <p>Manage partner logos and the funding block displayed on the portal project page.</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn primary" (click)="savePartnersFunders()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
-          <div class="placeholder-section">
-            <p>Partners and Funder details will be here.</p>
+
+          <div class="partners-funders-layout">
+            <section class="pf-card">
+              <div class="pf-header">
+                <div class="pf-title">
+                  <h4>Partners</h4>
+                  <p>Upload partner logos shown in the partners block.</p>
+                </div>
+                <div class="pf-actions">
+                  <button class="section-btn" type="button" (click)="addPartnersLogo()">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Logo</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="pf-logos-grid">
+                <div class="pf-logo-card" *ngFor="let logo of partnersLogos; let i = index">
+                  <div class="pf-logo-preview" [class.has-image]="logo.url">
+                    <img *ngIf="logo.url" [src]="logo.url" alt="Partner logo">
+                    <label class="pf-upload" [for]="'partners-logo-' + i">
+                      <i class='bx bx-cloud-upload'></i>
+                      <span>{{ logo.url ? 'Change' : 'Upload' }}</span>
+                    </label>
+                    <input type="file" [id]="'partners-logo-' + i" (change)="onPartnersLogoSelected($event, i)" accept="image/*" hidden>
+                  </div>
+
+                  <div class="pf-logo-actions">
+                    <button class="mini-btn" type="button" (click)="movePartnersLogo(i, 'left')" [disabled]="i === 0" title="Move Left">
+                      <i class='bx bx-chevron-left'></i>
+                    </button>
+                    <button class="mini-btn" type="button" (click)="movePartnersLogo(i, 'right')" [disabled]="i === partnersLogos.length - 1" title="Move Right">
+                      <i class='bx bx-chevron-right'></i>
+                    </button>
+                    <button class="mini-btn danger" type="button" (click)="removePartnersLogo(i)" title="Remove">
+                      <i class='bx bx-trash'></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="pf-card">
+              <div class="pf-header">
+                <div class="pf-title">
+                  <h4>Project funded by</h4>
+                  <p>Configure the text lines and funder logos for the funding block.</p>
+                </div>
+                <div class="pf-actions">
+                  <button class="section-btn" type="button" (click)="addFunderLine()">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Line</span>
+                  </button>
+                  <button class="section-btn" type="button" (click)="addFunderLogo()">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Logo</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="pf-funded-body">
+                <div class="pf-funded-lines">
+                  <div class="pf-line-row" *ngFor="let line of funderTextLines; let i = index">
+                    <input class="pf-line-input" type="text" [(ngModel)]="line.text" placeholder="Enter a funding line...">
+                    <div class="pf-line-actions">
+                      <button class="mini-btn" type="button" (click)="moveFunderLine(i, 'up')" [disabled]="i === 0" title="Move Up">
+                        <i class='bx bx-chevron-up'></i>
+                      </button>
+                      <button class="mini-btn" type="button" (click)="moveFunderLine(i, 'down')" [disabled]="i === funderTextLines.length - 1" title="Move Down">
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <button class="mini-btn danger" type="button" (click)="removeFunderLine(i)" title="Remove">
+                        <i class='bx bx-trash'></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pf-funded-logos">
+                  <div class="pf-logo-card" *ngFor="let logo of funderLogos; let i = index">
+                    <div class="pf-logo-preview" [class.has-image]="logo.url">
+                      <img *ngIf="logo.url" [src]="logo.url" alt="Funder logo">
+                      <label class="pf-upload" [for]="'funder-logo-' + i">
+                        <i class='bx bx-cloud-upload'></i>
+                        <span>{{ logo.url ? 'Change' : 'Upload' }}</span>
+                      </label>
+                      <input type="file" [id]="'funder-logo-' + i" (change)="onFunderLogoSelected($event, i)" accept="image/*" hidden>
+                    </div>
+
+                    <div class="pf-logo-actions">
+                      <button class="mini-btn" type="button" (click)="moveFunderLogo(i, 'left')" [disabled]="i === 0" title="Move Left">
+                        <i class='bx bx-chevron-left'></i>
+                      </button>
+                      <button class="mini-btn" type="button" (click)="moveFunderLogo(i, 'right')" [disabled]="i === funderLogos.length - 1" title="Move Right">
+                        <i class='bx bx-chevron-right'></i>
+                      </button>
+                      <button class="mini-btn danger" type="button" (click)="removeFunderLogo(i)" title="Remove">
+                        <i class='bx bx-trash'></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
