@@ -1,0 +1,432 @@
+<div class="admin-layout">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class='bx bx-menu'></i>
+      </button>
+      <h1 class="page-title">Portal Projects</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn primary" (click)="showLogoutModal($event)">
+        <i class='bx bx-plus'></i>
+        <span>Add New Portal Project</span>
+      </button>
+      <div class="user-menu">
+        <div class="user-avatar" (click)="toggleUserMenu()">
+          <i class='bx bx-user'></i>
+        </div>
+        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
+          <div class="dropdown-item" (click)="showLogoutModal($event)">
+            <i class='bx bx-log-out'></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
+    <nav class="sidebar-nav">
+      <a routerLink="/projectadmin" class="nav-item">
+        <i class='bx bx-home'></i>
+        <span>Projects</span>
+      </a>
+      <a routerLink="/docsadmin" class="nav-item">
+        <i class='bx bx-file'></i>
+        <span>Documents</span>
+      </a>
+      <a routerLink="/budget-charts" class="nav-item">
+        <i class='bx bx-pie-chart-alt-2'></i>
+        <span>Budget Charts</span>
+      </a>
+      <a routerLink="/eventsadmin" class="nav-item">
+        <i class='bx bx-calendar-event'></i>
+        <span>Events</span>
+      </a>
+      <a routerLink="/management" class="nav-item active">
+        <i class='bx bx-cog'></i>
+        <span>Management</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <!-- Stats Cards (Optional, adding them for consistency) -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-icon purple">
+          <i class='bx bx-grid-alt'></i>
+        </div>
+        <div class="stat-info">
+          <h2>2</h2>
+          <p>Portal Projects</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon green">
+          <i class='bx bx-check-circle'></i>
+        </div>
+        <div class="stat-info">
+          <h2>2</h2>
+          <p>Active Projects</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon orange">
+          <i class='bx bx-time-five'></i>
+        </div>
+        <div class="stat-info">
+          <h2>0</h2>
+          <p>Pending Actions</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breadcrumb below cards -->
+    <div class="breadcrumb-container">
+      <div class="breadcrumb">
+        <a routerLink="/management">Management</a>
+        <i class='bx bx-chevron-right'></i>
+        <a [routerLink]="['/management/portal-projects', projectName.toLowerCase()]">{{ projectName }}</a>
+        <i class='bx bx-chevron-right'></i>
+        <span class="active-breadcrumb">{{ getTabLabel(activeTab) }}</span>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      <!-- Tabs Navigation -->
+      <div class="tabs-navigation">
+        <button 
+          *ngFor="let tab of tabs" 
+          class="tab-btn" 
+          [class.active]="activeTab === tab.id"
+          (click)="setActiveTab(tab.id)">
+          <i class='bx' [ngClass]="tab.icon"></i>
+          <span>{{ tab.label }}</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content-container">
+        <!-- Home -->
+        <div class="tab-content" *ngIf="activeTab === 'home'">
+          <div class="content-header">
+            <div class="header-info">
+              <h3><i class='bx bx-home-alt'></i> Home Configuration</h3>
+              <p>Manage the carousel images, their titles, subtexts, and display order.</p>
+            </div>
+            <button class="header-btn primary" (click)="saveHomeConfig()">
+              <i class='bx bx-save'></i>
+              <span>Save Configuration</span>
+            </button>
+          </div>
+
+          <div class="home-sections">
+            <section class="home-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <h4>Carousel</h4>
+                  <p>Manage slides shown at the top of the portal project home.</p>
+                </div>
+                <div class="section-actions">
+                  <button class="section-btn" type="button" (click)="addImage()">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Slide</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="home-scroll-container">
+                <div class="home-flex-row">
+                  <div class="home-image-card" *ngFor="let img of homeImages; let i = index" [class.collapsed]="!img.expanded">
+                    <div class="image-header">
+                      <div class="header-left-side" (click)="toggleExpand(i)" [attr.aria-expanded]="img.expanded">
+                        <i class='bx bx-chevron-down'></i>
+                        <span class="image-number">Slide {{ i + 1 }}</span>
+                        <span class="preview-title" *ngIf="!img.expanded">{{ img.title || 'Untitled' }}</span>
+                      </div>
+                      <div class="header-actions">
+                        <div class="order-controls">
+                          <button class="control-btn" (click)="moveImage(i, 'up'); $event.stopPropagation()" [disabled]="i === 0" title="Move Up">
+                            <i class='bx bx-chevron-left'></i>
+                          </button>
+                          <button class="control-btn" (click)="moveImage(i, 'down'); $event.stopPropagation()" [disabled]="i === homeImages.length - 1" title="Move Down">
+                            <i class='bx bx-chevron-right'></i>
+                          </button>
+                        </div>
+                        <button class="remove-btn" (click)="removeImage(i); $event.stopPropagation()" title="Remove Image">
+                          <i class='bx bx-trash'></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="collapsible-content" *ngIf="img.expanded">
+                      <div class="image-upload-area" [class.has-image]="img.url">
+                        <img *ngIf="img.url" [src]="img.url" class="preview-img">
+                        <div class="upload-overlay">
+                          <label [for]="'file-' + i" class="upload-label">
+                            <i class='bx bx-cloud-upload'></i>
+                            <span>{{ img.url ? 'Change Image' : 'Upload Image' }}</span>
+                          </label>
+                          <input type="file" [id]="'file-' + i" (change)="onImageSelected($event, i)" accept="image/*" hidden>
+                        </div>
+                      </div>
+
+                      <div class="image-details">
+                        <div class="form-group">
+                          <label>Main Text</label>
+                          <input type="text" [(ngModel)]="img.title" placeholder="Enter main title...">
+                        </div>
+                        <div class="form-group">
+                          <label>Subtext</label>
+                          <textarea [(ngModel)]="img.subtitle" placeholder="Enter subtext description..." rows="2"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="home-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <h4>Logos & Partners</h4>
+                  <p>Add partner logos (min 1, max 10).</p>
+                </div>
+                <div class="section-actions">
+                  <button class="section-btn" type="button" (click)="addLogo()" [disabled]="homePartnerLogos.length >= 10">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Logo</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="logos-grid">
+                <div class="logo-card" *ngFor="let logo of homePartnerLogos; let i = index">
+                  <div class="logo-preview" [class.has-image]="logo.url">
+                    <img *ngIf="logo.url" [src]="logo.url" alt="Partner logo">
+                    <label class="logo-upload" [for]="'logo-' + i">
+                      <i class='bx bx-cloud-upload'></i>
+                      <span>{{ logo.url ? 'Change' : 'Upload' }}</span>
+                    </label>
+                    <input type="file" [id]="'logo-' + i" (change)="onLogoSelected($event, i)" accept="image/*" hidden>
+                  </div>
+
+                  <div class="logo-actions">
+                    <button class="mini-btn" type="button" (click)="moveLogo(i, 'left')" [disabled]="i === 0" title="Move Left">
+                      <i class='bx bx-chevron-left'></i>
+                    </button>
+                    <button class="mini-btn" type="button" (click)="moveLogo(i, 'right')" [disabled]="i === homePartnerLogos.length - 1" title="Move Right">
+                      <i class='bx bx-chevron-right'></i>
+                    </button>
+                    <button class="mini-btn danger" type="button" (click)="removeLogo(i)" [disabled]="homePartnerLogos.length <= 1" title="Remove">
+                      <i class='bx bx-trash'></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="home-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <h4>Video</h4>
+                  <p>Upload a video file for the home page.</p>
+                </div>
+              </div>
+
+              <div class="video-upload-container single-column">
+                <div class="video-preview-box" [class.has-video]="homeVideoFile.url">
+                  <video *ngIf="homeVideoFile.url" [src]="homeVideoFile.url" controls class="video-player"></video>
+                  
+                  <div class="video-upload-placeholder" *ngIf="!homeVideoFile.url">
+                    <i class='bx bx-video-plus'></i>
+                    <span>No video uploaded</span>
+                    <label class="video-upload-btn primary" for="video-upload-input">
+                      <i class='bx bx-cloud-upload'></i>
+                      <span>Upload Video</span>
+                    </label>
+                  </div>
+
+                  <div class="video-controls-overlay" *ngIf="homeVideoFile.url">
+                    <label class="overlay-btn" for="video-upload-input">
+                      <i class='bx bx-refresh'></i>
+                      <span>Change Video</span>
+                    </label>
+                    <button class="overlay-btn danger" (click)="removeVideo()">
+                      <i class='bx bx-trash'></i>
+                      <span>Remove</span>
+                    </button>
+                  </div>
+                  
+                  <input id="video-upload-input" type="file" (change)="onVideoSelected($event)" accept="video/*" hidden>
+                </div>
+                <p class="video-filename" *ngIf="homeVideoFile.name">
+                  <i class='bx bx-file'></i> {{ homeVideoFile.name }}
+                </p>
+              </div>
+            </section>
+
+            <section class="home-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <h4>Info Blocks</h4>
+                  <p>Add one or more information blocks with images and text.</p>
+                </div>
+                <div class="section-actions">
+                  <button class="section-btn" type="button" (click)="addInfoBlock()">
+                    <i class='bx bx-plus'></i>
+                    <span>Add Info Block</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="info-blocks-list">
+                <div class="info-block-item" *ngFor="let block of homeInfoBlocks; let i = index">
+                  <div class="info-block-header">
+                    <span class="block-number">Block {{ i + 1 }}</span>
+                    <div class="block-actions">
+                      <button class="mini-btn" type="button" (click)="moveInfoBlock(i, 'up')" [disabled]="i === 0" title="Move Up">
+                        <i class='bx bx-chevron-up'></i>
+                      </button>
+                      <button class="mini-btn" type="button" (click)="moveInfoBlock(i, 'down')" [disabled]="i === homeInfoBlocks.length - 1" title="Move Down">
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <button class="mini-btn danger" type="button" (click)="removeInfoBlock(i)" [disabled]="homeInfoBlocks.length <= 1" title="Remove">
+                        <i class='bx bx-trash'></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="info-grid">
+                    <div class="info-image">
+                      <div class="info-image-box" [class.has-image]="block.imageUrl">
+                        <img *ngIf="block.imageUrl" [src]="block.imageUrl" alt="Info image">
+                        <label class="info-upload" [for]="'info-image-' + i">
+                          <i class='bx bx-cloud-upload'></i>
+                          <span>{{ block.imageUrl ? 'Change Image' : 'Upload Image' }}</span>
+                        </label>
+                        <input [id]="'info-image-' + i" type="file" (change)="onInfoImageSelected($event, i)" accept="image/*" hidden>
+                      </div>
+                    </div>
+
+                    <div class="info-fields">
+                      <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" [(ngModel)]="block.title" placeholder="Enter title...">
+                      </div>
+                      <div class="form-group">
+                        <label>Text</label>
+                        <textarea [(ngModel)]="block.text" rows="4" placeholder="Enter short text..."></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Scientific Merit -->
+        <div class="tab-content" *ngIf="activeTab === 'scientific-merit'">
+          <div class="content-header">
+            <h3><i class='bx bx-analyse'></i> Scientific Merit</h3>
+            <p>Define the scientific value and impact of this portal project.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Scientific Merit content configuration will be here.</p>
+          </div>
+        </div>
+
+        <!-- Objectives -->
+        <div class="tab-content" *ngIf="activeTab === 'objectives'">
+          <div class="content-header">
+            <h3><i class='bx bx-target-lock'></i> Objectives</h3>
+            <p>Manage the key goals and milestones of the project.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Objectives configuration will be here.</p>
+          </div>
+        </div>
+
+        <!-- Partners & Funder -->
+        <div class="tab-content" *ngIf="activeTab === 'partners-funder'">
+          <div class="content-header">
+            <h3><i class='bx bx-building-house'></i> Partners & Funder</h3>
+            <p>Configure the organizations and funding bodies involved.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Partners and Funder details will be here.</p>
+          </div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="tab-content" *ngIf="activeTab === 'gallery'">
+          <div class="content-header">
+            <h3><i class='bx bx-images'></i> Gallery</h3>
+            <p>Upload and manage project images and media.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Image gallery management will be here.</p>
+          </div>
+        </div>
+
+        <!-- Events -->
+        <div class="tab-content" *ngIf="activeTab === 'events'">
+          <div class="content-header">
+            <h3><i class='bx bx-calendar'></i> Events</h3>
+            <p>Manage upcoming and past events related to this project.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Project events management will be here.</p>
+          </div>
+        </div>
+
+        <!-- Team -->
+        <div class="tab-content" *ngIf="activeTab === 'team'">
+          <div class="content-header">
+            <h3><i class='bx bx-group'></i> Team</h3>
+            <p>Manage project members and their roles.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Team members management will be here.</p>
+          </div>
+        </div>
+
+        <!-- Data Providers -->
+        <div class="tab-content" *ngIf="activeTab === 'data-providers'">
+          <div class="content-header">
+            <h3><i class='bx bx-data'></i> Data Providers</h3>
+            <p>Configure external data sources and providers.</p>
+          </div>
+          <div class="placeholder-section">
+            <p>Data providers configuration will be here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="logoutModalVisible" (mousedown)="onOverlayClick($event)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-log-out-circle'></i>
+          <h3>Confirm Logout</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to logout?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
+          <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

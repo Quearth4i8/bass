@@ -58,6 +58,7 @@ import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
 import { ManagementComponent } from './management/management.component';
+import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 
 import { AuthInterceptor } from './auth/auth.interceptor';
 
@@ -96,6 +97,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     ProjectsLandingComponent,
     EventsadminComponent,
     ManagementComponent,
+    PortalProjectsListComponent,
   ],
   imports: [
     BrowserModule,

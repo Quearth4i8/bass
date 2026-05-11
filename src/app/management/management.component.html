@@ -8,6 +8,10 @@
       <h1 class="page-title">Management</h1>
     </div>
     <div class="header-right">
+      <button class="header-btn primary" (click)="showAddProjectDialog()">
+        <i class='bx bx-plus'></i>
+        <span>Add New Portal Project</span>
+      </button>
       <div class="user-menu">
         <div class="user-avatar" (click)="toggleUserMenu()">
           <i class='bx bx-user'></i>
@@ -48,11 +52,65 @@
     </nav>
   </aside>
 
-  <!-- Main Content -->
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-icon purple">
+          <i class='bx bx-grid-alt'></i>
+        </div>
+        <div class="stat-info">
+          <h2>{{ portalProjects.length }}</h2>
+          <p>Portal Projects</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon green">
+          <i class='bx bx-check-circle'></i>
+        </div>
+        <div class="stat-info">
+          <h2>2</h2>
+          <p>Active Projects</p>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon orange">
+          <i class='bx bx-time-five'></i>
+        </div>
+        <div class="stat-info">
+          <h2>0</h2>
+          <p>Pending Actions</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breadcrumb below cards -->
+    <div class="breadcrumb-container">
+      <div class="breadcrumb">
+        <span>Management</span>
+      </div>
+    </div>
+
     <div class="content-wrapper">
-      <div class="management-container">
-        <p>management works!</p>
+      <div class="portal-grid">
+        <div class="portal-card" *ngFor="let project of portalProjects">
+          <div class="card-image-wrapper">
+            <img [src]="project.image" [alt]="project.title" class="card-img">
+            <div class="coming-soon-badge" *ngIf="project.comingSoon">
+              <span>COMING SOON</span>
+            </div>
+            <div class="card-overlay" *ngIf="project.comingSoon"></div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">{{ project.title }}</h3>
+            <p class="card-subtitle">{{ project.description }}</p>
+            <div class="card-actions">
+              <button class="btn-platform" [class.disabled]="project.comingSoon" (click)="!project.comingSoon && goToPortalProjects(project.title)">
+                ENTER PLATFORM
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>

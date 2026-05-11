@@ -12,6 +12,37 @@ export class ManagementComponent {
   isSidebarVisible = true;
   isUserMenuOpen = false;
   logoutModalVisible = false;
+  
+  portalProjects = [
+    { 
+      title: 'IMAS-ICHKEUL', 
+      description: 'About IMAS-ICHKEUL', 
+      status: 'Active',
+      image: 'assets/images/ichkeul_home.jpg',
+      comingSoon: false
+    },
+    { 
+      title: 'ABCDryBasin', 
+      description: 'Coming Soon', 
+      status: 'Pending',
+      image: 'assets/images/project2.jpg',
+      comingSoon: true
+    },
+    { 
+      title: 'BASSIANA', 
+      description: 'Coming Soon', 
+      status: 'Pending',
+      image: 'assets/images/project3.jpg',
+      comingSoon: true
+    },
+    { 
+      title: 'SUMME_One Health', 
+      description: 'Coming Soon', 
+      status: 'Pending',
+      image: 'assets/images/project4.jpg',
+      comingSoon: true
+    }
+  ];
 
   constructor(private sidebarService: SidebarService, private authService: AuthService, private router: Router) { }
 
@@ -52,6 +83,14 @@ export class ManagementComponent {
     this.logoutModalVisible = false;
     this.authService.logout();
     this.router.navigate(['/projects'], { replaceUrl: true });
+  }
+
+  showAddProjectDialog(): void {
+    console.log('Open add project dialog');
+  }
+
+  goToPortalProjects(projectTitle: string): void {
+    this.router.navigate(['/management/portal-projects', projectTitle.toLowerCase()]);
   }
 
 }

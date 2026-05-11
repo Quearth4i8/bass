@@ -15,6 +15,7 @@ import { ProjectsLandingComponent } from './projects-landing/projects-landing.co
 import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
 import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
 import { ManagementComponent } from './management/management.component';
+import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { AdminGuard } from './auth/admin.guard';
 
 const routes: Routes = [
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'budget-charts', component:BudgetChartsComponent},
   { path: 'eventsadmin', component:EventsadminComponent, canActivate: [AdminGuard] },
   { path: 'management', component:ManagementComponent, canActivate: [AdminGuard] },
+  { path: 'management/portal-projects/:name', component:PortalProjectsListComponent, canActivate: [AdminGuard] },
   { path: 'dataproviders', component:DataprovidersComponent},
 ];
 
