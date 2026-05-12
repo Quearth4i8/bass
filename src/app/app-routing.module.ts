@@ -13,7 +13,7 @@ import { NgModule } from '@angular/core';
 import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
-import { EventsadminComponent } from './eventsadmin/eventsadmin.component';
+import { OutputsComponent } from './outputs/outputs.component';
 import { ManagementComponent } from './management/management.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { AdminGuard } from './auth/admin.guard';
@@ -31,9 +31,9 @@ const routes: Routes = [
   { path: 'projectadmin', component:ProjectAdminComponent, canActivate: [AdminGuard] },
   { path: 'docsadmin', component:DocsadminComponent, canActivate: [AdminGuard] },
   { path: 'budget-charts', component:BudgetChartsComponent},
-  { path: 'eventsadmin', component:EventsadminComponent, canActivate: [AdminGuard] },
   { path: 'management', component:ManagementComponent, canActivate: [AdminGuard] },
   { path: 'management/portal-projects/:name', component:PortalProjectsListComponent, canActivate: [AdminGuard] },
+  { path: 'outputs', component:OutputsComponent},
   { path: 'dataproviders', component:DataprovidersComponent},
 ];
 

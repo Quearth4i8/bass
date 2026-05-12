@@ -29,23 +29,19 @@
   <!-- Sidebar -->
   <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
     <nav class="sidebar-nav">
-      <a routerLink="/projectadmin" class="nav-item">
+      <a routerLink="/projectadmin" class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <i class='bx bx-home'></i>
         <span>Projects</span>
       </a>
-      <a routerLink="/docsadmin" class="nav-item">
+      <a routerLink="/docsadmin" class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <i class='bx bx-file'></i>
         <span>Documents</span>
       </a>
-      <a routerLink="/budget-charts" class="nav-item">
+      <a routerLink="/budget-charts" class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <i class='bx bx-pie-chart-alt-2'></i>
         <span>Budget Charts</span>
       </a>
-      <a routerLink="/eventsadmin" class="nav-item">
-        <i class='bx bx-calendar-event'></i>
-        <span>Events</span>
-      </a>
-      <a routerLink="/management" class="nav-item active">
+      <a routerLink="/management" class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <i class='bx bx-cog'></i>
         <span>Management</span>
       </a>
@@ -93,20 +89,30 @@
 
     <div class="content-wrapper">
       <div class="portal-grid">
-        <div class="portal-card" *ngFor="let project of portalProjects">
+        <div class="portal-card" *ngFor="let project of portalProjects; let i = index" [class.inactive]="!project.isActive">
           <div class="card-image-wrapper">
             <img [src]="project.image" [alt]="project.title" class="card-img">
-            <div class="coming-soon-badge" *ngIf="project.comingSoon">
-              <span>COMING SOON</span>
+            <div class="inactive-badge" *ngIf="!project.isActive">
+              <span>INACTIVE</span>
             </div>
-            <div class="card-overlay" *ngIf="project.comingSoon"></div>
+            <div class="card-overlay" *ngIf="!project.isActive"></div>
+            
+            <!-- Project Actions Overlay -->
+            <div class="card-top-actions">
+              <button class="action-btn edit" (click)="openEditModal(project, i, $event)" title="Edit Project">
+                <i class='bx bx-edit-alt'></i>
+              </button>
+              <button class="action-btn delete" (click)="openDeleteModal(i, $event)" title="Delete Project">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
           </div>
           <div class="card-content">
             <h3 class="card-title">{{ project.title }}</h3>
             <p class="card-subtitle">{{ project.description }}</p>
             <div class="card-actions">
-              <button class="btn-platform" [class.disabled]="project.comingSoon" (click)="!project.comingSoon && goToPortalProjects(project.title)">
-                ENTER PLATFORM
+              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalProjects(project.title)">
+                MANAGE PROJECT
               </button>
             </div>
           </div>
@@ -117,7 +123,7 @@
 
   <!-- Logout Confirmation Modal -->
   <div class="modal-overlay" *ngIf="logoutModalVisible" (mousedown)="onOverlayClick($event)">
-    <div class="modal-dialog">
+    <div class="modal-dialog small">
       <div class="modal-content">
         <div class="modal-header">
           <i class='bx bx-log-out-circle'></i>
@@ -128,7 +134,120 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
-          <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
+          <button type="button" class="btn-confirm danger" (click)="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Project Modal -->
+  <div class="modal-overlay" *ngIf="isEditModalOpen" (mousedown)="isEditModalOpen = false">
+    <div class="modal-dialog" (mousedown)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-edit-alt'></i>
+          <h3>Edit Portal Project</h3>
+        </div>
+        <div class="modal-body">
+          <div class="edit-form">
+            <div class="edit-image-section">
+              <div class="edit-image-preview">
+                <img [src]="editingProject?.image" alt="Preview">
+                <label class="image-upload-label" for="edit-project-image">
+                  <i class='bx bx-camera'></i>
+                  <span>Change Image</span>
+                </label>
+                <input type="file" id="edit-project-image" (change)="onEditImageSelected($event)" accept="image/*" hidden>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Project Title</label>
+              <input type="text" [(ngModel)]="editingProject.title" placeholder="Enter project title">
+            </div>
+            <div class="form-field">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="editingProject.description" placeholder="Short description">
+            </div>
+            <div class="status-toggle-row">
+              <span class="field-label">Project Status</span>
+              <div class="toggle-switch" (click)="editingProject.isActive = !editingProject.isActive">
+                <div class="switch-track" [class.active]="editingProject.isActive">
+                  <div class="switch-thumb"></div>
+                </div>
+                <span class="switch-label">{{ editingProject.isActive ? 'Active' : 'Inactive' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeEditModal()">Cancel</button>
+          <button type="button" class="btn-confirm primary" (click)="saveProjectEdit()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Project Modal -->
+  <div class="modal-overlay" *ngIf="isAddModalOpen" (mousedown)="isAddModalOpen = false">
+    <div class="modal-dialog" (mousedown)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class='bx bx-plus-circle'></i>
+          <h3>Add New Portal Project</h3>
+        </div>
+        <div class="modal-body">
+          <div class="edit-form">
+            <div class="edit-image-section">
+              <div class="edit-image-preview">
+                <img [src]="newProject?.image" alt="Preview">
+                <label class="image-upload-label" for="add-project-image">
+                  <i class='bx bx-camera'></i>
+                  <span>Upload Image</span>
+                </label>
+                <input type="file" id="add-project-image" (change)="onAddImageSelected($event)" accept="image/*" hidden>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Project Title</label>
+              <input type="text" [(ngModel)]="newProject.title" placeholder="Enter project title">
+            </div>
+            <div class="form-field">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="newProject.description" placeholder="Short description">
+            </div>
+            <div class="status-toggle-row">
+              <span class="field-label">Project Status</span>
+              <div class="toggle-switch" (click)="newProject.isActive = !newProject.isActive">
+                <div class="switch-track" [class.active]="newProject.isActive">
+                  <div class="switch-thumb"></div>
+                </div>
+                <span class="switch-label">{{ newProject.isActive ? 'Active' : 'Inactive' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+          <button type="button" class="btn-confirm primary" (click)="confirmAddProject()">Add Project</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Project Modal -->
+  <div class="modal-overlay" *ngIf="isDeleteModalOpen" (mousedown)="isDeleteModalOpen = false">
+    <div class="modal-dialog small" (mousedown)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header danger">
+          <i class='bx bx-trash'></i>
+          <h3>Delete Project</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this project? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeDeleteModal()">Cancel</button>
+          <button type="button" class="btn-confirm danger" (click)="confirmDeleteProject()">Delete Project</button>
         </div>
       </div>
     </div>

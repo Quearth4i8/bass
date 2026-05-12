@@ -13,34 +13,29 @@ export class ManagementComponent {
   isUserMenuOpen = false;
   logoutModalVisible = false;
   
+  // Add Project State
+  isAddModalOpen = false;
+  newProject: any = {
+    title: '',
+    description: '',
+    image: 'assets/images/ichkeul_home.jpg',
+    isActive: true,
+    status: 'Active'
+  };
+
+  // Edit Project State
+  isEditModalOpen = false;
+  isDeleteModalOpen = false;
+  editingProject: any = null;
+  editingProjectIndex: number = -1;
+  
   portalProjects = [
     { 
       title: 'IMAS-ICHKEUL', 
       description: 'About IMAS-ICHKEUL', 
       status: 'Active',
       image: 'assets/images/ichkeul_home.jpg',
-      comingSoon: false
-    },
-    { 
-      title: 'ABCDryBasin', 
-      description: 'Coming Soon', 
-      status: 'Pending',
-      image: 'assets/images/project2.jpg',
-      comingSoon: true
-    },
-    { 
-      title: 'BASSIANA', 
-      description: 'Coming Soon', 
-      status: 'Pending',
-      image: 'assets/images/project3.jpg',
-      comingSoon: true
-    },
-    { 
-      title: 'SUMME_One Health', 
-      description: 'Coming Soon', 
-      status: 'Pending',
-      image: 'assets/images/project4.jpg',
-      comingSoon: true
+      isActive: true
     }
   ];
 
@@ -86,11 +81,91 @@ export class ManagementComponent {
   }
 
   showAddProjectDialog(): void {
-    console.log('Open add project dialog');
+    this.newProject = {
+      title: '',
+      description: '',
+      image: 'assets/images/ichkeul_home.jpg',
+      isActive: true,
+      status: 'Active'
+    };
+    this.isAddModalOpen = true;
+  }
+
+  closeAddModal(): void {
+    this.isAddModalOpen = false;
+  }
+
+  onAddImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.newProject.image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  confirmAddProject(): void {
+    if (this.newProject.title.trim()) {
+      this.portalProjects.push({ ...this.newProject });
+      this.closeAddModal();
+    }
   }
 
   goToPortalProjects(projectTitle: string): void {
     this.router.navigate(['/management/portal-projects', projectTitle.toLowerCase()]);
+  }
+
+  // Edit Project Methods
+  openEditModal(project: any, index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.editingProjectIndex = index;
+    this.editingProject = { ...project }; // Clone to avoid direct mutation
+    this.isEditModalOpen = true;
+  }
+
+  closeEditModal(): void {
+    this.isEditModalOpen = false;
+    this.editingProject = null;
+    this.editingProjectIndex = -1;
+  }
+
+  onEditImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editingProject.image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveProjectEdit(): void {
+    if (this.editingProjectIndex > -1) {
+      this.portalProjects[this.editingProjectIndex] = { ...this.editingProject };
+      this.closeEditModal();
+    }
+  }
+
+  // Delete Project Methods
+  openDeleteModal(index: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.editingProjectIndex = index;
+    this.isDeleteModalOpen = true;
+  }
+
+  closeDeleteModal(): void {
+    this.isDeleteModalOpen = false;
+    this.editingProjectIndex = -1;
+  }
+
+  confirmDeleteProject(): void {
+    if (this.editingProjectIndex > -1) {
+      this.portalProjects.splice(this.editingProjectIndex, 1);
+      this.closeDeleteModal();
+    }
   }
 
 }

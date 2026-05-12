@@ -49,31 +49,39 @@ img {
 .container {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    margin-inline: 1.5rem;
+    align-items: center;
+    margin-inline: auto;
     padding-block: 2rem;
+    width: 100%;
   }
   
   .card__container {
-    display: grid;
-    row-gap: 3.5rem;
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
+    gap: 3.5rem 1.5rem;
+    max-width: 1400px;
+    width: 100%;
   }
   
 
 .card__article {
   position: relative;
   overflow: hidden;
+  width: 260px;
 }
 
 .card__img {
-  width: 328px;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  object-position: center;
   border-radius: 1.5rem;
 }
 
 .card__data {
-  width: 280px;
+  width: calc(100% - 48px);
   background-color: white;
   padding: 1.5rem 2rem;
   box-shadow: 0 8px 24px hsla(0, 0%, 0%, .15);
@@ -185,24 +193,27 @@ img {
 /* Modal styles */
 .cards-modal-backdrop {
   position: fixed;
-  inset: 0;
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(0,0,0,0.55), rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.15));
-  backdrop-filter: blur(2px) saturate(110%);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px) saturate(115%);
   animation: fadeBackdrop 200ms ease both;
   z-index: 10001;
 }
 
 .cards-modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 50vh;
+  left: 50vw;
   transform: translate(-50%, -50%);
   background: #ffffff;
-  width: min(560px, 92vw);
-  border-radius: 14px;
+  width: min(780px, 94vw);
+  border-radius: 18px;
   border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-  padding: 1rem 1rem 1.25rem 1rem;
+  box-shadow: 0 34px 90px rgba(0,0,0,0.35);
+  padding: 1.25rem 1.25rem 1.5rem 1.25rem;
   z-index: 10002;
   animation: popModal 220ms cubic-bezier(.2,.7,.3,1.2) both;
 }
@@ -217,8 +228,8 @@ img {
 .modal__icon { display: none; }
 
 .modal__titles { display: flex; flex-direction: column; }
-.modal__title { margin: 0; font-weight: 800; font-size: 1.25rem; letter-spacing: .2px; }
-.modal__subtitle { color: #6b7280; font-weight: 600; font-size: .9rem; }
+.modal__title { margin: 0; font-weight: 900; font-size: 1.6rem; letter-spacing: .2px; color: #111827; }
+.modal__subtitle { color: #6b7280; font-weight: 700; font-size: 1rem; }
 
 .modal__divider {
   height: 1px;
@@ -228,27 +239,22 @@ img {
 
 .modal__body { padding: 0 .25rem; }
 
-.modal__title {
-  margin: 0 0 0.5rem 0;
-  font-weight: 800;
-  font-size: 1.25rem;
-}
-
 .modal__desc {
   margin: 0;
-  color: #4b5563;
-  line-height: 1.6;
-  max-height: 60vh;
+  color: #374151;
+  line-height: 1.75;
+  font-size: 1.05rem;
+  max-height: 68vh;
   overflow: auto;
 }
 
 .modal__close {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  top: 10px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.06);
   background: rgba(255,255,255,0.9);
   cursor: pointer;
@@ -270,26 +276,22 @@ img {
 
 /* For medium devices */
 @media screen and (min-width: 768px) {
-  .card__container {
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 1.5rem;
+  .card__article {
+    width: 270px;
   }
 }
 
 /* For large devices */
 @media screen and (min-width: 1120px) {
   .container {
-    height: 40vh;
+    height: auto;
   }
 
-  .card__container {
-    grid-template-columns: repeat(3, 1fr);
-  }
   .card__img {
-    width: 348px;
+    width: 100%;
   }
   .card__data {
-    width: 316px;
+    width: calc(100% - 48px);
     padding-inline: 2.5rem;
   }
 }
