@@ -231,51 +231,5 @@ header.sticky .icon{
     font-weight: 500;
   }
 }
-@media (max-width: 768px) {
-  header {
-    padding: 20px;
-  }
 
-  header.sticky {
-    padding: 10px;
-  }
-
-  header .logo {
-    font-size: 1.5em;
-  }
-
-  header > ul {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  header > ul > li {
-    margin: 5px;
-  }
-
-  header > ul > li > a {
-    margin: 0;
-    font-size: 0.9em;
-  }
-
-  header > ul > li.dropdown:hover .dropdown-menu {
-    animation: none; 
-  }
-
-  header > ul > li.dropdown .dropdown-menu {
-    position: static;
-    display: none;
-  }
-
-  header.sticky > ul > li.dropdown .dropdown-menu {
-    background-color: transparent;
-  }
-
-  .custom-dropdown-icon {
-    display: none;
-  }
-
-  header > ul > li > a.nav-link {
-    font-weight: 500;
-  }
-}
+@import '../../portal/styles/portal-shell-nav.shared.scss';

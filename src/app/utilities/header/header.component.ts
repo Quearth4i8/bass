@@ -35,7 +35,7 @@ export class HeaderComponent {
   }
 
   logout(): void {
-    this.router.navigate(['/projects']);
+    this.router.navigate(['/']);
     console.log('User logged out');
   }
 }

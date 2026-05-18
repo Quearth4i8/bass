@@ -1,0 +1,42 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  <div class="page-header">
+    <h1 class="page-project-title">{{ project.title }}</h1>
+    <h2 class="page-section-title">Outputs</h2>
+    <p class="page-section-lead">Videos and highlights from this project.</p>
+    <div class="header-divider"></div>
+  </div>
+
+  <div class="outputs-shell" *ngIf="project.content.outputs.outputs?.length">
+    <article
+      class="output-card"
+      *ngFor="let output of project.content.outputs.outputs; let idx = index"
+      [class.output-card--reverse]="output.layout === 'text-right'"
+      [class.output-card--full]="!output.videoUrl"
+    >
+      <div class="output-card__index" aria-hidden="true">{{ idx + 1 }}</div>
+      <div class="output-card__body">
+        <h3 class="output-card__title">{{ output.title }}</h3>
+        <p class="output-card__desc">{{ output.description }}</p>
+      </div>
+      <div class="output-card__media" *ngIf="output.videoUrl">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          class="portal-observe-video"
+        >
+          <source [src]="output.videoUrl" type="video/mp4">
+        </video>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-state" *ngIf="!project.content.outputs.outputs?.length">
+    <i class='bx bx-video-off'></i>
+    <p>No outputs have been added yet.</p>
+  </div>
+</ng-container>

@@ -8,6 +8,10 @@
       <h1 class="page-title">Management</h1>
     </div>
     <div class="header-right">
+      <button class="header-btn" routerLink="/" type="button">
+        <i class='bx bx-globe'></i>
+        <span>BASSIANA Database Portal</span>
+      </button>
       <button class="header-btn primary" (click)="showAddProjectDialog()">
         <i class='bx bx-plus'></i>
         <span>Add New Portal Project</span>
@@ -65,7 +69,7 @@
           <i class='bx bx-check-circle'></i>
         </div>
         <div class="stat-info">
-          <h2>2</h2>
+          <h2>{{ activeProjectsCount }}</h2>
           <p>Active Projects</p>
         </div>
       </div>
@@ -111,8 +115,11 @@
             <h3 class="card-title">{{ project.title }}</h3>
             <p class="card-subtitle">{{ project.description }}</p>
             <div class="card-actions">
-              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalProjects(project.title)">
+              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalProjects(project.slug)">
                 MANAGE PROJECT
+              </button>
+              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalPublic(project.slug, $event)">
+                VIEW
               </button>
             </div>
           </div>
@@ -168,6 +175,10 @@
               <label>Description</label>
               <input type="text" [(ngModel)]="editingProject.description" placeholder="Short description">
             </div>
+            <div class="form-field">
+              <label>Theme color (navbar &amp; scroll button)</label>
+              <input type="color" [(ngModel)]="editingProject.accentColor" title="Accent color">
+            </div>
             <div class="status-toggle-row">
               <span class="field-label">Project Status</span>
               <div class="toggle-switch" (click)="editingProject.isActive = !editingProject.isActive">
@@ -214,6 +225,10 @@
             <div class="form-field">
               <label>Description</label>
               <input type="text" [(ngModel)]="newProject.description" placeholder="Short description">
+            </div>
+            <div class="form-field">
+              <label>Theme color (navbar &amp; scroll button)</label>
+              <input type="color" [(ngModel)]="newProject.accentColor" title="Accent color">
             </div>
             <div class="status-toggle-row">
               <span class="field-label">Project Status</span>

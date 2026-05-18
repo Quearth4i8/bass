@@ -1,0 +1,225 @@
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(26, 42, 74, 0.15);
+    border-top-color: #1a2a4a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  i {
+    font-size: 60px;
+    color: #c5cce0;
+    display: block;
+    margin-bottom: 16px;
+  }
+  p {
+    color: #88909e;
+    font-size: 15px;
+  }
+}
+
+.page-header {
+  text-align: center;
+  padding: 56px 20px 40px;
+  background: radial-gradient(120% 80% at 50% 0%, rgba(79, 195, 247, 0.12) 0%, transparent 55%),
+    linear-gradient(180deg, #f4f7fb 0%, #ffffff 100%);
+
+  .page-project-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #0d9488;
+    margin-bottom: 10px;
+  }
+
+  .page-section-title {
+    font-size: clamp(30px, 4.5vw, 44px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+    margin: 0 0 12px;
+  }
+
+  .page-section-lead {
+    margin: 0 auto 22px;
+    max-width: 520px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #64748b;
+  }
+
+  .header-divider {
+    width: 64px;
+    height: 4px;
+    background: linear-gradient(90deg, #2dd4bf, #1a2a4a);
+    border-radius: 999px;
+    margin: 0 auto;
+  }
+}
+
+.outputs-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.output-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+
+  &:hover {
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.1), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    transform: translateY(-2px);
+  }
+
+  &--reverse {
+    .output-card__body {
+      order: 2;
+    }
+    .output-card__media {
+      order: 1;
+    }
+    .output-card__index {
+      left: auto;
+      right: 20px;
+    }
+  }
+  &--full {
+    grid-template-columns: 1fr;
+    .output-card__index {
+      left: auto;
+      right: 20px;
+    }
+    .output-card__body {
+      padding: 40px 44px 48px;
+    }
+  }
+}
+
+.output-card__index {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f766e;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.output-card__body {
+  padding: 40px 40px 40px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.output-card--reverse .output-card__body {
+  padding: 40px 72px 40px 40px;
+}
+
+.output-card__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.output-card__desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #475569;
+  max-width: 42em;
+}
+
+.output-card__media {
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+  align-self: stretch;
+
+  video {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    object-fit: cover;
+    display: block;
+    outline: none;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .output-card {
+    grid-template-columns: 1fr;
+    &--reverse {
+      .output-card__body,
+      .output-card__media {
+        order: unset;
+      }
+      .output-card__index {
+        left: 20px;
+        right: auto;
+      }
+    }
+  }
+
+  .output-card__media {
+    min-height: 240px;
+    order: -1;
+
+    video {
+      min-height: 240px;
+    }
+  }
+
+  .output-card__body {
+    padding: 28px 24px 32px 24px;
+  }
+
+  .output-card--reverse .output-card__body {
+    padding: 28px 24px 32px 24px;
+  }
+}

@@ -1,0 +1,36 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  <div class="page-header">
+    <h1 class="page-project-title">{{ project.title }}</h1>
+    <h2 class="page-section-title">Partners &amp; Funders</h2>
+    <div class="header-divider"></div>
+  </div>
+
+  <!-- Partners Section -->
+  <section class="pf-section" *ngIf="project.content.partnersFunders.partnersLogos?.length">
+    <h3 class="section-label"><i class='bx bx-link'></i> Partners</h3>
+    <div class="logo-grid">
+      <div class="logo-card" *ngFor="let logo of project.content.partnersFunders.partnersLogos">
+        <img [src]="logo.url" alt="partner logo" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- Funders Section -->
+  <section class="pf-section funders-section" *ngIf="project.content.partnersFunders.funderTextLines?.length || project.content.partnersFunders.funderLogos?.length">
+    <h3 class="section-label"><i class='bx bx-dollar-circle'></i> Funders</h3>
+
+    <ul class="funder-list" *ngIf="project.content.partnersFunders.funderTextLines?.length">
+      <li *ngFor="let line of project.content.partnersFunders.funderTextLines">
+        <i class='bx bx-check-circle'></i> {{ line.text }}
+      </li>
+    </ul>
+
+    <div class="logo-grid" *ngIf="project.content.partnersFunders.funderLogos?.length">
+      <div class="logo-card" *ngFor="let logo of project.content.partnersFunders.funderLogos">
+        <img [src]="logo.url" alt="funder logo" loading="lazy">
+      </div>
+    </div>
+  </section>
+</ng-container>

@@ -1,7 +1,13 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../../services/sidebarservice';
 import { AuthService } from '../../services/AuthService';
 import { Router, ActivatedRoute } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+
+import { PortalProjectsService } from '../../portal/services/portal-projects.service';
+import { PortalProjectContent } from '../../portal/models/portal-project.model';
 
 @Component({
   selector: 'app-portal-projects-list',
@@ -13,7 +19,8 @@ export class PortalProjectsListComponent implements OnInit {
   isUserMenuOpen = false;
   logoutModalVisible = false;
 
-  projectName: string = 'IMAS-ICHKEUL'; // Default for now, should be dynamic
+  projectSlug: string = '';
+  projectName = '';
   activeTab: string = 'home';
   
   homeImages: any[] = [
@@ -82,11 +89,16 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 1, name: 'John Doe', role: 'Data Specialist', image: '', order: 1 }
   ];
 
+  outputs: any[] = [
+    { id: 1, title: '', description: '', videoUrl: '', layout: 'text-left', order: 1 }
+  ];
+
   events: any[] = [
     { id: 1, date: '2020-11-22', timeFrom: '09:00', timeTo: '17:00', title: 'International Workshop on Wetland Conservation', location: 'Ichkeul National Park, Tunisia', description: 'A workshop bringing together experts to discuss strategies for wetland conservation and sustainable management of the Ichkeul ecosystem.', status: 'finished' }
   ];
 
   openEventStatusDropdown: number = -1;
+  openOutputLayoutDropdown: number = -1;
   openFontSizeDropdown: number = -1;
   openFontSizeTab: string = '';
   dropdownMenuStyle: { [key: string]: string } = {};
@@ -107,6 +119,11 @@ export class PortalProjectsListComponent implements OnInit {
     { label: 'Other', chars: ['%','@','#','&','*','_','~','^','`','|','\\','/','+','=','<','>','[',']','{','}','(',')',':',';','?','!','"','\'','°','‰','℃','℉','′','″','•','…','–','—','©','®','™','§','¶','†','‡','⊕','⊗','⊙','≤','≥','≪','≫'] }
   ];
 
+  outputLayoutOptions = [
+    { value: 'text-left', label: 'Text left · video right' },
+    { value: 'text-right', label: 'Video left · text right' },
+  ];
+
   tabs = [
     { id: 'home', label: 'Home', icon: 'bx-home-alt' },
     { id: 'scientific-merit', label: 'Scientific Merit', icon: 'bx-analyse' },
@@ -115,38 +132,57 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 'gallery', label: 'Gallery', icon: 'bx-images' },
     { id: 'events', label: 'Events', icon: 'bx-calendar' },
     { id: 'team', label: 'Team', icon: 'bx-group' },
-    { id: 'participants', label: 'Participants', icon: 'bx-user-voice' }
+    { id: 'participants', label: 'Participants', icon: 'bx-user-voice' },
+    { id: 'outputs', label: 'Outputs', icon: 'bx-video' }
   ];
 
   constructor(
     private sidebarService: SidebarService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private portalProjectsService: PortalProjectsService,
+    private destroyRef: DestroyRef,
   ) { }
 
   ngOnInit(): void {
-    this.sidebarService.sidebarVisibility$.subscribe((isVisible: boolean) => {
-      this.isSidebarVisible = isVisible;
-    });
+    this.sidebarService.sidebarVisibility$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isVisible: boolean) => {
+        this.isSidebarVisible = isVisible;
+      });
 
-    // Handle dynamic project name and tab from route
-    this.route.params.subscribe(params => {
-      if (params['name']) {
-        // Find the project in a list or just use the parameter
-        // For now we keep the parameter, but ensure it's handled for display
-        this.projectName = params['name'].toUpperCase();
-      }
-    });
+    combineLatest([
+      this.route.paramMap.pipe(
+        map((m) => m.get('slug')),
+        filter((slug): slug is string => !!slug),
+        distinctUntilChanged(),
+      ),
+      this.portalProjectsService.allProjects$,
+    ])
+      .pipe(
+        switchMap(([slug]) => {
+          this.projectSlug = slug;
+          return this.portalProjectsService.getBySlug(slug);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((project) => {
+        if (!project) {
+          return;
+        }
+        this.projectName = project.title;
+        this.applyContent(project.content);
+      });
 
-    this.route.queryParams.subscribe(params => {
-      if (params['tab']) {
-        this.activeTab = params['tab'];
-      } else {
-        // Default to home if no tab is specified
-        this.activeTab = 'home';
-      }
-    });
+    this.route.queryParamMap
+      .pipe(
+        map((m) => m.get('tab')),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((tab) => {
+        this.activeTab = tab || 'home';
+      });
   }
 
   toggleSidebar(): void {
@@ -179,7 +215,7 @@ export class PortalProjectsListComponent implements OnInit {
   confirmLogout(): void {
     this.logoutModalVisible = false;
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   setActiveTab(tabId: string): void {
@@ -348,12 +384,32 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveScientificMerit(): void {
-    console.log('Saving Scientific Merit:', this.scientificMeritParagraphs);
-    // Backend implementation would go here
+    this.saveAll();
   }
 
   execCommand(command: string, value: string = ''): void {
     document.execCommand(command, false, value);
+    this.syncActiveRichEditorFromDom();
+  }
+
+  /** Keeps paragraph model in sync when execCommand does not fire an `input` event. */
+  private syncActiveRichEditorFromDom(): void {
+    const el = this.lastFocusedEditor;
+    if (!el?.id) {
+      return;
+    }
+    const id = el.id;
+    if (id.startsWith('obj-')) {
+      const i = +id.slice(4);
+      if (!Number.isNaN(i) && this.objectivesParagraphs[i]) {
+        this.objectivesParagraphs[i].content = el.innerHTML;
+      }
+    } else if (id.startsWith('p-')) {
+      const i = +id.slice(2);
+      if (!Number.isNaN(i) && this.scientificMeritParagraphs[i]) {
+        this.scientificMeritParagraphs[i].content = el.innerHTML;
+      }
+    }
   }
 
   toggleSpecialCharPicker(event: MouseEvent, index: number, tab: string): void {
@@ -397,18 +453,27 @@ export class PortalProjectsListComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (this.specialCharPickerOpen === -1) {
-      return;
-    }
     const target = event.target as HTMLElement | null;
     if (!target) {
       this.closeSpecialCharPicker();
+      this.closeDropdowns();
       return;
     }
-    if (target.closest('.special-char-picker') || target.closest('.special-char-btn')) {
+
+    if (this.specialCharPickerOpen !== -1) {
+      if (!target.closest('.special-char-picker') && !target.closest('.special-char-btn')) {
+        this.closeSpecialCharPicker();
+      }
+    }
+
+    if (
+      target.closest('.custom-dropdown-menu') ||
+      target.closest('.custom-select-trigger') ||
+      target.closest('.output-layout-select')
+    ) {
       return;
     }
-    this.closeSpecialCharPicker();
+
     this.closeDropdowns();
   }
 
@@ -495,13 +560,14 @@ export class PortalProjectsListComponent implements OnInit {
     }
   }
 
-  onContentInput(event: any, index: number, tab: string = 'scientific'): void {
+  onRichHtmlChange(html: string, index: number, tab: 'scientific' | 'objectives'): void {
     if (tab === 'scientific') {
-      this.scientificMeritParagraphs[index].content = event.target.innerHTML;
-    } else if (tab === 'objectives') {
-      this.objectivesParagraphs[index].content = event.target.innerHTML;
+      this.scientificMeritParagraphs[index].content = html;
+    } else {
+      this.objectivesParagraphs[index].content = html;
     }
-    this.lastFocusedEditor = event.target as HTMLElement;
+    const id = tab === 'objectives' ? 'obj-' + index : 'p-' + index;
+    this.lastFocusedEditor = document.getElementById(id) as HTMLElement;
   }
 
   addObjectivesParagraph(): void {
@@ -538,7 +604,7 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveObjectives(): void {
-    console.log('Saving Objectives:', this.objectivesParagraphs);
+    this.saveAll();
   }
 
   onPartnersLogoSelected(event: any, index: number): void {
@@ -651,11 +717,7 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   savePartnersFunders(): void {
-    console.log('Saving Partners & Funders:', {
-      partnersLogos: this.partnersLogos,
-      funderTextLines: this.funderTextLines,
-      funderLogos: this.funderLogos
-    });
+    this.saveAll();
   }
 
   onGalleryImagesSelected(event: any): void {
@@ -739,7 +801,7 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveGallery(): void {
-    console.log('Saving Gallery:', this.galleryImages);
+    this.saveAll();
   }
 
   addEvent(): void {
@@ -786,7 +848,27 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveEvents(): void {
-    console.log('Saving Events:', this.events);
+    this.saveAll();
+  }
+
+  toggleOutputLayoutDropdown(event: MouseEvent, index: number): void {
+    event.stopPropagation();
+    if (this.openOutputLayoutDropdown === index) {
+      this.closeDropdowns();
+      return;
+    }
+    this.closeDropdowns();
+    this.openOutputLayoutDropdown = index;
+    this.computeDropdownPosition(event);
+  }
+
+  selectOutputLayout(layout: string, index: number): void {
+    this.outputs[index].layout = layout;
+    this.closeDropdowns();
+  }
+
+  getOutputLayoutLabel(layout: string): string {
+    return this.outputLayoutOptions.find(o => o.value === layout)?.label ?? 'Text left · video right';
   }
 
   toggleEventStatusDropdown(event: MouseEvent, index: number): void {
@@ -851,6 +933,7 @@ export class PortalProjectsListComponent implements OnInit {
 
   closeDropdowns(): void {
     this.openEventStatusDropdown = -1;
+    this.openOutputLayoutDropdown = -1;
     this.openFontSizeDropdown = -1;
     this.openFontSizeTab = '';
     this.dropdownMenuStyle = {};
@@ -931,7 +1014,7 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveTeam(): void {
-    console.log('Saving Team Sections:', this.teamSections);
+    this.saveAll();
   }
 
   addParticipant(): void {
@@ -977,7 +1060,7 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveParticipants(): void {
-    console.log('Saving Participants:', this.participants);
+    this.saveAll();
   }
 
   addImage(): void {
@@ -1017,13 +1100,119 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   saveHomeConfig(): void {
-    console.log('Saving home configuration:', {
-      carousel: this.homeImages,
-      partnerLogos: this.homePartnerLogos,
-      geoAnalysis: this.homeGeoSections,
-      video: this.homeVideoFile,
-      infoBlocks: this.homeInfoBlocks
+    this.saveAll();
+  }
+
+  addOutput(): void {
+    const newId = this.outputs.length > 0 ? Math.max(...this.outputs.map(o => o.id)) + 1 : 1;
+    const layout = this.outputs.length % 2 === 0 ? 'text-left' : 'text-right';
+    this.outputs.push({
+      id: newId,
+      title: '',
+      description: '',
+      videoUrl: '',
+      layout,
+      order: this.outputs.length + 1
     });
-    // Implementation for saving to backend would go here
+  }
+
+  removeOutput(index: number): void {
+    this.outputs.splice(index, 1);
+    this.updateOutputOrder();
+  }
+
+  moveOutput(index: number, direction: 'up' | 'down'): void {
+    if (direction === 'up' && index > 0) {
+      [this.outputs[index], this.outputs[index - 1]] = [this.outputs[index - 1], this.outputs[index]];
+    } else if (direction === 'down' && index < this.outputs.length - 1) {
+      [this.outputs[index], this.outputs[index + 1]] = [this.outputs[index + 1], this.outputs[index]];
+    }
+    this.updateOutputOrder();
+  }
+
+  private updateOutputOrder(): void {
+    this.outputs.forEach((o, i) => o.order = i + 1);
+  }
+
+  onOutputVideoSelected(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.outputs[index].videoUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  saveOutputs(): void {
+    this.saveAll();
+  }
+
+  private applyContent(content: PortalProjectContent): void {
+    this.homeImages = content.home.carousel?.length ? content.home.carousel : this.homeImages;
+    this.homePartnerLogos = content.home.partnerLogos?.length ? content.home.partnerLogos : this.homePartnerLogos;
+    this.homeGeoSections = content.home.geoSections?.length ? content.home.geoSections : this.homeGeoSections;
+    this.homeVideoFile = content.home.video || this.homeVideoFile;
+    this.homeInfoBlocks = content.home.infoBlocks?.length ? content.home.infoBlocks : this.homeInfoBlocks;
+
+    this.scientificMeritParagraphs = content.scientificMerit.paragraphs?.length ? content.scientificMerit.paragraphs : this.scientificMeritParagraphs;
+    this.objectivesParagraphs = content.objectives.paragraphs?.length ? content.objectives.paragraphs : this.objectivesParagraphs;
+
+    this.partnersLogos = content.partnersFunders.partnersLogos?.length ? content.partnersFunders.partnersLogos : this.partnersLogos;
+    this.funderTextLines = content.partnersFunders.funderTextLines?.length ? content.partnersFunders.funderTextLines : this.funderTextLines;
+    this.funderLogos = content.partnersFunders.funderLogos?.length ? content.partnersFunders.funderLogos : this.funderLogos;
+
+    this.galleryImages = content.gallery.images || [];
+    this.events = content.events.events || [];
+    this.teamSections = content.team.sections || [];
+    this.participants = content.participants.participants || [];
+    this.outputs = content.outputs.outputs?.length ? content.outputs.outputs : this.outputs;
+  }
+
+  private buildContent(): PortalProjectContent {
+    return {
+      home: {
+        carousel: this.homeImages,
+        partnerLogos: this.homePartnerLogos,
+        geoSections: this.homeGeoSections,
+        video: this.homeVideoFile,
+        infoBlocks: this.homeInfoBlocks,
+      },
+      scientificMerit: {
+        paragraphs: this.scientificMeritParagraphs,
+      },
+      objectives: {
+        paragraphs: this.objectivesParagraphs,
+      },
+      partnersFunders: {
+        partnersLogos: this.partnersLogos,
+        funderTextLines: this.funderTextLines,
+        funderLogos: this.funderLogos,
+      },
+      gallery: {
+        images: this.galleryImages,
+      },
+      events: {
+        events: this.events,
+      },
+      team: {
+        sections: this.teamSections,
+      },
+      participants: {
+        participants: this.participants,
+      },
+      outputs: {
+        outputs: this.outputs,
+      },
+    };
+  }
+
+  private saveAll(): void {
+    if (!this.projectSlug) return;
+    this.portalProjectsService.saveContent(this.projectSlug, this.buildContent()).subscribe();
   }
 }

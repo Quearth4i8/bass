@@ -22,9 +22,10 @@
     justify-content: space-between;
     align-items: center;
     transition: 0.6s;
-    padding: 40px 100px;
+    padding: 20px 100px;
     z-index: 100000;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+    background: transparent;
+    box-shadow: none;
   }
   header .dropdown-menu {
     background-color: transparent;
@@ -34,6 +35,7 @@
   header.sticky {
     padding: 15px 100px;
     background-color: #1a5f7a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
   header .icon {
     filter: invert(1);
@@ -271,3 +273,5 @@
   @media (max-width: 768px) {
     header .logo { font-size: 1.5em; }
   }
+
+@import '../../portal/styles/portal-shell-nav.shared.scss';

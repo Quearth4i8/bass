@@ -1,0 +1,77 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  
+  <div class="hero-container">
+    <div class="slider">
+      <div class="list">
+          <div class="item" *ngFor="let item of project.content.home.carousel; let i = index" [class.active]="i === activeSlide">
+              <img [src]="item.url" alt="" loading="lazy" decoding="async">
+              <div class="content">
+                  <p></p>
+                  <h2>{{item.title}}</h2>
+                  <p class="text">{{item.subtitle}}</p>
+              </div>
+          </div>
+      </div>
+      <div class="thumbnail">
+          <div class="item" *ngFor="let item of project.content.home.carousel; let i = index" [class.active]="i === activeSlide" (click)="setSlide(i)">
+              <img [src]="item.url" alt="" loading="lazy" decoding="async">
+          </div>
+      </div>
+      <div class="dots" role="tablist" aria-label="Slide navigation">
+          <button
+              *ngFor="let _ of project.content.home.carousel; let i = index"
+              class="dot"
+              [class.active]="i === activeSlide"
+              (click)="setSlide(i)"
+              [attr.aria-selected]="i === activeSlide"
+              [attr.aria-label]="'Go to slide ' + (i + 1)"
+          ></button>
+      </div>
+    </div>
+    <div class="hero-gradient"></div>
+  </div>
+
+  <section class="body">
+    <div class="logo-strip">
+        <img *ngFor="let logo of project.content.home.partnerLogos; let i = index" 
+             [src]="logo.url" 
+             loading="lazy" 
+             decoding="async" 
+             class="logo"
+             [class.logo--primary]="i === 0">
+    </div>
+
+    <!-- Background Ocean Video is hardcoded in original body, preserving that aesthetic or using dynamic video -->
+    <div class="video-background-container" *ngIf="project.content.home.video?.url">
+        <video class="background-video" autoplay loop muted playsinline preload="metadata">
+            <source src="assets/videos/bg-ocean.mp4" type="video/mp4">
+        </video>
+        <div class="video-container">
+            <video controls preload="metadata" class="observe-video">
+                <source [src]="project.content.home.video.url" type="video/mp4">
+            </video>
+        </div>
+    </div>
+  </section>
+
+  <!-- Info blocks matching original "container2" structure -->
+  <div class="container2" *ngFor="let item of project.content.home.infoBlocks; let i = index">
+      <div class="content-wrapper" #contentWrapper>
+          <section [class]="i % 2 === 0 ? 'text-section-left fade-in-left' : 'text-section-right fade-in-right'"
+              [style.order]="i % 2 === 0 ? 1 : 2">
+              <h1>{{ item.title }}</h1>
+              <h5>{{ item.text }}</h5>
+          </section>
+          <img src="{{ item.imageUrl }}" alt="Image Description" class="image"
+              [ngClass]="i % 2 === 0 ? 'fade-in-right' : 'fade-in-left'" [style.order]="i % 2 === 0 ? 2 : 1" />
+      </div>
+  </div>
+
+</ng-container>
+
+<div *ngIf="!loading && !project" class="empty-state">
+  <i class='bx bx-error-circle'></i>
+  <p>No content available for this project yet.</p>
+</div>

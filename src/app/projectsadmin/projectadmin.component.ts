@@ -133,7 +133,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated() || !this.authService.isAdmin()) {
-      this.router.navigate(['/projects'], { replaceUrl: true });
+      this.router.navigate(['/'], { replaceUrl: true });
       return;
     }
 
@@ -306,12 +306,12 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   confirmLogout(): void {
     this.logoutModalVisible = false;
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   onInput(event: Event, project: any, field: string): void {

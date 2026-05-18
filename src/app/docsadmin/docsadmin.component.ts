@@ -27,7 +27,7 @@ export class DocsadminComponent {
 
   ngOnInit(): void {
     if (!this.authService.isAuthenticated() || !this.authService.isAdmin()) {
-      this.router.navigate(['/projects'], { replaceUrl: true });
+      this.router.navigate(['/'], { replaceUrl: true });
       return;
     }
 
@@ -60,7 +60,7 @@ export class DocsadminComponent {
   confirmLogout(): void {
     this.logoutModalVisible = false;
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   triggerFileUpload(event: MouseEvent): void {
@@ -82,7 +82,7 @@ export class DocsadminComponent {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   onUpload(event: any): void {

@@ -4,7 +4,7 @@
     right: 20px;
     width: 50px;
     height: 50px;
-    background-color: #1a5f7a;
+    background-color: var(--portal-accent, #1a5f7a);
     color: white;
     border: none;
     border-radius: 50%;
@@ -12,10 +12,10 @@
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     z-index: 1000;
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s, transform 0.3s, filter 0.2s ease;
   }
   
   #backToTop:hover {
-    background-color: #159895;
+    filter: brightness(1.12);
     transform: scale(1.1);
   }

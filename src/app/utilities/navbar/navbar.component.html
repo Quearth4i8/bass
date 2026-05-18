@@ -1,31 +1,57 @@
-<header [ngClass]="{'sticky': isSticky}">
+<ng-container *ngIf="portalHomeMode; else legacyNavbar">
+  <header class="portal-shell-nav" [ngClass]="{'sticky': isSticky}">
     <div class="logo-section">
-        <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+      <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
     </div>
-    
+
+    <nav class="portal-nav-center" aria-label="Project sections">
+      <ul>
+        <li *ngFor="let link of portalTopNavLinks">
+          <a
+            [routerLink]="portalLink(link.path)"
+            routerLinkActive="nav-active"
+            [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
+          >
+            {{ link.label }}
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="portal-nav-actions">
+      <app-custom-button></app-custom-button>
+    </div>
+  </header>
+</ng-container>
+
+<ng-template #legacyNavbar>
+  <header [ngClass]="{'sticky': isSticky}">
+    <div class="logo-section">
+      <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+    </div>
+
     <button class="hamburger" type="button" aria-label="Toggle navigation" (click)="toggleMenu()">
       <span></span><span></span><span></span>
     </button>
-  
-  <ul [ngClass]="{'open': isMenuOpen}">
-    <li class="dropdown" [ngClass]="{'open': openDropdown==='imas'}">
-      <a routerLink="#" class="dropdown-toggle" (click)="toggleDropdown('imas', $event)">
-        IMAS-Ichkeul
-        <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
-      </a>
-      <ul class="dropdown-menu" style=" padding: 10px;" [ngClass]="{'show': openDropdown==='imas'}">
-        <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
-      </ul>
-    </li>
-    <li><a routerLink="/gallery">Gallery</a></li>
-    <li><a routerLink="/events">Events</a></li>
-    <li><a routerLink="/team">Team</a></li>
-    <li><a routerLink="/dataproviders">Participants</a></li>
-    <li><a routerLink="/outputs">Outputs</a></li>
-  </ul>
-  <app-custom-button></app-custom-button>
-</header>
 
-
+    <ul [ngClass]="{'open': isMenuOpen}">
+      <li class="dropdown" [ngClass]="{'open': openDropdown==='imas'}">
+        <a routerLink="#" class="dropdown-toggle" (click)="toggleDropdown('imas', $event)">
+          IMAS-Ichkeul
+          <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;" alt=""></span>
+        </a>
+        <ul class="dropdown-menu" style="padding: 10px;" [ngClass]="{'show': openDropdown==='imas'}">
+          <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
+          <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
+          <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
+        </ul>
+      </li>
+      <li><a routerLink="/gallery">Gallery</a></li>
+      <li><a routerLink="/events">Events</a></li>
+      <li><a routerLink="/team">Team</a></li>
+      <li><a routerLink="/dataproviders">Participants</a></li>
+      <li><a routerLink="/outputs">Outputs</a></li>
+    </ul>
+    <app-custom-button></app-custom-button>
+  </header>
+</ng-template>

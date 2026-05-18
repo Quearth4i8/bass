@@ -1,28 +1,53 @@
-<header [ngClass]="{'sticky': isSticky}">
+<ng-container *ngIf="!forceLegacyNav && portalMode; else legacyNavbar2">
+  <header class="portal-shell-nav sticky">
     <div class="logo-section">
-        <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+      <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
     </div>
-  
-  <ul>
-    <li class="dropdown">
-      <a routerLink="#" class="dropdown-toggle">
-        IMAS-Ichkeul
-        <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;"></span>
-      </a>
-      <ul class="dropdown-menu" style=" padding: 10px;">
-        <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
-        <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
+
+    <nav class="portal-nav-center" aria-label="Project sections">
+      <ul>
+        <li *ngFor="let link of portalLinks">
+          <a
+            [routerLink]="portalLink(link.path)"
+            routerLinkActive="nav-active"
+            [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
+          >
+            {{ link.label }}
+          </a>
+        </li>
       </ul>
-    </li>
-    <li><a routerLink="/gallery">Gallery</a></li>
-    <li><a routerLink="/events">Events</a></li>
-    <li><a routerLink="/team">Team</a></li>
-    <li><a routerLink="/dataproviders">Participants</a></li>
-    <li><a routerLink="/outputs">Outputs</a></li>
+    </nav>
 
-  </ul>
-  <app-custom-button></app-custom-button>
-</header>
+    <div class="portal-nav-actions">
+      <app-custom-button></app-custom-button>
+    </div>
+  </header>
+</ng-container>
 
+<ng-template #legacyNavbar2>
+  <header [ngClass]="{'sticky': isSticky}">
+    <div class="logo-section">
+      <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+    </div>
 
+    <ul>
+      <li class="dropdown">
+        <a routerLink="#" class="dropdown-toggle">
+          IMAS-Ichkeul
+          <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;" alt=""></span>
+        </a>
+        <ul class="dropdown-menu" style="padding: 10px;">
+          <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
+          <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
+          <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
+        </ul>
+      </li>
+      <li><a routerLink="/gallery">Gallery</a></li>
+      <li><a routerLink="/events">Events</a></li>
+      <li><a routerLink="/team">Team</a></li>
+      <li><a routerLink="/dataproviders">Participants</a></li>
+      <li><a routerLink="/outputs">Outputs</a></li>
+    </ul>
+    <app-custom-button></app-custom-button>
+  </header>
+</ng-template>

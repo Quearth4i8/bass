@@ -1,0 +1,24 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  <div class="page-header">
+    <h1 class="page-project-title">{{ project.title }}</h1>
+    <h2 class="page-section-title">Participants</h2>
+    <div class="header-divider"></div>
+  </div>
+
+  <div class="participants-grid" *ngIf="project.content.participants.participants?.length">
+    <div class="participant-card" *ngFor="let person of project.content.participants.participants">
+      <div class="participant-avatar">
+        <img [src]="person.image || 'assets/images/avatar-placeholder.png'" [alt]="person.name" loading="lazy">
+      </div>
+      <h4 class="participant-name">{{ person.name }}</h4>
+      <p class="participant-role">{{ person.role }}</p>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!project.content.participants.participants?.length">
+    <i class='bx bx-user-voice'></i>
+    <p>No participants have been added yet.</p>
+  </div>
+</ng-container>

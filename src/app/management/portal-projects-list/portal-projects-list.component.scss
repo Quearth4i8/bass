@@ -2595,11 +2595,18 @@
 
 .rich-editor {
   padding: 20px;
-  min-height: 120px;
+  min-height: 140px;
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: #1e293b;
+  background: #ffffff;
   outline: none;
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  color-scheme: only light;
+  border-top: 1px solid #f1f5f9;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   &:empty::before {
     content: attr(placeholder);
@@ -2620,6 +2627,12 @@
   }
 }
 
+:host ::ng-deep .rich-editor * {
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  text-align: left !important;
+}
+
 .header-actions {
   display: flex;
   gap: 12px;
@@ -2632,5 +2645,281 @@
 
   &:hover {
     background: #f0f9ff;
+  }
+}
+
+/* Portal project — Outputs tab (editor): fields were outside .provider-fields, so inputs looked unstyled */
+.outputs-admin-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.output-editor-card {
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #14b8a6, #1a5f7a);
+    border-radius: 18px 0 0 18px;
+    opacity: 0.9;
+  }
+}
+
+.output-editor-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 16px 22px;
+  margin-left: 4px;
+  background: linear-gradient(90deg, #f0fdfa 0%, #ffffff 55%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.output-editor-card__badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.2), rgba(20, 184, 166, 0.12));
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+
+.output-editor-card__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.output-editor-card__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
+  gap: 0;
+  align-items: stretch;
+  margin-left: 4px;
+}
+
+.output-editor-card__fields {
+  padding: 24px 26px 28px;
+  border-right: 1px solid #eef2f7;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 4px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.55px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      i {
+        font-size: 15px;
+        color: #1a5f7a;
+      }
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #ffffff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+
+      &:hover {
+        border-color: #cbd5e1;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: #1a5f7a;
+        box-shadow: 0 0 0 4px rgba(26, 95, 122, 0.12);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.55;
+    }
+
+    .output-layout-dropdown {
+      width: 100%;
+    }
+
+    .output-layout-select.custom-select-trigger {
+      width: 100%;
+      min-height: 46px;
+      padding: 0 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f172a;
+
+      span {
+        flex: 1;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+.output-editor-card__media-col {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-self: stretch;
+}
+
+.output-video-box {
+  flex: 1;
+  position: relative;
+  display: block;
+  min-height: 240px;
+  overflow: hidden;
+  cursor: pointer;
+  margin: 0;
+  background: #f1f5f9;
+  border-left: 1px solid #eef2f7;
+
+  &.has-video {
+    background: #000;
+  }
+
+  video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .output-video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.42);
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    padding: 16px;
+
+    i {
+      font-size: 32px;
+    }
+  }
+
+  &:hover .output-video-overlay,
+  &:not(.has-video) .output-video-overlay {
+    opacity: 1;
+  }
+
+  &:not(.has-video) .output-video-overlay {
+    background: transparent;
+    color: #64748b;
+
+    i {
+      color: #1a5f7a;
+    }
+  }
+}
+
+.outputs-empty {
+  margin-top: 20px;
+  padding: 56px 40px;
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  text-align: center;
+  color: #64748b;
+
+  i {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+    display: inline-block;
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 960px) {
+  .output-editor-card__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .output-editor-card__fields {
+    border-right: none;
+    border-bottom: 1px solid #eef2f7;
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .output-editor-card__media-col {
+    min-height: 220px;
+    order: -1;
+  }
+
+  .output-video-box {
+    border-left: none;
+    border-bottom: 1px solid #eef2f7;
+    min-height: 220px;
   }
 }

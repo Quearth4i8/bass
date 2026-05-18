@@ -18,23 +18,50 @@ import { ManagementComponent } from './management/management.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { AdminGuard } from './auth/admin.guard';
 
+// Portal public display
+import { PortalProjectDisplayComponent } from './portal-project-display/portal-project-display.component';
+import { PortalPageHomeComponent } from './portal-project-display/pages/portal-page-home/portal-page-home.component';
+import { PortalPageScientificMeritComponent } from './portal-project-display/pages/portal-page-scientific-merit/portal-page-scientific-merit.component';
+import { PortalPageObjectivesComponent } from './portal-project-display/pages/portal-page-objectives/portal-page-objectives.component';
+import { PortalPagePartnersFundersComponent } from './portal-project-display/pages/portal-page-partners-funders/portal-page-partners-funders.component';
+import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
+import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
+import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
+import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
+import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
+
 const routes: Routes = [
   { path: '', component: ProjectsLandingComponent },
-  { path: 'imas-ichkeul', component: HomeComponent },
   { path: 'gallery', component: GalleryComponent },
   { path: 'events', component: EventsComponent },
-  { path: 'ichkeul', component:IchkeulComponent},
-  { path: 'objectives', component:ObjectivesComponent},
-  { path: 'partners', component:PartnersComponent},
-  { path: 'team', component:TeamComponent},
-  { path: 'projects', component:ProjectsComponent},
-  { path: 'projectadmin', component:ProjectAdminComponent, canActivate: [AdminGuard] },
-  { path: 'docsadmin', component:DocsadminComponent, canActivate: [AdminGuard] },
-  { path: 'budget-charts', component:BudgetChartsComponent},
-  { path: 'management', component:ManagementComponent, canActivate: [AdminGuard] },
-  { path: 'management/portal-projects/:name', component:PortalProjectsListComponent, canActivate: [AdminGuard] },
-  { path: 'outputs', component:OutputsComponent},
-  { path: 'dataproviders', component:DataprovidersComponent},
+  { path: 'ichkeul', component: IchkeulComponent },
+  { path: 'objectives', component: ObjectivesComponent },
+  { path: 'partners', component: PartnersComponent },
+  { path: 'team', component: TeamComponent },
+  { path: 'projects', component: ProjectsComponent },
+  { path: 'projectadmin', component: ProjectAdminComponent, canActivate: [AdminGuard] },
+  { path: 'docsadmin', component: DocsadminComponent, canActivate: [AdminGuard] },
+  { path: 'budget-charts', component: BudgetChartsComponent },
+  { path: 'management', component: ManagementComponent, canActivate: [AdminGuard] },
+  { path: 'management/portal-projects/:slug', component: PortalProjectsListComponent, canActivate: [AdminGuard] },
+  {
+    path: 'portal/:slug',
+    component: PortalProjectDisplayComponent,
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home',             component: PortalPageHomeComponent },
+      { path: 'scientific-merit', component: PortalPageScientificMeritComponent },
+      { path: 'objectives',       component: PortalPageObjectivesComponent },
+      { path: 'partners-funders', component: PortalPagePartnersFundersComponent },
+      { path: 'gallery',          component: PortalPageGalleryComponent },
+      { path: 'events',           component: PortalPageEventsComponent },
+      { path: 'team',             component: PortalPageTeamComponent },
+      { path: 'participants',     component: PortalPageParticipantsComponent },
+      { path: 'outputs',          component: PortalPageOutputsComponent },
+    ]
+  },
+  { path: 'outputs', component: OutputsComponent },
+  { path: 'dataproviders', component: DataprovidersComponent },
 ];
 
 @NgModule({

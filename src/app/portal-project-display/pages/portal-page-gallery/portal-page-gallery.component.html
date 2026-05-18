@@ -1,0 +1,41 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  <div class="page-header">
+    <h1 class="page-project-title">{{ project.title }}</h1>
+    <h2 class="page-section-title">Gallery</h2>
+    <div class="header-divider"></div>
+  </div>
+
+  <div class="gallery-grid" *ngIf="project.content.gallery.images?.length">
+    <div
+      class="gallery-item"
+      *ngFor="let img of project.content.gallery.images; let i = index"
+      (click)="openLightbox(i)"
+    >
+      <img [src]="img.url" [alt]="img.name || 'Gallery image'" loading="lazy">
+      <div class="gallery-overlay">
+        <i class='bx bx-zoom-in'></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!project.content.gallery.images?.length">
+    <i class='bx bx-image'></i>
+    <p>No gallery images have been added yet.</p>
+  </div>
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="closeLightbox()">
+    <div class="lightbox-box" (click)="$event.stopPropagation()">
+      <button class="lb-close" (click)="closeLightbox()"><i class='bx bx-x'></i></button>
+      <button class="lb-arrow lb-prev" (click)="prevImage()"><i class='bx bx-chevron-left'></i></button>
+      <img
+        [src]="project.content.gallery.images[lightboxIndex].url"
+        [alt]="project.content.gallery.images[lightboxIndex].name"
+        class="lb-image"
+      >
+      <button class="lb-arrow lb-next" (click)="nextImage()"><i class='bx bx-chevron-right'></i></button>
+      <div class="lb-counter">{{ lightboxIndex + 1 }} / {{ project.content.gallery.images.length }}</div>
+    </div>
+  </div>
+</ng-container>

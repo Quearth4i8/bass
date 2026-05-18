@@ -58,9 +58,21 @@ import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { ManagementComponent } from './management/management.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
+import { ContentEditableHtmlDirective } from './management/portal-projects-list/content-editable-html.directive';
 import { OutputsComponent } from './outputs/outputs.component';
-
 import { AuthInterceptor } from './auth/auth.interceptor';
+
+// Portal public display components
+import { PortalProjectDisplayComponent } from './portal-project-display/portal-project-display.component';
+import { PortalPageHomeComponent } from './portal-project-display/pages/portal-page-home/portal-page-home.component';
+import { PortalPageScientificMeritComponent } from './portal-project-display/pages/portal-page-scientific-merit/portal-page-scientific-merit.component';
+import { PortalPageObjectivesComponent } from './portal-project-display/pages/portal-page-objectives/portal-page-objectives.component';
+import { PortalPagePartnersFundersComponent } from './portal-project-display/pages/portal-page-partners-funders/portal-page-partners-funders.component';
+import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
+import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
+import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
+import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
+import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 
 @NgModule({
   declarations: [
@@ -97,13 +109,24 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     ProjectsLandingComponent,
     ManagementComponent,
     PortalProjectsListComponent,
+    ContentEditableHtmlDirective,
     OutputsComponent,
+    // Portal public display
+    PortalProjectDisplayComponent,
+    PortalPageHomeComponent,
+    PortalPageScientificMeritComponent,
+    PortalPageObjectivesComponent,
+    PortalPagePartnersFundersComponent,
+    PortalPageGalleryComponent,
+    PortalPageEventsComponent,
+    PortalPageTeamComponent,
+    PortalPageParticipantsComponent,
+    PortalPageOutputsComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HammerModule,
-    BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
     MatExpansionModule,
@@ -124,8 +147,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     MessagesModule,
     MessageModule,
     DropdownModule,
-],
-  
+  ],
   providers: [
     DialogService,
     ConfirmationService,

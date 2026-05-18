@@ -362,8 +362,8 @@ export class BudgetChartsComponent implements OnInit {
     console.log('confirmLogout called - logging out...');
     this.logoutModalVisible = false;
     this.authService.logout();
-    console.log('Navigating to /projects');
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    console.log('Navigating to /');
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   getBudgetPercentage(budget: number): number {

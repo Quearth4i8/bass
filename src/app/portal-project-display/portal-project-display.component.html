@@ -1,0 +1,28 @@
+<ng-container *ngIf="!notFound; else notFoundTpl">
+  <div class="portal-root" [style.--portal-accent]="portalAccentHex">
+    <app-navbar *ngIf="showPortalPublicHomeNav"></app-navbar>
+    <app-navbar2 *ngIf="!showPortalPublicHomeNav"></app-navbar2>
+
+    <div class="portal-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <app-upbutton></app-upbutton>
+    <app-footer></app-footer>
+  </div>
+</ng-container>
+
+<ng-template #notFoundTpl>
+  <app-navbar2 [forceLegacyNav]="true"></app-navbar2>
+  <div class="not-found-container">
+    <div class="not-found-box">
+      <i class='bx bx-search-alt'></i>
+      <h1>Project Not Found</h1>
+      <p>The project you're looking for doesn't exist or has been removed.</p>
+      <button class="back-home-btn" (click)="goBack()">
+        <i class='bx bx-home'></i> Back to Projects
+      </button>
+    </div>
+  </div>
+  <app-footer></app-footer>
+</ng-template>

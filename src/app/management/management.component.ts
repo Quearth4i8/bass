@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../services/sidebarservice';
 import { AuthService } from '../services/AuthService';
 import { Router } from '@angular/router';
+
+import { PortalProjectsService } from '../portal/services/portal-projects.service';
+import { PortalProjectMeta } from '../portal/models/portal-project.model';
 
 @Component({
   selector: 'app-management',
   templateUrl: 'management.component.html',
   styleUrls: ['management.component.scss']
 })
-export class ManagementComponent {
+export class ManagementComponent implements OnInit {
   isSidebarVisible = true;
   isUserMenuOpen = false;
   logoutModalVisible = false;
@@ -20,7 +24,8 @@ export class ManagementComponent {
     description: '',
     image: 'assets/images/ichkeul_home.jpg',
     isActive: true,
-    status: 'Active'
+    status: 'Active',
+    accentColor: '#1a5f7a',
   };
 
   // Edit Project State
@@ -29,22 +34,32 @@ export class ManagementComponent {
   editingProject: any = null;
   editingProjectIndex: number = -1;
   
-  portalProjects = [
-    { 
-      title: 'IMAS-ICHKEUL', 
-      description: 'About IMAS-ICHKEUL', 
-      status: 'Active',
-      image: 'assets/images/ichkeul_home.jpg',
-      isActive: true
-    }
-  ];
+  portalProjects: PortalProjectMeta[] = [];
 
-  constructor(private sidebarService: SidebarService, private authService: AuthService, private router: Router) { }
+  get activeProjectsCount(): number {
+    return this.portalProjects.filter(p => p.isActive).length;
+  }
+
+  constructor(
+    private sidebarService: SidebarService,
+    private authService: AuthService,
+    private router: Router,
+    private portalProjectsService: PortalProjectsService,
+    private destroyRef: DestroyRef,
+  ) { }
 
   ngOnInit(): void {
-    this.sidebarService.sidebarVisibility$.subscribe((isVisible) => {
-      this.isSidebarVisible = isVisible;
-    });
+    this.sidebarService.sidebarVisibility$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((isVisible) => {
+        this.isSidebarVisible = isVisible;
+      });
+    this.portalProjectsService
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((projects) => {
+        this.portalProjects = projects;
+      });
   }
 
   toggleSidebar(): void {
@@ -77,7 +92,7 @@ export class ManagementComponent {
   confirmLogout(): void {
     this.logoutModalVisible = false;
     this.authService.logout();
-    this.router.navigate(['/projects'], { replaceUrl: true });
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 
   showAddProjectDialog(): void {
@@ -86,7 +101,8 @@ export class ManagementComponent {
       description: '',
       image: 'assets/images/ichkeul_home.jpg',
       isActive: true,
-      status: 'Active'
+      status: 'Active',
+      accentColor: '#1a5f7a',
     };
     this.isAddModalOpen = true;
   }
@@ -108,20 +124,39 @@ export class ManagementComponent {
 
   confirmAddProject(): void {
     if (this.newProject.title.trim()) {
-      this.portalProjects.push({ ...this.newProject });
-      this.closeAddModal();
+      this.portalProjectsService
+        .create({
+          title: this.newProject.title,
+          description: this.newProject.description,
+          image: this.newProject.image,
+          isActive: this.newProject.isActive,
+          accentColor: this.newProject.accentColor,
+        })
+        .subscribe(() => {
+          this.closeAddModal();
+        });
     }
   }
 
-  goToPortalProjects(projectTitle: string): void {
-    this.router.navigate(['/management/portal-projects', projectTitle.toLowerCase()]);
+  goToPortalProjects(projectSlug: string): void {
+    this.router.navigate(['/management/portal-projects', projectSlug]);
+  }
+
+  goToPortalPublic(projectSlug: string, event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.router.navigate(['/portal', projectSlug]);
   }
 
   // Edit Project Methods
   openEditModal(project: any, index: number, event: MouseEvent): void {
     event.stopPropagation();
     this.editingProjectIndex = index;
-    this.editingProject = { ...project }; // Clone to avoid direct mutation
+    this.editingProject = {
+      ...project,
+      accentColor: project.accentColor || '#1a5f7a',
+    };
     this.isEditModalOpen = true;
   }
 
@@ -143,10 +178,17 @@ export class ManagementComponent {
   }
 
   saveProjectEdit(): void {
-    if (this.editingProjectIndex > -1) {
-      this.portalProjects[this.editingProjectIndex] = { ...this.editingProject };
+    if (this.editingProjectIndex < 0 || !this.editingProject?.slug) return;
+    const slug = this.editingProject.slug as string;
+    this.portalProjectsService.updateMeta(slug, {
+      title: this.editingProject.title,
+      description: this.editingProject.description,
+      image: this.editingProject.image,
+      isActive: this.editingProject.isActive,
+      accentColor: this.editingProject.accentColor,
+    }).subscribe(() => {
       this.closeEditModal();
-    }
+    });
   }
 
   // Delete Project Methods
@@ -162,10 +204,12 @@ export class ManagementComponent {
   }
 
   confirmDeleteProject(): void {
-    if (this.editingProjectIndex > -1) {
-      this.portalProjects.splice(this.editingProjectIndex, 1);
+    if (this.editingProjectIndex < 0) return;
+    const project = this.portalProjects[this.editingProjectIndex];
+    if (!project?.slug) return;
+    this.portalProjectsService.delete(project.slug).subscribe(() => {
       this.closeDeleteModal();
-    }
+    });
   }
 
 }

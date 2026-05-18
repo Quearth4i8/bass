@@ -8,10 +8,14 @@
       <h1 class="page-title">Portal Projects</h1>
     </div>
     <div class="header-right">
-      <button class="header-btn primary" (click)="showLogoutModal($event)">
-        <i class='bx bx-plus'></i>
-        <span>Add New Portal Project</span>
-      </button>
+      <a routerLink="/" class="header-btn">
+        <i class='bx bx-globe'></i>
+        <span>BASSIANA Database Portal</span>
+      </a>
+      <a routerLink="/management" class="header-btn primary">
+        <i class='bx bx-arrow-back'></i>
+        <span>Back to Management</span>
+      </a>
       <div class="user-menu">
         <div class="user-avatar" (click)="toggleUserMenu()">
           <i class='bx bx-user'></i>
@@ -86,7 +90,7 @@
       <div class="breadcrumb">
         <a routerLink="/management">Management</a>
         <i class='bx bx-chevron-right'></i>
-        <a [routerLink]="['/management/portal-projects', projectName.toLowerCase()]">{{ projectName }}</a>
+        <a [routerLink]="['/management/portal-projects', projectSlug]">{{ projectName }}</a>
         <i class='bx bx-chevron-right'></i>
         <span class="active-breadcrumb">{{ getTabLabel(activeTab) }}</span>
       </div>
@@ -422,8 +426,11 @@
               <div 
                 class="rich-editor" 
                 [id]="'p-' + i" 
+                dir="ltr"
+                lang="en"
                 contenteditable="true" 
-                (input)="onContentInput($event, i)"
+                [appContentEditableHtml]="p.content"
+                (appContentEditableHtmlChange)="onRichHtmlChange($event, i, 'scientific')"
                 (focus)="onEditorFocus($event)"
                 placeholder="Start typing your scientific merit content here...">
               </div>
@@ -526,8 +533,11 @@
               <div 
                 class="rich-editor" 
                 [id]="'obj-' + i" 
+                dir="ltr"
+                lang="en"
                 contenteditable="true" 
-                (input)="onContentInput($event, i, 'objectives')"
+                [appContentEditableHtml]="p.content"
+                (appContentEditableHtmlChange)="onRichHtmlChange($event, i, 'objectives')"
                 (focus)="onEditorFocus($event)"
                 placeholder="Start typing your objectives here...">
               </div>
@@ -1025,6 +1035,91 @@
           <div class="team-empty" *ngIf="participants.length === 0">
             <i class='bx bx-user-voice'></i>
             <p>No participants yet. Click <b>Add Participant</b> to start.</p>
+          </div>
+        </div>
+
+        <!-- Outputs -->
+        <div class="tab-content" *ngIf="activeTab === 'outputs'">
+          <div class="content-header">
+            <div class="header-info">
+              <h3><i class='bx bx-video'></i> Outputs</h3>
+              <p>Manage portal project outputs (videos + text blocks).</p>
+            </div>
+            <div class="header-actions">
+              <button class="header-btn secondary" type="button" (click)="addOutput()">
+                <i class='bx bx-plus'></i>
+                <span>Add Output</span>
+              </button>
+              <button class="header-btn primary" (click)="saveOutputs()">
+                <i class='bx bx-save'></i>
+                <span>Save Changes</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="outputs-admin-grid">
+            <div class="output-editor-card" *ngFor="let o of outputs; let i = index">
+              <div class="output-editor-card__head">
+                <span class="output-editor-card__badge">Output {{ i + 1 }}</span>
+                <div class="output-editor-card__head-actions">
+                  <button class="mini-btn" type="button" (click)="moveOutput(i, 'up')" [disabled]="i === 0" title="Move Up">
+                    <i class='bx bx-chevron-up'></i>
+                  </button>
+                  <button class="mini-btn" type="button" (click)="moveOutput(i, 'down')" [disabled]="i === outputs.length - 1" title="Move Down">
+                    <i class='bx bx-chevron-down'></i>
+                  </button>
+                  <button class="mini-btn danger" type="button" (click)="removeOutput(i)" title="Remove">
+                    <i class='bx bx-trash'></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="output-editor-card__grid">
+                <div class="output-editor-card__fields">
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label><i class='bx bx-text'></i> Title</label>
+                      <input type="text" [(ngModel)]="o.title" placeholder="Output title">
+                    </div>
+                    <div class="form-field">
+                      <label><i class='bx bx-layout'></i> Layout</label>
+                      <div class="custom-dropdown-container output-layout-dropdown">
+                        <button type="button" class="output-layout-select custom-select-trigger" (click)="toggleOutputLayoutDropdown($event, i)">
+                          <span>{{ getOutputLayoutLabel(o.layout) }}</span>
+                          <i class='bx bx-chevron-down'></i>
+                        </button>
+                        <ul class="custom-dropdown-menu" *ngIf="openOutputLayoutDropdown === i" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                          <li *ngFor="let opt of outputLayoutOptions" (click)="selectOutputLayout(opt.value, i)">
+                            {{ opt.label }}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label><i class='bx bx-paragraph'></i> Description</label>
+                    <textarea [(ngModel)]="o.description" placeholder="Short description shown next to the video" rows="4"></textarea>
+                  </div>
+                </div>
+
+                <div class="output-editor-card__media-col">
+                  <label class="output-video-box" [class.has-video]="!!o.videoUrl" [for]="'output-video-' + i">
+                    <video *ngIf="o.videoUrl" [src]="o.videoUrl" autoplay muted loop playsinline preload="metadata"></video>
+                    <div class="output-video-overlay">
+                      <i class='bx bx-cloud-upload'></i>
+                      <span>{{ o.videoUrl ? 'Change video' : 'Upload video' }}</span>
+                    </div>
+                  </label>
+                  <input type="file" [id]="'output-video-' + i" (change)="onOutputVideoSelected($event, i)" accept="video/*" hidden>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="outputs-empty" *ngIf="outputs.length === 0">
+            <i class='bx bx-video'></i>
+            <p>No outputs yet. Click <b>Add Output</b> to start.</p>
           </div>
         </div>
       </div>
