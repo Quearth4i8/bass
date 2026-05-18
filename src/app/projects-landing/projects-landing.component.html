@@ -184,22 +184,22 @@
 
   <!-- Projects Grid -->
   <div class="projects-grid">
-    <div *ngFor="let project of projects" class="project-card" [class.active]="project.active" [class.inactive]="!project.active" 
-         (click)="project.active ? navigateToProject(project.id) : null"
-         [style.cursor]="project.active ? 'pointer' : 'default'">
+    <div *ngFor="let project of projects" class="project-card" [class.active]="project.isActive" [class.inactive]="!project.isActive" 
+         (click)="project.isActive ? navigateToProject(project.slug) : null"
+         [style.cursor]="project.isActive ? 'pointer' : 'default'">
       <div class="project-image">
-        <img [src]="project.image" [alt]="project.name">
-        <div class="overlay" *ngIf="!project.active">
+        <img [src]="project.image" [alt]="project.title">
+        <div class="overlay" *ngIf="!project.isActive">
           <span class="coming-soon">Coming Soon</span>
         </div>
       </div>
       <div class="project-content">
-        <h2>{{ project.name }}</h2>
+        <h2>{{ project.title }}</h2>
         <p>{{ project.description }}</p>
-        <button *ngIf="project.active" class="enter-btn" routerLink="/imas-ichkeul" (click)="$event.stopPropagation()">
+        <button *ngIf="project.isActive" class="enter-btn" [routerLink]="['/portal', project.slug]" (click)="$event.stopPropagation()">
           Enter Platform
         </button>
-        <button *ngIf="!project.active" class="enter-btn disabled" disabled>
+        <button *ngIf="!project.isActive" class="enter-btn disabled" disabled>
           Enter Platform
         </button>
       </div>

@@ -19,8 +19,8 @@ export class NavbarComponent implements OnInit {
   openDropdown: string | null = null;
   isHomePage: boolean = false;
 
-  /** Public portal **home** route only (`/portal/:slug`, `/portal/:slug/home`). */
-  portalHomeMode = false;
+  /** Any public portal route (`/portal/:slug/...`). */
+  portalMode = false;
   portalSlug = '';
   portalTitle = '';
 
@@ -62,18 +62,16 @@ export class NavbarComponent implements OnInit {
     const path = (rawUrl.split('?')[0].replace(/\/+$/, '') || '/') as string;
     this.isHomePage =
       path === '/' ||
-      path === '/imas-ichkeul' ||
       /^\/portal\/[^/]+$/.test(path) ||
       /^\/portal\/[^/]+\/home$/.test(path);
   }
 
   private applyUrl(rawUrl: string): void {
     const path = (rawUrl.split('?')[0].replace(/\/+$/, '') || '/') as string;
-    const mRoot = path.match(/^\/portal\/([^/]+)$/);
-    const mHome = path.match(/^\/portal\/([^/]+)\/home$/);
-    this.portalHomeMode = !!(mRoot || mHome);
-    const nextSlug = (mRoot || mHome)?.[1] ?? '';
-    if (this.portalHomeMode) {
+    const mPortal = path.match(/^\/portal\/([^/]+)(?:\/.*)?$/);
+    this.portalMode = !!mPortal;
+    const nextSlug = mPortal?.[1] ?? '';
+    if (this.portalMode) {
       this.portalSlug = nextSlug;
       if (nextSlug !== this.lastPortalSlug) {
         this.lastPortalSlug = nextSlug;

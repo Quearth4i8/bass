@@ -4,22 +4,11 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './utilities/navbar/navbar.component';
 import { CustomButtonComponent } from './custom_buttons/custom-button/custom-button.component';
-import { BodyComponent } from './home/body/body.component';
-import { LandscapeCardsComponent } from './home/landscape-cards/landscape-cards.component';
 import { CustomFbButtonsComponent } from './custom_buttons/custom-fb-buttons/custom-fb-buttons.component';
-import { CarouselComponent } from './home/carousel/carousel.component';
+import { LandscapeCardsComponent } from './home/landscape-cards/landscape-cards.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
-import { GalleryComponent } from './gallery/gallery.component';
-import { HomeComponent } from './home/home/home.component';
-import { EventsComponent } from './events/events.component';
 import { FooterComponent } from './utilities/footer/footer.component';
-import { AboutBassianaComponent } from './about-bassiana/about-bassiana.component';
-import { MissionComponent } from './mission/mission.component';
-import { IchkeulComponent } from './ichkeul/ichkeul.component';
-import { ObjectivesComponent } from './objectives/objectives.component';
-import { PartnersComponent } from './partners/partners.component';
-import { TeamComponent } from './team/team.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { ProjectsComponent } from './projects/projects.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -53,13 +42,11 @@ import { ProjectGroupDialogComponent } from './utilities/dialogues/project-group
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDeleteGroupDialogComponent } from './utilities/dialogues/confirm-delete-group-dialog/confirm-delete-group-dialog.component';
-import { DataprovidersComponent } from './dataproviders/dataproviders.component';
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { ManagementComponent } from './management/management.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { ContentEditableHtmlDirective } from './management/portal-projects-list/content-editable-html.directive';
-import { OutputsComponent } from './outputs/outputs.component';
 import { AuthInterceptor } from './auth/auth.interceptor';
 
 // Portal public display components
@@ -76,24 +63,12 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
 
 @NgModule({
   declarations: [
-    DataprovidersComponent,
     AppComponent,
     NavbarComponent,
     CustomButtonComponent,
-    BodyComponent,
-    LandscapeCardsComponent,
     CustomFbButtonsComponent,
-    CarouselComponent,
-    GalleryComponent,
-    HomeComponent,
-    EventsComponent,
+    LandscapeCardsComponent,
     FooterComponent,
-    AboutBassianaComponent,
-    MissionComponent,
-    IchkeulComponent,
-    ObjectivesComponent,
-    PartnersComponent,
-    TeamComponent,
     ProjectsComponent,
     LoginComponent,
     Navbar2Component,
@@ -110,7 +85,6 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
     ManagementComponent,
     PortalProjectsListComponent,
     ContentEditableHtmlDirective,
-    OutputsComponent,
     // Portal public display
     PortalProjectDisplayComponent,
     PortalPageHomeComponent,

@@ -2,7 +2,6 @@
 
 <ng-container *ngIf="!loading && project">
   <div class="page-header">
-    <h1 class="page-project-title">{{ project.title }}</h1>
     <h2 class="page-section-title">Gallery</h2>
     <div class="header-divider"></div>
   </div>
@@ -22,7 +21,7 @@
 
   <div class="empty-state" *ngIf="!project.content.gallery.images?.length">
     <i class='bx bx-image'></i>
-    <p>No gallery images have been added yet.</p>
+    <p>There is no data.</p>
   </div>
   <!-- Lightbox -->
   <div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="closeLightbox()">

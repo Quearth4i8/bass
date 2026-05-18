@@ -2,16 +2,15 @@
 
 <ng-container *ngIf="!loading && project">
   <div class="page-header">
-    <h1 class="page-project-title">{{ project.title }}</h1>
     <h2 class="page-section-title">Outputs</h2>
     <p class="page-section-lead">Videos and highlights from this project.</p>
     <div class="header-divider"></div>
   </div>
 
-  <div class="outputs-shell" *ngIf="project.content.outputs.outputs?.length">
+  <div class="outputs-shell" *ngIf="nonEmptyOutputs(project.content.outputs.outputs).length">
     <article
       class="output-card"
-      *ngFor="let output of project.content.outputs.outputs; let idx = index"
+      *ngFor="let output of nonEmptyOutputs(project.content.outputs.outputs); let idx = index"
       [class.output-card--reverse]="output.layout === 'text-right'"
       [class.output-card--full]="!output.videoUrl"
     >
@@ -35,8 +34,8 @@
     </article>
   </div>
 
-  <div class="empty-state" *ngIf="!project.content.outputs.outputs?.length">
+  <div class="empty-state" *ngIf="!nonEmptyOutputs(project.content.outputs.outputs).length">
     <i class='bx bx-video-off'></i>
-    <p>No outputs have been added yet.</p>
+    <p>There is no data.</p>
   </div>
 </ng-container>

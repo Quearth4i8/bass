@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PortalProjectContextService } from '../../../portal/services/portal-project-context.service';
 import { PortalProject } from '../../../portal/models/portal-project.model';
+import { PortalOutput } from '../../../portal/models/portal-project.model';
 
 @Component({
   selector: 'app-portal-page-outputs',
@@ -13,6 +14,16 @@ export class PortalPageOutputsComponent implements OnInit, OnDestroy {
   project: PortalProject | null = null;
   loading = true;
   private videoObserver: IntersectionObserver | null = null;
+
+  nonEmptyOutputs(outputs: PortalOutput[] | null | undefined): PortalOutput[] {
+    if (!outputs?.length) return [];
+    return outputs.filter((o) => {
+      const title = (o?.title ?? '').trim();
+      const description = (o?.description ?? '').trim();
+      const videoUrl = (o?.videoUrl ?? '').trim();
+      return title.length > 0 || description.length > 0 || videoUrl.length > 0;
+    });
+  }
 
   constructor(
     private readonly context: PortalProjectContextService,

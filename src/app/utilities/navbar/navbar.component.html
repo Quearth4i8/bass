@@ -1,4 +1,4 @@
-<ng-container *ngIf="portalHomeMode; else legacyNavbar">
+<ng-container *ngIf="portalMode; else legacyNavbar">
   <header class="portal-shell-nav" [ngClass]="{'sticky': isSticky}">
     <div class="logo-section">
       <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
@@ -27,7 +27,7 @@
 <ng-template #legacyNavbar>
   <header [ngClass]="{'sticky': isSticky}">
     <div class="logo-section">
-      <a routerLink="/imas-ichkeul" class="logo">IMAS-ICHKEUL</a>
+      <a routerLink="/" class="logo">BASSIANA</a>
     </div>
 
     <button class="hamburger" type="button" aria-label="Toggle navigation" (click)="toggleMenu()">
@@ -35,22 +35,7 @@
     </button>
 
     <ul [ngClass]="{'open': isMenuOpen}">
-      <li class="dropdown" [ngClass]="{'open': openDropdown==='imas'}">
-        <a routerLink="#" class="dropdown-toggle" (click)="toggleDropdown('imas', $event)">
-          IMAS-Ichkeul
-          <span><img src="assets/images/down.png" class="icon" style="width: 20px; height: 20px;" alt=""></span>
-        </a>
-        <ul class="dropdown-menu" style="padding: 10px;" [ngClass]="{'show': openDropdown==='imas'}">
-          <li style="padding: 5px 5px;"><a routerLink="/ichkeul">Scientific merit</a></li>
-          <li style="padding: 5px 5px;"><a routerLink="/objectives">Objectives</a></li>
-          <li style="padding: 5px 5px;"><a routerLink="/partners">Partners &amp; Funder</a></li>
-        </ul>
-      </li>
-      <li><a routerLink="/gallery">Gallery</a></li>
-      <li><a routerLink="/events">Events</a></li>
-      <li><a routerLink="/team">Team</a></li>
-      <li><a routerLink="/dataproviders">Participants</a></li>
-      <li><a routerLink="/outputs">Outputs</a></li>
+      <li><a routerLink="/projects">Projects</a></li>
     </ul>
     <app-custom-button></app-custom-button>
   </header>

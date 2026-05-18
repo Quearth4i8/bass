@@ -1,6 +1,9 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
+import { PortalProjectsService } from '../portal/services/portal-projects.service';
+import { PortalProjectMeta } from '../portal/models/portal-project.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-projects-landing',
@@ -15,41 +18,24 @@ export class ProjectsLandingComponent implements OnInit {
   showPassword: boolean = false;
   isAdminLoggedIn: boolean = false;
 
-  projects = [
-    {
-      id: 'imas-ichkeul',
-      name: 'IMAS-ICHKEUL',
-      description: 'About IMAS-ICHKEUL',
-      image: 'assets/images/4.png',
-      active: true
-    },
-    {
-      id: 'abcdrybasin',
-      name: 'ABCDryBasin',
-      description: 'Coming Soon',
-      image: 'assets/images/1.png',
-      active: false
-    },
-    {
-      id: 'bassiana',
-      name: 'BASSIANA',
-      description: 'Coming Soon',
-      image: 'assets/images/2.png',
-      active: false
-    },
-    {
-      id: 'summonehealth',
-      name: 'SUMME_One Health',
-      description: 'Coming Soon',
-      image: 'assets/images/3.png',
-      active: false
-    }
-  ];
+  projects: PortalProjectMeta[] = [];
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private portalProjectsService: PortalProjectsService,
+    private destroyRef: DestroyRef,
+  ) {}
 
   ngOnInit(): void {
     this.checkAdminSession();
+
+    this.portalProjectsService
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((projects) => {
+        this.projects = [...projects].sort((a, b) => Number(b.isActive) - Number(a.isActive));
+      });
   }
 
   private checkAdminSession(): void {
@@ -116,10 +102,7 @@ export class ProjectsLandingComponent implements OnInit {
     }
   }
 
-  navigateToProject(projectId: string): void {
-    if (projectId === 'imas-ichkeul') {
-      this.router.navigate(['/imas-ichkeul']);
-    }
-    // Add navigation for other projects when they become active
+  navigateToProject(projectSlug: string): void {
+    this.router.navigate(['/portal', projectSlug]);
   }
 }

@@ -2,21 +2,20 @@
 
 <ng-container *ngIf="!loading && project">
   <div class="page-header">
-    <h1 class="page-project-title">{{ project.title }}</h1>
     <h2 class="page-section-title">Objectives</h2>
     <div class="header-divider"></div>
   </div>
 
-  <div class="content-container" *ngIf="project.content.objectives.paragraphs?.length">
+  <div class="content-container" *ngIf="nonEmptyParagraphs(project.content.objectives.paragraphs).length">
     <div
       class="rich-paragraph"
-      *ngFor="let para of project.content.objectives.paragraphs"
+      *ngFor="let para of nonEmptyParagraphs(project.content.objectives.paragraphs)"
       [innerHTML]="para.content"
     ></div>
   </div>
 
-  <div class="empty-state" *ngIf="!project.content.objectives.paragraphs?.length">
+  <div class="empty-state" *ngIf="!nonEmptyParagraphs(project.content.objectives.paragraphs).length">
     <i class='bx bx-target-lock'></i>
-    <p>No objectives content has been added yet.</p>
+    <p>There is no data.</p>
   </div>
 </ng-container>
