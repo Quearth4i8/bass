@@ -5,8 +5,10 @@ import { AuthService } from '../../services/AuthService';
 import { Router, ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { MessageService } from 'primeng/api';
 
 import { PortalProjectsService } from '../../portal/services/portal-projects.service';
+import { PortalMediaService } from '../../portal/services/portal-media.service';
 import { PortalProjectContent } from '../../portal/models/portal-project.model';
 
 @Component({
@@ -89,13 +91,17 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 1, name: 'John Doe', role: 'Data Specialist', image: '', order: 1 }
   ];
 
-  outputs: any[] = [
-    { id: 1, title: '', description: '', videoUrl: '', layout: 'text-left', order: 1 }
-  ];
+  outputs: any[] = [];
+
+  totalProjectsCount = 0;
+  activeProjectsCount = 0;
 
   events: any[] = [
-    { id: 1, date: '2020-11-22', timeFrom: '09:00', timeTo: '17:00', title: 'International Workshop on Wetland Conservation', location: 'Ichkeul National Park, Tunisia', description: 'A workshop bringing together experts to discuss strategies for wetland conservation and sustainable management of the Ichkeul ecosystem.', status: 'finished' }
+    { id: 1, title: 'International Workshop on Wetland Conservation', organiser: 'BASS Team', startDate: '2020-11-22', endDate: '2020-11-23', location: 'Ichkeul National Park, Tunisia', presentation: 'Main presentation on wetland management', speaker: 'Dr. Smith', participants: 'Local experts, researchers', status: 'finished' }
   ];
+
+  uploadingHomeVideo = false;
+  uploadingOutputVideo: number = -1;
 
   openEventStatusDropdown: number = -1;
   openOutputLayoutDropdown: number = -1;
@@ -142,7 +148,9 @@ export class PortalProjectsListComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private portalProjectsService: PortalProjectsService,
+    private portalMediaService: PortalMediaService,
     private destroyRef: DestroyRef,
+    private messageService: MessageService,
   ) { }
 
   ngOnInit(): void {
@@ -150,6 +158,13 @@ export class PortalProjectsListComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((isVisible: boolean) => {
         this.isSidebarVisible = isVisible;
+      });
+
+    this.portalProjectsService.allProjects$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((projects) => {
+        this.totalProjectsCount = projects.length;
+        this.activeProjectsCount = projects.filter(p => p.isActive).length;
       });
 
     combineLatest([
@@ -287,15 +302,21 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   onVideoSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.homeVideoFile.name = file.name;
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.homeVideoFile.url = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    const file: File | undefined = event.target.files[0];
+    if (!file) return;
+    this.uploadingHomeVideo = true;
+    this.homeVideoFile.name = file.name;
+    this.portalMediaService.uploadFile(file).subscribe({
+      next: (url) => {
+        this.homeVideoFile.url = url;
+        this.uploadingHomeVideo = false;
+      },
+      error: () => {
+        this.uploadingHomeVideo = false;
+        this.messageService.add({ severity: 'error', summary: 'Upload failed', detail: 'Could not upload video. Check file size and try again.' });
+      },
+    });
+    event.target.value = '';
   }
 
   removeVideo(): void {
@@ -810,12 +831,14 @@ export class PortalProjectsListComponent implements OnInit {
       : 1;
     this.events.push({
       id: newId,
-      date: '',
-      timeFrom: '',
-      timeTo: '',
       title: '',
+      organiser: '',
+      startDate: '',
+      endDate: '',
       location: '',
-      description: '',
+      presentation: '',
+      speaker: '',
+      participants: '',
       status: 'ongoing'
     });
   }
@@ -901,6 +924,9 @@ export class PortalProjectsListComponent implements OnInit {
 
   selectFontSize(size: string): void {
     if (size) {
+      if (this.lastFocusedEditor) {
+        this.lastFocusedEditor.focus();
+      }
       this.execCommand('fontSize', size);
     }
     this.closeDropdowns();
@@ -1137,14 +1163,18 @@ export class PortalProjectsListComponent implements OnInit {
   onOutputVideoSelected(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.outputs[index].videoUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    if (!file) return;
+    this.uploadingOutputVideo = index;
+    this.portalMediaService.uploadFile(file).subscribe({
+      next: (url) => {
+        this.outputs[index].videoUrl = url;
+        this.uploadingOutputVideo = -1;
+      },
+      error: () => {
+        this.uploadingOutputVideo = -1;
+        this.messageService.add({ severity: 'error', summary: 'Upload failed', detail: 'Could not upload video. Check file size and try again.' });
+      },
+    });
     input.value = '';
   }
 
@@ -1170,7 +1200,7 @@ export class PortalProjectsListComponent implements OnInit {
     this.events = content.events.events || [];
     this.teamSections = content.team.sections || [];
     this.participants = content.participants.participants || [];
-    this.outputs = content.outputs.outputs?.length ? content.outputs.outputs : this.outputs;
+    this.outputs = content.outputs?.outputs || [];
   }
 
   private buildContent(): PortalProjectContent {
@@ -1213,6 +1243,31 @@ export class PortalProjectsListComponent implements OnInit {
 
   private saveAll(): void {
     if (!this.projectSlug) return;
-    this.portalProjectsService.saveContent(this.projectSlug, this.buildContent()).subscribe();
+    this.portalProjectsService.saveContent(this.projectSlug, this.buildContent()).subscribe({
+      next: (res) => {
+        if (res) {
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Success', 
+            detail: 'Changes saved successfully',
+            life: 3000
+          });
+        } else {
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'Failed to save changes' 
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Save error:', err);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'An error occurred while saving' 
+        });
+      }
+    });
   }
 }

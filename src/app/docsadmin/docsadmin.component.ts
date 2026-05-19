@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { SidebarService } from '../services/sidebarservice';
 import { FileUpload } from 'primeng/fileupload';
 import { AuthService } from '../services/AuthService';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-docsadmin',
   templateUrl: 'docsadmin.component.html',
-  styleUrls: ['docsadmin.component.scss'],
+  styleUrls: ['docsadmin.component.scss']
 })
 export class DocsadminComponent {
 
@@ -23,6 +24,7 @@ export class DocsadminComponent {
     private authService: AuthService,
     private http: HttpClient,
     private router: Router,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit(): void {
@@ -105,10 +107,19 @@ export class DocsadminComponent {
 
       this.http.post(uploadUrl, formData).subscribe({
         next: () => {
-          console.log('Uploaded file:', file.name);
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: 'Success', 
+            detail: `File "${file.name}" uploaded successfully` 
+          });
         },
         error: (err) => {
           console.error('Upload failed for file:', file.name, err);
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: `Failed to upload file "${file.name}"` 
+          });
         }
       });
     }

@@ -16,7 +16,7 @@ export class PortalPageOutputsComponent implements OnInit, OnDestroy {
   private videoObserver: IntersectionObserver | null = null;
 
   nonEmptyOutputs(outputs: PortalOutput[] | null | undefined): PortalOutput[] {
-    if (!outputs?.length) return [];
+    if (!outputs || !Array.isArray(outputs)) return [];
     return outputs.filter((o) => {
       const title = (o?.title ?? '').trim();
       const description = (o?.description ?? '').trim();

@@ -14,8 +14,7 @@ import { AuthService } from '../services/AuthService';
 @Component({
   selector: 'projectadmin',
   templateUrl: 'projectadmin.component.html',
-  styleUrls: ['projectadmin.component.scss'],
-  providers: [MessageService]
+  styleUrls: ['projectadmin.component.scss']
 })
 export class ProjectAdminComponent implements OnInit, OnDestroy {
   ref: DynamicDialogRef | undefined;

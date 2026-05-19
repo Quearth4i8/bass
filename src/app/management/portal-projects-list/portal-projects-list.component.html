@@ -61,7 +61,7 @@
           <i class='bx bx-grid-alt'></i>
         </div>
         <div class="stat-info">
-          <h2>2</h2>
+          <h2>{{ totalProjectsCount }}</h2>
           <p>Portal Projects</p>
         </div>
       </div>
@@ -70,7 +70,7 @@
           <i class='bx bx-check-circle'></i>
         </div>
         <div class="stat-info">
-          <h2>2</h2>
+          <h2>{{ activeProjectsCount }}</h2>
           <p>Active Projects</p>
         </div>
       </div>
@@ -241,9 +241,14 @@
 
               <div class="video-upload-container single-column">
                 <div class="video-preview-box" [class.has-video]="homeVideoFile.url">
-                  <video *ngIf="homeVideoFile.url" [src]="homeVideoFile.url" controls class="video-player"></video>
-                  
-                  <div class="video-upload-placeholder" *ngIf="!homeVideoFile.url">
+                  <video *ngIf="homeVideoFile.url && !uploadingHomeVideo" [src]="homeVideoFile.url" controls class="video-player"></video>
+
+                  <div class="video-upload-placeholder" *ngIf="uploadingHomeVideo">
+                    <i class='bx bx-loader-alt bx-spin'></i>
+                    <span>Uploading video…</span>
+                  </div>
+
+                  <div class="video-upload-placeholder" *ngIf="!homeVideoFile.url && !uploadingHomeVideo">
                     <i class='bx bx-video-plus'></i>
                     <span>No video uploaded</span>
                     <label class="video-upload-btn primary" for="video-upload-input">
@@ -252,7 +257,7 @@
                     </label>
                   </div>
 
-                  <div class="video-controls-overlay" *ngIf="homeVideoFile.url">
+                  <div class="video-controls-overlay" *ngIf="homeVideoFile.url && !uploadingHomeVideo">
                     <label class="overlay-btn" for="video-upload-input">
                       <i class='bx bx-refresh'></i>
                       <span>Change Video</span>
@@ -262,10 +267,10 @@
                       <span>Remove</span>
                     </button>
                   </div>
-                  
-                  <input id="video-upload-input" type="file" (change)="onVideoSelected($event)" accept="video/*" hidden>
+
+                  <input id="video-upload-input" type="file" (change)="onVideoSelected($event)" accept="video/*" [disabled]="uploadingHomeVideo" hidden>
                 </div>
-                <p class="video-filename" *ngIf="homeVideoFile.name">
+                <p class="video-filename" *ngIf="homeVideoFile.name && !uploadingHomeVideo">
                   <i class='bx bx-file'></i> {{ homeVideoFile.name }}
                 </p>
               </div>
@@ -378,10 +383,10 @@
                         <i class='bx bx-chevron-down'></i>
                       </button>
                       <ul class="custom-dropdown-menu" *ngIf="openFontSizeDropdown === i && openFontSizeTab === 'scientific'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
-                        <li (click)="selectFontSize('1')">Small</li>
-                        <li (click)="selectFontSize('3')">Normal</li>
-                        <li (click)="selectFontSize('5')">Large</li>
-                        <li (click)="selectFontSize('7')">Extra Large</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('1')">Small</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('3')">Normal</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('5')">Large</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('7')">Extra Large</li>
                       </ul>
                     </div>
                     <div class="control-separator"></div>
@@ -485,10 +490,10 @@
                         <i class='bx bx-chevron-down'></i>
                       </button>
                       <ul class="custom-dropdown-menu" *ngIf="openFontSizeDropdown === i && openFontSizeTab === 'objectives'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
-                        <li (click)="selectFontSize('1')">Small</li>
-                        <li (click)="selectFontSize('3')">Normal</li>
-                        <li (click)="selectFontSize('5')">Large</li>
-                        <li (click)="selectFontSize('7')">Extra Large</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('1')">Small</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('3')">Normal</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('5')">Large</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('7')">Extra Large</li>
                       </ul>
                     </div>
                     <div class="control-separator"></div>
@@ -787,10 +792,10 @@
           <div class="events-list">
             <div class="event-card" *ngFor="let ev of events; let i = index">
               <div class="event-card-left">
-                <div class="event-date-block" [class.has-date]="ev.date">
-                  <div class="event-day" *ngIf="ev.date">{{ getEventDay(ev.date) }}</div>
-                  <div class="event-date-display" *ngIf="ev.date">{{ formatEventDate(ev.date) }}</div>
-                  <div class="event-date-empty" *ngIf="!ev.date">
+                <div class="event-date-block" [class.has-date]="ev.startDate">
+                  <div class="event-day" *ngIf="ev.startDate">{{ getEventDay(ev.startDate) }}</div>
+                  <div class="event-date-display" *ngIf="ev.startDate">{{ formatEventDate(ev.startDate) }}</div>
+                  <div class="event-date-empty" *ngIf="!ev.startDate">
                     <i class='bx bx-calendar'></i>
                     <span>No date</span>
                   </div>
@@ -799,9 +804,9 @@
 
               <div class="event-card-body">
                 <div class="event-top-row">
-                  <div class="event-time-range" *ngIf="ev.timeFrom || ev.timeTo">
-                    <i class='bx bx-time-five'></i>
-                    <span>{{ ev.timeFrom || '—' }} – {{ ev.timeTo || '—' }}</span>
+                  <div class="event-time-range" *ngIf="ev.startDate || ev.endDate">
+                    <i class='bx bx-calendar-event'></i>
+                    <span>{{ ev.startDate || '—' }} <i class='bx bx-right-arrow-alt'></i> {{ ev.endDate || '—' }}</span>
                   </div>
                   <span class="event-status-badge" [class.ongoing]="ev.status === 'ongoing'" [class.finished]="ev.status === 'finished'" [class.canceled]="ev.status === 'canceled'">
                     <span class="status-dot"></span>
@@ -812,8 +817,30 @@
                 <div class="event-fields">
                   <div class="form-row">
                     <div class="event-field">
-                      <label>Date</label>
-                      <input type="date" [(ngModel)]="ev.date" class="event-input">
+                      <label>Event Title</label>
+                      <input type="text" [(ngModel)]="ev.title" class="event-input" placeholder="Enter event title...">
+                    </div>
+                    <div class="event-field">
+                      <label>Organiser</label>
+                      <input type="text" [(ngModel)]="ev.organiser" class="event-input" placeholder="Enter organiser...">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="event-field">
+                      <label>Start Date</label>
+                      <input type="date" [(ngModel)]="ev.startDate" class="event-input">
+                    </div>
+                    <div class="event-field">
+                      <label>End Date</label>
+                      <input type="date" [(ngModel)]="ev.endDate" class="event-input">
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="event-field">
+                      <label>Location</label>
+                      <input type="text" [(ngModel)]="ev.location" class="event-input" placeholder="Enter location...">
                     </div>
                     <div class="event-field">
                       <label>Status</label>
@@ -842,32 +869,21 @@
                       </div>
                     </div>
                   </div>
-                  
-                  <div class="form-row">
-                    <div class="event-field">
-                      <label>Time From</label>
-                      <input type="time" [(ngModel)]="ev.timeFrom" class="event-input">
-                    </div>
-                    <div class="event-field">
-                      <label>Time To</label>
-                      <input type="time" [(ngModel)]="ev.timeTo" class="event-input">
-                    </div>
-                  </div>
 
                   <div class="form-row">
                     <div class="event-field">
-                      <label>Event Title</label>
-                      <input type="text" [(ngModel)]="ev.title" class="event-input" placeholder="Enter event title...">
+                      <label>Speaker</label>
+                      <input type="text" [(ngModel)]="ev.speaker" class="event-input" placeholder="Enter speaker name...">
                     </div>
                     <div class="event-field">
-                      <label>Location</label>
-                      <input type="text" [(ngModel)]="ev.location" class="event-input" placeholder="Enter location...">
+                      <label>Participant(s)</label>
+                      <input type="text" [(ngModel)]="ev.participants" class="event-input" placeholder="Enter participants...">
                     </div>
                   </div>
 
                   <div class="event-field full-width">
-                    <label>Description</label>
-                    <textarea [(ngModel)]="ev.description" class="event-textarea" placeholder="Describe the event..." rows="2"></textarea>
+                    <label>Presentation</label>
+                    <textarea [(ngModel)]="ev.presentation" class="event-textarea" placeholder="Enter presentation details..." rows="3"></textarea>
                   </div>
                 </div>
               </div>
@@ -938,6 +954,7 @@
                 </div>
                 
                 <div class="member-item-card" *ngFor="let member of section.members; let mIdx = index">
+                  <div class="member-card-banner"></div>
                   <div class="member-photo-box">
                     <img *ngIf="member.image" [src]="member.image" alt="Member">
                     <div *ngIf="!member.image" class="member-photo-placeholder">
@@ -1002,6 +1019,7 @@
             </div>
 
             <div class="member-item-card" *ngFor="let p of participants; let i = index">
+              <div class="member-card-banner"></div>
               <div class="member-photo-box">
                 <img *ngIf="p.image" [src]="p.image" alt="Participant">
                 <div *ngIf="!p.image" class="member-photo-placeholder">
@@ -1104,14 +1122,15 @@
                 </div>
 
                 <div class="output-editor-card__media-col">
-                  <label class="output-video-box" [class.has-video]="!!o.videoUrl" [for]="'output-video-' + i">
-                    <video *ngIf="o.videoUrl" [src]="o.videoUrl" autoplay muted loop playsinline preload="metadata"></video>
+                  <label class="output-video-box" [class.has-video]="!!o.videoUrl && uploadingOutputVideo !== i" [for]="'output-video-' + i">
+                    <video *ngIf="o.videoUrl && uploadingOutputVideo !== i" [src]="o.videoUrl" autoplay muted loop playsinline preload="metadata"></video>
                     <div class="output-video-overlay">
-                      <i class='bx bx-cloud-upload'></i>
-                      <span>{{ o.videoUrl ? 'Change video' : 'Upload video' }}</span>
+                      <i *ngIf="uploadingOutputVideo === i" class='bx bx-loader-alt bx-spin'></i>
+                      <i *ngIf="uploadingOutputVideo !== i" class='bx bx-cloud-upload'></i>
+                      <span>{{ uploadingOutputVideo === i ? 'Uploading…' : (o.videoUrl ? 'Change video' : 'Upload video') }}</span>
                     </div>
                   </label>
-                  <input type="file" [id]="'output-video-' + i" (change)="onOutputVideoSelected($event, i)" accept="video/*" hidden>
+                  <input type="file" [id]="'output-video-' + i" (change)="onOutputVideoSelected($event, i)" accept="video/*" [disabled]="uploadingOutputVideo === i" hidden>
                 </div>
               </div>
             </div>
@@ -1144,4 +1163,6 @@
       </div>
     </div>
   </div>
+
+  <app-upbutton></app-upbutton>
 </div>

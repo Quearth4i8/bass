@@ -9,8 +9,7 @@ import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-project-group-dialog',
   templateUrl: './project-group-dialog.component.html',
-  styleUrls: ['./project-group-dialog.component.scss'],
-  providers: [MessageService]
+  styleUrls: ['./project-group-dialog.component.scss']
 })
 export class ProjectGroupDialogComponent implements OnInit {
   projectGroupTitles: any[] = [];

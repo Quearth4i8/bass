@@ -55,12 +55,14 @@ export type PortalEventStatus = 'ongoing' | 'finished' | 'canceled';
 
 export interface PortalEvent {
   id: number;
-  date: string;
-  timeFrom: string;
-  timeTo: string;
   title: string;
+  organiser: string;
+  startDate: string;
+  endDate: string;
   location: string;
-  description: string;
+  presentation: string;
+  speaker: string;
+  participants: string;
   status: PortalEventStatus;
 }
 

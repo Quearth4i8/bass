@@ -41,6 +41,7 @@ import { MessageModule } from 'primeng/message';
 import { ProjectGroupDialogComponent } from './utilities/dialogues/project-group-dialog/project-group-dialog.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DropdownModule } from 'primeng/dropdown';
+import { ToastModule } from 'primeng/toast';
 import { ConfirmDeleteGroupDialogComponent } from './utilities/dialogues/confirm-delete-group-dialog/confirm-delete-group-dialog.component';
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
@@ -121,6 +122,7 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
     MessagesModule,
     MessageModule,
     DropdownModule,
+    ToastModule,
   ],
   providers: [
     DialogService,

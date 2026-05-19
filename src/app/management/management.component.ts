@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../services/sidebarservice';
 import { AuthService } from '../services/AuthService';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 import { PortalProjectsService } from '../portal/services/portal-projects.service';
 import { PortalProjectMeta } from '../portal/models/portal-project.model';
@@ -46,6 +47,7 @@ export class ManagementComponent implements OnInit {
     private router: Router,
     private portalProjectsService: PortalProjectsService,
     private destroyRef: DestroyRef,
+    private messageService: MessageService,
   ) { }
 
   ngOnInit(): void {
@@ -132,8 +134,16 @@ export class ManagementComponent implements OnInit {
           isActive: this.newProject.isActive,
           accentColor: this.newProject.accentColor,
         })
-        .subscribe(() => {
-          this.closeAddModal();
+        .subscribe({
+          next: (res) => {
+            if (res) {
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Project created successfully' });
+              this.closeAddModal();
+            }
+          },
+          error: () => {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create project' });
+          }
         });
     }
   }
@@ -186,8 +196,16 @@ export class ManagementComponent implements OnInit {
       image: this.editingProject.image,
       isActive: this.editingProject.isActive,
       accentColor: this.editingProject.accentColor,
-    }).subscribe(() => {
-      this.closeEditModal();
+    }).subscribe({
+      next: (res) => {
+        if (res) {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Project updated successfully' });
+          this.closeEditModal();
+        }
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update project' });
+      }
     });
   }
 
@@ -207,8 +225,19 @@ export class ManagementComponent implements OnInit {
     if (this.editingProjectIndex < 0) return;
     const project = this.portalProjects[this.editingProjectIndex];
     if (!project?.slug) return;
-    this.portalProjectsService.delete(project.slug).subscribe(() => {
-      this.closeDeleteModal();
+    this.portalProjectsService.delete(project.slug).subscribe({
+      next: (deleted) => {
+        if (deleted) {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully' });
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete project' });
+        }
+        this.closeDeleteModal();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'An error occurred while deleting' });
+        this.closeDeleteModal();
+      }
     });
   }
 

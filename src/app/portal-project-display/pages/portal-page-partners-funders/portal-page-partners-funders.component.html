@@ -21,9 +21,11 @@
     <h3 class="section-label"><i class='bx bx-dollar-circle'></i> Funders</h3>
 
     <ul class="funder-list" *ngIf="project.content.partnersFunders.funderTextLines?.length">
-      <li *ngFor="let line of project.content.partnersFunders.funderTextLines">
-        <i class='bx bx-check-circle'></i> {{ line.text }}
-      </li>
+      <ng-container *ngFor="let line of project.content.partnersFunders.funderTextLines">
+        <li *ngIf="line.text">
+          <i class='bx bx-check-circle'></i> {{ line.text }}
+        </li>
+      </ng-container>
     </ul>
 
     <div class="logo-grid" *ngIf="project.content.partnersFunders.funderLogos?.length">

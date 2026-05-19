@@ -43,9 +43,6 @@ export class ProjectsComponent implements OnInit {
   ngOnInit() {
     this.loadProjectGroups();
     this.checkAdminSession();
-    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
-      this.router.navigate(['/'], { replaceUrl: true });
-    }
   }
 
   private checkAdminSession(): void {
@@ -281,7 +278,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   @HostListener('window:scroll', ['$event'])
-  onWindowScroll(): void {
+  onWindowScroll(_event: Event): void {
     // Close all dropdowns on scroll
     this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
     this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);

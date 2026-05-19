@@ -9,19 +9,44 @@
   <div class="events-container" *ngIf="project.content.events.events?.length">
     <div class="event-card" *ngFor="let event of project.content.events.events">
       <div class="event-date-col">
-        <span class="event-day">{{ getEventDay(event.date) }}</span>
-        <span class="event-full-date">{{ formatEventDate(event.date) }}</span>
-        <span class="event-time">{{ event.timeFrom }} – {{ event.timeTo }}</span>
+        <span class="event-day">{{ getEventDay(event.startDate) }}</span>
+        <span class="event-full-date">{{ formatEventDate(event.startDate) }}</span>
+        <div class="event-range" *ngIf="event.endDate && event.endDate !== event.startDate">
+          <span class="range-to">to</span>
+          <span class="event-full-date">{{ formatEventDate(event.endDate) }}</span>
+        </div>
       </div>
       <div class="event-body">
         <div class="event-top">
           <h3 class="event-title">{{ event.title }}</h3>
           <span class="event-status" [ngClass]="getStatusClass(event.status)">
-            {{ event.status | titlecase }}
+            {{ event.status === 'ongoing' ? 'On Going' : (event.status === 'finished' ? 'Finished' : 'Canceled') }}
           </span>
         </div>
-        <p class="event-location"><i class='bx bx-map-pin'></i> {{ event.location }}</p>
-        <p class="event-description">{{ event.description }}</p>
+        
+        <div class="event-meta-grid">
+          <p class="event-meta-item" *ngIf="event.organiser">
+            <i class='bx bx-buildings'></i> 
+            <strong>Organiser:</strong> {{ event.organiser }}
+          </p>
+          <p class="event-meta-item" *ngIf="event.location">
+            <i class='bx bx-map-pin'></i> 
+            <strong>Location:</strong> {{ event.location }}
+          </p>
+          <p class="event-meta-item" *ngIf="event.speaker">
+            <i class='bx bx-user-voice'></i> 
+            <strong>Speaker:</strong> {{ event.speaker }}
+          </p>
+          <p class="event-meta-item" *ngIf="event.participants">
+            <i class='bx bx-group'></i> 
+            <strong>Participant(s):</strong> {{ event.participants }}
+          </p>
+        </div>
+
+        <div class="event-presentation" *ngIf="event.presentation">
+          <h4 class="presentation-title">Presentation</h4>
+          <p class="presentation-text">{{ event.presentation }}</p>
+        </div>
       </div>
     </div>
   </div>
