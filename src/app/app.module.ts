@@ -61,6 +61,7 @@ import { PortalPageEventsComponent } from './portal-project-display/pages/portal
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
 import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
+import { SafeHtmlPipe } from './shared/safe-html.pipe';
 
 @NgModule({
   declarations: [
@@ -97,6 +98,7 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
     PortalPageTeamComponent,
     PortalPageParticipantsComponent,
     PortalPageOutputsComponent,
+    SafeHtmlPipe,
   ],
   imports: [
     BrowserModule,

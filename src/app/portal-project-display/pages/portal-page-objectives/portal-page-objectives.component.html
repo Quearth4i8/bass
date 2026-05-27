@@ -10,7 +10,7 @@
     <div
       class="rich-paragraph"
       *ngFor="let para of nonEmptyParagraphs(project.content.objectives.paragraphs)"
-      [innerHTML]="para.content"
+      [innerHTML]="para.content | safeHtml"
     ></div>
   </div>
 

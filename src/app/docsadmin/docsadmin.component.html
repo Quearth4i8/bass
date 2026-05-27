@@ -1,16 +1,25 @@
 <div class="admin-wrapper">
+
   <!-- Header -->
   <header class="admin-header">
     <div class="header-left">
       <button class="menu-toggle" (click)="toggleSidebar()">
         <i class='bx bx-menu'></i>
       </button>
-      <h1>Documents Management</h1>
+      <div class="header-breadcrumb">
+        <h1>Documents</h1>
+        <ng-container *ngIf="view === 'documents' && selectedProject">
+          <i class='bx bx-chevron-right breadcrumb-sep'></i>
+          <span class="breadcrumb-project" [style.color]="selectedProject.accentColor">
+            {{ selectedProject.title }}
+          </span>
+        </ng-container>
+      </div>
     </div>
     <div class="header-right">
       <a class="header-btn" routerLink="/">
         <i class='bx bx-globe'></i>
-        <span>BASSIANA Database Portal</span>
+        <span>Portal</span>
       </a>
       <div class="user-menu">
         <div class="user-avatar" (click)="toggleUserMenu()">
@@ -50,112 +59,436 @@
 
   <!-- Main Content -->
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
-    <!-- Stats Row -->
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-icon">
-          <i class='bx bx-file'></i>
-        </div>
-        <div class="stat-info">
-          <h2>0</h2>
-          <p>Total Documents</p>
-        </div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-icon green">
-          <i class='bx bx-upload'></i>
-        </div>
-        <div class="stat-info">
-          <h2>0</h2>
-          <p>Uploaded Today</p>
-        </div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-icon orange">
-          <i class='bx bx-hdd'></i>
-        </div>
-        <div class="stat-info">
-          <h2>0 MB</h2>
-          <p>Storage Used</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Upload Section -->
-    <div class="upload-section">
-      <div class="section-header">
-        <h3><i class='bx bx-cloud-upload'></i> Upload Documents</h3>
-        <p>Drag and drop files or click to browse</p>
-      </div>
-      <div class="file-upload-container">
-        <p-fileUpload
-          name="myfile[]"
-          [customUpload]="true"
-          [auto]="true"
-          (onUpload)="onUpload($event)"
-          (uploadHandler)="uploadHandler($event)"
-          [multiple]="true"
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-          maxFileSize="10000000"
-          [showUploadButton]="true"
-          [showCancelButton]="true"
-          chooseLabel="Choose Files"
-          uploadLabel="Upload"
-          cancelLabel="Cancel"
-        ></p-fileUpload>
-      </div>
-    </div>
+    <!-- =================== PROJECTS VIEW =================== -->
+    <ng-container *ngIf="view === 'projects'">
 
-    <!-- Documents Table -->
-    <div class="content-wrapper">
-      <div class="table-container">
-        <div class="table-header">
-          <h3><i class='bx bx-folder-open'></i> Recent Documents</h3>
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-icon"><i class='bx bx-folder'></i></div>
+          <div class="stat-info">
+            <h2>{{ projects.length }}</h2>
+            <p>Total Projects</p>
+          </div>
         </div>
-        <div class="table-scroll">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="col-name">Name</th>
-                <th class="col-type">Type</th>
-                <th class="col-size">Size</th>
-                <th class="col-date">Upload Date</th>
-                <th class="col-actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="empty-state">
-                <td colspan="5">
-                  <div class="empty-message">
-                    <i class='bx bx-folder-open'></i>
-                    <p>No documents uploaded yet</p>
-                    <span>Upload your first document using the section above</span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="stat-box">
+          <div class="stat-icon"><i class='bx bx-file'></i></div>
+          <div class="stat-info">
+            <h2>{{ totalDocuments }}</h2>
+            <p>Total Documents</p>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon"><i class='bx bx-hdd'></i></div>
+          <div class="stat-info">
+            <h2>{{ formatSize(totalStorage) }}</h2>
+            <p>Storage Used</p>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- Projects Section -->
+      <div class="projects-section">
+        <div class="section-toolbar">
+          <h2 class="section-title">
+            <i class='bx bx-folder-open'></i>
+            Portal Projects
+          </h2>
+          <div class="search-wrapper">
+            <i class='bx bx-search'></i>
+            <input type="text" placeholder="Search projects..." [(ngModel)]="projectSearch" class="search-input" />
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-state" *ngIf="isLoadingProjects">
+          <div class="spinner"></div>
+          <p>Loading projects...</p>
+        </div>
+
+        <!-- Empty -->
+        <div class="empty-state" *ngIf="!isLoadingProjects && filteredProjects.length === 0">
+          <i class='bx bx-folder-open'></i>
+          <p>No projects found</p>
+          <span>Create portal projects from the Management section</span>
+        </div>
+
+        <!-- Grid -->
+        <div class="projects-grid" *ngIf="!isLoadingProjects && filteredProjects.length > 0">
+          <div class="project-card" *ngFor="let project of filteredProjects"
+               (click)="openProject(project)">
+            <div class="card-accent-bar" [style.background]="project.accentColor"></div>
+            <div class="card-body">
+              <div class="card-top-row">
+                <div class="project-icon"
+                     [style.background]="project.accentColor + '20'"
+                     [style.color]="project.accentColor">
+                  <i class='bx bx-folder'></i>
+                </div>
+                <div class="project-badges">
+                  <span class="badge badge-status" [class.active]="project.isActive" [class.inactive]="!project.isActive">
+                    {{ project.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+              <h3 class="project-title">{{ project.title }}</h3>
+              <p class="project-desc">{{ (project.description || 'No description available') | slice:0:100 }}<span *ngIf="(project.description || '').length > 100">...</span></p>
+              <div class="card-stats">
+                <span class="card-stat">
+                  <i class='bx bx-file'></i>
+                  {{ project.fileCount }} {{ project.fileCount === 1 ? 'file' : 'files' }}
+                </span>
+                <span class="card-stat">
+                  <i class='bx bx-hdd'></i>
+                  {{ formatSize(project.totalSize) }}
+                </span>
+              </div>
+              <button class="browse-btn" [style.background]="project.accentColor">
+                <i class='bx bx-folder-open'></i>
+                Browse Files
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- =================== DOCUMENTS VIEW =================== -->
+    <ng-container *ngIf="view === 'documents' && selectedProject">
+
+      <!-- Back + Breadcrumb bar -->
+      <div class="doc-nav-bar">
+        <button class="back-btn" (click)="currentSubfolder ? backToRoot() : backToProjects()">
+          <i class='bx bx-arrow-back'></i>
+          {{ currentSubfolder ? selectedProject.title : 'All Projects' }}
+        </button>
+        <div class="breadcrumb-trail">
+          <span class="bc-item bc-project" [style.color]="selectedProject.accentColor">
+            <i class='bx bx-folder'></i> {{ selectedProject.title }}
+          </span>
+          <ng-container *ngIf="currentSubfolder">
+            <i class='bx bx-chevron-right bc-sep'></i>
+            <span class="bc-item bc-folder">
+              <i class='bx bx-folder-open'></i> {{ currentSubfolder }}
+            </span>
+          </ng-container>
+        </div>
+        <button *ngIf="!currentSubfolder" type="button" class="new-folder-btn"
+                (click)="openCreateFolderModal()">
+          <i class='bx bx-folder-plus'></i>
+          New Folder
+        </button>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone"
+           [class.drag-over]="isDragOver"
+           [style.border-color]="isDragOver ? selectedProject.accentColor : ''"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)"
+           (click)="fileInput.click()">
+        <input #fileInput type="file" multiple style="display:none"
+               accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.odt,.rtf,.ods"
+               (change)="onFileSelect($event)" />
+        <div class="upload-icon-wrap" [style.background]="selectedProject.accentColor + '15'" [style.color]="selectedProject.accentColor">
+          <i class='bx bx-cloud-upload'></i>
+        </div>
+        <p class="upload-title">Drop files here or <span [style.color]="selectedProject.accentColor">click to browse</span></p>
+        <p class="upload-sub">PDF, Word, Excel, Images, and more</p>
+      </div>
+
+      <!-- Folders Grid (root level only) -->
+      <div class="folders-section" *ngIf="!currentSubfolder && folders.length > 0">
+        <div class="folder-card" *ngFor="let folder of folders" (click)="openFolder(folder)">
+          <div class="folder-icon-wrap">
+            <i class='bx bxs-folder'></i>
+          </div>
+          <div class="folder-info">
+            <span class="folder-name">{{ folder.name }}</span>
+            <span class="folder-count">{{ folder.fileCount }} {{ folder.fileCount === 1 ? 'file' : 'files' }}</span>
+          </div>
+          <button type="button" class="folder-delete-btn"
+                  (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
+            <i class='bx bx-trash'></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter + Search Bar -->
+      <div class="filter-search-bar">
+        <div class="filter-chips">
+          <button *ngFor="let f of filters"
+                  class="filter-chip"
+                  [class.active]="activeFilter === f.key"
+                  [style.--chip-color]="activeFilter === f.key ? selectedProject.accentColor : ''"
+                  (click)="setFilter(f.key)">
+            <i class='bx' [ngClass]="f.icon"></i>
+            <span>{{ f.label }}</span>
+            <em class="chip-count">{{ getCategoryCount(f.key) }}</em>
+          </button>
+        </div>
+        <div class="search-wrapper">
+          <i class='bx bx-search'></i>
+          <input type="text" placeholder="Search files..."
+                 [(ngModel)]="docSearch"
+                 (input)="onDocSearchChange()"
+                 class="search-input" />
+        </div>
+      </div>
+
+      <!-- Document List -->
+      <div class="documents-container">
+
+        <!-- Loading -->
+        <div class="loading-state" *ngIf="isLoadingDocs">
+          <div class="spinner"></div>
+          <p>Loading documents...</p>
+        </div>
+
+        <!-- Empty -->
+        <div class="empty-state" *ngIf="!isLoadingDocs && filteredDocuments.length === 0">
+          <i class='bx bx-folder-open'></i>
+          <p *ngIf="activeFilter === 'all' && !docSearch">No documents uploaded yet</p>
+          <p *ngIf="activeFilter !== 'all' || docSearch">No matching files found</p>
+          <span *ngIf="activeFilter === 'all' && !docSearch">Upload files using the zone above</span>
+          <span *ngIf="activeFilter !== 'all' || docSearch">Try a different filter or search term</span>
+        </div>
+
+        <!-- Files List -->
+        <div class="files-list" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
+          <div class="file-row" *ngFor="let doc of filteredDocuments">
+            <div class="file-icon-box"
+                 [style.background]="getFileColor(doc.category) + '15'"
+                 [style.color]="getFileColor(doc.category)">
+              <i class='bx' [ngClass]="getFileIcon(doc.category)"></i>
+            </div>
+            <div class="file-info">
+              <span class="file-name" [title]="doc.originalName">{{ doc.originalName }}</span>
+              <div class="file-meta-row">
+                <span class="file-type-badge"
+                      [style.background]="getFileColor(doc.category) + '18'"
+                      [style.color]="getFileColor(doc.category)">
+                  {{ doc.fileType.toUpperCase() }}
+                </span>
+                <span class="file-meta-item">{{ formatSize(doc.fileSize) }}</span>
+                <span class="file-meta-item">{{ formatDate(doc.uploadDate) }}</span>
+              </div>
+            </div>
+            <div class="file-actions">
+              <button type="button" class="action-btn view-btn" (click)="viewFile(doc)" title="View">
+                <i class='bx bx-show'></i>
+              </button>
+              <button type="button" class="action-btn download-btn" (click)="downloadFile(doc)" title="Download">
+                <i class='bx bx-download'></i>
+              </button>
+              <button type="button" class="action-btn delete-btn" (click)="confirmDelete(doc)" title="Delete">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+
   </main>
 
-  <!-- Logout Confirmation Modal -->
-  <div class="modal-overlay" *ngIf="logoutModalVisible" (mousedown)="onOverlayClick($event)">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <i class='bx bx-log-out-circle'></i>
-          <h3>Confirm Logout</h3>
+  <!-- File Preview Modal -->
+  <ng-container *ngIf="previewDoc">
+    <div class="modal-backdrop" (click)="closePreview()"></div>
+    <div class="preview-dialog">
+
+      <!-- Preview Header -->
+      <div class="preview-header">
+        <div class="preview-file-info">
+          <div class="preview-file-icon"
+               [style.background]="getFileColor(previewDoc.category) + '18'"
+               [style.color]="getFileColor(previewDoc.category)">
+            <i class='bx' [ngClass]="getFileIcon(previewDoc.category)"></i>
+          </div>
+          <div class="preview-file-meta">
+            <span class="preview-file-name" [title]="previewDoc.originalName">{{ previewDoc.originalName }}</span>
+            <span class="preview-file-size">{{ formatSize(previewDoc.fileSize) }} &bull; {{ previewDoc.fileType.toUpperCase() }}</span>
+          </div>
         </div>
-        <div class="modal-body">
-          <p>Are you sure you want to logout?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
-          <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
+        <div class="preview-actions">
+          <button class="preview-download-btn" (click)="downloadFile(previewDoc)" title="Download">
+            <i class='bx bx-download'></i>
+            <span>Download</span>
+          </button>
+          <button class="preview-close-btn" (click)="closePreview()" title="Close">
+            <i class='bx bx-x'></i>
+          </button>
         </div>
       </div>
+
+      <!-- Preview Body -->
+      <div class="preview-body">
+
+        <!-- Loading -->
+        <div class="preview-loading" *ngIf="previewLoading">
+          <div class="spinner"></div>
+          <p>Loading preview...</p>
+        </div>
+
+        <!-- Image Preview -->
+        <div class="preview-image-wrap" *ngIf="!previewLoading && previewDoc.category === 'image' && previewSafeImgUrl">
+          <img [src]="previewSafeImgUrl" [alt]="previewDoc.originalName" class="preview-image" />
+        </div>
+
+        <!-- PDF Preview -->
+        <iframe *ngIf="!previewLoading && previewDoc.category === 'pdf' && previewSafeResourceUrl"
+                [src]="previewSafeResourceUrl"
+                class="preview-iframe"
+                frameborder="0">
+        </iframe>
+
+        <!-- CSV Table Preview -->
+        <div class="preview-csv-wrap" *ngIf="!previewLoading && previewCsvRows">
+          <div class="csv-scroll">
+            <table class="csv-table">
+              <thead>
+                <tr><th *ngFor="let cell of previewCsvRows[0]">{{ cell }}</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of previewCsvRows | slice:1">
+                  <td *ngFor="let cell of row">{{ cell }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="csv-limit-note" *ngIf="previewCsvRows.length >= 500">Showing first 500 rows</p>
+          </div>
+        </div>
+
+        <!-- Office HTML Preview (DOCX via mammoth, XLSX via SheetJS) -->
+        <div class="preview-office-wrap" *ngIf="!previewLoading && previewHtmlContent !== null">
+          <div class="preview-office-body" [innerHTML]="previewHtmlContent"></div>
+        </div>
+
+        <!-- Plain-text Preview (JSON, XML, HTML, TXT, etc.) -->
+        <div class="preview-text-wrap" *ngIf="!previewLoading && previewTextContent !== null">
+          <pre class="preview-text">{{ previewTextContent }}</pre>
+        </div>
+
+        <!-- Unsupported binary (pptx, zip, exe, etc.) -->
+        <div class="preview-unsupported"
+             *ngIf="!previewLoading && !previewCsvRows && previewTextContent === null
+                    && previewHtmlContent === null
+                    && !previewSafeImgUrl && !previewSafeResourceUrl">
+          <div class="unsupported-icon"
+               [style.background]="getFileColor(previewDoc.category) + '15'"
+               [style.color]="getFileColor(previewDoc.category)">
+            <i class='bx' [ngClass]="getFileIcon(previewDoc.category)"></i>
+          </div>
+          <p class="unsupported-title">Preview not available</p>
+          <p class="unsupported-sub">
+            .{{ previewDoc.fileType.toUpperCase() }} files must be opened in a desktop application
+          </p>
+          <button class="preview-download-btn large" (click)="downloadFile(previewDoc)">
+            <i class='bx bx-download'></i>
+            Download to view
+          </button>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </ng-container>
+
+  <!-- Delete Confirm Modal -->
+  <ng-container *ngIf="deleteConfirmDoc">
+    <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    <div class="modal-dialog delete-modal">
+      <div class="modal-header">
+        <div class="modal-icon-wrap delete-icon">
+          <i class='bx bx-trash'></i>
+        </div>
+        <h3>Delete File</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete</p>
+        <strong class="file-name-highlight">{{ deleteConfirmDoc!.originalName }}</strong>
+        <p class="modal-warning"><i class='bx bx-info-circle'></i> This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn-delete" (click)="executeDelete()">
+          <i class='bx bx-trash'></i> Delete
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Create Folder Modal -->
+  <ng-container *ngIf="showCreateFolderModal">
+    <div class="modal-backdrop" (click)="closeCreateFolderModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-icon-wrap" style="background:#fef9c3;color:#ca8a04">
+          <i class='bx bx-folder-plus'></i>
+        </div>
+        <h3>New Folder</h3>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="folder-name-input" placeholder="Folder name"
+               [(ngModel)]="newFolderName"
+               (keyup.enter)="submitCreateFolder()"
+               autofocus />
+        <p class="folder-name-error" *ngIf="folderNameError">{{ folderNameError }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeCreateFolderModal()">Cancel</button>
+        <button type="button" class="btn-create-folder" (click)="submitCreateFolder()">
+          <i class='bx bx-folder-plus'></i> Create
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Delete Folder Modal -->
+  <ng-container *ngIf="deleteFolderConfirm">
+    <div class="modal-backdrop" (click)="cancelDeleteFolder()"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-icon-wrap delete-icon"><i class='bx bx-trash'></i></div>
+        <h3>Delete Folder</h3>
+      </div>
+      <div class="modal-body">
+        <p>Delete folder <strong>"{{ deleteFolderConfirm!.name }}"</strong>?</p>
+        <p class="modal-warning" *ngIf="deleteFolderConfirm!.fileCount > 0">
+          <i class='bx bx-info-circle'></i>
+          This will permanently delete all {{ deleteFolderConfirm!.fileCount }} files inside.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cancelDeleteFolder()">Cancel</button>
+        <button type="button" class="btn-delete" (click)="executeDeleteFolder()">
+          <i class='bx bx-trash'></i> Delete
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Logout Modal -->
+  <ng-container *ngIf="logoutModalVisible">
+    <div class="modal-backdrop" (click)="closeLogoutModal()"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-icon-wrap logout-icon">
+          <i class='bx bx-log-out-circle'></i>
+        </div>
+        <h3>Confirm Logout</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to logout?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
+        <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
+      </div>
+    </div>
+  </ng-container>
+
 </div>

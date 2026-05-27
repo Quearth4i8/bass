@@ -389,6 +389,37 @@
                         <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('7')">Extra Large</li>
                       </ul>
                     </div>
+                    <div class="custom-dropdown-container">
+                      <button class="font-size-select custom-select-trigger" (click)="toggleLineSpacingDropdown($event, i, 'scientific')">
+                        <span>Spacing</span>
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <ul class="custom-dropdown-menu" *ngIf="openLineSpacingDropdown === i && openLineSpacingTab === 'scientific'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1')">Single (1.0)</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1.25')">1.25</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1.5')">1.5</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('2')">Double (2.0)</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('2.5')">2.5</li>
+                      </ul>
+                    </div>
+                    <div class="control-separator"></div>
+                    <div class="highlight-wrapper">
+                      <button class="format-btn highlight-btn" (click)="toggleHighlightPicker($event, i, 'scientific')" title="Highlight" [class.active]="highlightPickerOpen === i && highlightPickerTab === 'scientific'">
+                        <i class='bx bx-highlight'></i>
+                      </button>
+                      <div class="highlight-picker" *ngIf="highlightPickerOpen === i && highlightPickerTab === 'scientific'" [ngStyle]="highlightPickerStyle" (click)="$event.stopPropagation()">
+                        <div class="picker-header">
+                          <span>Highlight Color</span>
+                          <button class="picker-close" (click)="closeHighlightPicker()"><i class='bx bx-x'></i></button>
+                        </div>
+                        <div class="highlight-colors">
+                          <button class="highlight-swatch" *ngFor="let hc of highlightColors" [style.background-color]="hc.color" [title]="hc.label" (mousedown)="$event.preventDefault()" (click)="applyHighlight(hc.color)"></button>
+                          <button class="highlight-swatch remove-highlight" title="Remove Highlight" (mousedown)="$event.preventDefault()" (click)="removeHighlight()">
+                            <i class='bx bx-x'></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <div class="control-separator"></div>
                     <div class="special-char-wrapper">
                       <button class="format-btn special-char-btn" (click)="toggleSpecialCharPicker($event, i, 'scientific')" title="Special Characters & Units" [class.active]="specialCharPickerOpen === i && specialCharPickerTab === 'scientific'">
@@ -495,6 +526,37 @@
                         <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('5')">Large</li>
                         <li (mousedown)="$event.preventDefault()" (click)="selectFontSize('7')">Extra Large</li>
                       </ul>
+                    </div>
+                    <div class="custom-dropdown-container">
+                      <button class="font-size-select custom-select-trigger" (click)="toggleLineSpacingDropdown($event, i, 'objectives')">
+                        <span>Spacing</span>
+                        <i class='bx bx-chevron-down'></i>
+                      </button>
+                      <ul class="custom-dropdown-menu" *ngIf="openLineSpacingDropdown === i && openLineSpacingTab === 'objectives'" [ngStyle]="dropdownMenuStyle" [class.opens-up]="dropdownOpensUp">
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1')">Single (1.0)</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1.25')">1.25</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('1.5')">1.5</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('2')">Double (2.0)</li>
+                        <li (mousedown)="$event.preventDefault()" (click)="selectLineSpacing('2.5')">2.5</li>
+                      </ul>
+                    </div>
+                    <div class="control-separator"></div>
+                    <div class="highlight-wrapper">
+                      <button class="format-btn highlight-btn" (click)="toggleHighlightPicker($event, i, 'objectives')" title="Highlight" [class.active]="highlightPickerOpen === i && highlightPickerTab === 'objectives'">
+                        <i class='bx bx-highlight'></i>
+                      </button>
+                      <div class="highlight-picker" *ngIf="highlightPickerOpen === i && highlightPickerTab === 'objectives'" [ngStyle]="highlightPickerStyle" (click)="$event.stopPropagation()">
+                        <div class="picker-header">
+                          <span>Highlight Color</span>
+                          <button class="picker-close" (click)="closeHighlightPicker()"><i class='bx bx-x'></i></button>
+                        </div>
+                        <div class="highlight-colors">
+                          <button class="highlight-swatch" *ngFor="let hc of highlightColors" [style.background-color]="hc.color" [title]="hc.label" (mousedown)="$event.preventDefault()" (click)="applyHighlight(hc.color)"></button>
+                          <button class="highlight-swatch remove-highlight" title="Remove Highlight" (mousedown)="$event.preventDefault()" (click)="removeHighlight()">
+                            <i class='bx bx-x'></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     <div class="control-separator"></div>
                     <div class="special-char-wrapper">

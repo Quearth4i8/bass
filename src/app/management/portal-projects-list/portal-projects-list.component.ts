@@ -107,12 +107,27 @@ export class PortalProjectsListComponent implements OnInit {
   openOutputLayoutDropdown: number = -1;
   openFontSizeDropdown: number = -1;
   openFontSizeTab: string = '';
+  openLineSpacingDropdown: number = -1;
+  openLineSpacingTab: string = '';
   dropdownMenuStyle: { [key: string]: string } = {};
   dropdownOpensUp: boolean = false;
 
   specialCharPickerOpen: number = -1;
   specialCharPickerTab: string = '';
   specialCharPickerStyle: { [key: string]: string } = {};
+
+  highlightPickerOpen: number = -1;
+  highlightPickerTab: string = '';
+  highlightPickerStyle: { [key: string]: string } = {};
+  highlightColors = [
+    { color: '#FFFF00', label: 'Yellow' },
+    { color: '#90EE90', label: 'Green' },
+    { color: '#ADD8E6', label: 'Light Blue' },
+    { color: '#FFB6C1', label: 'Pink' },
+    { color: '#FFA500', label: 'Orange' },
+    { color: '#D3D3D3', label: 'Gray' },
+  ];
+
   private lastFocusedEditor: HTMLElement | null = null;
 
   specialCharCategories: { label: string; chars: string[] }[] = [
@@ -484,6 +499,12 @@ export class PortalProjectsListComponent implements OnInit {
     if (this.specialCharPickerOpen !== -1) {
       if (!target.closest('.special-char-picker') && !target.closest('.special-char-btn')) {
         this.closeSpecialCharPicker();
+      }
+    }
+
+    if (this.highlightPickerOpen !== -1) {
+      if (!target.closest('.highlight-picker') && !target.closest('.highlight-btn')) {
+        this.closeHighlightPicker();
       }
     }
 
@@ -910,6 +931,93 @@ export class PortalProjectsListComponent implements OnInit {
     this.closeDropdowns();
   }
 
+  toggleLineSpacingDropdown(event: MouseEvent, index: number, tab: string): void {
+    event.stopPropagation();
+    if (this.openLineSpacingDropdown === index && this.openLineSpacingTab === tab) {
+      this.closeDropdowns();
+      return;
+    }
+    this.closeDropdowns();
+    this.openLineSpacingDropdown = index;
+    this.openLineSpacingTab = tab;
+    this.computeDropdownPosition(event);
+  }
+
+  selectLineSpacing(spacing: string): void {
+    if (this.lastFocusedEditor) {
+      this.lastFocusedEditor.focus();
+    }
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (!range.collapsed) {
+        const span = document.createElement('span');
+        span.style.lineHeight = spacing;
+        try {
+          range.surroundContents(span);
+        } catch {
+          const fragment = range.extractContents();
+          span.appendChild(fragment);
+          range.insertNode(span);
+        }
+      } else if (this.lastFocusedEditor) {
+        this.lastFocusedEditor.style.lineHeight = spacing;
+      }
+    } else if (this.lastFocusedEditor) {
+      this.lastFocusedEditor.style.lineHeight = spacing;
+    }
+    this.syncActiveRichEditorFromDom();
+    this.closeDropdowns();
+  }
+
+  toggleHighlightPicker(event: MouseEvent, index: number, tab: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.highlightPickerOpen === index && this.highlightPickerTab === tab) {
+      this.closeHighlightPicker();
+      return;
+    }
+    this.highlightPickerOpen = index;
+    this.highlightPickerTab = tab;
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) { this.highlightPickerStyle = {}; return; }
+    const rect = target.getBoundingClientRect();
+    const pickerWidth = 230;
+    const pickerHeight = 110;
+    const margin = 8;
+    const maxLeft = Math.max(margin, window.innerWidth - pickerWidth - margin);
+    const left = Math.min(Math.max(margin, rect.left), maxLeft);
+    let top = rect.bottom + margin;
+    if (top > window.innerHeight - pickerHeight - margin) {
+      top = Math.max(margin, rect.top - pickerHeight - margin);
+    }
+    this.highlightPickerStyle = { left: `${left}px`, top: `${top}px` };
+  }
+
+  applyHighlight(color: string): void {
+    if (this.lastFocusedEditor) {
+      this.lastFocusedEditor.focus();
+    }
+    document.execCommand('hiliteColor', false, color);
+    this.syncActiveRichEditorFromDom();
+    this.closeHighlightPicker();
+  }
+
+  removeHighlight(): void {
+    if (this.lastFocusedEditor) {
+      this.lastFocusedEditor.focus();
+    }
+    document.execCommand('hiliteColor', false, 'transparent');
+    this.syncActiveRichEditorFromDom();
+    this.closeHighlightPicker();
+  }
+
+  closeHighlightPicker(): void {
+    this.highlightPickerOpen = -1;
+    this.highlightPickerTab = '';
+    this.highlightPickerStyle = {};
+  }
+
   toggleFontSizeDropdown(event: MouseEvent, index: number, tab: string): void {
     event.stopPropagation();
     if (this.openFontSizeDropdown === index && this.openFontSizeTab === tab) {
@@ -962,6 +1070,8 @@ export class PortalProjectsListComponent implements OnInit {
     this.openOutputLayoutDropdown = -1;
     this.openFontSizeDropdown = -1;
     this.openFontSizeTab = '';
+    this.openLineSpacingDropdown = -1;
+    this.openLineSpacingTab = '';
     this.dropdownMenuStyle = {};
   }
 
