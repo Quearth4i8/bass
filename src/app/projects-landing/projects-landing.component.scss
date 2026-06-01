@@ -634,6 +634,194 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 .tba-name { color: $text-faint; font-style: italic; font-weight: 400; }
 .member-tba { opacity: 0.6; border-style: dashed; }
 
+// ── Relevant Outputs section ─────────────────────────────────────────────
+
+.outputs-panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $line;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(8,42,61,0.55) 0%, rgba(6,31,46,0.75) 100%);
+}
+
+// Gauge row — left: stats  |  center: SVG  |  right: legend
+.gauge-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 36px 40px 28px;
+  border-bottom: 1px solid $line;
+  background: radial-gradient(circle at 50% 65%, rgba(74,214,196,0.07) 0%, transparent 68%);
+
+  @media (max-width: 700px) { flex-direction: column; gap: 20px; padding: 24px; }
+}
+
+.gauge-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.meter-eyebrow {
+  font-family: $font-mono;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: $text-faint;
+}
+
+.gauge-wrap { position: relative; }
+
+.g-ring {
+  stroke: rgba(74,214,196,0.16);
+  animation: ring-pulse 3.5s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { stroke-opacity: 0.16; }
+  50%       { stroke-opacity: 0.38; }
+}
+
+.danger-gauge {
+  overflow: visible;
+
+  .g-bg  { stroke: $line; }
+  .g-num { font-size: 46px; font-weight: 800; fill: $text; font-family: 'Geist', system-ui, sans-serif; }
+  .g-pct { font-size: 18px; font-weight: 600; fill: $text-dim; font-family: 'Geist', system-ui, sans-serif; }
+  .g-status { font-size: 11px; font-weight: 700; fill: $warn; font-family: $font-mono; letter-spacing: 0.14em; }
+}
+
+.gauge-side-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 700px) { flex-direction: row; gap: 28px; }
+}
+
+.g-stat       { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.g-stat-val   { font-family: $font-mono; font-size: 15px; font-weight: 700; color: $text; letter-spacing: -0.01em; }
+.g-stat-label { font-family: $font-mono; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: $text-faint; }
+
+.gauge-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  @media (max-width: 700px) { flex-direction: row; gap: 18px; }
+}
+
+.legend-item  { display: flex; align-items: center; gap: 8px; }
+
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-low  { background: $accent; box-shadow: 0 0 7px rgba(74,214,196,0.7); }
+.dot-mod  { background: $warn;   box-shadow: 0 0 7px rgba(245,185,74,0.7); }
+.dot-crit { background: #ef4444; box-shadow: 0 0 7px rgba(239,68,68,0.7); }
+
+.legend-label {
+  font-family: $font-mono;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: $text-dim;
+}
+
+// Videos — below gauge, flex-wrap centered, max 4 per row
+.outputs-videos {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.outputs-video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  max-width: 1120px;
+  width: 100%;
+}
+
+.output-film-card {
+  width: 300px;
+  aspect-ratio: 1/1;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid $line;
+  background: $bg;
+  transition: transform .25s, border-color .25s, box-shadow .25s;
+
+  video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $accent-2;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  }
+}
+
+.film-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px 12px;
+  background: linear-gradient(to top, rgba(3,20,32,0.86) 0%, transparent 55%);
+}
+
+.film-badge {
+  font-family: $font-mono;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $accent;
+  padding: 2px 5px;
+  border: 1px solid rgba(74,214,196,0.38);
+  border-radius: 3px;
+  background: rgba(3,20,32,0.55);
+  align-self: flex-start;
+  margin-bottom: 5px;
+  backdrop-filter: blur(4px);
+}
+
+.film-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: #e8f1f5;
+  line-height: 1.35;
+  font-family: $font-sans;
+}
+
+.outputs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  gap: 10px;
+  color: $text-faint;
+  text-align: center;
+
+  i { font-size: 30px; }
+  span { font-family: $font-mono; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+  p { font-size: 12px; max-width: 28ch; margin: 0; line-height: 1.5; }
+}
+
 // ── Light theme ───────────────────────────────────────────────────────────
 :host(.theme-light) {
   background: linear-gradient(160deg, #e8f4f8 0%, #f0f7fb 50%, #e4eff6 100%);
@@ -744,6 +932,26 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   // Footer & theme btn
   .landing-footer { border-top-color: #c5d8e6; color: #6b8a9a; }
   .theme-btn { background: rgba(0,0,0,0.05); border-color: #c5d8e6; color: #4a7590; &:hover { color: #1a8f7f; border-color: #1a8f7f; } }
+
+  // Relevant Outputs
+  .outputs-panel  { background: #fff; border-color: #c5d8e6; }
+  .gauge-panel    { background: radial-gradient(circle at 50% 65%, rgba(26,143,127,0.05) 0%, transparent 68%); border-bottom-color: #e2eff6; }
+  .g-stat-val     { color: #0d2137; }
+  .g-stat-label   { color: #9bb0bc; }
+  .meter-eyebrow  { color: #9bb0bc; }
+  .legend-label   { color: #4a7590; }
+  .g-ring         { stroke: rgba(26,143,127,0.18); }
+  .dot-low  { background: #1a8f7f; box-shadow: 0 0 6px rgba(26,143,127,0.5); }
+  .dot-mod  { background: #b36c00; box-shadow: 0 0 6px rgba(179,108,0,0.5); }
+  .dot-crit { background: #dc2626; box-shadow: 0 0 6px rgba(220,38,38,0.5); }
+  .danger-gauge {
+    .g-bg     { stroke: #c5d8e6; }
+    .g-num    { fill: #0d2137; }
+    .g-pct    { fill: #6b8a9a; }
+    .g-status { fill: #b36c00; }
+  }
+  .output-film-card { border-color: #c5d8e6; background: #e8f4f8; }
+  .outputs-empty  { color: #9bb0bc; p { color: #9bb0bc; } }
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────

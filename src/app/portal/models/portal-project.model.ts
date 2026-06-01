@@ -85,6 +85,7 @@ export interface PortalOutput extends OrderedEntity {
   description: string;
   videoUrl: string;
   layout: PortalOutputLayout;
+  featured?: boolean;
 }
 
 export interface PortalProjectContent {

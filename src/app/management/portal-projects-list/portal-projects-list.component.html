@@ -1158,6 +1158,12 @@
               <div class="output-editor-card__head">
                 <span class="output-editor-card__badge">Output {{ i + 1 }}</span>
                 <div class="output-editor-card__head-actions">
+                  <button class="mini-btn output-heart-toggle" type="button"
+                    (click)="toggleOutputFeatured(i)"
+                    [class.hearted]="o.featured"
+                    [title]="o.featured ? 'Remove from homepage' : 'Feature on homepage'">
+                    <i class='bx' [class.bx-heart]="!o.featured" [class.bxs-heart]="o.featured"></i>
+                  </button>
                   <button class="mini-btn" type="button" (click)="moveOutput(i, 'up')" [disabled]="i === 0" title="Move Up">
                     <i class='bx bx-chevron-up'></i>
                   </button>

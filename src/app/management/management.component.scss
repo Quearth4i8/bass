@@ -326,6 +326,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   to   { opacity: 1; transform: translateY(0); }
 }
 
+
 @media (max-width: 1024px) {
   .admin-sidebar { transform: translateX(-100%); }
   .admin-main { margin-left: 0 !important; }
@@ -371,4 +372,5 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .modal-body p { color: #3d5a6e; }
   .modal-footer { background: #f8fafc; }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; } }
+
 }

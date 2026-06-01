@@ -1,5 +1,7 @@
 import { Component, DestroyRef, HostBinding, HostListener, OnInit, AfterViewInit, ElementRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../services/AuthService';
 import { PortalProjectsService } from '../portal/services/portal-projects.service';
 import { PortalProjectMeta } from '../portal/models/portal-project.model';
@@ -7,6 +9,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectService } from '../services/ProjectService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { ThemeService } from '../services/ThemeService';
+
+interface FeaturedOutput {
+  videoUrl: string;
+  title: string;
+  projectSlug: string;
+}
 
 @Component({
   selector: 'app-projects-landing',
@@ -23,6 +31,7 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   isAdminLoggedIn: boolean = false;
 
   projects: PortalProjectMeta[] = [];
+  featuredOutputs: FeaturedOutput[] = [];
 
   // Stats loaded from backend
   totalResearchProjects: number | null = null;
@@ -30,8 +39,12 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   totalPortalProjects: number | null = null;
   activePortalProjects: number | null = null;
 
+  get leftOutputs(): FeaturedOutput[] { return this.featuredOutputs.filter((_, i) => i % 2 === 0); }
+  get rightOutputs(): FeaturedOutput[] { return this.featuredOutputs.filter((_, i) => i % 2 === 1); }
+
   private io?: IntersectionObserver;
   private navIo?: IntersectionObserver;
+  private outputVideoIo?: IntersectionObserver;
   private clockInterval?: ReturnType<typeof setInterval>;
   currentTime: string = '';
   activeSection: string = 'home';
@@ -67,6 +80,27 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
         setTimeout(() => this.observeFadeElements(), 80);
       });
 
+    // Load featured outputs once projects are available
+    this.portalProjectsService.list().pipe(
+      filter(projects => projects.length > 0),
+      take(1),
+      switchMap(projects => {
+        const actives = projects.filter(p => p.isActive);
+        if (!actives.length) return of([]);
+        return forkJoin(actives.map(p => this.portalProjectsService.getBySlug(p.slug)));
+      })
+    ).subscribe(fullProjects => {
+      const outputs: FeaturedOutput[] = [];
+      fullProjects.forEach(full => {
+        if (!full) return;
+        (full.content?.outputs?.outputs ?? [])
+          .filter(o => o.featured && o.videoUrl?.trim())
+          .forEach(o => outputs.push({ videoUrl: o.videoUrl, title: o.title, projectSlug: full.slug }));
+      });
+      this.featuredOutputs = outputs;
+      setTimeout(() => this.setupOutputVideoObserver(), 200);
+    });
+
     this.projectService.getAllProjects().subscribe({
       next: (p) => { this.totalResearchProjects = p.length; },
       error: () => {}
@@ -86,11 +120,12 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   ngOnDestroy(): void {
     this.io?.disconnect();
     this.navIo?.disconnect();
+    this.outputVideoIo?.disconnect();
     if (this.clockInterval) clearInterval(this.clockInterval);
   }
 
   private observeSections(): void {
-    const ids = ['home', 'about', 'geodatabase', 'projects', 'team'];
+    const ids = ['home', 'about', 'geodatabase', 'projects', 'team', 'outputs'];
     this.navIo = new IntersectionObserver(
       (entries) => {
         entries.forEach(e => { if (e.isIntersecting) this.activeSection = e.target.id; });
@@ -105,7 +140,7 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
 
   private startClock(): void {
     const tick = () => {
-      this.currentTime = new Date().toISOString().slice(11, 19) + ' UTC';
+      this.currentTime = new Date().toLocaleTimeString('en-GB', { timeZone: 'Africa/Tunis', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' TUN';
     };
     tick();
     this.clockInterval = setInterval(tick, 1000);
@@ -189,6 +224,22 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
     if (!target.closest('.admin-area')) {
       this.showAdminLogin = false;
     }
+  }
+
+  private setupOutputVideoObserver(): void {
+    this.outputVideoIo?.disconnect();
+    this.outputVideoIo = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(e => {
+          const v = e.target as HTMLVideoElement;
+          if (e.isIntersecting) { if (v.paused) v.play().catch(() => {}); }
+          else if (!v.paused) { v.pause(); }
+        });
+      },
+      { threshold: 0.25 }
+    );
+    this.el.nativeElement.querySelectorAll('video.landing-output-video')
+      .forEach((v: HTMLVideoElement) => this.outputVideoIo!.observe(v));
   }
 
   scrollTo(sectionId: string): void {

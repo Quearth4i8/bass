@@ -257,6 +257,11 @@
     border-color: #fee2e2;
     color: #ef4444;
   }
+
+  &.output-heart-toggle {
+    &:hover:not(:disabled) { border-color: #f87171; color: #f87171; }
+    &.hearted { border-color: rgba(248,113,113,.4); color: #f87171; background: rgba(239,68,68,.06); }
+  }
 }
 
 .geo-grid {
@@ -3221,7 +3226,7 @@
   .logo-card { background: $panel-2; border-color: $line; }
   .logo-preview { background: $bg-2; border-color: $line-2; &.has-image { background: $bg-2; border-color: $line; } }
   .logo-preview:not(.has-image) .logo-upload { background: $bg-2; color: $text-faint; i { color: $accent; } }
-  .mini-btn { background: $panel; border-color: $line; color: $text-dim; box-shadow: none; &:hover:not(:disabled) { border-color: $accent; color: $accent; } &.danger { border-color: rgba(239,68,68,.3); color: $danger; } }
+  .mini-btn { background: $panel; border-color: $line; color: $text-dim; box-shadow: none; &:hover:not(:disabled) { border-color: $accent; color: $accent; } &.danger { border-color: rgba(239,68,68,.3); color: $danger; } &.output-heart-toggle { &:hover:not(:disabled) { border-color: #f87171; color: #f87171; } &.hearted { border-color: rgba(248,113,113,.35); color: #f87171; background: rgba(239,68,68,.1); } } }
 
   // ── Info blocks ──
   .info-block-item { background: $panel-2; border-color: $line; box-shadow: none; &:hover { box-shadow: 0 8px 20px rgba(0,0,0,.25); } }
@@ -3353,6 +3358,8 @@
   .stat-icon { background: rgba(26,143,127,.08); border-color: rgba(26,143,127,.2); color: #1a8f7f; }
   .stat-info { h2 { color: #1a8f7f; } p { color: #3d5a6e; } }
   .admin-main {
+    .breadcrumb { color: #475569; a { color: #1a5f7a; } span { color: #64748b; } .active-breadcrumb { color: #1e293b; } i { color: #94a3b8; } }
+    .content-header { border-bottom-color: #f1f5f9; .header-info { h3 { color: #1e293b; i { color: #1a5f7a; } } p { color: #64748b; } } }
     .tabs-navigation { background: white; border-color: #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
     .tab-btn { color: #64748b; &:hover { background: #f8fafc; color: #1a5f7a; } &.active { background: #1a5f7a; color: white; box-shadow: 0 4px 12px rgba(26,95,122,.2); } }
     .tab-content-container { background: white; border-color: #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,.08); }

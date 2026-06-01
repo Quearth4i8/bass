@@ -7,10 +7,10 @@
     <div class="header-divider"></div>
   </div>
 
-  <div class="outputs-shell" *ngIf="nonEmptyOutputs(project.content.outputs?.outputs).length">
+  <div class="outputs-shell" *ngIf="nonEmptyOutputs(project.content.outputs.outputs).length">
     <article
       class="output-card"
-      *ngFor="let output of nonEmptyOutputs(project.content.outputs?.outputs); let idx = index"
+      *ngFor="let output of nonEmptyOutputs(project.content.outputs.outputs); let idx = index"
       [class.output-card--reverse]="output.layout === 'text-right'"
       [class.output-card--full]="!output.videoUrl"
     >
@@ -34,7 +34,7 @@
     </article>
   </div>
 
-  <div class="empty-state" *ngIf="!nonEmptyOutputs(project.content.outputs?.outputs).length">
+  <div class="empty-state" *ngIf="!nonEmptyOutputs(project.content.outputs.outputs).length">
     <i class='bx bx-video-off'></i>
     <p>There is no data.</p>
   </div>

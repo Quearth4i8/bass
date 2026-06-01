@@ -262,8 +262,8 @@ function About() {
       <FadeUp>
         <div className="section-head">
           <span className="section-num">/ 01</span>
-          <h2 className="section-title">Programme overview</h2>
-          <span className="label">est. 2020</span>
+          <h2 className="section-title">BASSIANA overview</h2>
+          <span className="label">est. 2026</span>
         </div>
       </FadeUp>
 

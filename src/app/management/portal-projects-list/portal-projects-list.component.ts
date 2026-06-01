@@ -1253,6 +1253,11 @@ export class PortalProjectsListComponent implements OnInit {
     this.saveAll();
   }
 
+  toggleOutputFeatured(index: number): void {
+    this.outputs[index].featured = !this.outputs[index].featured;
+    this.saveOutputs();
+  }
+
   addOutput(): void {
     const newId = this.outputs.length > 0 ? Math.max(...this.outputs.map(o => o.id)) + 1 : 1;
     const layout = this.outputs.length % 2 === 0 ? 'text-left' : 'text-right';
