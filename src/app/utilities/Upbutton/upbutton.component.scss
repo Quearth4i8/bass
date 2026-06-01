@@ -1,21 +1,22 @@
 #backToTop {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
     background-color: var(--portal-accent, #1a5f7a);
     color: white;
     border: none;
-    border-radius: 50%;
-    font-size: 24px;
+    border-radius: 10px;
+    font-size: 20px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     z-index: 1000;
-    transition: opacity 0.3s, transform 0.3s, filter 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   }
-  
+
   #backToTop:hover {
-    filter: brightness(1.12);
-    transform: scale(1.1);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   }

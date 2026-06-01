@@ -1,0 +1,44 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+
+  <!-- Partners Section -->
+  <div class="page-header">
+    <h2 class="page-section-title">Partners</h2>
+    <div class="header-divider"></div>
+  </div>
+
+  <section class="logos-section" *ngIf="project.content.partnersFunders.partnersLogos.length; else emptyPartners">
+    <div class="logo-grid">
+      <div class="logo-tile" *ngFor="let logo of project.content.partnersFunders.partnersLogos">
+        <img [src]="logo.url" alt="partner" loading="lazy">
+        <span class="logo-name" *ngIf="logo.name">{{ logo.name }}</span>
+      </div>
+    </div>
+  </section>
+
+  <ng-template #emptyPartners>
+    <div class="empty-state">
+      <i class='bx bx-buildings'></i>
+      <p>No partners listed yet.</p>
+    </div>
+  </ng-template>
+
+  <!-- Associate Partners Section -->
+  <ng-container *ngIf="project.content.partnersFunders.associatePartnersLogos?.length">
+    <div class="page-header section-header">
+      <h2 class="page-section-title">Associate Partners</h2>
+      <div class="header-divider"></div>
+    </div>
+
+    <section class="logos-section associate-section">
+      <div class="logo-grid">
+        <div class="logo-tile" *ngFor="let logo of project.content.partnersFunders.associatePartnersLogos">
+          <img [src]="logo.url" alt="associate partner" loading="lazy">
+          <span class="logo-name" *ngIf="logo.name">{{ logo.name }}</span>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+</ng-container>

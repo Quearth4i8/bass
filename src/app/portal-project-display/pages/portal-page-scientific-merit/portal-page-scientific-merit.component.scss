@@ -19,7 +19,7 @@
 .page-header {
   text-align: center;
   padding: 92px 20px 36px;
-  background: linear-gradient(180deg, #f4f7fb 0%, #fff 100%);
+  background: transparent;
 
   .page-project-title {
     font-size: 13px;
@@ -47,9 +47,9 @@
 
 /* ── Content Container ────────────────────────────── */
 .content-container {
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 40px 24px 100px;
+  padding: 40px 40px 100px;
   display: flex;
   flex-direction: column;
   gap: 50px;
@@ -62,7 +62,7 @@
     padding: 60px;
     background: #ffffff;
     border-radius: 32px;
-    box-shadow: 
+    box-shadow:
       0 10px 15px -3px rgba(0, 0, 0, 0.04),
       0 4px 6px -2px rgba(0, 0, 0, 0.02),
       0 40px 60px -15px rgba(0, 0, 0, 0.03);
@@ -90,14 +90,14 @@
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 
+      box-shadow:
         0 20px 25px -5px rgba(0, 0, 0, 0.06),
         0 10px 10px -5px rgba(0, 0, 0, 0.03);
     }
 
     ::ng-deep {
-      p { 
-        margin-bottom: 1.6em; 
+      p {
+        margin-bottom: 1.6em;
         &:last-child { margin-bottom: 0; }
         &:first-letter {
           font-size: 1.2em;
@@ -106,7 +106,7 @@
         }
       }
       strong { color: #0f172a; font-weight: 800; }
-      
+
       font[size="1"] { font-size: 13px; }
       font[size="2"] { font-size: 15px; }
       font[size="3"] { font-size: 18px; }
@@ -115,11 +115,11 @@
       font[size="6"] { font-size: 32px; }
       font[size="7"] { font-size: 40px; }
 
-      img { 
+      img {
         display: block;
-        max-width: 100%; 
-        height: auto; 
-        border-radius: 20px; 
+        max-width: 100%;
+        height: auto;
+        border-radius: 20px;
         margin: 40px auto;
         box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         border: 1px solid rgba(0,0,0,0.05);
@@ -148,11 +148,9 @@
   .content-container {
     padding: 20px 16px 60px;
     gap: 30px;
-
-    .rich-paragraph {
-      padding: 40px 25px;
-      font-size: 16px;
-      border-radius: 24px;
-    }
+    .rich-paragraph { padding: 40px 25px; font-size: 16px; border-radius: 24px; }
   }
+}
+@media (min-width: 769px) and (max-width: 1100px) {
+  .content-container { padding: 40px 24px 80px; }
 }

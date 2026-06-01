@@ -55,7 +55,12 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((projects) => {
-        this.projects = [...projects].sort((a, b) => Number(b.isActive) - Number(a.isActive));
+        this.projects = [...projects].sort((a, b) => {
+          const aO = a.order ?? Number.MAX_SAFE_INTEGER;
+          const bO = b.order ?? Number.MAX_SAFE_INTEGER;
+          if (aO !== bO) return aO - bO;
+          return Number(b.isActive) - Number(a.isActive);
+        });
         this.totalPortalProjects = projects.length;
         this.activePortalProjects = projects.filter(p => p.isActive).length;
         // Re-observe after project cards are rendered

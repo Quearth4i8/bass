@@ -1,34 +1,10 @@
 <div class="admin-layout">
-  <!-- Header -->
-  <header class="admin-header">
-    <div class="header-left">
-      <button class="menu-toggle" (click)="toggleSidebar()">
-        <i class='bx bx-menu'></i>
-      </button>
-      <h1 class="page-title">Management</h1>
-    </div>
-    <div class="header-right">
-      <button class="header-btn" routerLink="/" type="button">
-        <i class='bx bx-globe'></i>
-        <span>BASSIANA Database Portal</span>
-      </button>
-      <button class="header-btn primary" (click)="showAddProjectDialog()">
-        <i class='bx bx-plus'></i>
-        <span>Add New Portal Project</span>
-      </button>
-      <div class="user-menu">
-        <div class="user-avatar" (click)="toggleUserMenu()">
-          <i class='bx bx-user'></i>
-        </div>
-        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
-          <div class="dropdown-item" (click)="showLogoutModal($event)">
-            <i class='bx bx-log-out'></i>
-            <span>Logout</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+  <app-admin-navbar pageTitle="Management" (menuToggle)="toggleSidebar()">
+    <button header-actions class="header-btn primary" (click)="showAddProjectDialog()">
+      <i class='bx bx-plus'></i>
+      <span>Add New Portal Project</span>
+    </button>
+  </app-admin-navbar>
 
   <!-- Sidebar -->
   <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
@@ -122,30 +98,20 @@
                 VIEW
               </button>
             </div>
+            <div class="card-order-controls">
+              <button class="order-btn" (click)="moveProject(i, 'up'); $event.stopPropagation()" [disabled]="i === 0" title="Move Left">
+                <i class='bx bx-chevron-left'></i>
+              </button>
+              <span class="order-pos">{{ i + 1 }}</span>
+              <button class="order-btn" (click)="moveProject(i, 'down'); $event.stopPropagation()" [disabled]="i === portalProjects.length - 1" title="Move Right">
+                <i class='bx bx-chevron-right'></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </main>
-
-  <!-- Logout Confirmation Modal -->
-  <div class="modal-overlay" *ngIf="logoutModalVisible" (mousedown)="onOverlayClick($event)">
-    <div class="modal-dialog small">
-      <div class="modal-content">
-        <div class="modal-header">
-          <i class='bx bx-log-out-circle'></i>
-          <h3>Confirm Logout</h3>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to logout?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
-          <button type="button" class="btn-confirm danger" (click)="confirmLogout()">Logout</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Edit Project Modal -->
   <div class="modal-overlay" *ngIf="isEditModalOpen" (mousedown)="isEditModalOpen = false">

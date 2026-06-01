@@ -1,7 +1,7 @@
-import { Component, HostListener, OnInit, DestroyRef } from '@angular/core';
+import { Component, HostListener, OnInit, DestroyRef, HostBinding } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../../services/sidebarservice';
-import { AuthService } from '../../services/AuthService';
+import { ThemeService } from '../../services/ThemeService';
 import { Router, ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
@@ -17,9 +17,8 @@ import { PortalProjectContent } from '../../portal/models/portal-project.model';
   styleUrls: ['portal-projects-list.component.scss']
 })
 export class PortalProjectsListComponent implements OnInit {
+  @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   isSidebarVisible = true;
-  isUserMenuOpen = false;
-  logoutModalVisible = false;
 
   projectSlug: string = '';
   projectName = '';
@@ -44,6 +43,8 @@ export class PortalProjectsListComponent implements OnInit {
     name: ''
   };
 
+  homeProjectId = '';
+
   homeInfoBlocks: any[] = [
     { id: 1, imageUrl: '', title: '', text: '', order: 1 }
   ];
@@ -59,6 +60,8 @@ export class PortalProjectsListComponent implements OnInit {
   partnersLogos: any[] = [
     { id: 1, url: '', order: 1 }
   ];
+
+  associatePartnersLogos: any[] = [];
 
   funderTextLines: any[] = [
     { id: 1, text: 'NAS: The National Academy of Sciences', order: 1 },
@@ -159,13 +162,13 @@ export class PortalProjectsListComponent implements OnInit {
 
   constructor(
     private sidebarService: SidebarService,
-    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private portalProjectsService: PortalProjectsService,
     private portalMediaService: PortalMediaService,
     private destroyRef: DestroyRef,
     private messageService: MessageService,
+    public themeService: ThemeService,
   ) { }
 
   ngOnInit(): void {
@@ -220,33 +223,6 @@ export class PortalProjectsListComponent implements OnInit {
     this.sidebarService.toggleSidebar();
   }
 
-  toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
-  }
-
-  showLogoutModal(event?: MouseEvent): void {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    this.logoutModalVisible = true;
-  }
-
-  closeLogoutModal(): void {
-    this.logoutModalVisible = false;
-  }
-
-  onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.closeLogoutModal();
-    }
-  }
-
-  confirmLogout(): void {
-    this.logoutModalVisible = false;
-    this.authService.logout();
-    this.router.navigate(['/'], { replaceUrl: true });
-  }
 
   setActiveTab(tabId: string): void {
     this.activeTab = tabId;
@@ -687,6 +663,44 @@ export class PortalProjectsListComponent implements OnInit {
 
   private updatePartnersLogoOrder(): void {
     this.partnersLogos.forEach((l, i) => l.order = i + 1);
+  }
+
+  onAssociatePartnersLogoSelected(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => { this.associatePartnersLogos[index].url = e.target.result; };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  addAssociatePartnersLogo(): void {
+    const newId = this.associatePartnersLogos.length > 0
+      ? Math.max(...this.associatePartnersLogos.map(l => l.id)) + 1
+      : 1;
+    this.associatePartnersLogos.push({ id: newId, url: '', order: this.associatePartnersLogos.length + 1 });
+  }
+
+  removeAssociatePartnersLogo(index: number): void {
+    if (this.associatePartnersLogos.length <= 1) {
+      this.associatePartnersLogos[0].url = '';
+      return;
+    }
+    this.associatePartnersLogos.splice(index, 1);
+    this.updateAssociatePartnersLogoOrder();
+  }
+
+  moveAssociatePartnersLogo(index: number, direction: 'left' | 'right'): void {
+    if (direction === 'left' && index > 0) {
+      [this.associatePartnersLogos[index], this.associatePartnersLogos[index - 1]] = [this.associatePartnersLogos[index - 1], this.associatePartnersLogos[index]];
+    } else if (direction === 'right' && index < this.associatePartnersLogos.length - 1) {
+      [this.associatePartnersLogos[index], this.associatePartnersLogos[index + 1]] = [this.associatePartnersLogos[index + 1], this.associatePartnersLogos[index]];
+    }
+    this.updateAssociatePartnersLogoOrder();
+  }
+
+  private updateAssociatePartnersLogoOrder(): void {
+    this.associatePartnersLogos.forEach((l, i) => l.order = i + 1);
   }
 
   addFunderLine(): void {
@@ -1295,6 +1309,7 @@ export class PortalProjectsListComponent implements OnInit {
   private applyContent(content: PortalProjectContent): void {
     this.homeImages = content.home.carousel?.length ? content.home.carousel : this.homeImages;
     this.homePartnerLogos = content.home.partnerLogos?.length ? content.home.partnerLogos : this.homePartnerLogos;
+    this.homeProjectId = content.home.projectId ?? '';
     this.homeGeoSections = content.home.geoSections?.length ? content.home.geoSections : this.homeGeoSections;
     this.homeVideoFile = content.home.video || this.homeVideoFile;
     this.homeInfoBlocks = content.home.infoBlocks?.length ? content.home.infoBlocks : this.homeInfoBlocks;
@@ -1303,6 +1318,7 @@ export class PortalProjectsListComponent implements OnInit {
     this.objectivesParagraphs = content.objectives.paragraphs?.length ? content.objectives.paragraphs : this.objectivesParagraphs;
 
     this.partnersLogos = content.partnersFunders.partnersLogos?.length ? content.partnersFunders.partnersLogos : this.partnersLogos;
+    this.associatePartnersLogos = content.partnersFunders.associatePartnersLogos ?? [];
     this.funderTextLines = content.partnersFunders.funderTextLines?.length ? content.partnersFunders.funderTextLines : this.funderTextLines;
     this.funderLogos = content.partnersFunders.funderLogos?.length ? content.partnersFunders.funderLogos : this.funderLogos;
 
@@ -1318,6 +1334,7 @@ export class PortalProjectsListComponent implements OnInit {
       home: {
         carousel: this.homeImages,
         partnerLogos: this.homePartnerLogos,
+        projectId: this.homeProjectId,
         geoSections: this.homeGeoSections,
         video: this.homeVideoFile,
         infoBlocks: this.homeInfoBlocks,
@@ -1330,6 +1347,7 @@ export class PortalProjectsListComponent implements OnInit {
       },
       partnersFunders: {
         partnersLogos: this.partnersLogos,
+        associatePartnersLogos: this.associatePartnersLogos,
         funderTextLines: this.funderTextLines,
         funderLogos: this.funderLogos,
       },

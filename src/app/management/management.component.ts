@@ -1,7 +1,7 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostBinding, OnInit } from '@angular/core';
+import { ThemeService } from '../services/ThemeService';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../services/sidebarservice';
-import { AuthService } from '../services/AuthService';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
@@ -14,10 +14,8 @@ import { PortalProjectMeta } from '../portal/models/portal-project.model';
   styleUrls: ['management.component.scss']
 })
 export class ManagementComponent implements OnInit {
+  @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   isSidebarVisible = true;
-  isUserMenuOpen = false;
-  logoutModalVisible = false;
-  
   // Add Project State
   isAddModalOpen = false;
   newProject: any = {
@@ -43,11 +41,11 @@ export class ManagementComponent implements OnInit {
 
   constructor(
     private sidebarService: SidebarService,
-    private authService: AuthService,
     private router: Router,
     private portalProjectsService: PortalProjectsService,
     private destroyRef: DestroyRef,
     private messageService: MessageService,
+    public themeService: ThemeService,
   ) { }
 
   ngOnInit(): void {
@@ -60,7 +58,11 @@ export class ManagementComponent implements OnInit {
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((projects) => {
-        this.portalProjects = projects;
+        this.portalProjects = [...projects].sort((a, b) => {
+          const aO = a.order ?? Number.MAX_SAFE_INTEGER;
+          const bO = b.order ?? Number.MAX_SAFE_INTEGER;
+          return aO - bO;
+        });
       });
   }
 
@@ -69,33 +71,22 @@ export class ManagementComponent implements OnInit {
     this.sidebarService.toggleSidebar();
   }
 
-  toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
+  moveProject(index: number, direction: 'up' | 'down'): void {
+    const other = direction === 'up' ? index - 1 : index + 1;
+    if (other < 0 || other >= this.portalProjects.length) return;
+    const slugA = this.portalProjects[index].slug;
+    const slugB = this.portalProjects[other].slug;
+    // Update the store synchronously — the reactive subscription re-fires and
+    // re-sorts portalProjects automatically with the new order values.
+    this.portalProjectsService.reorderInStore([
+      { slug: slugA, order: other + 1 },
+      { slug: slugB, order: index + 1 },
+    ]);
+    // Persist to backend in the background.
+    this.portalProjectsService.updateMeta(slugA, { order: other + 1 }).subscribe();
+    this.portalProjectsService.updateMeta(slugB, { order: index + 1 }).subscribe();
   }
 
-  showLogoutModal(event?: MouseEvent): void {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    this.logoutModalVisible = true;
-  }
-
-  closeLogoutModal(): void {
-    this.logoutModalVisible = false;
-  }
-
-  onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.closeLogoutModal();
-    }
-  }
-
-  confirmLogout(): void {
-    this.logoutModalVisible = false;
-    this.authService.logout();
-    this.router.navigate(['/'], { replaceUrl: true });
-  }
 
   showAddProjectDialog(): void {
     this.newProject = {

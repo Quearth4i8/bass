@@ -1,39 +1,16 @@
-<div class="admin-wrapper">
+<div class="admin-wrapper" [class.theme-light]="themeService.isLight">
 
-  <!-- Header -->
-  <header class="admin-header">
-    <div class="header-left">
-      <button class="menu-toggle" (click)="toggleSidebar()">
-        <i class='bx bx-menu'></i>
-      </button>
-      <div class="header-breadcrumb">
-        <h1>Documents</h1>
-        <ng-container *ngIf="view === 'documents' && selectedProject">
-          <i class='bx bx-chevron-right breadcrumb-sep'></i>
-          <span class="breadcrumb-project" [style.color]="selectedProject.accentColor">
-            {{ selectedProject.title }}
-          </span>
-        </ng-container>
-      </div>
+  <app-admin-navbar (menuToggle)="toggleSidebar()">
+    <div header-title class="header-breadcrumb">
+      <h1>Documents</h1>
+      <ng-container *ngIf="view === 'documents' && selectedProject">
+        <i class='bx bx-chevron-right breadcrumb-sep'></i>
+        <span class="breadcrumb-project" [style.color]="selectedProject.accentColor">
+          {{ selectedProject.title }}
+        </span>
+      </ng-container>
     </div>
-    <div class="header-right">
-      <a class="header-btn" routerLink="/">
-        <i class='bx bx-globe'></i>
-        <span>Portal</span>
-      </a>
-      <div class="user-menu">
-        <div class="user-avatar" (click)="toggleUserMenu()">
-          <i class='bx bx-user'></i>
-        </div>
-        <div class="dropdown-menu" [class.show]="isUserMenuOpen">
-          <div class="dropdown-item" (click)="showLogoutModal($event)">
-            <i class='bx bx-log-out'></i>
-            <span>Logout</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+  </app-admin-navbar>
 
   <!-- Sidebar -->
   <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
@@ -471,24 +448,5 @@
     </div>
   </ng-container>
 
-  <!-- Logout Modal -->
-  <ng-container *ngIf="logoutModalVisible">
-    <div class="modal-backdrop" (click)="closeLogoutModal()"></div>
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <div class="modal-icon-wrap logout-icon">
-          <i class='bx bx-log-out-circle'></i>
-        </div>
-        <h3>Confirm Logout</h3>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to logout?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="closeLogoutModal()">Cancel</button>
-        <button type="button" class="btn-confirm" (click)="confirmLogout()">Logout</button>
-      </div>
-    </div>
-  </ng-container>
 
 </div>

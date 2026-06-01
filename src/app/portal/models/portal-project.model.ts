@@ -39,6 +39,7 @@ export interface RichTextParagraph extends OrderedEntity {
 
 export interface PartnersLogo extends OrderedEntity {
   url: string;
+  name?: string;
 }
 
 export interface FunderTextLine extends OrderedEntity {
@@ -90,6 +91,7 @@ export interface PortalProjectContent {
   home: {
     carousel: PortalCarouselSlide[];
     partnerLogos: PortalPartnerLogo[];
+    projectId?: string;
     geoSections: PortalGeoSection[];
     video: PortalVideoFile;
     infoBlocks: PortalInfoBlock[];
@@ -102,6 +104,7 @@ export interface PortalProjectContent {
   };
   partnersFunders: {
     partnersLogos: PartnersLogo[];
+    associatePartnersLogos: PartnersLogo[];
     funderTextLines: FunderTextLine[];
     funderLogos: PartnersLogo[];
   };
@@ -130,6 +133,8 @@ export interface PortalProjectMeta {
   isActive: boolean;
   /** Primary UI color (hex) for portal navbar, scroll-to-top, etc. */
   accentColor?: string;
+  /** Display order on the landing page (1 = first). */
+  order?: number;
 }
 
 export interface PortalProject extends PortalProjectMeta {

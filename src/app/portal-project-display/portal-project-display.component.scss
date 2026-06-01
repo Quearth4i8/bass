@@ -14,19 +14,22 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
     .back-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       color: #fff;
       width: 32px;
       height: 32px;
-      border-radius: 50%;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: background 0.2s, border-color 0.2s;
       flex-shrink: 0;
-      &:hover { background: rgba(255, 255, 255, 0.2); }
+      &:hover {
+        background: rgba(79, 195, 247, 0.15);
+        border-color: var(--portal-accent, #4fc3f7);
+      }
       i { font-size: 16px; }
     }
 
@@ -90,8 +93,8 @@
       }
 
       &.active {
-        color: #4fc3f7;
-        border-bottom-color: #4fc3f7;
+        color: var(--portal-accent, #4fc3f7);
+        border-bottom-color: var(--portal-accent, #4fc3f7);
         background: rgba(79, 195, 247, 0.08);
       }
 
@@ -103,14 +106,31 @@
         border-bottom: none;
         border-left: 3px solid transparent;
         padding: 12px 24px;
-        &.active { border-left-color: #4fc3f7; background: rgba(79, 195, 247, 0.08); }
+        &.active {
+          border-left-color: var(--portal-accent, #4fc3f7);
+          background: rgba(79, 195, 247, 0.08);
+        }
       }
     }
   }
 }
 
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.portal-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
+}
+
 .portal-content {
-  min-height: calc(100vh - 200px);
+  flex: 1;
 }
 
 /* Not Found */
@@ -136,16 +156,19 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, #1a2a4a, #0d1b3e);
-      color: #fff;
+      background: linear-gradient(135deg, #2a8b9c 0%, #4ad6c4 100%);
+      color: #031420;
       border: none;
-      padding: 13px 30px;
-      border-radius: 10px;
-      font-size: 15px;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 600;
+      font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: opacity 0.2s;
-      &:hover { opacity: 0.85; }
+      transition: opacity 0.2s, transform 0.15s;
+      &:hover { opacity: 0.9; transform: translateY(-1px); }
     }
   }
 }

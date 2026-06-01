@@ -1,0 +1,26 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+
+  <div class="page-header">
+    <h2 class="page-section-title">Funders</h2>
+    <div class="header-divider"></div>
+  </div>
+
+  <section class="logos-section" *ngIf="project.content.partnersFunders.funderLogos.length; else empty">
+    <div class="logo-grid">
+      <div class="logo-tile" *ngFor="let logo of project.content.partnersFunders.funderLogos">
+        <img [src]="logo.url" alt="funder" loading="lazy">
+        <span class="logo-name" *ngIf="logo.name">{{ logo.name }}</span>
+      </div>
+    </div>
+  </section>
+
+  <ng-template #empty>
+    <div class="empty-state">
+      <i class='bx bx-coin-stack'></i>
+      <p>No funders listed yet.</p>
+    </div>
+  </ng-template>
+
+</ng-container>

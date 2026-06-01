@@ -14,7 +14,7 @@ import { PORTAL_TOP_NAV_LINKS } from '../../portal/portal-top-nav-links';
 export class NavbarComponent implements OnInit {
   readonly portalTopNavLinks = PORTAL_TOP_NAV_LINKS;
 
-  isSticky: boolean = false;
+  isSticky: boolean = true;
   isMenuOpen: boolean = false;
   openDropdown: string | null = null;
   isHomePage: boolean = false;
@@ -55,7 +55,7 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isSticky = window.scrollY > 0;
+    this.isSticky = true;
   }
 
   private syncHomePageFlag(rawUrl: string): void {
@@ -98,7 +98,7 @@ export class NavbarComponent implements OnInit {
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll(_event: Event): void {
-    this.isSticky = window.scrollY > 0;
+    this.isSticky = true;
   }
 
   toggleMenu(): void {

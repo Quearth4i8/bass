@@ -1,6 +1,7 @@
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { ThemeService } from '../services/ThemeService';
 import { Router } from '@angular/router';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DialogContentComponent } from '../utilities/dialogues/dialog-content/dialog-content.component';
@@ -40,6 +41,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     private projectGroupService: ProjectGroupService,
     private authService: AuthService,
     private router: Router,
+    public themeService: ThemeService,
   ) { }
 
   @HostListener('document:click', ['$event'])
@@ -270,8 +272,6 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.groupDropdownOpen[index] = false;
   }
 
-  logoutModalVisible = false;
-  isUserMenuOpen = false;
   showAdvancedFilters = false;
   globalSearchTerm = '';
 
@@ -279,39 +279,6 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.isSidebarVisible = !this.isSidebarVisible;
   }
 
-  toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
-  }
-
-  showLogoutModal(event?: MouseEvent): void {
-    console.log('Logout clicked, showing modal');
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    this.logoutModalVisible = true;
-  }
-
-  closeLogoutModal(): void {
-    this.logoutModalVisible = false;
-  }
-
-  onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
-      this.closeLogoutModal();
-    }
-  }
-
-  confirmLogout(): void {
-    this.logoutModalVisible = false;
-    this.authService.logout();
-    this.router.navigate(['/'], { replaceUrl: true });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/'], { replaceUrl: true });
-  }
 
   onInput(event: Event, project: any, field: string): void {
     const input = event.target as HTMLInputElement;

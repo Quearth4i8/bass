@@ -14,7 +14,8 @@ import { PortalProjectDisplayComponent } from './portal-project-display/portal-p
 import { PortalPageHomeComponent } from './portal-project-display/pages/portal-page-home/portal-page-home.component';
 import { PortalPageScientificMeritComponent } from './portal-project-display/pages/portal-page-scientific-merit/portal-page-scientific-merit.component';
 import { PortalPageObjectivesComponent } from './portal-project-display/pages/portal-page-objectives/portal-page-objectives.component';
-import { PortalPagePartnersFundersComponent } from './portal-project-display/pages/portal-page-partners-funders/portal-page-partners-funders.component';
+import { PortalPagePartnersComponent } from './portal-project-display/pages/portal-page-partners/portal-page-partners.component';
+import { PortalPageFundersComponent } from './portal-project-display/pages/portal-page-funders/portal-page-funders.component';
 import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
 import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
@@ -37,7 +38,8 @@ const routes: Routes = [
       { path: 'home',             component: PortalPageHomeComponent },
       { path: 'scientific-merit', component: PortalPageScientificMeritComponent },
       { path: 'objectives',       component: PortalPageObjectivesComponent },
-      { path: 'partners-funders', component: PortalPagePartnersFundersComponent },
+      { path: 'partners',          component: PortalPagePartnersComponent },
+      { path: 'funders',           component: PortalPageFundersComponent },
       { path: 'gallery',          component: PortalPageGalleryComponent },
       { path: 'events',           component: PortalPageEventsComponent },
       { path: 'team',             component: PortalPageTeamComponent },

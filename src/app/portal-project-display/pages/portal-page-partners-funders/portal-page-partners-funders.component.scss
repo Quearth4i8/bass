@@ -7,23 +7,21 @@
 
 .page-header {
   text-align: center; padding: 92px 20px 36px;
-  background: linear-gradient(180deg, #f4f7fb 0%, #fff 100%);
+  background: transparent;
   .page-project-title { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #4fc3f7; margin-bottom: 10px; }
   .page-section-title { font-size: clamp(28px,4vw,40px); font-weight: 900; color: #1a2a4a; margin-bottom: 20px; }
   .header-divider { width: 56px; height: 4px; background: linear-gradient(90deg, var(--portal-accent, #4fc3f7), color-mix(in srgb, var(--portal-accent, #4fc3f7), #000 25%)); border-radius: 2px; margin: 0 auto; }
 }
 
 .pf-section {
-  max-width: 1100px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 60px 24px;
+  padding: 60px 40px;
   display: flex;
   flex-direction: column;
   gap: 40px;
 
-  & + .pf-section {
-    border-top: 1px solid rgba(226, 232, 240, 0.8);
-  }
+  & + .pf-section { border-top: 1px solid rgba(226, 232, 240, 0.8); }
 
   .section-label {
     display: flex;
@@ -39,19 +37,13 @@
     &::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 24px;
+      left: 0; top: 50%; transform: translateY(-50%);
+      width: 4px; height: 24px;
       background: var(--portal-accent, #4fc3f7);
       border-radius: 999px;
     }
 
-    i {
-      color: var(--portal-accent, #4fc3f7);
-      font-size: 24px;
-    }
+    i { color: var(--portal-accent, #4fc3f7); font-size: 24px; }
   }
 }
 
@@ -66,9 +58,7 @@
     border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.05),
-      0 10px 15px -3px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,27 +67,17 @@
 
     &:hover {
       transform: translateY(-5px);
-      box-shadow: 
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       border-color: var(--portal-accent, #4fc3f7);
     }
 
-    img {
-      max-width: 100%;
-      max-height: 80px;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      transition: all 0.4s ease;
-    }
+    img { max-width: 100%; max-height: 80px; width: auto; height: auto; object-fit: contain; transition: all 0.4s ease; }
   }
 }
 
 .funders-section .funder-list {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
@@ -116,41 +96,23 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
 
-    &:hover {
-      border-color: var(--portal-accent, #4fc3f7);
-      background: #f8fafc;
-      transform: translateX(4px);
-    }
+    &:hover { border-color: var(--portal-accent, #4fc3f7); background: #f8fafc; transform: translateX(4px); }
 
-    i {
-      color: var(--portal-accent, #4fc3f7);
-      font-size: 20px;
-      flex-shrink: 0;
-    }
+    i { color: var(--portal-accent, #4fc3f7); font-size: 20px; flex-shrink: 0; }
   }
 }
 
-@media (max-width: 1200px) {
-  .page-header { padding-top: 160px; }
-}
+@media (max-width: 1200px) { .page-header { padding-top: 160px; } }
 
 @media (max-width: 768px) {
-  .pf-section {
-    padding: 40px 16px;
-    gap: 30px;
-  }
-
+  .pf-section { padding: 40px 16px; gap: 30px; }
+}
+@media (min-width: 769px) and (max-width: 1100px) {
+  .pf-section { padding: 60px 24px; }
   .logo-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 16px;
-
-    .logo-card {
-      padding: 20px;
-      min-height: 100px;
-    }
+    .logo-card { padding: 20px; min-height: 100px; }
   }
-
-  .funders-section .funder-list {
-    grid-template-columns: 1fr;
-  }
+  .funders-section .funder-list { grid-template-columns: 1fr; }
 }

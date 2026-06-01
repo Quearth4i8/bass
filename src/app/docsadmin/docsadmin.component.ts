@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ThemeService } from '../services/ThemeService';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
@@ -31,8 +32,6 @@ interface ProjectWithStats extends PortalProject {
 export class DocsadminComponent implements OnInit {
 
   isSidebarVisible = true;
-  logoutModalVisible = false;
-  isUserMenuOpen = false;
 
   view: 'projects' | 'documents' = 'projects';
 
@@ -94,6 +93,7 @@ export class DocsadminComponent implements OnInit {
     private messageService: MessageService,
     private docService: PortalProjectDocumentService,
     private sanitizer: DomSanitizer,
+    public themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
@@ -510,22 +510,4 @@ export class DocsadminComponent implements OnInit {
 
   toggleSidebar(): void { this.sidebarService.toggleSidebar(); }
 
-  toggleUserMenu(): void { this.isUserMenuOpen = !this.isUserMenuOpen; }
-
-  showLogoutModal(event?: MouseEvent): void {
-    if (event) { event.preventDefault(); event.stopPropagation(); }
-    this.logoutModalVisible = true;
-  }
-
-  closeLogoutModal(): void { this.logoutModalVisible = false; }
-
-  onOverlayClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) this.closeLogoutModal();
-  }
-
-  confirmLogout(): void {
-    this.logoutModalVisible = false;
-    this.authService.logout();
-    this.router.navigate(['/'], { replaceUrl: true });
-  }
 }

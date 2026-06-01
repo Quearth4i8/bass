@@ -29,6 +29,8 @@ export class Navbar2Component implements OnInit {
     private readonly destroyRef: DestroyRef,
     @Optional() private readonly portalContext: PortalProjectContextService | null,
   ) {
+    this.applyUrl(this.router.url);
+
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -47,9 +49,7 @@ export class Navbar2Component implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    this.applyUrl(this.router.url);
-  }
+  ngOnInit(): void {}
 
   private applyUrl(rawUrl: string): void {
     if (this.forceLegacyNav) {

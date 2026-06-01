@@ -127,6 +127,16 @@ export class PortalProjectsService {
     );
   }
 
+  /** Update display order in the local store synchronously (no HTTP). */
+  reorderInStore(updates: { slug: PortalProjectSlug; order: number }[]): void {
+    const current = this.projects$.value;
+    const next = current.map((p) => {
+      const u = updates.find((x) => x.slug === p.slug);
+      return u ? { ...p, order: u.order } : p;
+    });
+    this.projects$.next(next);
+  }
+
   private upsertInStore(project: PortalProject, opts?: { preferFront?: boolean }): void {
     const normalized = normalizeProject(project);
     const current = this.projects$.value;
@@ -136,7 +146,8 @@ export class PortalProjectsService {
       return;
     }
     const next = [...current];
-    next[idx] = normalized;
+    // Preserve order from the existing entry when the API response omits it.
+    next[idx] = { ...normalized, order: normalized.order ?? current[idx].order };
     this.projects$.next(next);
   }
 }

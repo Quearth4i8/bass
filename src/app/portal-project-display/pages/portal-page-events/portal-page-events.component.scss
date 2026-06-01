@@ -1,10 +1,10 @@
 .page-loader { display: flex; align-items: center; justify-content: center; min-height: 60vh; .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.8s linear infinite; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: #c5cce0; display: block; margin-bottom: 16px; } p { color: #88909e; font-size: 15px; } }
-.page-header { text-align: center; padding: 92px 20px 36px; background: linear-gradient(180deg, #f4f7fb 0%, #fff 100%); .page-project-title { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #4fc3f7; margin-bottom: 10px; } .page-section-title { font-size: clamp(28px,4vw,40px); font-weight: 900; color: #1a2a4a; margin-bottom: 20px; } .header-divider { width: 56px; height: 4px; background: linear-gradient(90deg, var(--portal-accent, #4fc3f7), color-mix(in srgb, var(--portal-accent, #4fc3f7), #000 25%)); border-radius: 2px; margin: 0 auto; } }
+.page-header { text-align: center; padding: 92px 20px 36px; background: transparent; .page-project-title { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #4fc3f7; margin-bottom: 10px; } .page-section-title { font-size: clamp(28px,4vw,40px); font-weight: 900; color: #1a2a4a; margin-bottom: 20px; } .header-divider { width: 56px; height: 4px; background: linear-gradient(90deg, var(--portal-accent, #4fc3f7), color-mix(in srgb, var(--portal-accent, #4fc3f7), #000 25%)); border-radius: 2px; margin: 0 auto; } }
 
 .events-container {
-  max-width: 900px; margin: 0 auto; padding: 40px 24px 72px;
+  max-width: 1300px; margin: 0 auto; padding: 40px 32px 72px;
   .event-card {
     display: flex; gap: 0;
     background: #fff;
@@ -36,14 +36,22 @@
     flex: 1; padding: 24px 28px;
     .event-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
     .event-title { font-size: 18px; font-weight: 800; color: #1a2a4a; line-height: 1.35; margin: 0; }
+
+    /* ── Status badge — modern chip style ── */
     .event-status {
-      flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 4px 10px;
-      border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em;
-      &.status-ongoing { background: #e8f5e9; color: #2e7d32; }
-      &.status-finished { background: #e3f2fd; color: #1565c0; }
-      &.status-canceled { background: #fce4ec; color: #c62828; }
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+      &.status-ongoing  { background: rgba(46,125,50,0.1);  color: #2e7d32; border: 1px solid rgba(46,125,50,0.25); }
+      &.status-finished { background: rgba(21,101,192,0.1); color: #1565c0; border: 1px solid rgba(21,101,192,0.25); }
+      &.status-canceled { background: rgba(198,40,40,0.1);  color: #c62828; border: 1px solid rgba(198,40,40,0.25); }
     }
-    
+
     .event-meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -62,13 +70,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      
-      i { 
-        font-size: 18px; 
+
+      i {
+        font-size: 18px;
         color: var(--portal-accent, #1a5f7a);
         flex-shrink: 0;
       }
-      
+
       strong {
         color: #2d3748;
         font-weight: 700;
@@ -79,16 +87,17 @@
     .event-presentation {
       border-top: 1px dashed #e2e8f0;
       padding-top: 16px;
-      
+
       .presentation-title {
-        font-size: 14px;
-        font-weight: 800;
-        color: #1a2a4a;
+        font-size: 10px;
+        font-weight: 600;
+        color: #a0aec0;
         margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.12em;
+        font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
       }
-      
+
       .presentation-text {
         font-size: 14.5px;
         line-height: 1.7;

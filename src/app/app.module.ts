@@ -55,13 +55,15 @@ import { PortalProjectDisplayComponent } from './portal-project-display/portal-p
 import { PortalPageHomeComponent } from './portal-project-display/pages/portal-page-home/portal-page-home.component';
 import { PortalPageScientificMeritComponent } from './portal-project-display/pages/portal-page-scientific-merit/portal-page-scientific-merit.component';
 import { PortalPageObjectivesComponent } from './portal-project-display/pages/portal-page-objectives/portal-page-objectives.component';
-import { PortalPagePartnersFundersComponent } from './portal-project-display/pages/portal-page-partners-funders/portal-page-partners-funders.component';
+import { PortalPagePartnersComponent } from './portal-project-display/pages/portal-page-partners/portal-page-partners.component';
+import { PortalPageFundersComponent } from './portal-project-display/pages/portal-page-funders/portal-page-funders.component';
 import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
 import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
 import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
+import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
 
 @NgModule({
   declarations: [
@@ -92,7 +94,8 @@ import { SafeHtmlPipe } from './shared/safe-html.pipe';
     PortalPageHomeComponent,
     PortalPageScientificMeritComponent,
     PortalPageObjectivesComponent,
-    PortalPagePartnersFundersComponent,
+    PortalPagePartnersComponent,
+    PortalPageFundersComponent,
     PortalPageGalleryComponent,
     PortalPageEventsComponent,
     PortalPageTeamComponent,
@@ -125,6 +128,7 @@ import { SafeHtmlPipe } from './shared/safe-html.pipe';
     MessageModule,
     DropdownModule,
     ToastModule,
+    AdminNavbarComponent,
   ],
   providers: [
     DialogService,

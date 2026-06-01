@@ -74,8 +74,9 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   box-sizing: border-box;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  background: rgba(3, 20, 32, 0.84);
-  border-bottom: 1px solid $line;
+  background: rgba(8, 42, 61, 0.95);
+  border-bottom: 1px solid $line-2;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
 }
 
 .nav-inner {
@@ -655,7 +656,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .mission-list li strong { color: #0d2137 !important; }
 
   // Nav
-  .nav { background: rgba(240,247,251,0.92); border-bottom-color: #c5d8e6; }
+  .nav { background: rgba(255,255,255,0.97); border-bottom-color: #a8c5d8; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
   .brand-name  { color: #0d2137; }
   .brand-sub   { color: #4a7590; }
   .nav-link    { color: #3d5a6e; &:hover { color: #0d2137; background: rgba(0,0,0,0.04); } &.active { color: #1a8f7f; } }

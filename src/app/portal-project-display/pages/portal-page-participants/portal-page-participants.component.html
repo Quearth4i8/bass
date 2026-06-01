@@ -6,17 +6,24 @@
     <div class="header-divider"></div>
   </div>
 
-  <div class="participants-grid" *ngIf="project.content.participants.participants?.length">
-    <div class="participant-card" *ngFor="let person of project.content.participants.participants">
-      <div class="participant-avatar">
-        <img [src]="person.image || 'assets/images/avatar-placeholder.png'" [alt]="person.name" loading="lazy">
-      </div>
-      <h4 class="participant-name">{{ person.name }}</h4>
-      <p class="participant-role">{{ person.role }}</p>
+  <div class="participants-wrapper" *ngIf="project.content.participants.participants.length">
+    <div class="members-grid">
+      <article class="member-card" *ngFor="let person of project.content.participants.participants">
+        <div class="avatar-wrap">
+          <div class="avatar">
+            <img [src]="person.image || 'assets/images/avatar-placeholder.png'" [alt]="person.name" loading="lazy">
+          </div>
+          <span class="avatar-dot"></span>
+        </div>
+        <div class="member-info">
+          <h4 class="member-name">{{ person.name }}</h4>
+          <p class="member-role">{{ person.role }}</p>
+        </div>
+      </article>
     </div>
   </div>
 
-  <div class="empty-state" *ngIf="!project.content.participants.participants?.length">
+  <div class="empty-state" *ngIf="!project.content.participants.participants.length">
     <i class='bx bx-user-voice'></i>
     <p>There is no data.</p>
   </div>

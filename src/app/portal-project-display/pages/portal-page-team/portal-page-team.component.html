@@ -6,24 +6,31 @@
     <div class="header-divider"></div>
   </div>
 
-  <ng-container *ngIf="project.content.team.sections?.length">
+  <div class="sections-wrapper" *ngIf="project.content.team.sections.length">
     <div class="team-section" *ngFor="let section of project.content.team.sections">
-      <h3 class="section-group-title">{{ section.title }}</h3>
+      <div class="section-header-row">
+        <span class="section-group-title">{{ section.title }}</span>
+        <span class="section-rule"></span>
+        <span class="section-count">{{ section.members.length }} member{{ section.members.length !== 1 ? 's' : '' }}</span>
+      </div>
       <div class="members-grid">
-        <div class="member-card" *ngFor="let member of section.members">
-          <div class="member-avatar">
-            <img [src]="member.image || 'assets/images/avatar-placeholder.png'" [alt]="member.name" loading="lazy">
+        <article class="member-card" *ngFor="let member of section.members">
+          <div class="avatar-wrap">
+            <div class="avatar">
+              <img [src]="member.image || 'assets/images/avatar-placeholder.png'" [alt]="member.name" loading="lazy">
+            </div>
+            <span class="avatar-dot"></span>
           </div>
           <div class="member-info">
             <h4 class="member-name">{{ member.name }}</h4>
             <p class="member-role">{{ member.role }}</p>
           </div>
-        </div>
+        </article>
       </div>
     </div>
-  </ng-container>
+  </div>
 
-  <div class="empty-state" *ngIf="!project.content.team.sections?.length">
+  <div class="empty-state" *ngIf="!project.content.team.sections.length">
     <i class='bx bx-group'></i>
     <p>There is no data.</p>
   </div>
