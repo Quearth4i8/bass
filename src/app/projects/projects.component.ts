@@ -1,8 +1,9 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostBinding, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { ProjectService } from '../services/ProjectService';
+import { ThemeService } from '../services/ThemeService';
 
 @Component({
   selector: 'app-projects',
@@ -10,6 +11,7 @@ import { ProjectService } from '../services/ProjectService';
   styleUrls: ['projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
+  @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   username: string = '';
   password: string = '';
   error: string = '';
@@ -37,7 +39,8 @@ export class ProjectsComponent implements OnInit {
     private authService: AuthService,
     private projectGroupService: ProjectGroupService,
     private projectService: ProjectService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {

@@ -1,62 +1,26 @@
-   <div class="container">
-      <div class="card__container">
-         <article class="card__article">
-            <img src="assets/images/atm.jpg" alt="image" class="card__img">
+<div class="lc-grid">
+  <article
+    *ngFor="let card of cards"
+    class="lc-card"
+    [class.lc-expanded]="activeCard === card.id"
+    (click)="toggle(card.id)">
 
-            <div class="card__data">
-               <span class="card__description">Meteorological conditions</span>
-               <h2 class="card__title">ATMOSPHERIC</h2>
-               <a class="card__button" (click)="$event.preventDefault(); onReadMore('ATMOSPHERIC')">Read More</a>
-            </div>
-         </article>
+    <img [src]="card.image" [alt]="card.name" class="lc-img">
+    <div class="lc-hatch"></div>
 
-         <article class="card__article">
-            <img src="assets/images/water.jpg" alt="image" class="card__img">
+    <!-- Slide-up description panel -->
+    <div class="lc-overlay">
+      <p>{{ card.description }}</p>
+    </div>
 
-            <div class="card__data">
-               <span class="card__description">Aqua</span>
-               <h2 class="card__title">WATER</h2>
-               <a class="card__button" (click)="$event.preventDefault(); onReadMore('WATER')">Read More</a>
-            </div>
-         </article>
-
-         <article class="card__article">
-            <img src="assets/images/sediment.jpg" alt="image" class="card__img">
-
-            <div class="card__data">
-               <span class="card__description">Sedimentation</span>
-               <h2 class="card__title">SEDIMENT</h2>
-               <a class="card__button" (click)="$event.preventDefault(); onReadMore('SEDIMENT')">Read More</a>
-            </div>
-         </article>
-
-         <article class="card__article">
-            <img src="assets/images/6.jpg" alt="image" class="card__img">
-
-            <div class="card__data">
-               <span class="card__description">Biota</span>
-               <h2 class="card__title">BIOTA</h2>
-               <a class="card__button" (click)="$event.preventDefault(); onReadMore('BIOTA')">Read More</a>
-            </div>
-         </article>
+    <!-- Bottom bar -->
+    <div class="lc-foot">
+      <div class="lc-info">
+        <span class="lc-tag">{{ card.tag }}</span>
+        <span class="lc-name">{{ card.name }}</span>
       </div>
-   </div>
+      <span class="lc-toggle-icon">{{ activeCard === card.id ? '×' : '+' }}</span>
+    </div>
 
-   <!-- Modal -->
-   <div class="cards-modal-backdrop" *ngIf="modalOpen" (click)="closeModal()"></div>
-   <div class="cards-modal" *ngIf="modalOpen" role="dialog" aria-modal="true" [attr.aria-labelledby]="'cards-modal-title'" [attr.aria-describedby]="'cards-modal-desc'" (click)="$event.stopPropagation()">
-      <button class="modal__close" (click)="closeModal()" aria-label="Close">
-         <span aria-hidden="true">×</span>
-      </button>
-      <div class="modal__header">
-         <div class="modal__icon" [attr.data-type]="modalTitle"></div>
-         <div class="modal__titles">
-            <h3 class="modal__title" id="cards-modal-title">{{ modalTitle }}</h3>
-            <span class="modal__subtitle">Overview</span>
-         </div>
-      </div>
-      <div class="modal__divider"></div>
-      <div class="modal__body">
-         <p class="modal__desc" id="cards-modal-desc">{{ modalDescription }}</p>
-      </div>
-   </div>
+  </article>
+</div>

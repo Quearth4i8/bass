@@ -1,16 +1,20 @@
-import { Component, DestroyRef, HostListener, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostBinding, HostListener, OnInit, AfterViewInit, ElementRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
 import { PortalProjectsService } from '../portal/services/portal-projects.service';
 import { PortalProjectMeta } from '../portal/models/portal-project.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ProjectService } from '../services/ProjectService';
+import { ProjectGroupService } from '../services/ProjectGroupService';
+import { ThemeService } from '../services/ThemeService';
 
 @Component({
   selector: 'app-projects-landing',
   templateUrl: './projects-landing.component.html',
   styleUrls: ['./projects-landing.component.scss']
 })
-export class ProjectsLandingComponent implements OnInit {
+export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   username: string = '';
   password: string = '';
   error: string = '';
@@ -20,22 +24,103 @@ export class ProjectsLandingComponent implements OnInit {
 
   projects: PortalProjectMeta[] = [];
 
+  // Stats loaded from backend
+  totalResearchProjects: number | null = null;
+  totalProjectGroups: number | null = null;
+  totalPortalProjects: number | null = null;
+  activePortalProjects: number | null = null;
+
+  private io?: IntersectionObserver;
+  private navIo?: IntersectionObserver;
+  private clockInterval?: ReturnType<typeof setInterval>;
+  currentTime: string = '';
+  activeSection: string = 'home';
+
   constructor(
     private router: Router,
     private authService: AuthService,
     private portalProjectsService: PortalProjectsService,
+    private projectService: ProjectService,
+    private projectGroupService: ProjectGroupService,
     private destroyRef: DestroyRef,
+    private el: ElementRef,
+    public themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
     this.checkAdminSession();
+    this.startClock();
 
     this.portalProjectsService
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((projects) => {
         this.projects = [...projects].sort((a, b) => Number(b.isActive) - Number(a.isActive));
+        this.totalPortalProjects = projects.length;
+        this.activePortalProjects = projects.filter(p => p.isActive).length;
+        // Re-observe after project cards are rendered
+        setTimeout(() => this.observeFadeElements(), 80);
       });
+
+    this.projectService.getAllProjects().subscribe({
+      next: (p) => { this.totalResearchProjects = p.length; },
+      error: () => {}
+    });
+
+    this.projectGroupService.getProjectGroups().subscribe({
+      next: (g) => { this.totalProjectGroups = g.length; },
+      error: () => {}
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.observeFadeElements();
+    this.observeSections();
+  }
+
+  ngOnDestroy(): void {
+    this.io?.disconnect();
+    this.navIo?.disconnect();
+    if (this.clockInterval) clearInterval(this.clockInterval);
+  }
+
+  private observeSections(): void {
+    const ids = ['home', 'about', 'geodatabase', 'projects', 'team'];
+    this.navIo = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(e => { if (e.isIntersecting) this.activeSection = e.target.id; });
+      },
+      { rootMargin: '-40% 0px -50% 0px' }
+    );
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) this.navIo!.observe(el);
+    });
+  }
+
+  private startClock(): void {
+    const tick = () => {
+      this.currentTime = new Date().toISOString().slice(11, 19) + ' UTC';
+    };
+    tick();
+    this.clockInterval = setInterval(tick, 1000);
+  }
+
+  private observeFadeElements(): void {
+    this.io?.disconnect();
+    this.io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add('in');
+            this.io?.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    );
+    const elements: NodeListOf<Element> = this.el.nativeElement.querySelectorAll('.fade-up:not(.in)');
+    elements.forEach(el => this.io!.observe(el));
   }
 
   private checkAdminSession(): void {
@@ -60,7 +145,6 @@ export class ProjectsLandingComponent implements OnInit {
           this.error = 'Invalid username or password';
           return;
         }
-
         if (this.authService.isAdmin()) {
           this.isAdminLoggedIn = true;
           this.showAdminLogin = false;
@@ -97,9 +181,17 @@ export class ProjectsLandingComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (!target.closest('.landing-admin-area')) {
+    if (!target.closest('.admin-area')) {
       this.showAdminLogin = false;
     }
+  }
+
+  scrollTo(sectionId: string): void {
+    const el = document.getElementById(sectionId);
+    if (!el) return;
+    const navHeight = 64;
+    const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+    window.scrollTo({ top, behavior: 'smooth' });
   }
 
   navigateToProject(projectSlug: string): void {

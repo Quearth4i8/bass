@@ -18,6 +18,9 @@
       </svg>
       Back to Portal
     </a>
+    <button class="theme-btn" (click)="themeService.toggle()" [title]="themeService.isLight ? 'Switch to dark' : 'Switch to light'">
+      <i class='bx' [class.bx-sun]="!themeService.isLight" [class.bx-moon]="themeService.isLight"></i>
+    </button>
   </div>
 
   <!-- Page Title -->
