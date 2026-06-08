@@ -2,6 +2,7 @@
   <header class="portal-shell-nav sticky">
     <div class="logo-section">
       <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
+      <span class="portal-pid" *ngIf="portalProjectId">{{ portalProjectId }}</span>
     </div>
 
     <nav class="portal-nav-center" aria-label="Project sections">

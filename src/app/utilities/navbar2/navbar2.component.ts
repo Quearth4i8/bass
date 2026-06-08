@@ -20,6 +20,7 @@ export class Navbar2Component implements OnInit {
   portalMode = false;
   portalSlug = '';
   portalTitle = '';
+  portalProjectId = '';
   private lastPortalSlug = '';
 
   readonly portalLinks = PORTAL_TOP_NAV_LINKS;
@@ -45,6 +46,12 @@ export class Navbar2Component implements OnInit {
           if (meta?.title && (!this.portalSlug || meta.slug === this.portalSlug)) {
             this.portalTitle = meta.title;
           }
+        });
+
+      this.portalContext.project$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((project) => {
+          this.portalProjectId = project?.content?.home?.projectId ?? '';
         });
     }
   }

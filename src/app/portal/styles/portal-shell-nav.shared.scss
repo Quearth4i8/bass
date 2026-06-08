@@ -20,7 +20,7 @@ header.portal-shell-nav {
 }
 
 header.portal-shell-nav.sticky {
-  padding: 15px 100px;
+  padding: 10px 100px;
   min-height: 56px;
   background-color: var(--portal-accent, #1a5f7a);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -38,8 +38,11 @@ header.portal-shell-nav .logo {
   text-decoration: none;
   letter-spacing: 0.06em;
   transition: color 0.2s ease;
-  font-size: clamp(1.2rem, 2.5vw, 1.85rem);
+  font-size: clamp(1rem, 2vw, 1.5rem);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  line-height: 1.2;
+  text-transform: none;
 }
 
 .portal-nav-center {

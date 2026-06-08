@@ -174,14 +174,23 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Doughnut ───────────────────────────────────────────────────────────────
 .pie-chart-compact {
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  min-height: 260px;
 }
 
 .chart-canvas {
   position: relative;
+  flex-shrink: 0;
+
   &.doughnut {
-    display: flex; align-items: center; justify-content: center;
-    width: 220px; height: 220px; flex-shrink: 0;
+    width: 240px;
+    height: 240px;
+
+    p-chart { display: block; width: 100%; height: 100%; }
+    ::ng-deep canvas { width: 100% !important; height: 100% !important; }
   }
   &.line { }
   &.bar-chart-container { }
@@ -195,14 +204,21 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 .compact-legend {
-  width: 100%; max-height: 180px; overflow-y: auto;
-  padding-right: 4px;
+  flex: 1;
+  min-width: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 6px;
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: $line-2; border-radius: 2px; }
 }
 
-.legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+}
 
 .legend-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
 

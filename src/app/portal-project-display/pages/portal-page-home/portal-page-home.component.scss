@@ -10,9 +10,10 @@
     color: #ffffff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6);
 }
+:host { display: block; margin-top: -56px; }
+
 .slider {
     height: 100vh;
-    margin-top: -50px;
     position: relative;
 }
 .slider .list .item {
@@ -201,25 +202,6 @@
   opacity: 1;
 }
 
-.project-id-row {
-  flex-basis: 100%;
-  text-align: center;
-  padding: 12px 0 4px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-
-  .pid-value {
-    display: inline-block;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--portal-accent, #1a5f7a);
-    font-family: 'Courier New', Courier, monospace;
-    letter-spacing: 0.06em;
-    background: rgba(79, 195, 247, 0.07);
-    border: 1px solid rgba(79, 195, 247, 0.2);
-    padding: 4px 14px;
-    border-radius: 6px;
-  }
-}
 
 .container2 {
   display: flex;

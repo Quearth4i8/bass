@@ -1,0 +1,24 @@
+<aside class="admin-sidebar" [class.collapsed]="collapsed">
+  <nav class="sidebar-nav">
+    <a routerLink="/projectadmin" class="nav-item"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <i class='bx bx-home'></i>
+      <span>Projects</span>
+    </a>
+    <a routerLink="/docsadmin" class="nav-item"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <i class='bx bx-file'></i>
+      <span>Documents</span>
+    </a>
+    <a routerLink="/budget-charts" class="nav-item"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <i class='bx bx-pie-chart-alt-2'></i>
+      <span>Budget Charts</span>
+    </a>
+    <a routerLink="/management" class="nav-item"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <i class='bx bx-cog'></i>
+      <span>Management</span>
+    </a>
+  </nav>
+</aside>

@@ -1,0 +1,57 @@
+$bg-2:       #061f2e;
+$panel:      #082a3d;
+$line:       #103a4f;
+$text:       #e8f1f5;
+$text-dim:   #9fb3bf;
+$accent:     #4ad6c4;
+$radius:     10px;
+
+.admin-sidebar {
+  position: fixed;
+  top: 64px; left: 0; bottom: 0;
+  width: 220px;
+  background: $bg-2;
+  border-right: 1px solid $line;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  transition: transform 0.3s ease;
+
+  &.collapsed { transform: translateX(-100%); pointer-events: none; }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: $radius;
+  color: $text-dim;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  i { font-size: 18px; }
+
+  &:hover  { background: $panel; color: $text; }
+  &.active { background: $panel; color: $accent; border-left: 2px solid $accent; padding-left: 12px; }
+}
+
+// Light theme
+:host-context(.theme-light) {
+  .admin-sidebar { background: #ffffff; border-right-color: #c5d8e6; }
+  .nav-item {
+    color: #3d5a6e;
+    &:hover  { background: #f0f7fb; color: #1a8f7f; }
+    &.active { background: #e4eff6; color: #1a8f7f; border-left-color: #1a8f7f; }
+  }
+}

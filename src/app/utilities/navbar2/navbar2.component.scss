@@ -40,8 +40,19 @@ header .logo {
 
 .logo-section {
   display: flex;
-  align-items: center;
-  gap: 15px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.portal-pid {
+  font-size: 9.5px;
+  font-weight: 500;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1;
 }
 
 .projects-icon {

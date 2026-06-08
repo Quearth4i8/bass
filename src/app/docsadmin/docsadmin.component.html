@@ -12,27 +12,7 @@
     </div>
   </app-admin-navbar>
 
-  <!-- Sidebar -->
-  <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
-    <nav class="sidebar-nav">
-      <a routerLink="/projectadmin" class="nav-item">
-        <i class='bx bx-home'></i>
-        <span>Projects</span>
-      </a>
-      <a routerLink="/docsadmin" class="nav-item active">
-        <i class='bx bx-file'></i>
-        <span>Documents</span>
-      </a>
-      <a routerLink="/budget-charts" class="nav-item">
-        <i class='bx bx-pie-chart-alt-2'></i>
-        <span>Budget Charts</span>
-      </a>
-      <a routerLink="/management" class="nav-item">
-        <i class='bx bx-cog'></i>
-        <span>Management</span>
-      </a>
-    </nav>
-  </aside>
+  <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
 
   <!-- Main Content -->
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">

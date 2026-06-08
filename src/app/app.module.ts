@@ -64,6 +64,7 @@ import { PortalPageParticipantsComponent } from './portal-project-display/pages/
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
+import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.component';
 
 @NgModule({
   declarations: [
@@ -129,6 +130,7 @@ import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.comp
     DropdownModule,
     ToastModule,
     AdminNavbarComponent,
+    AdminSidebarComponent,
   ],
   providers: [
     DialogService,

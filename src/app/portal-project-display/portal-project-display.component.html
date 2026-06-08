@@ -1,7 +1,6 @@
 <ng-container *ngIf="!notFound; else notFoundTpl">
   <div class="portal-root" [style.--portal-accent]="portalAccentHex">
-    <app-navbar *ngIf="showPortalPublicHomeNav"></app-navbar>
-    <app-navbar2 *ngIf="!showPortalPublicHomeNav"></app-navbar2>
+    <app-navbar2></app-navbar2>
 
     <div class="portal-content">
       <router-outlet></router-outlet>

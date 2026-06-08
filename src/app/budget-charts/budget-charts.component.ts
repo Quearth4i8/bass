@@ -6,11 +6,12 @@ import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
 import { ThemeService } from '../services/ThemeService';
 import { AdminNavbarComponent } from '../utilities/admin-navbar/admin-navbar.component';
+import { AdminSidebarComponent } from '../utilities/admin-sidebar/admin-sidebar.component';
 
 @Component({
   selector: 'app-budget-charts',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartModule, AdminNavbarComponent],
+  imports: [CommonModule, RouterModule, ChartModule, AdminNavbarComponent, AdminSidebarComponent],
   templateUrl: './budget-charts.component.html',
   styleUrls: ['./budget-charts.component.scss']
 })
