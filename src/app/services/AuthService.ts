@@ -35,6 +35,12 @@ export class AuthService {
     return this.baseUrl;
   }
 
+  private extractRole(payload: any): string | null {
+    const raw = payload?.role ?? payload?.roles;
+    if (Array.isArray(raw)) return typeof raw[0] === 'string' ? raw[0] : null;
+    return typeof raw === 'string' ? raw : null;
+  }
+
   login(username: string, password: string): Observable<boolean> {
     return this.http
       .post<any>(`${this.baseUrl}/auth/signin`, { username, password })
@@ -43,15 +49,10 @@ export class AuthService {
           const token = res?.accessToken || res?.token;
           if (token) {
             localStorage.setItem(this.TOKEN_KEY, token);
-          }
-
-          if (token) {
             const payload = this.decodeJwtPayload(token);
-            const roleFromToken = payload?.role;
+            const role = this.extractRole(payload);
             const usernameFromToken = payload?.username || payload?.sub;
-            if (typeof roleFromToken === 'string') {
-              localStorage.setItem(this.ROLE_KEY, roleFromToken);
-            }
+            if (role) localStorage.setItem(this.ROLE_KEY, role);
             if (typeof usernameFromToken === 'string' && usernameFromToken) {
               localStorage.setItem(this.USERNAME_KEY, usernameFromToken);
             }
@@ -101,11 +102,7 @@ export class AuthService {
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
-    if (this.isTokenExpired()) {
-      this.logout();
-      return false;
-    }
-    return true;
+    return !this.isTokenExpired();
   }
 
   getRole(): string {
@@ -128,11 +125,9 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return of(void 0);
     const payload = this.decodeJwtPayload(token);
-    const role = payload?.role;
+    const role = this.extractRole(payload);
     const username = payload?.username || payload?.sub;
-    if (typeof role === 'string' && !this.getRole()) {
-      localStorage.setItem(this.ROLE_KEY, role);
-    }
+    if (role && !this.getRole()) localStorage.setItem(this.ROLE_KEY, role);
     if (typeof username === 'string' && username && !this.getUsername()) {
       localStorage.setItem(this.USERNAME_KEY, username);
     }

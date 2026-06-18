@@ -61,11 +61,14 @@
       <div class="content-wrapper" #contentWrapper>
           <section [class]="i % 2 === 0 ? 'text-section-left fade-in-left' : 'text-section-right fade-in-right'"
               [style.order]="i % 2 === 0 ? 1 : 2">
+              <span class="info-eyebrow">// {{ i + 1 < 10 ? '0' + (i + 1) : (i + 1) }}</span>
               <h1>{{ item.title }}</h1>
+              <span class="info-divider"></span>
               <h5>{{ item.text }}</h5>
           </section>
-          <img src="{{ item.imageUrl }}" alt="Image Description" class="image"
-              [ngClass]="i % 2 === 0 ? 'fade-in-right' : 'fade-in-left'" [style.order]="i % 2 === 0 ? 2 : 1" />
+          <div class="image-wrap" [ngClass]="i % 2 === 0 ? 'fade-in-right' : 'fade-in-left'" [style.order]="i % 2 === 0 ? 2 : 1">
+              <img src="{{ item.imageUrl }}" alt="Image Description" class="image" />
+          </div>
       </div>
   </div>
 

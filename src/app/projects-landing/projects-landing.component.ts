@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../services/AuthService';
-import { EcoStatusService } from '../services/eco-status.service';
+import { TrixService, TrixRegionData, TrixResult, TrixSeason, calcTrix, classify } from '../services/trix.service';
+import { TrixPredictionService, TrixPredRegion, TrixPredResult } from '../services/trix-prediction.service';
 import { PortalProjectsService } from '../portal/services/portal-projects.service';
 import { PortalProjectMeta } from '../portal/models/portal-project.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,24 +12,39 @@ import { ProjectService } from '../services/ProjectService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { ThemeService } from '../services/ThemeService';
 
+function detectCurrentSeason(): TrixSeason {
+  const m = new Date().getMonth() + 1;
+  if (m <= 2 || m === 12) return 'winter';
+  if (m <= 5)             return 'spring';
+  if (m <= 8)             return 'summer';
+  return 'autumn';
+}
+
+const TRIX_MOCK: TrixRegionData[] = [
+  { id: 'bizerte', label: 'Lagoon of Bizerte', seasons: {
+    winter: { trix: 4.2, eutrophication: 'Medium',    waterQuality: 'Good', din: 18.4, dip: 1.2, chla: 3.8,  do2: 10 },
+    spring: { trix: 3.6, eutrophication: 'Low',       waterQuality: 'High', din: 12.1, dip: 0.8, chla: 2.9,  do2:  5 },
+    summer: { trix: 5.3, eutrophication: 'High',      waterQuality: 'Poor', din: 24.7, dip: 2.1, chla: 8.4,  do2: 35 },
+    autumn: { trix: 4.8, eutrophication: 'Medium',    waterQuality: 'Good', din: 20.3, dip: 1.6, chla: 5.2,  do2: 15 },
+  }},
+  { id: 'tunis', label: 'Gulf of Tunis', seasons: {
+    winter: { trix: 5.1, eutrophication: 'High',      waterQuality: 'Poor', din: 31.2, dip: 2.4, chla: 7.1,  do2: 17 },
+    spring: { trix: 4.4, eutrophication: 'Medium',    waterQuality: 'Good', din: 22.6, dip: 1.8, chla: 4.3,  do2: 20 },
+    summer: { trix: 6.2, eutrophication: 'Very High', waterQuality: 'Bad',  din: 48.9, dip: 3.7, chla: 14.6, do2: 40 },
+    autumn: { trix: 5.7, eutrophication: 'High',      waterQuality: 'Poor', din: 38.4, dip: 2.9, chla: 10.2, do2: 30 },
+  }},
+  { id: 'gabes', label: 'Gulf of Gabès', seasons: {
+    winter: { trix: 3.4, eutrophication: 'Low',       waterQuality: 'High', din:  9.8, dip: 0.6, chla: 2.1,  do2:  5 },
+    spring: { trix: 3.8, eutrophication: 'Low',       waterQuality: 'High', din: 11.4, dip: 0.7, chla: 2.7,  do2: 10 },
+    summer: { trix: 4.6, eutrophication: 'Medium',    waterQuality: 'Good', din: 16.2, dip: 1.1, chla: 4.8,  do2: 25 },
+    autumn: { trix: 4.1, eutrophication: 'Medium',    waterQuality: 'Good', din: 13.9, dip: 0.9, chla: 3.5,  do2: 15 },
+  }},
+];
+
 interface FeaturedOutput {
   videoUrl: string;
   title: string;
   projectSlug: string;
-}
-
-interface EcoParam {
-  key: string;
-  label: string;
-  unit: string;
-  value: number;
-  min: number;
-  max: number;
-  lowThreshold: number;
-  critThreshold: number;
-  higherIsBetter?: boolean;
-  category: string;
-  desc: string;
 }
 
 @Component({
@@ -48,72 +64,40 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   projects: PortalProjectMeta[] = [];
   featuredOutputs: FeaturedOutput[] = [];
 
-  ecoParams: EcoParam[] = [
-    {
-      key: 'nh4', label: 'NH₄⁺ — Ammonium', unit: 'µmol/L', value: 3.2,
-      min: 0, max: 20, lowThreshold: 2, critThreshold: 10,
-      category: 'WATER · CHEMICAL',
-      desc: 'High ammonium indicates organic decomposition and anthropogenic inputs. Promotes algal blooms above 2 µmol/L.'
-    },
-    {
-      key: 'no3', label: 'NO₃⁻ — Nitrate', unit: 'µmol/L', value: 18.4,
-      min: 0, max: 120, lowThreshold: 25, critThreshold: 60,
-      category: 'WATER · CHEMICAL',
-      desc: 'Primary dissolved inorganic nitrogen form. Elevated levels indicate eutrophication pressure from agricultural runoff.'
-    },
-    {
-      key: 'no2', label: 'NO₂⁻ — Nitrite', unit: 'µmol/L', value: 0.6,
-      min: 0, max: 8, lowThreshold: 1, critThreshold: 4,
-      category: 'WATER · CHEMICAL',
-      desc: 'Nitrite is toxic to aquatic fauna at elevated concentrations. Transient intermediate in the nitrogen cycling pathway.'
-    },
-    {
-      key: 'po4', label: 'PO₄³⁻ — Phosphate', unit: 'µmol/L', value: 0.8,
-      min: 0, max: 8, lowThreshold: 1, critThreshold: 3,
-      category: 'WATER · CHEMICAL',
-      desc: 'Limiting nutrient in most marine systems. Co-elevation with nitrogen drives hypoxic bloom events in coastal lagoons.'
-    },
-    {
-      key: 'si', label: 'Si — Silicate', unit: 'µmol/L', value: 12.1,
-      min: 0, max: 80, lowThreshold: 15, critThreshold: 40,
-      category: 'WATER · CHEMICAL',
-      desc: 'Essential for diatom growth. Imbalance relative to N and P shifts phytoplankton community structure toward harmful species.'
-    },
-    {
-      key: 'toc', label: 'TOC — Total Organic Carbon', unit: 'mg/L', value: 2.1,
-      min: 0, max: 15, lowThreshold: 3, critThreshold: 8,
-      category: 'WATER · CHEMICAL',
-      desc: 'Indicator of organic pollution load. High TOC drives microbial oxygen consumption and promotes hypoxic bottom waters.'
-    },
-    {
-      key: 'chl', label: 'Chl-a — Chlorophyll a', unit: 'µg/L', value: 4.2,
-      min: 0, max: 60, lowThreshold: 10, critThreshold: 30,
-      category: 'BIOTA · CHEMICAL',
-      desc: 'Proxy for phytoplankton biomass. Elevated concentrations signal bloom events and eutrophication stress on the ecosystem.'
-    },
-    {
-      key: 'turb', label: 'Turb — Turbidity', unit: 'NTU', value: 3.8,
-      min: 0, max: 30, lowThreshold: 5, critThreshold: 15,
-      category: 'WATER · PHYSICAL',
-      desc: 'Reduces light penetration affecting primary production. Elevated values indicate sediment load or algal proliferation.'
-    },
-    {
-      key: 'temp', label: 'T° — Water Temperature', unit: '°C', value: 22.4,
-      min: 0, max: 35, lowThreshold: 25, critThreshold: 30,
-      category: 'WATER · PHYSICAL',
-      desc: 'Above 25°C reduces dissolved oxygen capacity and accelerates metabolic stress rates in aquatic organisms.'
-    },
-    {
-      key: 'do', label: 'O₂ — Dissolved Oxygen', unit: 'mg/L', value: 7.2,
-      min: 0, max: 14, lowThreshold: 8, critThreshold: 5,
-      higherIsBetter: true,
-      category: 'WATER · PHYSICAL',
-      desc: 'Critical for aerobic life. Below 5 mg/L triggers hypoxic stress; below 2 mg/L is lethal to most marine organisms.'
-    }
-  ];
+  // TRIX — measured
+  trixData: TrixRegionData[] = [];
+  trixLoading = true;
+  selectedSeason: TrixSeason = detectCurrentSeason();
+  showSeasonDd = false;
+  useMockData = false;
+  readonly TRIX_SEASONS: TrixSeason[] = ['winter', 'spring', 'summer', 'autumn'];
 
-  selectedParam!: EcoParam;
-  showParamDropdown = false;
+  // TRIX — predictions
+  predData: TrixPredRegion[] = [];
+  predLoading = true;
+  predError = false;
+  selectedPredSeason: TrixSeason = detectCurrentSeason();
+  showPredSeasonDd = false;
+
+  get displayTrixData(): TrixRegionData[] {
+    return this.useMockData ? TRIX_MOCK : this.trixData;
+  }
+
+  toggleMockData(): void { this.useMockData = !this.useMockData; }
+
+  // TRIX — manual test calculator
+  showTrixTest = false;
+  testDin = 20;
+  testDip = 2;
+  testChla = 5;
+  testDo2 = 15;
+
+  toggleTrixTest(): void { this.showTrixTest = !this.showTrixTest; }
+
+  get testTrixResult(): TrixResult {
+    const trix = calcTrix(this.testDin, this.testDip, this.testDo2, this.testChla);
+    return { trix, ...classify(trix), din: this.testDin, dip: this.testDip, chla: this.testChla, do2: this.testDo2 };
+  }
 
   // Stats loaded from backend
   totalResearchProjects: number | null = null;
@@ -131,100 +115,11 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   currentTime: string = '';
   activeSection: string = 'home';
 
-  get gaugePercent(): number {
-    const p = this.selectedParam;
-    if (!p) return 0;
-    const frac = (p.value - p.min) / (p.max - p.min);
-    const raw = p.higherIsBetter ? (1 - frac) * 100 : frac * 100;
-    return Math.min(100, Math.max(0, raw));
-  }
-
-  get gaugeArc(): string {
-    const filled = 329.87 * (this.gaugePercent / 100);
-    return `${filled} ${439.82 - filled}`;
-  }
-
-  get gaugeStatus(): 'LOW' | 'MODERATE' | 'CRITICAL' {
-    const p = this.selectedParam;
-    if (!p) return 'LOW';
-    if (p.higherIsBetter) {
-      if (p.value >= p.lowThreshold) return 'LOW';
-      if (p.value >= p.critThreshold) return 'MODERATE';
-      return 'CRITICAL';
-    }
-    if (p.value <= p.lowThreshold) return 'LOW';
-    if (p.value <= p.critThreshold) return 'MODERATE';
-    return 'CRITICAL';
-  }
-
-  get gaugeStatusColor(): string {
-    const isLight = this.themeService.isLight;
-    switch (this.gaugeStatus) {
-      case 'LOW':      return isLight ? '#1a8f7f' : '#4ad6c4';
-      case 'MODERATE': return isLight ? '#b36c00' : '#f5b94a';
-      case 'CRITICAL': return isLight ? '#dc2626' : '#ef4444';
-    }
-  }
-
-  get rangeMarkerPos(): number {
-    const p = this.selectedParam;
-    if (!p) return 0;
-    return (p.value - p.min) / (p.max - p.min) * 100;
-  }
-
-  get rangeSegments(): { flex: number; color: string }[] {
-    const p = this.selectedParam;
-    if (!p) return [];
-    const range = p.max - p.min;
-    if (p.higherIsBetter) {
-      return [
-        { flex: (p.critThreshold - p.min) / range,        color: '#ef4444' },
-        { flex: (p.lowThreshold - p.critThreshold) / range, color: '#f5b94a' },
-        { flex: (p.max - p.lowThreshold) / range,          color: '#4ad6c4' },
-      ];
-    }
-    return [
-      { flex: (p.lowThreshold - p.min) / range,           color: '#4ad6c4' },
-      { flex: (p.critThreshold - p.lowThreshold) / range,  color: '#f5b94a' },
-      { flex: (p.max - p.critThreshold) / range,           color: '#ef4444' },
-    ];
-  }
-
-  get rangeTicks(): { value: number; color: string; pos: number }[] {
-    const p = this.selectedParam;
-    if (!p) return [];
-    const range  = p.max - p.min;
-    const pct    = (v: number) => (v - p.min) / range * 100;
-    const isLight = this.themeService.isLight;
-    const gray   = isLight ? '#9bb0bc' : '#5d7785';
-    const orange = isLight ? '#b36c00' : '#f5b94a';
-    const red    = isLight ? '#dc2626' : '#ef4444';
-    if (p.higherIsBetter) {
-      return [
-        { value: p.min,           color: gray,   pos: 0 },
-        { value: p.critThreshold, color: red,    pos: pct(p.critThreshold) },
-        { value: p.lowThreshold,  color: orange, pos: pct(p.lowThreshold) },
-        { value: p.max,           color: gray,   pos: 100 },
-      ];
-    }
-    return [
-      { value: p.min,           color: gray,   pos: 0 },
-      { value: p.lowThreshold,  color: orange, pos: pct(p.lowThreshold) },
-      { value: p.critThreshold, color: red,    pos: pct(p.critThreshold) },
-      { value: p.max,           color: gray,   pos: 100 },
-    ];
-  }
-
-  paramCompare(a: EcoParam, b: EcoParam): boolean {
-    return a?.key === b?.key;
-  }
-
-  ecoValuesLoading = true;
-
   constructor(
     private router: Router,
     private authService: AuthService,
-    private ecoStatusService: EcoStatusService,
+    private trixService: TrixService,
+    private trixPredService: TrixPredictionService,
     private portalProjectsService: PortalProjectsService,
     private projectService: ProjectService,
     private projectGroupService: ProjectGroupService,
@@ -234,27 +129,21 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   ) {}
 
   ngOnInit(): void {
-    this.selectedParam = this.ecoParams[0];
     this.checkAdminSession();
     this.startClock();
 
-    this.ecoStatusService.getLatestValues()
+    this.trixService.getTrixData()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: vals => {
-          const map: Record<string, number | null> = {
-            nh4: vals.nh4, no3: vals.no3, no2: vals.no2, po4: vals.po4,
-            si: vals.si, toc: vals.toc, do: vals.do, temp: vals.temp,
-            turb: vals.turb, chl: vals.chl,
-          };
-          this.ecoParams = this.ecoParams.map(p =>
-            map[p.key] != null ? { ...p, value: map[p.key]! } : p
-          );
-          this.selectedParam = this.ecoParams.find(p => p.key === this.selectedParam?.key)
-            ?? this.ecoParams[0];
-          this.ecoValuesLoading = false;
-        },
-        error: () => { this.ecoValuesLoading = false; }
+        next: data => { this.trixData = data; this.trixLoading = false; },
+        error: ()   => { this.trixLoading = false; }
+      });
+
+    this.trixPredService.getPredictions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: data => { this.predData = data; this.predLoading = false; },
+        error: ()   => { this.predLoading = false; this.predError = true; }
       });
 
     this.portalProjectsService
@@ -269,11 +158,9 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
         });
         this.totalPortalProjects = projects.length;
         this.activePortalProjects = projects.filter(p => p.isActive).length;
-        // Re-observe after project cards are rendered
         setTimeout(() => this.observeFadeElements(), 80);
       });
 
-    // Load featured outputs once projects are available
     this.portalProjectsService.list().pipe(
       filter(projects => projects.length > 0),
       take(1),
@@ -317,6 +204,75 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
     if (this.clockInterval) clearInterval(this.clockInterval);
   }
 
+  // ── TRIX helpers ──────────────────────────────────────────────────────────
+
+  getSeasonResult(region: TrixRegionData): TrixResult {
+    return region.seasons[this.selectedSeason];
+  }
+
+  getTrixArc(trix: number | null): string {
+    const filled = 329.87 * ((trix ?? 0) / 10);
+    return `${filled} ${439.82 - filled}`;
+  }
+
+  getTrixColor(trix: number | null): string {
+    const light = this.themeService.isLight;
+    if (trix === null) return light ? '#9bb0bc' : '#5d7785';
+    if (trix <= 4)  return light ? '#1a8f7f' : '#4ad6c4';
+    if (trix <= 5)  return light ? '#b36c00' : '#f5b94a';
+    if (trix <= 6)  return light ? '#c2580a' : '#f97316';
+    return                light ? '#dc2626' : '#ef4444';
+  }
+
+  seasonLabel(s: TrixSeason): string {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  toggleSeasonDd(): void { this.showSeasonDd = !this.showSeasonDd; }
+
+  selectSeason(s: TrixSeason): void {
+    this.selectedSeason = s;
+    this.showSeasonDd = false;
+  }
+
+  // ── Prediction helpers ────────────────────────────────────────────────────
+
+  getPredResult(region: TrixPredRegion): TrixPredResult {
+    return region.seasons[this.selectedPredSeason];
+  }
+
+  togglePredSeasonDd(): void { this.showPredSeasonDd = !this.showPredSeasonDd; }
+
+  selectPredSeason(s: TrixSeason): void {
+    this.selectedPredSeason = s;
+    this.showPredSeasonDd = false;
+  }
+
+  getPredNoDataReason(r: TrixPredResult): string {
+    if (r.chla === null && r.din === null && r.dip === null) return 'unavailable Data';
+    if (r.chla === null) return 'Chl-a data unavailable';
+    if (r.din  === null) return 'DIN (NH₄/NO₃) unavailable';
+    if (r.dip  === null) return 'DIP (PO₄) unavailable';
+    return 'Insufficient data';
+  }
+
+  // Needle polygon points for SVG gauge — arc starts at SVG 135° (rotate 135 applied to circles)
+  getNeedlePoints(trix: number | null): string {
+    const t = trix ?? 0;
+    const angle = (135 + (t / 10) * 270) * Math.PI / 180;
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const tipX = 100 + 65 * c,  tipY = 100 + 65 * s;
+    const bx   = 100 -  9 * c,  by   = 100 -  9 * s;
+    return [
+      `${tipX.toFixed(2)},${tipY.toFixed(2)}`,
+      `${(bx - 6 * s).toFixed(2)},${(by + 6 * c).toFixed(2)}`,
+      `${(bx + 6 * s).toFixed(2)},${(by - 6 * c).toFixed(2)}`,
+    ].join(' ');
+  }
+
+  // ── Private helpers ───────────────────────────────────────────────────────
+
   private observeSections(): void {
     const ids = ['home', 'about', 'geodatabase', 'projects', 'team', 'outputs'];
     this.navIo = new IntersectionObserver(
@@ -333,7 +289,9 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
 
   private startClock(): void {
     const tick = () => {
-      this.currentTime = new Date().toLocaleTimeString('en-GB', { timeZone: 'Africa/Tunis', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' TUN';
+      this.currentTime = new Date().toLocaleTimeString('en-GB', {
+        timeZone: 'Africa/Tunis', hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }) + ' TUN';
     };
     tick();
     this.clockInterval = setInterval(tick, 1000);
@@ -371,13 +329,9 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   login(event: Event): void {
     event.preventDefault();
     this.error = '';
-
     this.authService.login(this.username, this.password).subscribe({
       next: (ok) => {
-        if (!ok) {
-          this.error = 'Invalid username or password';
-          return;
-        }
+        if (!ok) { this.error = 'Invalid username or password'; return; }
         if (this.authService.isAdmin()) {
           this.isAdminLoggedIn = true;
           this.showAdminLogin = false;
@@ -389,17 +343,11 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
           this.authService.logout();
         }
       },
-      error: () => {
-        this.error = 'Invalid username or password';
-      }
+      error: () => { this.error = 'Invalid username or password'; }
     });
   }
 
-  continueToAdmin(): void {
-    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
-      this.router.navigate(['/projectadmin']);
-    }
-  }
+  continueToAdmin(): void { this.router.navigate(['/projectadmin']); }
 
   adminLogout(): void {
     this.authService.logout();
@@ -407,22 +355,15 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
     this.showAdminLogin = false;
   }
 
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  toggleParamDropdown(): void { this.showParamDropdown = !this.showParamDropdown; }
-
-  selectEcoParam(p: EcoParam): void {
-    this.selectedParam = p;
-    this.showParamDropdown = false;
-  }
+  togglePasswordVisibility(): void { this.showPassword = !this.showPassword; }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (!target.closest('.admin-area'))    this.showAdminLogin    = false;
-    if (!target.closest('.esp-dd-wrap'))   this.showParamDropdown = false;
+    if (!target.closest('.admin-area'))            this.showAdminLogin  = false;
+    if (!target.closest('.trix-season-wrap'))      this.showSeasonDd    = false;
+    if (!target.closest('.trix-pred-season-wrap')) this.showPredSeasonDd = false;
+    if (!target.closest('.trix-test-wrap'))        this.showTrixTest    = false;
   }
 
   private setupOutputVideoObserver(): void {
@@ -444,8 +385,7 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   scrollTo(sectionId: string): void {
     const el = document.getElementById(sectionId);
     if (!el) return;
-    const navHeight = 64;
-    const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+    const top = el.getBoundingClientRect().top + window.scrollY - 64 - 16;
     window.scrollTo({ top, behavior: 'smooth' });
   }
 
