@@ -78,6 +78,7 @@ export class ProjectsLandingComponent implements OnInit, AfterViewInit, OnDestro
   predError = false;
   selectedPredSeason: TrixSeason = detectCurrentSeason();
   showPredSeasonDd = false;
+  showFormulaBreakdown = false;
 
   get displayTrixData(): TrixRegionData[] {
     return this.useMockData ? TRIX_MOCK : this.trixData;

@@ -737,6 +737,19 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   flex-direction: column;
   align-items: center;
   padding: 12px 8px 10px;
+  gap: 8px;
+}
+
+.trix-gauge-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 8px 12px;
+  background: rgba(74,214,196,0.04);
+  border: 1px solid rgba(74,214,196,0.1);
+  border-radius: 10px;
 }
 
 .trix-cell-type {
@@ -795,6 +808,32 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   font-weight: 600;
   fill: $text-faint;
   letter-spacing: 0.12em;
+}
+
+// Greyed-out gauge for empty/unavailable regions
+.trix-gauge-empty { opacity: 0.55; }
+
+.tg-zone-grey {
+  stroke: rgba(120,150,170,0.28);
+}
+
+.tg-pivot-grey {
+  fill: rgba(120,150,170,0.35);
+  stroke: rgba(120,150,170,0.2);
+  stroke-width: 1.5;
+}
+
+.tg-num-empty {
+  font-size: 28px;
+  fill: rgba(120,150,170,0.5);
+}
+
+.trix-classification-empty {
+  font-family: $font-mono;
+  font-size: 11px;
+  color: rgba(120,150,170,0.5);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .trix-classification {
@@ -1245,6 +1284,170 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   span { font-family: $font-mono; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; }
 }
 
+// ── Formula breakdown modal ───────────────────────────────────────────────
+
+.trix-formula-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 14px; padding: 7px 14px;
+  background: rgba(74,214,196,0.06); border: 1px solid rgba(74,214,196,0.2);
+  border-radius: 6px; cursor: pointer; color: $accent;
+  font-family: $font-mono; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  &:hover { background: rgba(74,214,196,0.12); border-color: rgba(74,214,196,0.4); }
+  i { font-size: 15px; }
+}
+
+// Overlay backdrop
+.trix-modal-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0, 8, 20, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: tfm-fade-in 0.18s ease;
+}
+
+@keyframes tfm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// Modal card
+.trix-modal {
+  width: 100%; max-width: 580px; max-height: 88vh;
+  background: #071828; border: 1px solid rgba(74,214,196,0.18);
+  border-radius: 14px; box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column;
+  animation: tfm-slide-up 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes tfm-slide-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.trix-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(74,214,196,0.12);
+  flex-shrink: 0;
+}
+
+.trix-modal-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: $font-mono; font-size: 11.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: $accent; font-weight: 600;
+  i { font-size: 17px; }
+}
+
+.trix-modal-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 6px; border: none;
+  background: rgba(255,255,255,0.04); color: $text-dim; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  i { font-size: 20px; }
+  &:hover { background: rgba(255,255,255,0.1); color: $text; }
+}
+
+.trix-modal-body {
+  padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin; scrollbar-color: rgba(74,214,196,0.2) transparent;
+}
+
+// Groups
+.tfp-group {
+  display: flex; flex-direction: column; gap: 6px;
+  padding-bottom: 14px; border-bottom: 1px solid rgba(74,214,196,0.08);
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+}
+
+.tfp-label {
+  font-family: $font-mono; font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(74,214,196,0.5);
+}
+
+.tfp-row {
+  display: flex; flex-wrap: wrap; gap: 14px;
+}
+
+.tfp-item {
+  font-family: $font-mono; font-size: 11.5px; color: $text-dim;
+}
+
+.tfp-var {
+  color: $accent; font-weight: 700;
+}
+
+.tfp-calc {
+  font-family: $font-mono; font-size: 12px; color: $text-dim; line-height: 1.6;
+  strong { color: $text; font-weight: 600; }
+}
+
+.tfp-fallback {
+  margin-left: 6px; font-size: 10px; color: rgba(245,185,74,0.8);
+  font-style: italic;
+}
+
+// TRIX result block
+.tfp-result {
+  background: rgba(74,214,196,0.06); border: 1px solid rgba(74,214,196,0.14);
+  border-radius: 8px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.tfp-result-formula {
+  font-family: $font-mono; font-size: 10px; color: rgba(74,214,196,0.6);
+  letter-spacing: 0.03em;
+}
+
+.tfp-result-value {
+  display: flex; align-items: baseline; gap: 12px;
+}
+
+.tfp-result-num {
+  font-family: $font-mono; font-size: 28px; font-weight: 700; line-height: 1;
+}
+
+.tfp-result-class {
+  font-family: $font-mono; font-size: 11px; opacity: 0.9; font-weight: 500;
+}
+
+// ── Light-theme overrides (modal + toggle) ────────────────────────────────
+
+:host(.theme-light) {
+  .trix-formula-toggle {
+    background: rgba(26,143,127,0.06); border-color: rgba(26,143,127,0.22);
+    color: #1a8f7f;
+    &:hover { background: rgba(26,143,127,0.12); border-color: rgba(26,143,127,0.4); }
+  }
+
+  .trix-modal-overlay { background: rgba(10,40,60,0.55); }
+
+  .trix-modal {
+    background: #ffffff; border-color: rgba(26,143,127,0.2);
+    box-shadow: 0 24px 60px rgba(0,60,80,0.18);
+  }
+
+  .trix-modal-header { border-bottom-color: rgba(26,143,127,0.12); }
+  .trix-modal-title  { color: #1a8f7f; }
+
+  .trix-modal-close {
+    background: rgba(0,0,0,0.04); color: #4a7590;
+    &:hover { background: rgba(0,0,0,0.08); color: #0d2137; }
+  }
+
+  .tfp-group          { border-bottom-color: rgba(26,143,127,0.08); }
+  .tfp-label          { color: rgba(26,143,127,0.55); }
+  .tfp-item           { color: #4a7590; }
+  .tfp-var            { color: #1a8f7f; }
+  .tfp-calc           { color: #4a7590; strong { color: #0d2137; } }
+  .tfp-result         { background: rgba(26,143,127,0.05); border-color: rgba(26,143,127,0.15); }
+  .tfp-result-formula { color: rgba(26,143,127,0.6); }
+  .tfp-result-class   { opacity: 0.8; }
+  .tfp-fallback       { color: rgba(180,100,0,0.85); }
+  .trix-modal-body    { scrollbar-color: rgba(26,143,127,0.25) transparent; }
+}
+
 // Per-parameter trend inline icon
 .trix-param-val {
   display: inline-flex;
@@ -1573,6 +1776,11 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .tg-needle          { fill: rgba(20,40,60,0.88); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
   .tg-needle-pred     { fill: rgba(20,40,60,0.65); }
   .tg-pivot           { stroke: rgba(0,0,0,0.15); }
+  .tg-zone-grey       { stroke: rgba(80,120,150,0.18); }
+  .tg-pivot-grey      { fill: rgba(80,120,150,0.22); stroke: rgba(80,120,150,0.15); }
+  .tg-num-empty       { fill: rgba(80,120,150,0.4); }
+  .trix-classification-empty { color: rgba(80,120,150,0.5); }
+  .trix-gauge-box     { background: rgba(26,143,127,0.04); border-color: rgba(26,143,127,0.12); }
   .trix-region-name   { color: #0d2137; }
   .trix-season-label  { color: #0d2137; }
   .trix-season-btn    { background: rgba(26,143,127,0.06); border-color: rgba(26,143,127,0.22); }

@@ -4,37 +4,26 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { TrixSeason, TrixResult } from './trix.service';
 
-const BASE = 'http://41.229.139.17:8080/imasservice/api/imas';
+const BASE       = 'http://41.229.139.17:8080/imasservice/api/imas';
+const FLASK_BASE = (typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://127.0.0.1:8088'
+  : 'http://41.229.139.17:8088';
 
-// ── Shared constants ──────────────────────────────────────────────────────
+const S_SALINITY = 36; // constant salinity (PSU)
 
-const DO2: Record<string, Record<TrixSeason, number>> = {
-  bizerte: { winter: 10, spring:  5, summer: 35, autumn: 15 },
-  tunis:   { winter: 17, spring: 20, summer: 40, autumn: 30 },
-  gabes:   { winter:  5, spring: 10, summer: 25, autumn: 15 },
+// Fallback |ΔO2%| per season when Weiss cannot be computed (no T/O2 data available)
+const DO2_FALLBACK: Record<TrixSeason, number> = {
+  winter: 10, spring: 5, summer: 35, autumn: 15,
 };
-
-const REGIONS = [
-  { id: 'bizerte', label: 'Lagoon of Bizerte', keywords: ['bizert'] },
-  { id: 'tunis',   label: 'Gulf of Tunis',   keywords: ['tunis', 'lac de tunis', 'lac nord'] },
-  { id: 'gabes',   label: 'Gulf of Gabès',  keywords: ['gab', 'golfe de gab'] },
-] as const;
 
 const SEASON_MONTHS: Record<TrixSeason, number[]> = {
   winter: [12, 1, 2], spring: [3, 4, 5], summer: [6, 7, 8], autumn: [9, 10, 11],
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────
+// ── Date helpers ─────────────────────────────────────────────────────────────
 
-function matchRegion(r: any): string | null {
-  const hay = `${r.name ?? ''} ${r.region ?? ''} ${r.locality ?? ''}`.toLowerCase();
-  for (const reg of REGIONS) {
-    if ((reg.keywords as readonly string[]).some(k => hay.includes(k))) return reg.id;
-  }
-  return null;
-}
-
-// Jan/Feb belong to the previous December's winter
+// Jan/Feb belong to the previous December's winter season-year
 function sYear(dateStr: string): number {
   const d = new Date(dateStr.replace(/\//g, '-'));
   if (isNaN(d.getTime())) return 0;
@@ -52,73 +41,98 @@ function sSeason(dateStr: string): TrixSeason | null {
   return null;
 }
 
+// ── Weiss (1970) dissolved oxygen saturation ──────────────────────────────────
+
+// O2 saturation in mg/L at given temperature (°C) and salinity (PSU).
+function calcO2Sat(T_celsius: number, S: number): number {
+  const T = T_celsius + 273.15; // Kelvin
+  const lnC = -173.4292
+    + 249.6339 * (100 / T)
+    + 143.3483 * Math.log(T / 100)
+    - 21.8492  * (T / 100)
+    + S * (-0.033096 + 0.014259 * (T / 100) - 0.001700 * Math.pow(T / 100, 2));
+  return Math.exp(lnC) * 1.4276; // mL/L → mg/L (O2 density at STP)
+}
+
+// |ΔO2%| = absolute deviation of measured O2 from saturation — the DO2 term in TRIX.
+// o2_mg: measured dissolved O2 in mg/L; T_celsius: water temperature (°C).
+function calcDeltaO2Pct(o2_mg: number, T_celsius: number, S: number): number {
+  const sat = calcO2Sat(T_celsius, S);
+  if (sat <= 0) return 0;
+  return Math.abs((o2_mg / sat) * 100 - 100);
+}
+
+// ── TRIX ──────────────────────────────────────────────────────────────────────
+
 function calcTrix(din: number | null, dip: number | null, do2: number, chla: number | null): number | null {
   if (din === null || dip === null || chla === null) return null;
   const e = 0.001;
-  const v = (Math.log10(Math.max(din, e) * Math.max(dip, e) * Math.max(do2, e) * Math.max(chla, e)) + 1.5) / 1.2;
+  const v = (Math.log10(
+    Math.max(din, e) * Math.max(dip, e) * Math.max(do2, e) * Math.max(chla, e)
+  ) + 1.5) / 1.2;
   return Math.max(0, Math.min(10, v));
 }
 
 function classify(t: number | null): Pick<TrixResult, 'eutrophication' | 'waterQuality'> {
   if (t === null) return { eutrophication: null, waterQuality: null };
-  if (t <= 4)     return { eutrophication: 'Low',       waterQuality: 'High' };
-  if (t <= 5)     return { eutrophication: 'Medium',    waterQuality: 'Good' };
-  if (t <= 6)     return { eutrophication: 'High',      waterQuality: 'Poor' };
-  return                 { eutrophication: 'Very High', waterQuality: 'Bad'  };
+  if (t <= 4)    return { eutrophication: 'Low',       waterQuality: 'High' };
+  if (t <= 5)    return { eutrophication: 'Medium',    waterQuality: 'Good' };
+  if (t <= 6)    return { eutrophication: 'High',      waterQuality: 'Poor' };
+  return               { eutrophication: 'Very High', waterQuality: 'Bad'  };
 }
 
-// ── Ordinary Least Squares regression ────────────────────────────────────
+// ── Current-season data aggregation ──────────────────────────────────────────
 
-function ols(pts: { x: number; y: number }[]): { m: number; b: number; r2: number } | null {
-  const n = pts.length;
-  if (n < 2) return null;
-  const mx = pts.reduce((s, p) => s + p.x, 0) / n;
-  const my = pts.reduce((s, p) => s + p.y, 0) / n;
-  const ssXX = pts.reduce((s, p) => s + (p.x - mx) ** 2, 0);
-  const ssXY = pts.reduce((s, p) => s + (p.x - mx) * (p.y - my), 0);
-  if (ssXX === 0) return null;
-  const m  = ssXY / ssXX;
-  const b  = my - m * mx;
-  const ssRes = pts.reduce((s, p) => s + (p.y - (m * p.x + b)) ** 2, 0);
-  const ssTot = pts.reduce((s, p) => s + (p.y - my) ** 2, 0);
-  const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 1;
-  return { m, b, r2: Math.min(1, Math.max(0, r2)) };
+// Mean of historical observed values for (season, year) supplemented by
+// ML forecast future-date points within the same season.
+// Used for nutrient and chla parameters.
+function seasonMean(
+  records: any[],
+  field: string,
+  forecastPts: Array<{ date: string; value: number }>,
+  season: TrixSeason,
+  year: number,
+): number | null {
+  const todayISO = new Date().toISOString().slice(0, 10);
+
+  const histVals = records
+    .filter(r => r.date && sSeason(r.date) === season && sYear(r.date) === year)
+    .map(r => Number(r[field]))
+    .filter(v => isFinite(v) && v >= 0);
+
+  const fcVals = forecastPts
+    .filter(p => {
+      if (!p.date || p.date < todayISO) return false;
+      const d = new Date(p.date);
+      return d.getFullYear() === year && SEASON_MONTHS[season].includes(d.getMonth() + 1);
+    })
+    .map(p => p.value)
+    .filter(v => isFinite(v) && v >= 0);
+
+  const all = [...histVals, ...fcVals];
+  return all.length ? all.reduce((a, b) => a + b, 0) / all.length : null;
 }
 
-// Predict a single parameter for targetYear using OLS over past yearly means
-interface ParamPred { val: number | null; r2: number | null; trend: 'up' | 'down' | 'stable' | null; }
-
-function predictParam(records: any[], field: string, targetYear: number): ParamPred {
-  const byYear = new Map<number, number[]>();
-  for (const r of records) {
-    const v = Number(r[field]);
-    if (!isFinite(v) || isNaN(v) || v < 0) continue;
-    const yr = sYear(r.date);
-    if (yr <= 0 || yr >= targetYear) continue; // only train on past data
-    if (!byYear.has(yr)) byYear.set(yr, []);
-    byYear.get(yr)!.push(v);
-  }
-
-  const pts = Array.from(byYear.entries())
-    .map(([x, vals]) => ({ x, y: vals.reduce((a, b) => a + b) / vals.length }))
-    .sort((a, b) => a.x - b.x);
-
-  if (pts.length === 0) return { val: null, r2: null, trend: null };
-  if (pts.length === 1) return { val: pts[0].y, r2: null, trend: null };
-
-  const reg = ols(pts);
-  if (!reg) return { val: null, r2: null, trend: null };
-
-  const val  = Math.max(0, reg.m * targetYear + reg.b);
-  const mean = pts.reduce((s, p) => s + p.y, 0) / pts.length || 1;
-  const trend: 'up' | 'down' | 'stable' =
-    reg.m >  mean * 0.04 ? 'up' :
-    reg.m < -mean * 0.04 ? 'down' : 'stable';
-
-  return { val, r2: reg.r2, trend };
+// Mean of saved forecast green-dot points only (future dates, no historical mixing).
+// Used for T and O2 so the Weiss formula stays purely forecast-based.
+function forecastMean(
+  forecastPts: Array<{ date: string; value: number }>,
+  season: TrixSeason,
+  year: number,
+): number | null {
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const vals = forecastPts
+    .filter(p => {
+      if (!p.date || p.date < todayISO) return false;
+      const d = new Date(p.date);
+      return d.getFullYear() === year && SEASON_MONTHS[season].includes(d.getMonth() + 1);
+    })
+    .map(p => p.value)
+    .filter(v => isFinite(v) && v >= 0);
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
 }
 
-// ── Public types ──────────────────────────────────────────────────────────
+// ── Public types ──────────────────────────────────────────────────────────────
 
 export interface TrixPredResult {
   trix:           number | null;
@@ -134,6 +148,15 @@ export interface TrixPredResult {
   chlaTrend:      'up' | 'down' | 'stable' | null;
   r2:             number | null;
   dataYears:      number;
+  // Intermediate values for formula inspection
+  nh4:       number | null;
+  no3:       number | null;
+  no2:       number | null;
+  po4:       number | null;
+  o2_mg:     number | null;
+  T_celsius: number | null;
+  o2sat:     number | null;
+  do_pct:    number | null;
 }
 
 export interface TrixPredRegion {
@@ -142,13 +165,19 @@ export interface TrixPredRegion {
   seasons: Record<TrixSeason, TrixPredResult>;
 }
 
-// ── Service ───────────────────────────────────────────────────────────────
+// ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class TrixPredictionService {
   constructor(private http: HttpClient) {}
 
-  // Fetch all pages sequentially using page-size=200 to stay within server limits
+  private fetchForecast(target: string): Observable<Array<{ date: string; value: number }>> {
+    return this.http.get<any>(`${FLASK_BASE}/forecast_data?target=${target}`).pipe(
+      catchError(() => of({ points: [] })),
+      map((r: any) => Array.isArray(r?.points) ? r.points : [])
+    );
+  }
+
   private fetchAll(path: string): Observable<any[]> {
     const size = 200;
     return this.http
@@ -158,7 +187,7 @@ export class TrixPredictionService {
         switchMap((first: any) => {
           const firstVals  = first?.values  ?? [];
           const totalPages = first?.totalPages ?? 1;
-          const maxPages   = Math.min(totalPages, 15); // cap at 3000 records
+          const maxPages   = Math.min(totalPages, 15); // cap at 3 000 records
 
           if (maxPages <= 1) return of(firstVals);
 
@@ -176,91 +205,88 @@ export class TrixPredictionService {
   getPredictions(): Observable<TrixPredRegion[]> {
     const now = new Date();
     const cm  = now.getMonth() + 1;
-    const targetYear = cm <= 2 ? now.getFullYear() - 1 : now.getFullYear();
+    // Jan/Feb belong to the prior year's winter
+    const targetYear    = cm <= 2 ? now.getFullYear() - 1 : now.getFullYear();
+    const currentSeason = (Object.keys(SEASON_MONTHS) as TrixSeason[])
+      .find(s => SEASON_MONTHS[s].includes(cm)) ?? 'summer';
 
     return forkJoin({
-      chem:  this.fetchAll('wat_chemical'),
-      phyto: this.fetchAll('wat_phytoplankton'),
-    }).pipe(map(({ chem, phyto }) => {
-      if (!chem.length && !phyto.length) return this.buildEmpty(targetYear);
+      chem:    this.fetchAll('wat_chemical'),
+      phyto:   this.fetchAll('wat_phytoplankton'),
+      fcNh4:   this.fetchForecast('nh4'),
+      fcNo3:   this.fetchForecast('no3'),
+      fcNo2:   this.fetchForecast('no2'),
+      fcPo4:   this.fetchForecast('po4'),
+      fcChla:  this.fetchForecast('chla'),
+      fcO2:    this.fetchForecast('oxygen'),
+      fcT:     this.fetchForecast('temperature'),
+    }).pipe(map(({ chem, phyto, fcNh4, fcNo3, fcNo2, fcPo4, fcChla, fcO2, fcT }) => {
+      const chemAll  = chem.filter((r: any) => r.date);
+      const phytoAll = phyto.filter((r: any) => r.date);
 
-      // Filter only valid dated records
-      const chemAll  = chem.filter(r => r.date);
-      const phytoAll = phyto.filter(r => r.date);
+      const sid = currentSeason;
 
-      return REGIONS.map(region => {
-        const useChemR  = chemAll.filter(r => matchRegion(r) === region.id);
-        const usePhytoR = phytoAll.filter(r => matchRegion(r) === region.id);
+      // ── Current-season means: observed this year + ML forecast future days ──
+      const nh4  = seasonMean(chemAll,  'nh4',  fcNh4,  sid, targetYear);
+      const no3  = seasonMean(chemAll,  'no3',  fcNo3,  sid, targetYear);
+      const no2  = seasonMean(chemAll,  'no2',  fcNo2,  sid, targetYear);
+      const po4  = seasonMean(chemAll,  'po4',  fcPo4,  sid, targetYear);
+      const chla = seasonMean(phytoAll, 'chla', fcChla, sid, targetYear);
+      // T and O2 come purely from saved forecast green dots (Weiss formula stays forward-looking)
+      const o2   = forecastMean(fcO2, sid, targetYear);
+      const T    = forecastMean(fcT,  sid, targetYear);
 
-        const seasons = {} as Record<TrixSeason, TrixPredResult>;
+      // DIN: µmol/L → µg/L N  (×14);  DIP: µmol/L → µg/L P  (×31)
+      const din = (nh4 !== null && no3 !== null)
+        ? (nh4 + no3 + (no2 ?? 0)) * 14
+        : null;
+      const dip = po4 !== null ? po4 * 31 : null;
 
-        for (const sid of Object.keys(SEASON_MONTHS) as TrixSeason[]) {
-          const cS = useChemR.filter(r => sSeason(r.date) === sid);
-          const pS = usePhytoR.filter(r => sSeason(r.date) === sid);
+      // |ΔO2%| via Weiss (1970), S = 36 PSU; fallback to seasonal constant
+      const do2 = (o2 !== null && T !== null)
+        ? calcDeltaO2Pct(o2, T, S_SALINITY)
+        : DO2_FALLBACK[sid];
 
-          const nh4P  = predictParam(cS, 'nh4',  targetYear);
-          const no3P  = predictParam(cS, 'no3',  targetYear);
-          const no2P  = predictParam(cS, 'no2',  targetYear);
-          const po4P  = predictParam(cS, 'po4',  targetYear);
-          const chlaP = predictParam(pS, 'chla', targetYear);
+      const trix = calcTrix(din, dip, do2, chla);
 
-          const do2  = DO2[region.id][sid];
-          // no2 is treated as 0 when absent — it is typically the smallest DIN component
-          // Source values are in µmol/L; convert to µg/L (DIN ×14 for N, DIP ×31 for P)
-          const din  = (nh4P.val !== null && no3P.val !== null)
-                        ? (nh4P.val + no3P.val + (no2P.val ?? 0)) * 14 : null;
-          const dip  = po4P.val !== null ? po4P.val * 31 : null;
-          const trix = calcTrix(din, dip, do2, chlaP.val);
+      const o2sat  = (o2 !== null && T !== null) ? calcO2Sat(T, S_SALINITY) : null;
+      const do_pct = (o2 !== null && o2sat !== null) ? (o2 / o2sat) * 100 : null;
 
-          // Mean R² across all predicted parameters
-          const r2vals = [nh4P.r2, no3P.r2, no2P.r2, po4P.r2, chlaP.r2]
-            .filter((v): v is number => v !== null);
-          const r2 = r2vals.length ? r2vals.reduce((a, b) => a + b) / r2vals.length : null;
+      const seasonResult: TrixPredResult = {
+        trix,
+        ...classify(trix),
+        din, dip, chla, do2,
+        trend: null, dinTrend: null, dipTrend: null, chlaTrend: null,
+        r2: null, dataYears: 1,
+        nh4, no3, no2, po4,
+        o2_mg: o2, T_celsius: T, o2sat, do_pct,
+      };
 
-          // Trend: dominant direction across all predicted parameters (DIN + DIP + Chl-a)
-          const trends = [nh4P.trend, no3P.trend, no2P.trend, po4P.trend, chlaP.trend].filter(Boolean);
-          const upCount   = trends.filter(t => t === 'up').length;
-          const downCount = trends.filter(t => t === 'down').length;
-          const trend: 'up' | 'down' | 'stable' =
-            upCount > downCount ? 'up' : downCount > upCount ? 'down' : 'stable';
-
-          const allYears = new Set([
-            ...cS.map(r => sYear(r.date)).filter(y => y > 0 && y < targetYear),
-            ...pS.map(r => sYear(r.date)).filter(y => y > 0 && y < targetYear),
-          ]);
-
-          // DIN trend: dominant across NH4/NO3/NO2
-          const dinTrends = [nh4P.trend, no3P.trend, no2P.trend].filter(Boolean);
-          const dinUp   = dinTrends.filter(t => t === 'up').length;
-          const dinDown = dinTrends.filter(t => t === 'down').length;
-          const dinTrend: 'up' | 'down' | 'stable' | null = dinTrends.length
-            ? (dinUp > dinDown ? 'up' : dinDown > dinUp ? 'down' : 'stable')
-            : null;
-
-          seasons[sid] = {
-            trix, ...classify(trix),
-            din, dip, chla: chlaP.val, do2,
-            trend, dinTrend, dipTrend: po4P.trend, chlaTrend: chlaP.trend,
-            r2, dataYears: allYears.size,
-          };
-        }
-
-        return { id: region.id, label: region.label, seasons };
+      const emptyResult = (s: TrixSeason): TrixPredResult => ({
+        trix: null, eutrophication: null, waterQuality: null,
+        din: null, dip: null, chla: null, do2: DO2_FALLBACK[s],
+        trend: null, dinTrend: null, dipTrend: null, chlaTrend: null,
+        r2: null, dataYears: 0,
+        nh4: null, no3: null, no2: null, po4: null,
+        o2_mg: null, T_celsius: null, o2sat: null, do_pct: null,
       });
-    }));
-  }
 
-  private buildEmpty(targetYear: number): TrixPredRegion[] {
-    return REGIONS.map(r => ({
-      id: r.id, label: r.label,
-      seasons: Object.fromEntries(
-        (Object.keys(SEASON_MONTHS) as TrixSeason[]).map(s => [s, {
-          trix: null, eutrophication: null, waterQuality: null,
-          din: null, dip: null, chla: null, do2: DO2[r.id][s],
-          trend: null, dinTrend: null, dipTrend: null, chlaTrend: null,
-          r2: null, dataYears: 0,
-        }])
-      ) as Record<TrixSeason, TrixPredResult>
+      const seasons = Object.fromEntries(
+        (Object.keys(SEASON_MONTHS) as TrixSeason[]).map(s => [
+          s, s === sid ? seasonResult : emptyResult(s),
+        ])
+      ) as Record<TrixSeason, TrixPredResult>;
+
+      const emptySeasons = (Object.keys(SEASON_MONTHS) as TrixSeason[]).reduce(
+        (acc, s) => { acc[s] = emptyResult(s); return acc; },
+        {} as Record<TrixSeason, TrixPredResult>
+      );
+
+      return [
+        { id: 'bizerte', label: 'Lagoon of Bizerte',  seasons },
+        { id: 'gabes',   label: 'Gulf of Gabes',       seasons: emptySeasons },
+        { id: 'tunis',   label: 'Gulf of Tunis',        seasons: emptySeasons },
+      ];
     }));
   }
 }
