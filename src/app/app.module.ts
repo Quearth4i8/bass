@@ -66,6 +66,14 @@ import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
 import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.component';
 
+// Landing pages
+import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
+import { LandingAboutComponent } from './projects-landing/pages/landing-about/landing-about.component';
+import { LandingGeodatabaseComponent } from './projects-landing/pages/landing-geodatabase/landing-geodatabase.component';
+import { LandingPortalsComponent } from './projects-landing/pages/landing-portals/landing-portals.component';
+import { LandingTeamComponent } from './projects-landing/pages/landing-team/landing-team.component';
+import { LandingOutputsComponent } from './projects-landing/pages/landing-outputs/landing-outputs.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -103,6 +111,13 @@ import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.c
     PortalPageParticipantsComponent,
     PortalPageOutputsComponent,
     SafeHtmlPipe,
+    // Landing pages
+    LandingOverviewComponent,
+    LandingAboutComponent,
+    LandingGeodatabaseComponent,
+    LandingPortalsComponent,
+    LandingTeamComponent,
+    LandingOutputsComponent,
   ],
   imports: [
     BrowserModule,

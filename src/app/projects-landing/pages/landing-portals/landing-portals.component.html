@@ -1,0 +1,39 @@
+<section class="section">
+  <div class="section-head fade-up">
+    <h2 class="section-title">Portal Projects</h2>
+    <span class="label" *ngIf="totalPortalProjects !== null">{{ totalPortalProjects | number:'2.0-0' }} initiatives</span>
+  </div>
+
+  <div class="projects-grid">
+    <article
+      *ngFor="let project of projects; let i = index"
+      class="project-card fade-up"
+      [style.transition-delay]="(i * 60) + 'ms'"
+      [class.active]="project.isActive"
+      [class.inactive]="!project.isActive"
+      (click)="project.isActive ? navigateToProject(project.slug) : null"
+      [style.cursor]="project.isActive ? 'pointer' : 'default'">
+
+      <div class="project-img">
+        <img [src]="project.image" [alt]="project.title">
+        <span class="project-status-badge" [class.badge-active]="project.isActive" [class.badge-soon]="!project.isActive">
+          <span *ngIf="project.isActive" class="status-dot"></span>
+          {{ project.isActive ? 'ACTIVE' : 'COMING SOON' }}
+        </span>
+      </div>
+
+      <div class="project-body">
+        <h3 class="project-title">{{ project.title }}</h3>
+        <p class="project-desc">{{ project.description }}</p>
+        <div class="project-foot">
+          <button *ngIf="project.isActive" class="enter-btn" [routerLink]="['/portal', project.slug]" (click)="$event.stopPropagation()">
+            Enter Platform <span class="btn-arrow">→</span>
+          </button>
+          <button *ngIf="!project.isActive" class="enter-btn" disabled>
+            Coming Soon
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

@@ -16,7 +16,7 @@ $font-sans:  'Geist', 'Manrope', system-ui, sans-serif;
 $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Host — background lives here so sticky nav is never blocked ───────────
-:host {
+app-projects-landing {
   display: block;
   overflow-x: clip;
   background:
@@ -61,6 +61,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 // ── Shell ─────────────────────────────────────────────────────────────────
 .shell {
   width: 100%;
+  flex: 1;
   padding: 0 40px;
   box-sizing: border-box;
   @media (max-width: 768px) { padding: 0 16px; }
@@ -1414,7 +1415,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Light-theme overrides (modal + toggle) ────────────────────────────────
 
-:host(.theme-light) {
+app-projects-landing.theme-light {
   .trix-formula-toggle {
     background: rgba(26,143,127,0.06); border-color: rgba(26,143,127,0.22);
     color: #1a8f7f;
@@ -1553,74 +1554,84 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   color: $text-dim;
 }
 
-// Videos — 6-col grid: 3 equal cards top row, 2 wider cards bottom row
-.outputs-videos {
-  padding: 24px;
-}
 
 .outputs-video-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 18px;
   width: 100%;
 }
 
-.output-film-card {
-  aspect-ratio: 4/3;
-  position: relative;
-  border-radius: 12px;
+// ── Output card ───────────────────────────────────────────────────────────
+.output-card {
+  border-radius: 14px;
   overflow: hidden;
   border: 1px solid $line;
+  background: $panel;
+  display: flex;
+  flex-direction: column;
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: $accent-2;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+
+  }
+}
+
+.output-media {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
   background: $bg;
-  transition: transform .25s, border-color .25s, box-shadow .25s;
+  flex-shrink: 0;
 
   video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
   }
-
-  &:hover {
-    transform: translateY(-3px);
-    border-color: $accent-2;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
 }
 
-.film-overlay {
-  position: absolute;
-  inset: 0;
+
+.output-info {
+  padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 10px 12px;
-  background: linear-gradient(to top, rgba(3,20,32,0.86) 0%, transparent 55%);
+  gap: 8px;
+  flex: 1;
 }
 
-.film-badge {
+.output-project-tag {
   font-family: $font-mono;
-  font-size: 8px;
+  font-size: 9px;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: $accent;
-  padding: 2px 5px;
-  border: 1px solid rgba(74,214,196,0.38);
-  border-radius: 3px;
-  background: rgba(3,20,32,0.55);
+  padding: 3px 8px;
+  border: 1px solid rgba(74,214,196,0.3);
+  border-radius: 4px;
+  background: rgba(74,214,196,0.07);
   align-self: flex-start;
-  margin-bottom: 5px;
-  backdrop-filter: blur(4px);
 }
 
-.film-title {
-  font-size: 11px;
-  font-weight: 500;
-  color: #e8f1f5;
-  line-height: 1.35;
-  font-family: $font-sans;
+.output-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text;
+  line-height: 1.45;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .outputs-empty {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1636,7 +1647,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 // ── Light theme ───────────────────────────────────────────────────────────
-:host(.theme-light) {
+app-projects-landing.theme-light {
   background: linear-gradient(160deg, #e8f4f8 0%, #f0f7fb 50%, #e4eff6 100%);
   color: #0d2137;
 
@@ -1803,7 +1814,6 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .trix-test-labels span { color: #4a7590; }
 
   // Relevant Outputs
-  .outputs-panel  { background: #fff; border-color: #c5d8e6; }
   .gauge-panel    { background: radial-gradient(circle at 50% 65%, rgba(26,143,127,0.05) 0%, transparent 68%); border-bottom-color: #e2eff6; }
   .g-stat-val     { color: #0d2137; }
   .g-stat-label   { color: #9bb0bc; }
@@ -1819,13 +1829,20 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
     .g-pct    { fill: #6b8a9a; }
     .g-status { fill: #b36c00; }
   }
-  .output-film-card { border-color: #c5d8e6; background: #e8f4f8; }
-  .outputs-empty  { color: #9bb0bc; p { color: #9bb0bc; } }
+  .output-card {
+    background: #fff;
+    border-color: #c5d8e6;
+    &:hover { border-color: #1a8f7f; box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+  }
+  .output-media { background: #e8f4f8; }
+  .output-project-tag { color: #1a8f7f; border-color: rgba(26,143,127,0.3); background: rgba(26,143,127,0.06); }
+  .output-title { color: #0d2137; }
+  .outputs-empty { color: #9bb0bc; p { color: #9bb0bc; } }
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────
 .landing-footer {
-  border-top: 1px solid $line; margin-top: 80px; padding: 28px 0;
+  border-top: 1px solid $line; margin-top: auto; padding: 28px 0;
   font-family: $font-mono; font-size: 11px; color: $text-faint;
 }
 

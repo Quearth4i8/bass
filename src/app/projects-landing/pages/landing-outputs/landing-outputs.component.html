@@ -1,0 +1,28 @@
+<section class="section">
+  <div class="section-head fade-up">
+    <h2 class="section-title">Relevant Outputs</h2>
+    <span class="label">{{ featuredOutputs.length }} featured highlight{{ featuredOutputs.length !== 1 ? 's' : '' }} · across projects</span>
+  </div>
+
+  <div class="outputs-video-grid fade-up" style="transition-delay:60ms">
+    <ng-container *ngIf="featuredOutputs.length > 0; else noOutputs">
+      <div class="output-card" *ngFor="let item of featuredOutputs; let i = index"
+           [style.transition-delay]="(i * 50) + 'ms'">
+        <div class="output-media">
+          <video [src]="item.videoUrl" muted loop playsinline class="landing-output-video"></video>
+        </div>
+        <div class="output-info">
+          <span class="output-project-tag">{{ item.projectSlug }}</span>
+          <p class="output-title">{{ item.title }}</p>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noOutputs>
+      <div class="outputs-empty">
+        <i class='bx bx-video-off'></i>
+        <span>no featured outputs</span>
+        <p>Feature outputs from the management portal to show them here.</p>
+      </div>
+    </ng-template>
+  </div>
+</section>

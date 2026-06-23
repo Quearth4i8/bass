@@ -22,6 +22,8 @@ export class ProjectsComponent implements OnInit {
   isAdminLoggedIn: boolean = false;
   adminUsername: string = '';
 
+  selectedProject: any = null;
+
   activeTab: number = 0;
   showFilters: boolean[] = [];
   partnerDropdownOpen: boolean[] = [];
@@ -189,11 +191,11 @@ export class ProjectsComponent implements OnInit {
 
   getTabIcon(title: string): string {
     const icons: { [key: string]: string } = {
-      'ACHIEVED PROJECTS': '✓',
-      'SUBMITTED PROJECTS': '📤',
-      'ONGOING PROJECTS': '🔄'
+      'ACHIEVED PROJECTS':  'bx-badge-check',
+      'SUBMITTED PROJECTS': 'bx-send',
+      'ONGOING PROJECTS':   'bx-time-five',
     };
-    return icons[title] || '📋';
+    return icons[title] || 'bx-folder';
   }
 
   resetFilters(index: number, title: string): void {
@@ -264,6 +266,20 @@ export class ProjectsComponent implements OnInit {
     // Close all dropdowns
     this.partnerDropdownOpen[index] = false;
     this.programmeDropdownOpen[index] = false;
+  }
+
+  openDetail(project: any): void  { this.selectedProject = project; }
+  closeDetail(): void              { this.selectedProject = null; }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.selectedProject = null; }
+
+  getProgressPct(start: any, end: any): number {
+    const s = Number(start), e = Number(end), now = new Date().getFullYear();
+    if (!s || !e || e <= s) return 100;
+    if (now <= s) return 0;
+    if (now >= e) return 100;
+    return Math.round(((now - s) / (e - s)) * 100);
   }
 
   @HostListener('document:click', ['$event'])

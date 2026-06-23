@@ -22,8 +22,16 @@ import { PortalPageTeamComponent } from './portal-project-display/pages/portal-p
 import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 
+// Landing pages
+import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
+import { LandingAboutComponent } from './projects-landing/pages/landing-about/landing-about.component';
+import { LandingGeodatabaseComponent } from './projects-landing/pages/landing-geodatabase/landing-geodatabase.component';
+import { LandingPortalsComponent } from './projects-landing/pages/landing-portals/landing-portals.component';
+import { LandingTeamComponent } from './projects-landing/pages/landing-team/landing-team.component';
+import { LandingOutputsComponent } from './projects-landing/pages/landing-outputs/landing-outputs.component';
+
 const routes: Routes = [
-  { path: '', component: ProjectsLandingComponent },
+  // Specific routes matched before the shell catch-all
   { path: 'projects', component: ProjectsComponent },
   { path: 'projectadmin', component: ProjectAdminComponent, canActivate: [AdminGuard] },
   { path: 'docsadmin', component: DocsadminComponent, canActivate: [AdminGuard] },
@@ -45,6 +53,20 @@ const routes: Routes = [
       { path: 'team',             component: PortalPageTeamComponent },
       { path: 'participants',     component: PortalPageParticipantsComponent },
       { path: 'outputs',          component: PortalPageOutputsComponent },
+    ]
+  },
+  // Landing shell — catches root and all landing sub-pages
+  {
+    path: '',
+    component: ProjectsLandingComponent,
+    children: [
+      { path: '', redirectTo: 'overview', pathMatch: 'full' },
+      { path: 'overview',    component: LandingOverviewComponent },
+      { path: 'about',       component: LandingAboutComponent },
+      { path: 'geodatabase', component: LandingGeodatabaseComponent },
+      { path: 'portals',     component: LandingPortalsComponent },
+      { path: 'team',        component: LandingTeamComponent },
+      { path: 'outputs',     component: LandingOutputsComponent },
     ]
   },
 ];
