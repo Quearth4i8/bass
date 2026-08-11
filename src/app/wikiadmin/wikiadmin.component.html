@@ -1,0 +1,108 @@
+<div class="admin-layout">
+  <app-admin-navbar pageTitle="Wiki" (menuToggle)="toggleSidebar()"></app-admin-navbar>
+
+  <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
+
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+      <div class="breadcrumb">
+        <span>Wiki</span>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="wiki-card">
+        <div class="wiki-card-header">
+          <div class="wiki-card-icon"><i class='bx bx-info-circle'></i></div>
+          <div>
+            <h3>TRIX Index Reference</h3>
+            <p>Classification ranges behind the Eutrophication and Water Quality gauges shown on the public Overview dashboard.</p>
+          </div>
+          <a class="wiki-card-goto" routerLink="/overview" title="These ranges color the gauges on the public Overview page">
+            <i class='bx bx-link-external'></i>
+            <span>Used on Overview</span>
+          </a>
+        </div>
+
+        <div class="trix-scales-container">
+          <div class="trix-scale-group">
+            <div class="trix-scale-title">Eutrophication Level</div>
+            <div class="trix-scale">
+              <div class="trix-scale-seg trix-scale-low"></div>
+              <div class="trix-scale-seg trix-scale-med"></div>
+              <div class="trix-scale-seg trix-scale-high"></div>
+              <div class="trix-scale-seg trix-scale-vhigh"></div>
+            </div>
+            <div class="trix-scale-labels">
+              <span>0 – 4 · Low</span><span>4 – 5 · Med</span>
+              <span>5 – 6 · High</span><span>6 – 10 · Very High</span>
+            </div>
+          </div>
+          <div class="trix-scale-group">
+            <div class="trix-scale-title">Water Quality Status</div>
+            <div class="trix-scale">
+              <div class="trix-scale-seg trix-scale-wq-high"></div>
+              <div class="trix-scale-seg trix-scale-wq-good"></div>
+              <div class="trix-scale-seg trix-scale-wq-poor"></div>
+              <div class="trix-scale-seg trix-scale-wq-bad"></div>
+            </div>
+            <div class="trix-scale-labels">
+              <span>0 – 4 · High</span><span>4 – 5 · Good</span>
+              <span>5 – 6 · Poor</span><span>6 – 10 · Bad</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wiki-card">
+        <div class="wiki-card-header">
+          <div class="wiki-card-icon"><i class='bx bx-math'></i></div>
+          <div>
+            <h3>TRIX Formula &amp; the Weiss (1970) Oxygen Saturation Equation</h3>
+            <p>How the four TRIX inputs are derived from raw measurements, and how measured O₂ is converted into a saturation deviation using Weiss (1970).</p>
+          </div>
+          <a class="wiki-card-goto" routerLink="/overview" title="This formula produces the TRIX Index values shown on the public Overview page">
+            <i class='bx bx-link-external'></i>
+            <span>Used on Overview</span>
+          </a>
+        </div>
+
+        <div class="formula-grid">
+          <div class="formula-block">
+            <div class="formula-block-title">DIN — Dissolved Inorganic Nitrogen</div>
+            <div class="formula-eq">DIN = (NH₄ + NO₃ + NO₂) × 14</div>
+            <p class="formula-note">Ammonium + nitrate + nitrite (µmol/L), converted to µg/L N.</p>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-block-title">DIP — Dissolved Inorganic Phosphorus</div>
+            <div class="formula-eq">DIP = PO₄ × 31</div>
+            <p class="formula-note">Phosphate (µmol/L), converted to µg/L P.</p>
+          </div>
+
+          <div class="formula-block formula-block-wide">
+            <div class="formula-block-title">|ΔO₂%| — Weiss (1970) oxygen solubility, S = 36 PSU (fixed)</div>
+            <div class="formula-eq">
+              ln(O₂sat) = −173.4292 + 249.6339·(100/T) + 143.3483·ln(T/100) − 21.8492·(T/100) + S·(−0.033096 + 0.014259·(T/100) − 0.001700·(T/100)²)
+            </div>
+            <p class="formula-note">
+              T is water temperature in Kelvin (°C + 273.15), S is salinity (PSU).
+              O₂sat comes out in mL/L and is converted to mg/L by <code>× 1.4276</code> (O₂ density at STP).
+            </p>
+            <div class="formula-eq">DO% = (O₂ / O₂sat) × 100 &nbsp;&nbsp;→&nbsp;&nbsp; |ΔO₂%| = | DO% − 100 |</div>
+            <p class="formula-note">
+              O₂ is the measured dissolved oxygen (mg/L). The resulting |ΔO₂%| is the DO2 term fed into the TRIX formula below —
+              it is the absolute deviation of the water's actual oxygen level from what full saturation at that temperature would be.
+            </p>
+          </div>
+        </div>
+
+        <div class="formula-result">
+          <div class="formula-eq formula-eq-lg">TRIX = ( log₁₀( DIN × DIP × |ΔO₂%| × Chla ) + 1.5 ) / 1.2</div>
+          <p class="formula-note">Chla is chlorophyll-a (µg/L), measured directly. The result is clamped to the 0–10 range used by the Overview gauges.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

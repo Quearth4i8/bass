@@ -46,6 +46,7 @@ import { ConfirmDeleteGroupDialogComponent } from './utilities/dialogues/confirm
 import { UpbuttonComponent } from "./utilities/Upbutton/upbutton.component";
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { ManagementComponent } from './management/management.component';
+import { WikiadminComponent } from './wikiadmin/wikiadmin.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { ContentEditableHtmlDirective } from './management/portal-projects-list/content-editable-html.directive';
 import { AuthInterceptor } from './auth/auth.interceptor';
@@ -96,6 +97,7 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     UpbuttonComponent,
     ProjectsLandingComponent,
     ManagementComponent,
+    WikiadminComponent,
     PortalProjectsListComponent,
     ContentEditableHtmlDirective,
     // Portal public display

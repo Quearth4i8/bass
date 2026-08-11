@@ -6,6 +6,7 @@ import { NgModule } from '@angular/core';
 import { ProjectsLandingComponent } from './projects-landing/projects-landing.component';
 import { BudgetChartsComponent } from './budget-charts/budget-charts.component';
 import { ManagementComponent } from './management/management.component';
+import { WikiadminComponent } from './wikiadmin/wikiadmin.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { AdminGuard } from './auth/admin.guard';
 
@@ -37,6 +38,7 @@ const routes: Routes = [
   { path: 'docsadmin', component: DocsadminComponent, canActivate: [AdminGuard] },
   { path: 'budget-charts', component: BudgetChartsComponent },
   { path: 'management', component: ManagementComponent, canActivate: [AdminGuard] },
+  { path: 'wikiadmin', component: WikiadminComponent, canActivate: [AdminGuard] },
   { path: 'management/portal-projects/:slug', component: PortalProjectsListComponent, canActivate: [AdminGuard] },
   {
     path: 'portal/:slug',

@@ -71,389 +71,340 @@
     </div>
   </div>
 
-  <!-- ── TRIX · Actual Status ──────────────────────────────────────────── -->
-  <div class="trix-section fade-up" style="transition-delay:280ms">
+  <!-- ── TRIX · Regional Overview — two coastline maps side by side ─────── -->
+  <div class="trix-overview-grid fade-up" style="transition-delay:280ms">
 
-    <div class="trix-header">
-      <div class="trix-header-left">
-        <span class="label label-accent trix-title">// Actual Status</span>
-        <span class="trix-footnote trix-loading-note" *ngIf="trixLoading">Loading data…</span>
-      </div>
-      <div class="trix-header-right">
-        <button class="trix-mock-btn" (click)="toggleMockData()" [class.active]="useMockData">
-          <i class='bx bx-flask'></i>
-          <span>DEMO</span>
-        </button>
-      </div>
-    </div>
+    <!-- ============================ ACTUAL STATUS ============================ -->
+    <div class="trix-map-card trix-section">
 
-    <div class="trix-grid">
-      <div class="trix-region-box" *ngFor="let region of displayTrixData">
-        <div class="trix-box-head">
-          <span class="trix-region-name">{{ region.label }}</span>
+      <div class="trix-header">
+        <div class="trix-header-left">
+          <span class="label label-accent trix-title">// Actual Status</span>
+          <span class="trix-footnote trix-loading-note" *ngIf="trixLoading">Loading data…</span>
         </div>
-        <div class="trix-box-gauges">
+        <div class="trix-header-right">
+          <button class="trix-mock-btn" (click)="toggleMockData()" [class.active]="useMockData">
+            <i class='bx bx-flask'></i>
+            <span>DEMO</span>
+          </button>
+          <div class="trix-season-wrap trix-country-wrap-a" (click)="$event.stopPropagation()">
+            <button class="trix-season-btn" (click)="toggleCountryDdA()" [class.open]="showCountryDdA">
+              <i class='bx bx-map'></i>
+              <span class="trix-season-label">{{ selectedCountryA.label }}</span>
+              <i class='bx' [class.bx-chevron-down]="!showCountryDdA" [class.bx-chevron-up]="showCountryDdA"></i>
+            </button>
+            <div class="trix-season-list" *ngIf="showCountryDdA">
+              <button *ngFor="let c of COUNTRIES"
+                (click)="selectCountryA(c)"
+                [class.active]="c.key === selectedCountryA.key">{{ c.label }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Eutrophication -->
-          <div class="trix-gauge-cell">
-            <span class="label trix-cell-type">EUTROPHICATION</span>
-            <div class="trix-gauge-box">
-              <ng-container *ngIf="getSeasonResult(region).trix !== null; else noEutrTpl">
-                <svg class="trix-gauge" viewBox="0 0 200 200" width="110" height="110">
-                  <circle class="tg-ring" cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                  <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                  <polygon class="tg-needle" [attr.points]="getNeedlePoints(getSeasonResult(region).trix)"/>
-                  <circle  class="tg-pivot"  cx="100" cy="100" r="6" [attr.fill]="getTrixColor(getSeasonResult(region).trix)"/>
-                  <text x="100" y="154" text-anchor="middle" class="tg-num">{{ getSeasonResult(region).trix | number:'1.1-1' }}</text>
-                  <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-                </svg>
-                <div class="trix-classification" [style.color]="getTrixColor(getSeasonResult(region).trix)">
-                  {{ getSeasonResult(region).eutrophication }}
+      <div class="trix-map-card-body">
+        <div class="trix-map-body">
+
+          <!-- Coastline, projected from the selected country's GeoJSON -->
+          <div class="trix-map-visual">
+            <div class="trix-map-frame" [style.aspect-ratio]="'60 / ' + selectedCountryA.vbH">
+              <svg class="trix-land-svg" [attr.viewBox]="'0 0 60 ' + selectedCountryA.vbH" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="trixLandFillA" x1="0" y1="0" x2="0.3" y2="1">
+                    <stop offset="0%"  stop-color="currentColor" stop-opacity="0.22"/>
+                    <stop offset="55%" stop-color="currentColor" stop-opacity="0.11"/>
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.16"/>
+                  </linearGradient>
+                </defs>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryA.vbH * 0.25" x2="60" [attr.y2]="selectedCountryA.vbH * 0.25"/>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryA.vbH * 0.5"  x2="60" [attr.y2]="selectedCountryA.vbH * 0.5"/>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryA.vbH * 0.75" x2="60" [attr.y2]="selectedCountryA.vbH * 0.75"/>
+                <path class="trix-land-shape" [attr.d]="selectedCountryA.path" fill="url(#trixLandFillA)"/>
+              </svg>
+              <svg class="trix-gov-overlay" *ngIf="selectedCountryA.key === 'tunisia'"
+                [attr.viewBox]="'0 0 60 ' + selectedCountryA.vbH" preserveAspectRatio="xMidYMid meet">
+                <path *ngFor="let g of GOVERNORATES"
+                  class="trix-gov-shape"
+                  [class.trix-gov-highlighted]="isHighlightedGovernorate(g.name)"
+                  [attr.d]="g.path"
+                  [attr.fill]="isHighlightedGovernorate(g.name) ? getGovernorateFill(g.name, false) : 'none'"
+                  [attr.title]="g.name"/>
+                <ng-container *ngFor="let g of GOVERNORATES">
+                  <text *ngIf="isHighlightedGovernorate(g.name) && GOV_LABEL_POS[g.name]" class="trix-gov-label"
+                    [attr.x]="GOV_LABEL_POS[g.name].x" [attr.y]="GOV_LABEL_POS[g.name].y">{{ g.name }}</text>
+                </ng-container>
+              </svg>
+            </div>
+            <div class="trix-compass" title="North"><i class='bx bx-up-arrow-alt'></i><span>N</span></div>
+          </div>
+
+          <!-- Region rows -->
+          <div class="trix-map-rows" *ngIf="selectedCountryA.hasRegions; else noRegionsA">
+            <div class="trix-row" *ngFor="let region of displayTrixData">
+              <div class="trix-row-head">
+                <div class="trix-row-title">
+                  <span class="trix-row-name">{{ region.label }}</span>
                 </div>
-              </ng-container>
-              <ng-template #noEutrTpl>
-                <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="110" height="110">
-                  <circle class="tg-ring"      cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                  <circle class="tg-pivot-grey" cx="100" cy="100" r="6"/>
-                  <text x="100" y="154" text-anchor="middle" class="tg-num tg-num-empty">–</text>
-                  <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-                </svg>
-                <div class="trix-classification trix-classification-empty">No Data</div>
-              </ng-template>
+                <span class="trix-row-trix" *ngIf="getSeasonResult(region).trix !== null"
+                  [style.color]="getTrixColor(getSeasonResult(region).trix)">
+                  TRIX INDEX {{ getSeasonResult(region).trix | number:'1.1-1' }}
+                </span>
+                <i class='bx bx-chevron-right trix-row-chevron'></i>
+              </div>
+              <div class="trix-row-gauges">
+
+                <!-- Eutrophication -->
+                <div class="trix-row-gauge">
+                  <ng-container *ngIf="getSeasonResult(region).trix !== null; else rowEmptyEutrA">
+                    <svg class="trix-gauge" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <polygon class="tg-needle" [attr.points]="getNeedlePoints(getSeasonResult(region).trix)"/>
+                      <circle  class="tg-pivot"  cx="100" cy="100" r="8" [attr.fill]="getTrixColor(getSeasonResult(region).trix)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num">{{ getSeasonResult(region).trix | number:'1.1-1' }}</text>
+                    </svg>
+                  </ng-container>
+                  <ng-template #rowEmptyEutrA>
+                    <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num tg-num-empty">–</text>
+                    </svg>
+                  </ng-template>
+                  <span class="trix-row-gauge-label">Eutrophication</span>
+                  <span class="trix-row-gauge-val" [style.color]="getTrixColor(getSeasonResult(region).trix)">
+                    {{ getSeasonResult(region).eutrophication || 'No data' }}
+                  </span>
+                </div>
+
+                <!-- Water quality -->
+                <div class="trix-row-gauge">
+                  <ng-container *ngIf="getSeasonResult(region).trix !== null; else rowEmptyQualA">
+                    <svg class="trix-gauge" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <polygon class="tg-needle" [attr.points]="getNeedlePoints(getSeasonResult(region).trix)"/>
+                      <circle  class="tg-pivot"  cx="100" cy="100" r="8" [attr.fill]="getTrixColor(getSeasonResult(region).trix)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num">{{ getSeasonResult(region).trix | number:'1.1-1' }}</text>
+                    </svg>
+                  </ng-container>
+                  <ng-template #rowEmptyQualA>
+                    <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num tg-num-empty">–</text>
+                    </svg>
+                  </ng-template>
+                  <span class="trix-row-gauge-label">Water Quality</span>
+                  <span class="trix-row-gauge-val" [style.color]="getTrixColor(getSeasonResult(region).trix)">
+                    {{ getSeasonResult(region).waterQuality || 'No data' }}
+                  </span>
+                </div>
+
+              </div>
             </div>
           </div>
 
-          <div class="trix-box-divider"></div>
+          <ng-template #noRegionsA>
+            <div class="trix-no-regions">
+              <i class='bx bx-map-pin'></i>
+              <span>No monitoring regions configured for {{ selectedCountryA.label }} yet.</span>
+            </div>
+          </ng-template>
 
-          <!-- Water quality -->
-          <div class="trix-gauge-cell">
-            <span class="label trix-cell-type">WATER QUALITY</span>
-            <div class="trix-gauge-box">
-              <ng-container *ngIf="getSeasonResult(region).trix !== null; else noQualTpl">
-                <svg class="trix-gauge" viewBox="0 0 200 200" width="110" height="110">
-                  <circle class="tg-ring" cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                  <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                  <polygon class="tg-needle" [attr.points]="getNeedlePoints(getSeasonResult(region).trix)"/>
-                  <circle  class="tg-pivot"  cx="100" cy="100" r="6" [attr.fill]="getTrixColor(getSeasonResult(region).trix)"/>
-                  <text x="100" y="154" text-anchor="middle" class="tg-num">{{ getSeasonResult(region).trix | number:'1.1-1' }}</text>
-                  <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-                </svg>
-                <div class="trix-classification" [style.color]="getTrixColor(getSeasonResult(region).trix)">
-                  {{ getSeasonResult(region).waterQuality }}
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================ PREDICTED STATUS ============================ -->
+    <div class="trix-map-card trix-pred-section">
+
+      <div class="trix-header">
+        <div class="trix-header-left">
+          <span class="label label-accent trix-title">// Predicted Status</span>
+        </div>
+        <div class="trix-header-right">
+          <div class="trix-season-wrap trix-country-wrap-b" (click)="$event.stopPropagation()">
+            <button class="trix-season-btn" (click)="toggleCountryDdB()" [class.open]="showCountryDdB">
+              <i class='bx bx-map'></i>
+              <span class="trix-season-label">{{ selectedCountryB.label }}</span>
+              <i class='bx' [class.bx-chevron-down]="!showCountryDdB" [class.bx-chevron-up]="showCountryDdB"></i>
+            </button>
+            <div class="trix-season-list" *ngIf="showCountryDdB">
+              <button *ngFor="let c of COUNTRIES"
+                (click)="selectCountryB(c)"
+                [class.active]="c.key === selectedCountryB.key">{{ c.label }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trix-pred-loading" *ngIf="predLoading && selectedCountryB.hasRegions">
+        <i class='bx bx-loader-alt'></i>
+        <span>Training model on historical data…</span>
+      </div>
+
+      <div class="trix-pred-error" *ngIf="!predLoading && predError && selectedCountryB.hasRegions">
+        <i class='bx bx-error-circle'></i>
+        <span>Could not load prediction data. Check your connection and try refreshing.</span>
+      </div>
+
+      <div class="trix-pred-error" *ngIf="!predLoading && !predError && predData.length === 0 && selectedCountryB.hasRegions">
+        <i class='bx bx-data'></i>
+        <span>No prediction data available for the selected season.</span>
+      </div>
+
+      <div class="trix-map-card-body" *ngIf="!selectedCountryB.hasRegions || (!predLoading && !predError && predData.length > 0)">
+        <div class="trix-map-body">
+
+          <!-- Coastline, projected from the selected country's GeoJSON -->
+          <div class="trix-map-visual">
+            <div class="trix-map-frame" [style.aspect-ratio]="'60 / ' + selectedCountryB.vbH">
+              <svg class="trix-land-svg" [attr.viewBox]="'0 0 60 ' + selectedCountryB.vbH" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="trixLandFillB" x1="0" y1="0" x2="0.3" y2="1">
+                    <stop offset="0%"  stop-color="currentColor" stop-opacity="0.22"/>
+                    <stop offset="55%" stop-color="currentColor" stop-opacity="0.11"/>
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0.16"/>
+                  </linearGradient>
+                </defs>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryB.vbH * 0.25" x2="60" [attr.y2]="selectedCountryB.vbH * 0.25"/>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryB.vbH * 0.5"  x2="60" [attr.y2]="selectedCountryB.vbH * 0.5"/>
+                <line class="trix-grat" x1="0" [attr.y1]="selectedCountryB.vbH * 0.75" x2="60" [attr.y2]="selectedCountryB.vbH * 0.75"/>
+                <path class="trix-land-shape" [attr.d]="selectedCountryB.path" fill="url(#trixLandFillB)"/>
+              </svg>
+              <svg class="trix-gov-overlay" *ngIf="selectedCountryB.key === 'tunisia'"
+                [attr.viewBox]="'0 0 60 ' + selectedCountryB.vbH" preserveAspectRatio="xMidYMid meet">
+                <path *ngFor="let g of GOVERNORATES"
+                  class="trix-gov-shape"
+                  [class.trix-gov-highlighted]="isHighlightedGovernorate(g.name)"
+                  [attr.d]="g.path"
+                  [attr.fill]="isHighlightedGovernorate(g.name) ? getGovernorateFill(g.name, true) : 'none'"
+                  [attr.title]="g.name"/>
+                <ng-container *ngFor="let g of GOVERNORATES">
+                  <text *ngIf="isHighlightedGovernorate(g.name) && GOV_LABEL_POS[g.name]" class="trix-gov-label"
+                    [attr.x]="GOV_LABEL_POS[g.name].x" [attr.y]="GOV_LABEL_POS[g.name].y">{{ g.name }}</text>
+                </ng-container>
+              </svg>
+            </div>
+            <div class="trix-compass" title="North"><i class='bx bx-up-arrow-alt'></i><span>N</span></div>
+          </div>
+
+          <!-- Region rows -->
+          <div class="trix-map-rows" *ngIf="selectedCountryB.hasRegions; else noRegionsB">
+            <div class="trix-row trix-row-pred" *ngFor="let region of predData; let i = index" [class.trix-row-primary]="i === 0">
+              <div class="trix-row-head">
+                <div class="trix-row-title">
+                  <span class="trix-row-name">{{ region.label }}</span>
                 </div>
-              </ng-container>
-              <ng-template #noQualTpl>
-                <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="110" height="110">
-                  <circle class="tg-ring"      cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                  <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                  <circle class="tg-pivot-grey" cx="100" cy="100" r="6"/>
-                  <text x="100" y="154" text-anchor="middle" class="tg-num tg-num-empty">–</text>
-                  <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-                </svg>
-                <div class="trix-classification trix-classification-empty">No Data</div>
-              </ng-template>
+                <div class="trix-pred-meta">
+                  <span class="trix-lowdata-badge"
+                    *ngIf="getPredResult(region).dataYears > 0 && getPredResult(region).dataYears < 3"
+                    title="Only {{ getPredResult(region).dataYears }} year(s) of data — low confidence">
+                    <i class='bx bx-error'></i>
+                  </span>
+                  <span class="trix-trend"
+                    [class.trix-trend-up]="getPredResult(region).trend === 'up'"
+                    [class.trix-trend-down]="getPredResult(region).trend === 'down'"
+                    [class.trix-trend-stable]="getPredResult(region).trend === 'stable'"
+                    *ngIf="getPredResult(region).trix !== null && getPredResult(region).trend !== null">
+                    <i class='bx'
+                      [class.bx-trending-up]="getPredResult(region).trend === 'up'"
+                      [class.bx-trending-down]="getPredResult(region).trend === 'down'"
+                      [class.bx-minus]="getPredResult(region).trend === 'stable'"></i>
+                  </span>
+                  <span class="trix-row-trix" *ngIf="getPredResult(region).trix !== null"
+                    [style.color]="getTrixColor(getPredResult(region).trix)">
+                    TRIX INDEX {{ getPredResult(region).trix | number:'1.1-1' }}
+                  </span>
+                </div>
+                <i class='bx bx-chevron-right trix-row-chevron'></i>
+              </div>
+              <div class="trix-row-gauges">
+
+                <!-- Eutrophication (predicted) -->
+                <div class="trix-row-gauge">
+                  <ng-container *ngIf="getPredResult(region).trix !== null; else rowEmptyEutrP">
+                    <svg class="trix-gauge" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <polygon class="tg-needle tg-needle-pred" [attr.points]="getNeedlePoints(getPredResult(region).trix)"/>
+                      <circle  class="tg-pivot" cx="100" cy="100" r="8" [attr.fill]="getTrixColor(getPredResult(region).trix)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num">{{ getPredResult(region).trix | number:'1.1-1' }}</text>
+                    </svg>
+                  </ng-container>
+                  <ng-template #rowEmptyEutrP>
+                    <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num tg-num-empty">–</text>
+                    </svg>
+                  </ng-template>
+                  <span class="trix-row-gauge-label">Eutrophication</span>
+                  <span class="trix-row-gauge-val" [style.color]="getTrixColor(getPredResult(region).trix)">
+                    {{ getPredResult(region).eutrophication || 'No data' }}
+                  </span>
+                </div>
+
+                <!-- Water quality (predicted) -->
+                <div class="trix-row-gauge">
+                  <ng-container *ngIf="getPredResult(region).trix !== null; else rowEmptyQualP">
+                    <svg class="trix-gauge" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <polygon class="tg-needle tg-needle-pred" [attr.points]="getNeedlePoints(getPredResult(region).trix)"/>
+                      <circle  class="tg-pivot" cx="100" cy="100" r="8" [attr.fill]="getTrixColor(getPredResult(region).trix)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num">{{ getPredResult(region).trix | number:'1.1-1' }}</text>
+                    </svg>
+                  </ng-container>
+                  <ng-template #rowEmptyQualP>
+                    <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="72" height="72">
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
+                      <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="16" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
+                      <text x="100" y="150" text-anchor="middle" class="tg-num tg-num-empty">–</text>
+                    </svg>
+                  </ng-template>
+                  <span class="trix-row-gauge-label">Water Quality</span>
+                  <span class="trix-row-gauge-val" [style.color]="getTrixColor(getPredResult(region).trix)">
+                    {{ getPredResult(region).waterQuality || 'No data' }}
+                  </span>
+                </div>
+
+              </div>
             </div>
           </div>
 
-        </div>
-      </div>
-    </div>
+          <ng-template #noRegionsB>
+            <div class="trix-no-regions">
+              <i class='bx bx-map-pin'></i>
+              <span>No monitoring regions configured for {{ selectedCountryB.label }} yet.</span>
+            </div>
+          </ng-template>
 
-    <div class="trix-scales-container">
-      <div class="trix-scale-group">
-        <div class="trix-scale-title">Eutrophication Level</div>
-        <div class="trix-scale">
-          <div class="trix-scale-seg trix-scale-low"></div>
-          <div class="trix-scale-seg trix-scale-med"></div>
-          <div class="trix-scale-seg trix-scale-high"></div>
-          <div class="trix-scale-seg trix-scale-vhigh"></div>
         </div>
-        <div class="trix-scale-labels">
-          <span>0 – 4 · Low</span><span>4 – 5 · Med</span>
-          <span>5 – 6 · High</span><span>6 – 10 · Very High</span>
-        </div>
+
       </div>
-      <div class="trix-scale-group">
-        <div class="trix-scale-title">Water Quality Status</div>
-        <div class="trix-scale">
-          <div class="trix-scale-seg trix-scale-wq-high"></div>
-          <div class="trix-scale-seg trix-scale-wq-good"></div>
-          <div class="trix-scale-seg trix-scale-wq-poor"></div>
-          <div class="trix-scale-seg trix-scale-wq-bad"></div>
-        </div>
-        <div class="trix-scale-labels">
-          <span>0 – 4 · High</span><span>4 – 5 · Good</span>
-          <span>5 – 6 · Poor</span><span>6 – 10 · Bad</span>
-        </div>
-      </div>
+
     </div>
 
   </div>
 
 </section>
-
-<!-- ── TRIX · Predicted Status ──────────────────────────────────────────── -->
-<div class="trix-pred-section fade-up" style="transition-delay:60ms">
-
-  <div class="trix-header">
-    <div class="trix-header-left">
-      <span class="label label-accent trix-title">// Predicted Status</span>
-    </div>
-    <div class="trix-header-right">
-      <div class="trix-pred-season-wrap" (click)="$event.stopPropagation()">
-        <button class="trix-season-btn" (click)="togglePredSeasonDd()" [class.open]="showPredSeasonDd">
-          <i class='bx bx-calendar-check'></i>
-          <span class="trix-season-label">{{ seasonLabel(selectedPredSeason) }}</span>
-          <i class='bx' [class.bx-chevron-down]="!showPredSeasonDd" [class.bx-chevron-up]="showPredSeasonDd"></i>
-        </button>
-        <div class="trix-season-list" *ngIf="showPredSeasonDd">
-          <button *ngFor="let s of TRIX_SEASONS"
-            (click)="selectPredSeason(s)"
-            [class.active]="s === selectedPredSeason">{{ seasonLabel(s) }}</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="trix-pred-loading" *ngIf="predLoading">
-    <i class='bx bx-loader-alt'></i>
-    <span>Training model on historical data…</span>
-  </div>
-
-  <div class="trix-pred-error" *ngIf="!predLoading && predError">
-    <i class='bx bx-error-circle'></i>
-    <span>Could not load prediction data. Check your connection and try refreshing.</span>
-  </div>
-
-  <div class="trix-pred-error" *ngIf="!predLoading && !predError && predData.length === 0">
-    <i class='bx bx-data'></i>
-    <span>No prediction data available for the selected season.</span>
-  </div>
-
-  <div class="trix-grid" *ngIf="!predLoading && !predError && predData.length > 0">
-    <div class="trix-region-box trix-pred-box" *ngFor="let region of predData">
-
-      <div class="trix-box-head">
-        <span class="trix-region-name">{{ region.label }}</span>
-        <div class="trix-pred-meta">
-          <span class="trix-lowdata-badge"
-            *ngIf="getPredResult(region).dataYears > 0 && getPredResult(region).dataYears < 3"
-            title="Only {{ getPredResult(region).dataYears }} year(s) of data — low confidence">
-            <i class='bx bx-error'></i> low data
-          </span>
-          <span class="trix-trend"
-            [class.trix-trend-up]="getPredResult(region).trend === 'up'"
-            [class.trix-trend-down]="getPredResult(region).trend === 'down'"
-            [class.trix-trend-stable]="getPredResult(region).trend === 'stable'"
-            *ngIf="getPredResult(region).trix !== null && getPredResult(region).trend !== null">
-            <i class='bx'
-              [class.bx-trending-up]="getPredResult(region).trend === 'up'"
-              [class.bx-trending-down]="getPredResult(region).trend === 'down'"
-              [class.bx-minus]="getPredResult(region).trend === 'stable'"></i>
-          </span>
-        </div>
-      </div>
-
-      <div class="trix-box-gauges">
-
-        <!-- Eutrophication (predicted) -->
-        <div class="trix-gauge-cell">
-          <span class="label trix-cell-type">EUTROPHICATION</span>
-          <div class="trix-gauge-box">
-            <ng-container *ngIf="getPredResult(region).trix !== null; else noPredE">
-              <svg class="trix-gauge" viewBox="0 0 200 200" width="110" height="110">
-                <circle class="tg-ring" cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                <polygon class="tg-needle tg-needle-pred" [attr.points]="getNeedlePoints(getPredResult(region).trix)"/>
-                <circle  class="tg-pivot" cx="100" cy="100" r="6" [attr.fill]="getTrixColor(getPredResult(region).trix)"/>
-                <text x="100" y="154" text-anchor="middle" class="tg-num">{{ getPredResult(region).trix | number:'1.1-1' }}</text>
-                <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-              </svg>
-              <div class="trix-classification" [style.color]="getTrixColor(getPredResult(region).trix)">
-                {{ getPredResult(region).eutrophication }}
-              </div>
-            </ng-container>
-            <ng-template #noPredE>
-              <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="110" height="110">
-                <circle class="tg-ring"      cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                <circle class="tg-pivot-grey" cx="100" cy="100" r="6"/>
-                <text x="100" y="154" text-anchor="middle" class="tg-num tg-num-empty">–</text>
-                <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-              </svg>
-              <div class="trix-classification trix-classification-empty">No Data</div>
-            </ng-template>
-          </div>
-        </div>
-
-        <div class="trix-box-divider"></div>
-
-        <!-- Water quality (predicted) -->
-        <div class="trix-gauge-cell">
-          <span class="label trix-cell-type">WATER QUALITY</span>
-          <div class="trix-gauge-box">
-            <ng-container *ngIf="getPredResult(region).trix !== null; else noPredQ">
-              <svg class="trix-gauge" viewBox="0 0 200 200" width="110" height="110">
-                <circle class="tg-ring" cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                <circle class="tg-zone tg-zone-low"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-med"   cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-high"  cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone tg-zone-vhigh" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                <polygon class="tg-needle tg-needle-pred" [attr.points]="getNeedlePoints(getPredResult(region).trix)"/>
-                <circle  class="tg-pivot" cx="100" cy="100" r="6" [attr.fill]="getTrixColor(getPredResult(region).trix)"/>
-                <text x="100" y="154" text-anchor="middle" class="tg-num">{{ getPredResult(region).trix | number:'1.1-1' }}</text>
-                <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-              </svg>
-              <div class="trix-classification" [style.color]="getTrixColor(getPredResult(region).trix)">
-                {{ getPredResult(region).waterQuality }}
-              </div>
-            </ng-container>
-            <ng-template #noPredQ>
-              <svg class="trix-gauge trix-gauge-empty" viewBox="0 0 200 200" width="110" height="110">
-                <circle class="tg-ring"      cx="100" cy="100" r="84" fill="none" stroke-width="1" stroke-dasharray="3 6"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="129.95 309.87"          transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 131.95 30.99 276.88"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 164.94 30.99 243.89"  transform="rotate(135,100,100)"/>
-                <circle class="tg-zone-grey" cx="100" cy="100" r="70" fill="none" stroke-width="13" stroke-linecap="butt" stroke-dasharray="0 197.93 129.95 111.94" transform="rotate(135,100,100)"/>
-                <circle class="tg-pivot-grey" cx="100" cy="100" r="6"/>
-                <text x="100" y="154" text-anchor="middle" class="tg-num tg-num-empty">–</text>
-                <text x="100" y="170" text-anchor="middle" class="tg-sub">TRIX</text>
-              </svg>
-              <div class="trix-classification trix-classification-empty">No Data</div>
-            </ng-template>
-          </div>
-        </div>
-
-      </div>
-
-      <button class="trix-formula-toggle" (click)="showFormulaBreakdown = true">
-        <i class='bx bx-math'></i>
-        Formula &amp; Values
-      </button>
-
-    </div>
-  </div>
-
-  <div class="trix-scales-container">
-    <div class="trix-scale-group">
-      <div class="trix-scale-title">Eutrophication Level</div>
-      <div class="trix-scale">
-        <div class="trix-scale-seg trix-scale-low"></div>
-        <div class="trix-scale-seg trix-scale-med"></div>
-        <div class="trix-scale-seg trix-scale-high"></div>
-        <div class="trix-scale-seg trix-scale-vhigh"></div>
-      </div>
-      <div class="trix-scale-labels">
-        <span>0 – 4 · Low</span><span>4 – 5 · Med</span>
-        <span>5 – 6 · High</span><span>6 – 10 · Very High</span>
-      </div>
-    </div>
-    <div class="trix-scale-group">
-      <div class="trix-scale-title">Water Quality Status</div>
-      <div class="trix-scale">
-        <div class="trix-scale-seg trix-scale-wq-high"></div>
-        <div class="trix-scale-seg trix-scale-wq-good"></div>
-        <div class="trix-scale-seg trix-scale-wq-poor"></div>
-        <div class="trix-scale-seg trix-scale-wq-bad"></div>
-      </div>
-      <div class="trix-scale-labels">
-        <span>0 – 4 · High</span><span>4 – 5 · Good</span>
-        <span>5 – 6 · Poor</span><span>6 – 10 · Bad</span>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ── Formula breakdown modal ──────────────────────────────────────────── -->
-<div class="trix-modal-overlay" *ngIf="showFormulaBreakdown" (click)="showFormulaBreakdown = false">
-  <div class="trix-modal" (click)="$event.stopPropagation()">
-
-    <div class="trix-modal-header">
-      <span class="trix-modal-title">
-        <i class='bx bx-math'></i> TRIX Formula Breakdown
-      </span>
-      <button class="trix-modal-close" (click)="showFormulaBreakdown = false">
-        <i class='bx bx-x'></i>
-      </button>
-    </div>
-
-    <div class="trix-modal-body" *ngIf="predData?.length">
-      <ng-container *ngIf="getPredResult(predData[0]) as r">
-        <div class="tfp-group">
-          <div class="tfp-label">DIN — Dissolved Inorganic Nitrogen</div>
-          <div class="tfp-row">
-            <span class="tfp-item"><span class="tfp-var">NH₄</span> = {{ r.nh4 !== null ? (r.nh4 | number:'1.3-3') : '–' }} µmol/L</span>
-            <span class="tfp-item"><span class="tfp-var">NO₃</span> = {{ r.no3 !== null ? (r.no3 | number:'1.3-3') : '–' }} µmol/L</span>
-            <span class="tfp-item"><span class="tfp-var">NO₂</span> = {{ r.no2 !== null ? (r.no2 | number:'1.3-3') : '–' }} µmol/L</span>
-          </div>
-          <div class="tfp-calc">
-            DIN = (NH₄ + NO₃ + NO₂) × 14 =
-            <strong>{{ r.din !== null ? (r.din | number:'1.3-3') : '–' }} µg/L N</strong>
-          </div>
-        </div>
-        <div class="tfp-group">
-          <div class="tfp-label">DIP — Dissolved Inorganic Phosphorus</div>
-          <div class="tfp-row">
-            <span class="tfp-item"><span class="tfp-var">PO₄</span> = {{ r.po4 !== null ? (r.po4 | number:'1.3-3') : '–' }} µmol/L</span>
-          </div>
-          <div class="tfp-calc">
-            DIP = PO₄ × 31 =
-            <strong>{{ r.dip !== null ? (r.dip | number:'1.3-3') : '–' }} µg/L P</strong>
-          </div>
-        </div>
-        <div class="tfp-group">
-          <div class="tfp-label">|ΔO₂%| — Weiss (1970), S = 36 PSU</div>
-          <div class="tfp-row">
-            <span class="tfp-item"><span class="tfp-var">O₂</span> = {{ r.o2_mg !== null ? (r.o2_mg | number:'1.2-2') : '–' }} mg/L</span>
-            <span class="tfp-item"><span class="tfp-var">T</span> = {{ r.T_celsius !== null ? (r.T_celsius | number:'1.1-1') : '–' }} °C</span>
-            <span class="tfp-item"><span class="tfp-var">O₂sat</span> = {{ r.o2sat !== null ? (r.o2sat | number:'1.2-2') : '–' }} mg/L</span>
-          </div>
-          <div class="tfp-calc">
-            DO% = O₂ / O₂sat × 100 = {{ r.do_pct !== null ? (r.do_pct | number:'1.1-1') : '–' }}%
-            &nbsp;→&nbsp; |ΔO₂%| = <strong>{{ r.do2 | number:'1.2-2' }}</strong>
-            <span *ngIf="r.o2_mg === null || r.T_celsius === null" class="tfp-fallback">(fallback constant)</span>
-          </div>
-        </div>
-        <div class="tfp-group">
-          <div class="tfp-label">Chla — Chlorophyll-a</div>
-          <div class="tfp-calc">
-            <span class="tfp-var">Chla</span> =
-            <strong>{{ r.chla !== null ? (r.chla | number:'1.3-3') : '–' }} µg/L</strong>
-          </div>
-        </div>
-        <div class="tfp-result">
-          <div class="tfp-result-formula">TRIX = (log₁₀(DIN × DIP × |ΔO₂%| × Chla) + 1.5) / 1.2</div>
-          <div class="tfp-result-value">
-            <span class="tfp-result-num" [style.color]="getTrixColor(r.trix)">
-              {{ r.trix !== null ? (r.trix | number:'1.2-2') : '–' }}
-            </span>
-            <span *ngIf="r.trix !== null" class="tfp-result-class" [style.color]="getTrixColor(r.trix)">
-              {{ r.eutrophication }} · {{ r.waterQuality }} Quality
-            </span>
-          </div>
-        </div>
-      </ng-container>
-    </div>
-
-  </div>
-</div>
