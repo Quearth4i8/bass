@@ -22,6 +22,9 @@ export interface ProjectStats {
 export interface ProjectFolder {
   id: number;
   name: string;
+  parentPath: string;
+  path: string;
+  depth: number;
   fileCount: number;
   createdAt: string;
 }
@@ -72,6 +75,12 @@ export class PortalProjectDocumentService {
     });
   }
 
+  move(slug: string, id: number, subfolder: string): Observable<ProjectDocument> {
+    let params = new HttpParams();
+    if (subfolder) params = params.set('subfolder', subfolder);
+    return this.http.put<ProjectDocument>(`${this.base(slug)}/${id}/move`, null, { params });
+  }
+
   downloadUrl(slug: string, id: number): string { return `${this.base(slug)}/${id}/download`; }
   previewUrl (slug: string, id: number): string { return `${this.base(slug)}/${id}/preview`; }
 
@@ -89,12 +98,18 @@ export class PortalProjectDocumentService {
 
   // ── Folders ────────────────────────────────────────────────────────────────
 
-  listFolders(slug: string): Observable<ProjectFolder[]> {
-    return this.http.get<ProjectFolder[]>(this.folderBase(slug));
+  listFolders(slug: string, parentPath: string = ''): Observable<ProjectFolder[]> {
+    let params = new HttpParams();
+    if (parentPath) params = params.set('parentPath', parentPath);
+    return this.http.get<ProjectFolder[]>(this.folderBase(slug), { params });
   }
 
-  createFolder(slug: string, name: string): Observable<ProjectFolder> {
-    return this.http.post<ProjectFolder>(this.folderBase(slug), { name });
+  listAllFolders(slug: string): Observable<ProjectFolder[]> {
+    return this.http.get<ProjectFolder[]>(`${this.folderBase(slug)}/all`);
+  }
+
+  createFolder(slug: string, name: string, parentPath: string = ''): Observable<ProjectFolder> {
+    return this.http.post<ProjectFolder>(this.folderBase(slug), { name, parentPath });
   }
 
   deleteFolder(slug: string, id: number): Observable<void> {

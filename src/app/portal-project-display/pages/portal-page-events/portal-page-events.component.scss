@@ -3,6 +3,37 @@
 .empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: #c5cce0; display: block; margin-bottom: 16px; } p { color: #88909e; font-size: 15px; } }
 .page-header { text-align: center; padding: 92px 20px 36px; background: transparent; .page-project-title { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #4fc3f7; margin-bottom: 10px; } .page-section-title { font-size: clamp(28px,4vw,40px); font-weight: 900; color: #1a2a4a; margin-bottom: 20px; } .header-divider { width: 56px; height: 4px; background: linear-gradient(90deg, var(--portal-accent, #4fc3f7), color-mix(in srgb, var(--portal-accent, #4fc3f7), #000 25%)); border-radius: 2px; margin: 0 auto; } }
 
+.events-search-bar {
+  max-width: 640px; margin: 0 auto; padding: 0 32px;
+  .events-search-box {
+    display: flex; align-items: center; gap: 10px;
+    height: 48px; padding: 0 18px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    &:focus-within {
+      border-color: var(--portal-accent, #4fc3f7);
+      box-shadow: 0 3px 18px rgba(0,0,0,0.08);
+    }
+    i.bx-search { font-size: 18px; color: #a0aec0; flex-shrink: 0; }
+    input {
+      flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+      font-size: 14px; color: #1a2a4a;
+      &::placeholder { color: #a0aec0; }
+    }
+  }
+  .events-search-clear {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; padding: 0; flex-shrink: 0;
+    border: none; border-radius: 50%;
+    background: #f1f5f9; color: #64748b; cursor: pointer;
+    i { font-size: 15px; }
+    &:hover { background: #e2e8f0; color: #1a2a4a; }
+  }
+}
+
 .events-container {
   max-width: 1300px; margin: 0 auto; padding: 40px 32px 72px;
   .event-card {

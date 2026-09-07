@@ -1,0 +1,164 @@
+// Dark theme — content area overrides
+// Wrapped in .admin-main so specificity beats all existing content rules
+// ═══════════════════════════════════════════════════════════════════════════
+.admin-main {
+
+  .breadcrumb { color: $text-dim; a { color: $accent; } span { color: $text-dim; } .active-breadcrumb { color: $text; } }
+
+  // ── Tabs ──
+  .tabs-navigation { background: $panel; border-color: $line; box-shadow: none; &::-webkit-scrollbar-thumb { background: $line-2; } }
+  .tab-btn { color: $text-dim; &:hover { background: $panel-2; color: $accent; } &.active { background: $accent; color: $bg; box-shadow: 0 4px 12px rgba(74,214,196,.25); } }
+
+  // ── Content shell ──
+  .tab-content-container { background: $panel; border-color: $line; box-shadow: none; }
+  .content-header { border-bottom-color: $line; .header-info { h3 { color: $text; i { color: $accent; } } p { color: $text-dim; } } }
+  .content-wrapper { background: transparent; }
+  .list-bottom-actions { border-top-color: $line; }
+
+  // ── Home sections ──
+  .home-section { background: $panel-2; border-color: $line; box-shadow: none; }
+  .section-header { border-bottom-color: $line; }
+  .section-title { h4 { color: $text; } p { color: $text-dim; } }
+  .section-actions { }
+  .section-btn { background: $accent; border-color: $accent; color: $bg; &:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(74,214,196,.25); filter: brightness(1.08); } }
+
+  // ── Generic form elements ──
+  .form-group {
+    label { color: $text-dim; }
+    input, textarea {
+      background: $bg-2; border-color: $line; color: $text;
+      &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); background: $bg-2; }
+      &::placeholder { color: $text-faint; }
+    }
+  }
+
+  // ── Geo cards ──
+  .geo-card { background: $bg-2; border-color: $line; }
+
+  // ── Logo cards ──
+  .logo-card { background: $panel-2; border-color: $line; }
+  .logo-preview { background: $bg-2; border-color: $line-2; &.has-image { background: $bg-2; border-color: $line; } }
+  .logo-preview:not(.has-image) .logo-upload { background: $bg-2; color: $text-faint; i { color: $accent; } }
+  .mini-btn { background: $panel; border-color: $line; color: $text-dim; box-shadow: none; &:hover:not(:disabled) { border-color: $accent; color: $accent; } &.danger { border-color: rgba(239,68,68,.3); color: $danger; } &.output-heart-toggle { &:hover:not(:disabled) { border-color: #f87171; color: #f87171; } &.hearted { border-color: rgba(248,113,113,.35); color: #f87171; background: rgba(239,68,68,.1); } } }
+
+  // ── Info blocks ──
+  .info-block-item { background: $panel-2; border-color: $line; box-shadow: none; &:hover { box-shadow: 0 8px 20px rgba(0,0,0,.25); } }
+  .info-block-header { background: $bg-2; border-bottom-color: $line; .block-number { color: $accent; background: rgba(74,214,196,.08); border-color: rgba(74,214,196,.15); } }
+  .info-image { background: $bg-2; border-right-color: $line; }
+  .info-image-box:not(.has-image) .info-upload { background: $bg-2; color: $text-faint; i { color: $accent; } }
+  .info-fields { background: $panel-2; label { color: $text-faint; } input, textarea { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; background: $bg-2; box-shadow: 0 0 0 4px rgba(74,214,196,.1); } } }
+
+  // ── Carousel image cards ──
+  .home-image-card {
+    background: $panel-2; border-color: $line; box-shadow: none;
+    .image-header {
+      .header-left-side i { color: $accent; }
+      .image-number { color: $text-faint; }
+      .preview-title { color: $text; }
+      .order-controls .control-btn { background: $panel; border-color: $line; color: $text-dim; &:hover:not(:disabled) { border-color: $accent; color: $accent; } }
+      .remove-btn { background: $panel; border-color: rgba(239,68,68,.3); color: $danger; &:hover { background: $danger; color: white; border-color: $danger; } }
+    }
+    .image-upload-area { background: $bg-2; border-color: $line-2; }
+    .image-details .form-group {
+      label { color: $text-faint; }
+      input, textarea { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); } }
+    }
+  }
+  .add-image-card { background: $panel-2; border-color: $line-2; .add-content { color: $accent; } &:hover { border-color: $accent; background: rgba(74,214,196,.05); box-shadow: none; } }
+  .placeholder-section { background: $bg-2; border-color: $line; color: $text-faint; }
+
+  // ── Video ──
+  .video-preview-box { background: $bg-2; border-color: $line; &.has-video { background: #000; border-color: $line; } }
+  .video-upload-placeholder { color: $text-faint; .video-upload-btn.primary { background: $accent; color: $bg; &:hover { filter: brightness(1.08); box-shadow: 0 4px 12px rgba(74,214,196,.25); } } }
+  .video-filename { color: $text-dim; i { color: $accent; } }
+
+  // ── Partners & Funders ──
+  .pf-card { background: $panel-2; border-color: $line; box-shadow: none; }
+  .pf-header { border-bottom-color: $line; }
+  .pf-title { h4 { color: $text; } p { color: $text-dim; } }
+  .pf-funded-logos { background: $bg-2; border-color: $line; }
+  .pf-logo-card { background: $panel; border-color: $line; }
+  .pf-logo-preview { background: $bg-2; border-color: $line-2; &.has-image { background: $panel; border-color: $line; } img { background: transparent; } }
+  .pf-logo-actions { border-top-color: $line; }
+  .pf-logo-preview:not(.has-image) .pf-upload { background: $bg-2; color: $text-faint; i { color: $accent; } }
+  .pf-line-input { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); } }
+  .pf-name-input { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); background: $bg-2; } }
+
+  // ── Gallery ──
+  .gallery-upload-tile { background: $bg-2; border-color: $line-2; .upload-icon { background: $accent; } .upload-text { .title { color: $text; } .sub { color: $text-dim; } } &:hover { border-color: $accent; background: rgba(74,214,196,.05); box-shadow: 0 8px 24px rgba(0,0,0,.2); transform: translateY(-2px); } }
+  .gallery-item { background: $panel-2; border-color: $line; }
+  .gallery-empty, .info-blocks-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
+
+  // ── Gallery viewer ──
+  .gallery-viewer-overlay { background: rgba(0,0,0,.88); }
+  .gallery-viewer { background: $panel; border-color: $line; }
+  .viewer-topbar { background: $bg-2; border-bottom-color: $line; }
+  .viewer-title { color: $text; .viewer-name { color: $text-dim; } }
+  .viewer-btn { background: $panel-2; border-color: $line; color: $text-dim; &:hover:not(:disabled) { border-color: $accent; color: $accent; background: rgba(74,214,196,.08); } &.danger { border-color: rgba(239,68,68,.3); color: $danger; &:hover { background: rgba(239,68,68,.1); border-color: $danger; } } }
+  .viewer-hint { background: $bg-2; border-top-color: $line; color: $text-faint; kbd { background: $panel; border-color: $line; color: $text-dim; } }
+
+  // ── Delete confirm modal ──
+  .delete-confirm-overlay { background: rgba(0,0,0,.75); }
+  .delete-confirm-box { background: $panel; border-color: $line; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .delete-confirm-title { color: $text; }
+  .delete-confirm-text { color: $text-dim; }
+
+  // ── Events ──
+  .event-card { background: $panel-2; border-color: $line; box-shadow: none; }
+  .event-card-left { background: $bg-2; border-right-color: $line; }
+  .event-time-range { color: $text-dim; i { color: $accent; } }
+  .event-input { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); } }
+  .event-textarea { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); } }
+  .event-card-actions { background: $bg-2; border-left-color: $line; }
+  .events-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
+
+  // ── Team ──
+  .team-section-card { background: $panel-2; border-color: $line; box-shadow: none; }
+  .section-card-header { background: $bg-2; border-bottom-color: $line; .section-title-group { i { color: $accent; } .section-title-input { color: $text; background: transparent; &:focus { border-bottom-color: $accent; } } } }
+  .member-add-tile { background: $bg-2; border-color: $line; color: $text-faint; i { background: $panel; color: $text-faint; } &:hover { background: rgba(74,214,196,.05); border-color: $accent; color: $accent; i { background: rgba(74,214,196,.1); color: $accent; } } }
+  .member-item-card { background: $panel-2; border-color: $line; box-shadow: none; &:hover { border-color: $accent; box-shadow: 0 8px 24px rgba(0,0,0,.25); } &::before { background: linear-gradient(to right, transparent, $accent, transparent); } }
+  .member-card-banner { display: none; }
+  .member-photo-box { background: $bg-2; border-right-color: $line; border-color: transparent; .member-photo-placeholder { background: linear-gradient(135deg, $bg-2, $panel); color: $text-faint; } }
+  .member-info-fields { .member-name-input { color: $text; border-bottom-color: $line; &::placeholder { color: $text-faint; } &:focus { border-bottom-color: $accent; } } .member-role-input { color: $text-dim; &::placeholder { color: $text-faint; } } }
+  .member-item-actions { background: $bg-2; border-top-color: $line; }
+  .member-mini-btn { background: $panel; color: $text-dim; box-shadow: none; &:hover:not(:disabled) { background: rgba(74,214,196,.1); color: $accent; } &.danger:hover { background: rgba(239,68,68,.1); color: $danger; } }
+  .team-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
+
+  // ── Participants (same pattern as team) ──
+
+  // ── Scientific merit / Objectives (rich text) ──
+  .paragraph-card { background: $panel-2; border-color: $line; box-shadow: none; }
+  .paragraph-header {
+    background: $bg-2; border-bottom-color: $line;
+    .paragraph-number { color: $text-faint; }
+    .remove-btn { background: $panel; border-color: rgba(239,68,68,.3); color: $danger; &:hover { background: $danger; color: white; border-color: $danger; } }
+    .rich-text-controls {
+      border-right-color: $line;
+      .control-separator { background: $line; }
+      .format-btn { background: $panel; border-color: $line; color: $text-dim; &:hover { background: rgba(74,214,196,.1); color: $accent; border-color: $accent; } &.active { background: $accent; color: $bg; border-color: $accent; } }
+    }
+  }
+  .rich-editor { background: $panel-2; border-top-color: $line; color: $text; }
+
+  // ── Custom select / dropdown ──
+  .custom-select-trigger { background: $bg-2; border-color: $line; color: $text; i { color: $text-faint; } &:hover { border-color: $accent; } }
+  .font-size-select.custom-select-trigger { background: $panel; color: $text-dim; }
+
+  // ── Providers / Outputs tab ──
+  .provider-card { background: $panel-2; border-color: $line; box-shadow: none; }
+  .provider-fields { .form-field { label { color: $text-faint; i { color: $accent; } } input, textarea { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.1); } } } }
+  .provider-card-actions { background: $bg-2; border-left-color: $line; }
+  .providers-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
+
+  .output-editor-card { background: $panel-2; border-color: $line; box-shadow: none; &:hover { box-shadow: 0 8px 24px rgba(0,0,0,.3); } }
+  .output-editor-card__head { background: $bg-2; border-bottom-color: $line; }
+  .output-editor-card__badge { background: rgba(74,214,196,.08); border-color: rgba(74,214,196,.15); color: $accent; }
+  .output-editor-card__fields { background: $panel-2; .form-field { label { color: $text-faint; i { color: $accent; } } input, textarea { background: $bg-2; border-color: $line; color: $text; &:focus { border-color: $accent; background: $bg-2; } } .output-layout-select.custom-select-trigger { background: $bg-2; border-color: $line; } } }
+  .output-editor-card__media-col { background: $bg-2; border-left-color: $line; }
+  .output-video-box:not(.has-video) .output-video-overlay { background: $bg-2; color: $text-faint; i { color: $accent; } }
+  .outputs-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
+
+  // ── Secondary header button (Add Paragraph) ──
+  .header-btn.secondary { background: $panel; border-color: $line-2; color: $text-dim; &:hover { border-color: $accent; color: $accent; background: rgba(74,214,196,.06); } }
+}
+

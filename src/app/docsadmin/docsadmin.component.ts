@@ -52,9 +52,15 @@ export class DocsadminComponent implements OnInit {
   totalStorage = 0;
 
   deleteConfirmDoc: ProjectDocument | null = null;
+  bulkDeleteConfirmOpen = false;
+
+  selectedDocIds = new Set<number>();
+  moveModalOpen = false;
+  movingDocIds: number[] = [];
 
   // Folder state
   folders: ProjectFolder[] = [];
+  allFolders: ProjectFolder[] = [];
   currentSubfolder: string | null = null;
   showCreateFolderModal = false;
   newFolderName = '';
@@ -141,11 +147,7 @@ export class DocsadminComponent implements OnInit {
   openProject(project: ProjectWithStats): void {
     this.selectedProject = { ...project };
     this.view = 'documents';
-    this.activeFilter = 'all';
-    this.docSearch = '';
-    this.currentSubfolder = null;
-    this.loadFolders();
-    this.loadDocuments();
+    this.navigateToPath(null);
   }
 
   backToProjects(): void {
@@ -155,28 +157,56 @@ export class DocsadminComponent implements OnInit {
     this.documents = [];
     this.filteredDocuments = [];
     this.folders = [];
+    this.allFolders = [];
+    this.selectedDocIds.clear();
     this.loadProjects();
   }
 
   openFolder(folder: ProjectFolder): void {
-    this.currentSubfolder = folder.name;
-    this.activeFilter = 'all';
-    this.docSearch = '';
-    this.loadDocuments();
+    this.navigateToPath(folder.path);
   }
 
   backToRoot(): void {
-    this.currentSubfolder = null;
+    this.navigateToPath(null);
+  }
+
+  goUpOneLevel(): void {
+    if (!this.currentSubfolder) return;
+    const idx = this.currentSubfolder.lastIndexOf('/');
+    this.navigateToPath(idx >= 0 ? this.currentSubfolder.slice(0, idx) : null);
+  }
+
+  navigateToPath(path: string | null): void {
+    this.currentSubfolder = path && path.length > 0 ? path : null;
     this.activeFilter = 'all';
     this.docSearch = '';
+    this.selectedDocIds.clear();
     this.loadFolders();
     this.loadDocuments();
   }
 
+  get breadcrumbSegments(): { name: string; path: string }[] {
+    if (!this.currentSubfolder) return [];
+    const parts = this.currentSubfolder.split('/');
+    let acc = '';
+    return parts.map(name => {
+      acc = acc ? `${acc}/${name}` : name;
+      return { name, path: acc };
+    });
+  }
+
   loadFolders(): void {
     if (!this.selectedProject) return;
-    this.docService.listFolders(this.selectedProject.slug).subscribe({
+    this.docService.listFolders(this.selectedProject.slug, this.currentSubfolder ?? '').subscribe({
       next: (f) => { this.folders = f; },
+      error: () => {}
+    });
+  }
+
+  loadAllFolders(): void {
+    if (!this.selectedProject) return;
+    this.docService.listAllFolders(this.selectedProject.slug).subscribe({
+      next: (f) => { this.allFolders = f; },
       error: () => {}
     });
   }
@@ -211,9 +241,10 @@ export class DocsadminComponent implements OnInit {
     if (!name) { this.folderNameError = 'Folder name is required'; return; }
     if (!/^[\w\s\-\.]+$/.test(name)) { this.folderNameError = 'Only letters, numbers, spaces, - and . allowed'; return; }
     if (!this.selectedProject) return;
-    this.docService.createFolder(this.selectedProject.slug, name).subscribe({
+    this.docService.createFolder(this.selectedProject.slug, name, this.currentSubfolder ?? '').subscribe({
       next: (folder) => {
         this.folders = [...this.folders, folder].sort((a, b) => a.name.localeCompare(b.name));
+        this.loadAllFolders();
         this.showCreateFolderModal = false;
         this.messageService.add({ severity: 'success', summary: 'Created', detail: `Folder "${name}" created` });
       },
@@ -237,15 +268,27 @@ export class DocsadminComponent implements OnInit {
     this.docService.deleteFolder(this.selectedProject.slug, folder.id).subscribe({
       next: () => {
         this.folders = this.folders.filter(f => f.id !== folder.id);
-        if (this.selectedProject) {
-          const removed = folder.fileCount;
-          this.selectedProject.fileCount = Math.max(0, this.selectedProject.fileCount - removed);
-        }
+        this.loadAllFolders();
+        this.refreshProjectStats();
         this.messageService.add({ severity: 'success', summary: 'Deleted', detail: `Folder "${folder.name}" deleted` });
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete folder' });
       }
+    });
+  }
+
+  private refreshProjectStats(): void {
+    if (!this.selectedProject) return;
+    const slug = this.selectedProject.slug;
+    this.docService.stats(slug).subscribe({
+      next: (stats) => {
+        if (this.selectedProject && this.selectedProject.slug === slug) {
+          this.selectedProject.fileCount = stats.fileCount;
+          this.selectedProject.totalSize = stats.totalSize;
+        }
+      },
+      error: () => {}
     });
   }
 
@@ -342,6 +385,7 @@ export class DocsadminComponent implements OnInit {
     this.docService.delete(this.selectedProject.slug, doc.id).subscribe({
       next: () => {
         this.documents = this.documents.filter(d => d.id !== doc.id);
+        this.selectedDocIds.delete(doc.id);
         this.applyFilters();
         if (this.selectedProject) {
           this.selectedProject.fileCount = Math.max(0, this.selectedProject.fileCount - 1);
@@ -352,6 +396,127 @@ export class DocsadminComponent implements OnInit {
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete file' });
       }
+    });
+  }
+
+  // ── Bulk select ────────────────────────────────────────────────────────────
+
+  isDocSelected(id: number): boolean {
+    return this.selectedDocIds.has(id);
+  }
+
+  toggleDocSelection(id: number): void {
+    if (this.selectedDocIds.has(id)) this.selectedDocIds.delete(id);
+    else this.selectedDocIds.add(id);
+  }
+
+  get allDocsSelected(): boolean {
+    return this.filteredDocuments.length > 0 && this.filteredDocuments.every(d => this.selectedDocIds.has(d.id));
+  }
+
+  toggleSelectAllDocs(): void {
+    if (this.allDocsSelected) {
+      this.filteredDocuments.forEach(d => this.selectedDocIds.delete(d.id));
+    } else {
+      this.filteredDocuments.forEach(d => this.selectedDocIds.add(d.id));
+    }
+  }
+
+  clearDocSelection(): void {
+    this.selectedDocIds.clear();
+  }
+
+  getSelectedDocIds(): number[] {
+    return Array.from(this.selectedDocIds);
+  }
+
+  // ── Bulk delete ────────────────────────────────────────────────────────────
+
+  confirmBulkDelete(): void {
+    if (this.selectedDocIds.size === 0) return;
+    this.bulkDeleteConfirmOpen = true;
+  }
+
+  cancelBulkDelete(): void {
+    this.bulkDeleteConfirmOpen = false;
+  }
+
+  executeBulkDelete(): void {
+    this.bulkDeleteConfirmOpen = false;
+    this.deleteDocsSequentially(Array.from(this.selectedDocIds), []);
+  }
+
+  private deleteDocsSequentially(ids: number[], failed: number[]): void {
+    if (!this.selectedProject) return;
+
+    if (ids.length === 0) {
+      this.selectedDocIds.clear();
+      if (failed.length > 0) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: `${failed.length} file(s) could not be deleted` });
+      } else {
+        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Selected files deleted' });
+      }
+      return;
+    }
+
+    const [id, ...rest] = ids;
+    const doc = this.documents.find(d => d.id === id);
+    this.docService.delete(this.selectedProject.slug, id).subscribe({
+      next: () => {
+        this.documents = this.documents.filter(d => d.id !== id);
+        this.applyFilters();
+        if (this.selectedProject && doc) {
+          this.selectedProject.fileCount = Math.max(0, this.selectedProject.fileCount - 1);
+          this.selectedProject.totalSize = Math.max(0, this.selectedProject.totalSize - doc.fileSize);
+        }
+        this.deleteDocsSequentially(rest, failed);
+      },
+      error: () => this.deleteDocsSequentially(rest, [...failed, id])
+    });
+  }
+
+  // ── Move to folder ─────────────────────────────────────────────────────────
+
+  openMoveModal(ids: number[]): void {
+    if (!this.selectedProject || ids.length === 0) return;
+    this.movingDocIds = ids;
+    this.moveModalOpen = true;
+    this.loadAllFolders();
+  }
+
+  cancelMove(): void {
+    this.moveModalOpen = false;
+    this.movingDocIds = [];
+  }
+
+  executeMoveTo(subfolder: string): void {
+    if (!this.selectedProject) return;
+    const ids = this.movingDocIds;
+    this.moveModalOpen = false;
+    this.moveDocsSequentially(ids, subfolder, []);
+  }
+
+  private moveDocsSequentially(ids: number[], subfolder: string, failed: number[]): void {
+    if (!this.selectedProject) return;
+
+    if (ids.length === 0) {
+      this.movingDocIds = [];
+      this.selectedDocIds.clear();
+      this.loadFolders();
+      this.loadAllFolders();
+      this.loadDocuments();
+      if (failed.length > 0) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: `${failed.length} file(s) could not be moved` });
+      } else {
+        this.messageService.add({ severity: 'success', summary: 'Moved', detail: subfolder ? `Moved to "${subfolder}"` : 'Moved to root' });
+      }
+      return;
+    }
+
+    const [id, ...rest] = ids;
+    this.docService.move(this.selectedProject.slug, id, subfolder).subscribe({
+      next: () => this.moveDocsSequentially(rest, subfolder, failed),
+      error: () => this.moveDocsSequentially(rest, subfolder, [...failed, id])
     });
   }
 

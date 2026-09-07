@@ -21,7 +21,8 @@
     inset: 0 0 0 0;
     overflow: hidden;
     opacity: 0;
-    transition: .5s;
+    transition: opacity .5s;
+    will-change: opacity;
 }
 .slider .list .item img {
     width: 100%;
@@ -107,7 +108,8 @@
     width: 150px;
     height: 220px;
     filter: brightness(.5);
-    transition: .5s;
+    transition: filter .5s;
+    will-change: filter;
     flex-shrink: 0;
     cursor: pointer;
 }
@@ -176,28 +178,81 @@
 }
 
 .logo-strip {
+  overflow: hidden;
+  width: 100%;
+  padding: 2.5rem 0;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+
+  // Too few logos to meaningfully scroll — show them centered, no fade/scroll illusion.
+  &.static {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+.logo-track {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: max-content;
+  gap: 1rem;
+  animation: logo-marquee 30s linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  &.static {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: none;
+    transform: none;
+  }
+}
+
+.logo-strip:hover .logo-track:not(.static) {
+  animation-play-state: paused;
+}
+
+@keyframes logo-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.logo-item {
+  display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 2rem 4rem;
+  height: 140px;
+  min-width: 140px;
+  padding: 1.25rem 1.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.logo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .logo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
-  max-width: 140px;
-  filter: grayscale(10%);
+  object-fit: contain;
+  filter: grayscale(15%);
   opacity: 0.9;
-  transition: transform 200ms ease, filter 200ms ease, opacity 200ms ease;
+  transition: filter 200ms ease, opacity 200ms ease;
 }
 
-.logo--primary {
-  max-height: 100px;
-}
-
-.logo:hover {
-  transform: translateY(-2px) scale(1.02);
+.logo-item:hover .logo {
   filter: none;
   opacity: 1;
 }
@@ -334,7 +389,7 @@ h5 {
 @media (min-width: 769px) and (max-width: 1100px) {
   .container2 { padding: 0 2rem; }
   .content-wrapper { padding: 32px; gap: 32px; }
-  .logo-strip { padding: 2rem 2.5rem; }
+  .logo-strip { padding: 2rem 0; }
 }
 
 @keyframes fadeInLeft {

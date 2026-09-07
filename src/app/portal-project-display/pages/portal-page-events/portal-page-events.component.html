@@ -6,8 +6,18 @@
     <div class="header-divider"></div>
   </div>
 
+  <div class="events-search-bar" *ngIf="project.content.events.events?.length">
+    <div class="events-search-box">
+      <i class='bx bx-search'></i>
+      <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Search events by title, organiser, location or speaker...">
+      <button class="events-search-clear" type="button" *ngIf="searchTerm" (click)="onSearchChange('')" title="Clear search">
+        <i class='bx bx-x'></i>
+      </button>
+    </div>
+  </div>
+
   <div class="events-container" *ngIf="project.content.events.events?.length">
-    <div class="event-card" *ngFor="let event of project.content.events.events">
+    <div class="event-card" *ngFor="let event of filteredEvents">
       <div class="event-date-col">
         <span class="event-day">{{ getEventDay(event.startDate) }}</span>
         <span class="event-full-date">{{ formatEventDate(event.startDate) }}</span>
@@ -48,6 +58,11 @@
           <p class="presentation-text">{{ event.presentation }}</p>
         </div>
       </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!filteredEvents.length">
+      <i class='bx bx-search-alt'></i>
+      <p>No events match "<b>{{ searchTerm }}</b>".</p>
     </div>
   </div>
 

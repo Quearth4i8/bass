@@ -12,6 +12,8 @@ import { PortalProject } from '../../../portal/models/portal-project.model';
 export class PortalPageEventsComponent implements OnInit {
   project: PortalProject | null = null;
   loading = true;
+  searchTerm = '';
+  filteredEvents: any[] = [];
 
   constructor(
     private readonly context: PortalProjectContextService,
@@ -24,6 +26,7 @@ export class PortalPageEventsComponent implements OnInit {
       .subscribe((project) => {
         this.project = project;
         this.loading = false;
+        this.updateFilteredEvents();
       });
   }
 
@@ -40,5 +43,21 @@ export class PortalPageEventsComponent implements OnInit {
 
   getStatusClass(status: string): string {
     return { ongoing: 'status-ongoing', finished: 'status-finished', canceled: 'status-canceled' }[status] || '';
+  }
+
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.updateFilteredEvents();
+  }
+
+  private updateFilteredEvents(): void {
+    const events = this.project?.content?.events?.events || [];
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredEvents = !term ? events : events.filter((event: any) =>
+      (event.title || '').toLowerCase().includes(term) ||
+      (event.organiser || '').toLowerCase().includes(term) ||
+      (event.location || '').toLowerCase().includes(term) ||
+      (event.speaker || '').toLowerCase().includes(term)
+    );
   }
 }

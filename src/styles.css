@@ -43,3 +43,80 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   left: auto !important;
   bottom: auto !important;
 }
+
+/* Toast Notifications - theme colors (PrimeNG's bundled saga-blue theme ships its
+   own fixed light styling with no awareness of this app's dark/light toggle, so it
+   never matched either mode). Dark is the app's baseline; body[data-theme="light"]
+   corrects it, same convention used everywhere else in the admin area.
+   Note: this only takes effect because src/styles.css is loaded AFTER PrimeNG's
+   theme.css in angular.json's "styles" array (equal-specificity ties go to
+   whichever stylesheet loads last) - don't move it back before PrimeNG's entries. */
+.p-toast {
+  width: 360px;
+}
+.p-toast .p-toast-message {
+  background: #082a3d;
+  border: none;
+  border-left: 3px solid #4ad6c4;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: #e8f1f5;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.p-toast .p-toast-message-content {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+}
+.p-toast .p-toast-message-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.p-toast .p-toast-summary {
+  color: #e8f1f5;
+  font-weight: 700;
+}
+.p-toast .p-toast-detail {
+  color: #9fb3bf;
+  margin-top: 4px;
+}
+.p-toast .p-toast-close-icon {
+  color: #9fb3bf;
+  background: transparent;
+  border-radius: 6px;
+}
+.p-toast .p-toast-close-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8f1f5;
+}
+.p-toast .p-toast-message-success { border-left-color: #4ad6c4; }
+.p-toast .p-toast-message-success .p-toast-message-icon { color: #4ad6c4; background: rgba(74, 214, 196, 0.12); }
+.p-toast .p-toast-message-error { border-left-color: #ef4444; }
+.p-toast .p-toast-message-error .p-toast-message-icon { color: #ef4444; background: rgba(239, 68, 68, 0.12); }
+.p-toast .p-toast-message-warn { border-left-color: #f5b94a; }
+.p-toast .p-toast-message-warn .p-toast-message-icon { color: #f5b94a; background: rgba(245, 185, 74, 0.12); }
+.p-toast .p-toast-message-info { border-left-color: #60a5fa; }
+.p-toast .p-toast-message-info .p-toast-message-icon { color: #60a5fa; background: rgba(96, 165, 250, 0.12); }
+
+body[data-theme="light"] .p-toast .p-toast-message {
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  color: #0d2137;
+}
+body[data-theme="light"] .p-toast .p-toast-summary { color: #0d2137; }
+body[data-theme="light"] .p-toast .p-toast-detail { color: #3d5a6e; }
+body[data-theme="light"] .p-toast .p-toast-close-icon { color: #3d5a6e; }
+body[data-theme="light"] .p-toast .p-toast-close-icon:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0d2137;
+}
+body[data-theme="light"] .p-toast .p-toast-message-success { border-left-color: #1a8f7f; }
+body[data-theme="light"] .p-toast .p-toast-message-success .p-toast-message-icon { color: #1a8f7f; background: rgba(26, 143, 127, 0.1); }

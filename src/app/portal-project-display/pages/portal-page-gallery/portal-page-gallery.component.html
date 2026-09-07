@@ -9,14 +9,38 @@
   <div class="gallery-grid" *ngIf="project.content.gallery.images?.length">
     <div
       class="gallery-item"
-      *ngFor="let img of project.content.gallery.images; let i = index"
-      (click)="openLightbox(i)"
+      *ngFor="let img of paginatedImages; let i = index"
+      (click)="openLightbox((currentPage - 1) * imagesPerPage + i)"
     >
-      <img [src]="img.url" [alt]="img.name || 'Gallery image'" loading="lazy">
+      <img [src]="img.url" [alt]="img.name || 'Gallery image'" loading="lazy" decoding="async">
       <div class="gallery-overlay">
         <i class='bx bx-zoom-in'></i>
       </div>
     </div>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button
+      class="pagination-btn"
+      (click)="prevPage()"
+      [disabled]="currentPage === 1"
+      title="Previous page">
+      <i class='bx bx-chevron-left'></i>
+    </button>
+
+    <div class="pagination-info">
+      <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+      <span class="image-count">{{ (currentPage - 1) * imagesPerPage + 1 }}-{{ Math.min(currentPage * imagesPerPage, project.content.gallery.images.length) }} of {{ project.content.gallery.images.length }} images</span>
+    </div>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages"
+      title="Next page">
+      <i class='bx bx-chevron-right'></i>
+    </button>
   </div>
 
   <div class="empty-state" *ngIf="!project.content.gallery.images?.length">

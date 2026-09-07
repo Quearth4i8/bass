@@ -18,7 +18,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 14px;
-  padding: 32px 40px 64px;
+  padding: 32px 40px 32px;
   max-width: 1600px;
   margin: 0 auto;
 
@@ -122,6 +122,113 @@
       color: rgba(255,255,255,0.6); font-size: 13px;
       font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
       letter-spacing: 0.06em;
+    }
+  }
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 40px 64px;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  .pagination-btn {
+    background: rgba(26, 42, 74, 0.08);
+    border: 1px solid rgba(26, 42, 74, 0.12);
+    color: #1a2a4a;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: rgba(26, 42, 74, 0.14);
+      border-color: rgba(26, 42, 74, 0.24);
+      color: #1a2a4a;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .pagination-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 220px;
+
+    .page-indicator {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a2a4a;
+    }
+
+    .image-count {
+      font-size: 12px;
+      color: #88909e;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  @media (max-width: 640px) {
+    gap: 16px;
+    padding: 24px 20px 48px;
+
+    .pagination-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+    }
+
+    .pagination-info {
+      min-width: 180px;
+
+      .page-indicator {
+        font-size: 13px;
+      }
+
+      .image-count {
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+:host ::ng-deep {
+  @media (prefers-color-scheme: dark) {
+    .pagination-container {
+      .pagination-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+
+        &:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.12);
+          border-color: rgba(255, 255, 255, 0.2);
+          color: #fff;
+        }
+      }
+
+      .pagination-info {
+        .page-indicator {
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .image-count {
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
     }
   }
 }

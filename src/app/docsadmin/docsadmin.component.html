@@ -117,23 +117,28 @@
 
       <!-- Back + Breadcrumb bar -->
       <div class="doc-nav-bar">
-        <button class="back-btn" (click)="currentSubfolder ? backToRoot() : backToProjects()">
+        <button class="back-btn" (click)="backToProjects()" title="All Projects">
           <i class='bx bx-arrow-back'></i>
-          {{ currentSubfolder ? selectedProject.title : 'All Projects' }}
+          All Projects
         </button>
-        <div class="breadcrumb-trail">
-          <span class="bc-item bc-project" [style.color]="selectedProject.accentColor">
-            <i class='bx bx-folder'></i> {{ selectedProject.title }}
-          </span>
-          <ng-container *ngIf="currentSubfolder">
+        <div class="path-bar">
+          <button type="button" class="bc-item bc-project" [class.bc-current]="!currentSubfolder"
+                  [style.color]="selectedProject.accentColor"
+                  [style.background]="!currentSubfolder ? (selectedProject.accentColor + '14') : ''"
+                  (click)="backToRoot()">
+            <i class='bx bxs-folder'></i>
+            <span>{{ selectedProject.title }}</span>
+          </button>
+          <ng-container *ngFor="let seg of breadcrumbSegments; let last = last">
             <i class='bx bx-chevron-right bc-sep'></i>
-            <span class="bc-item bc-folder">
-              <i class='bx bx-folder-open'></i> {{ currentSubfolder }}
-            </span>
+            <button type="button" class="bc-item bc-folder" [class.bc-current]="last"
+                    [disabled]="last" (click)="navigateToPath(seg.path)">
+              <i class='bx' [ngClass]="last ? 'bxs-folder-open' : 'bxs-folder'"></i>
+              <span>{{ seg.name }}</span>
+            </button>
           </ng-container>
         </div>
-        <button *ngIf="!currentSubfolder" type="button" class="new-folder-btn"
-                (click)="openCreateFolderModal()">
+        <button type="button" class="new-folder-btn" (click)="openCreateFolderModal()">
           <i class='bx bx-folder-plus'></i>
           New Folder
         </button>
@@ -157,20 +162,28 @@
         <p class="upload-sub">PDF, Word, Excel, Images, and more</p>
       </div>
 
-      <!-- Folders Grid (root level only) -->
-      <div class="folders-section" *ngIf="!currentSubfolder && folders.length > 0">
-        <div class="folder-card" *ngFor="let folder of folders" (click)="openFolder(folder)">
-          <div class="folder-icon-wrap">
-            <i class='bx bxs-folder'></i>
+      <!-- Folders Grid (subfolders of the current level) -->
+      <div class="folders-block" *ngIf="folders.length > 0">
+        <div class="block-label">
+          <i class='bx bxs-folder'></i>
+          <span>Folders</span>
+          <em class="block-label-count">{{ folders.length }}</em>
+        </div>
+        <div class="folders-section">
+          <div class="folder-card" *ngFor="let folder of folders" (click)="openFolder(folder)">
+            <button type="button" class="folder-delete-btn"
+                    (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
+              <i class='bx bx-trash'></i>
+            </button>
+            <div class="folder-icon-wrap">
+              <i class='bx bxs-folder'></i>
+            </div>
+            <div class="folder-info">
+              <span class="folder-name" [title]="folder.name">{{ folder.name }}</span>
+              <span class="folder-count">{{ folder.fileCount }} {{ folder.fileCount === 1 ? 'file' : 'files' }}</span>
+            </div>
+            <i class='bx bx-chevron-right folder-enter-hint'></i>
           </div>
-          <div class="folder-info">
-            <span class="folder-name">{{ folder.name }}</span>
-            <span class="folder-count">{{ folder.fileCount }} {{ folder.fileCount === 1 ? 'file' : 'files' }}</span>
-          </div>
-          <button type="button" class="folder-delete-btn"
-                  (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
-            <i class='bx bx-trash'></i>
-          </button>
         </div>
       </div>
 
@@ -196,6 +209,12 @@
         </div>
       </div>
 
+      <div class="block-label files-block-label" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
+        <i class='bx bx-file'></i>
+        <span>Files</span>
+        <em class="block-label-count">{{ filteredDocuments.length }}</em>
+      </div>
+
       <!-- Document List -->
       <div class="documents-container">
 
@@ -214,9 +233,42 @@
           <span *ngIf="activeFilter !== 'all' || docSearch">Try a different filter or search term</span>
         </div>
 
+        <!-- Bulk selection header -->
+        <div class="files-list-header" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
+          <label class="select-all-checkbox">
+            <input type="checkbox" [checked]="allDocsSelected" (change)="toggleSelectAllDocs()">
+            <span>Select all</span>
+          </label>
+        </div>
+
+        <!-- Bulk actions bar -->
+        <div class="bulk-actions-bar" *ngIf="selectedDocIds.size > 0">
+          <div class="bulk-info">
+            <i class='bx bx-check-square'></i>
+            <span>{{ selectedDocIds.size }} selected</span>
+          </div>
+          <div class="bulk-actions">
+            <button type="button" class="bulk-btn move-btn" (click)="openMoveModal(getSelectedDocIds())">
+              <i class='bx bx-folder-open'></i>
+              <span>Move to Folder</span>
+            </button>
+            <button type="button" class="bulk-btn delete-btn" (click)="confirmBulkDelete()">
+              <i class='bx bx-trash'></i>
+              <span>Delete</span>
+            </button>
+            <button type="button" class="bulk-btn clear-btn" (click)="clearDocSelection()">
+              <i class='bx bx-x'></i>
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Files List -->
         <div class="files-list" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
-          <div class="file-row" *ngFor="let doc of filteredDocuments">
+          <div class="file-row" *ngFor="let doc of filteredDocuments" [class.selected]="isDocSelected(doc.id)">
+            <label class="file-select" (click)="$event.stopPropagation()">
+              <input type="checkbox" [checked]="isDocSelected(doc.id)" (change)="toggleDocSelection(doc.id)">
+            </label>
             <div class="file-icon-box"
                  [style.background]="getFileColor(doc.category) + '15'"
                  [style.color]="getFileColor(doc.category)">
@@ -240,6 +292,9 @@
               </button>
               <button type="button" class="action-btn download-btn" (click)="downloadFile(doc)" title="Download">
                 <i class='bx bx-download'></i>
+              </button>
+              <button type="button" class="action-btn move-btn" (click)="openMoveModal([doc.id])" title="Move to folder">
+                <i class='bx bx-folder-open'></i>
               </button>
               <button type="button" class="action-btn delete-btn" (click)="confirmDelete(doc)" title="Delete">
                 <i class='bx bx-trash'></i>
@@ -378,6 +433,61 @@
     </div>
   </ng-container>
 
+  <!-- Bulk Delete Confirm Modal -->
+  <ng-container *ngIf="bulkDeleteConfirmOpen">
+    <div class="modal-backdrop" (click)="cancelBulkDelete()"></div>
+    <div class="modal-dialog delete-modal">
+      <div class="modal-header">
+        <div class="modal-icon-wrap delete-icon">
+          <i class='bx bx-trash'></i>
+        </div>
+        <h3>Delete {{ selectedDocIds.size }} {{ selectedDocIds.size === 1 ? 'File' : 'Files' }}</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the selected {{ selectedDocIds.size === 1 ? 'file' : 'files' }}?</p>
+        <p class="modal-warning"><i class='bx bx-info-circle'></i> This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cancelBulkDelete()">Cancel</button>
+        <button type="button" class="btn-delete" (click)="executeBulkDelete()">
+          <i class='bx bx-trash'></i> Delete
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Move to Folder Modal -->
+  <ng-container *ngIf="moveModalOpen">
+    <div class="modal-backdrop" (click)="cancelMove()"></div>
+    <div class="modal-dialog move-modal">
+      <div class="modal-header">
+        <div class="modal-icon-wrap">
+          <i class='bx bx-folder-open'></i>
+        </div>
+        <h3>Move {{ movingDocIds.length }} {{ movingDocIds.length === 1 ? 'File' : 'Files' }}</h3>
+      </div>
+      <div class="modal-body">
+        <p class="move-modal-hint">Choose a destination folder</p>
+        <div class="move-folder-list">
+          <button type="button" class="move-folder-option" (click)="executeMoveTo('')">
+            <i class='bx bxs-folder-open'></i>
+            <span>Root (no folder)</span>
+          </button>
+          <button type="button" class="move-folder-option" *ngFor="let folder of allFolders"
+                  [style.padding-left.px]="14 + folder.depth * 18"
+                  (click)="executeMoveTo(folder.path)">
+            <i class='bx bxs-folder'></i>
+            <span>{{ folder.name }}</span>
+          </button>
+          <p class="move-no-folders" *ngIf="allFolders.length === 0">No folders yet — create one first, or move to root.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="cancelMove()">Cancel</button>
+      </div>
+    </div>
+  </ng-container>
+
   <!-- Create Folder Modal -->
   <ng-container *ngIf="showCreateFolderModal">
     <div class="modal-backdrop" (click)="closeCreateFolderModal()"></div>
@@ -414,9 +524,9 @@
       </div>
       <div class="modal-body">
         <p>Delete folder <strong>"{{ deleteFolderConfirm!.name }}"</strong>?</p>
-        <p class="modal-warning" *ngIf="deleteFolderConfirm!.fileCount > 0">
+        <p class="modal-warning">
           <i class='bx bx-info-circle'></i>
-          This will permanently delete all {{ deleteFolderConfirm!.fileCount }} files inside.
+          This will permanently delete everything inside, including any subfolders.
         </p>
       </div>
       <div class="modal-footer">

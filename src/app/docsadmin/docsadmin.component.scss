@@ -217,25 +217,51 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Documents view ─────────────────────────────────────────────────────────
 .doc-nav-bar {
-  display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
-  padding-bottom: 16px; border-bottom: 1px solid $line;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  padding-bottom: 18px; border-bottom: 1px solid $line;
 }
 
 .back-btn {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; background: $panel; border: 1px solid $line;
+  padding: 9px 14px; background: $panel; border: 1px solid $line;
   border-radius: $radius; color: $text-dim; font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
   i { font-size: 18px; }
   &:hover { border-color: $accent; color: $accent; }
 }
 
-.breadcrumb-trail { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
+// The "address bar" — a distinct pill container so the breadcrumb reads as a
+// navigable path, not just plain header text.
+.path-bar {
+  display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; flex-wrap: wrap;
+  background: $bg-2; border: 1px solid $line; border-radius: $radius;
+  padding: 6px 10px;
+}
+
+.bc-sep { color: $text-faint; flex-shrink: 0; font-size: 15px; }
+
 .bc-item {
-  display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;
-  i { font-size: 16px; }
-  &.bc-project { font-weight: 700; }
-  &.bc-folder { color: $text-dim; }
+  display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600;
+  font-family: $font-sans; background: transparent; border: none; padding: 6px 10px; border-radius: 7px;
+  max-width: 260px; cursor: pointer; transition: opacity 0.2s, background 0.2s, color 0.2s;
+  i { font-size: 17px; flex-shrink: 0; }
+  span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  &.bc-project {
+    opacity: 0.7;
+    &:hover { opacity: 1; background: rgba(255,255,255,.06); }
+    &.bc-current { opacity: 1; &:hover { background: inherit; } }
+  }
+
+  &.bc-folder {
+    color: $text-dim;
+    &:hover:not(:disabled) { color: $text; background: rgba(255,255,255,.06); }
+    &.bc-current, &:disabled {
+      color: $text; cursor: default;
+      background: rgba(255,255,255,.05);
+      &:hover { background: rgba(255,255,255,.05); }
+    }
+  }
 }
 
 .new-folder-btn {
@@ -267,26 +293,64 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 .upload-sub { font-size: 12px; color: $text-faint; margin: 0; font-family: $font-mono; }
 
-// ── Folders ────────────────────────────────────────────────────────────────
-.folders-section { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+// ── Section labels (eyebrow headings above the folder grid / file list) ────
+.folders-block { margin-bottom: 24px; }
 
-.folder-card {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px; background: $panel; border: 1px solid $line; border-radius: $radius;
-  cursor: pointer; transition: all 0.2s; min-width: 160px;
-  &:hover { border-color: $line-2; }
+.block-label {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  font-size: 11px; font-weight: 700; color: $text-faint;
+  text-transform: uppercase; letter-spacing: 0.08em; font-family: $font-mono;
+  i { font-size: 15px; color: $text-faint; }
 }
 
-.folder-icon-wrap { i { font-size: 24px; color: $warn; } }
-.folder-info { flex: 1; }
-.folder-name { font-size: 13px; font-weight: 600; color: $text; display: block; }
+.block-label-count {
+  font-style: normal; padding: 1px 7px; background: $panel; border: 1px solid $line;
+  border-radius: 10px; color: $text-dim; font-size: 10px;
+}
+
+.files-block-label { margin: 4px 0 12px; }
+
+// ── Folders ────────────────────────────────────────────────────────────────
+.folders-section {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px;
+}
+
+.folder-card {
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: $panel; border: 1px solid $line; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  &:hover {
+    border-color: $warn; background: $panel-2; transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    .folder-delete-btn { opacity: 1; pointer-events: auto; }
+    .folder-enter-hint { opacity: 1; transform: translateX(2px); }
+  }
+}
+
+.folder-icon-wrap {
+  width: 42px; height: 42px; flex-shrink: 0; border-radius: 10px;
+  background: rgba(245,185,74,.12);
+  display: flex; align-items: center; justify-content: center;
+  i { font-size: 24px; color: $warn; }
+}
+
+.folder-info { flex: 1; min-width: 0; }
+.folder-name { font-size: 13.5px; font-weight: 700; color: $text; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .folder-count { font-size: 11px; color: $text-faint; font-family: $font-mono; }
 
+.folder-enter-hint {
+  font-size: 18px; color: $text-faint; flex-shrink: 0;
+  opacity: 0; transition: all 0.2s;
+}
+
 .folder-delete-btn {
-  width: 28px; height: 28px; border: none; background: transparent;
-  border-radius: 6px; cursor: pointer; color: $text-faint; font-size: 16px;
+  position: absolute; top: 8px; right: 8px;
+  width: 26px; height: 26px; border: none; background: $panel;
+  border-radius: 50%; cursor: pointer; color: $text-faint; font-size: 15px;
   display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-  &:hover { background: rgba(239,68,68,.1); color: $danger; }
+  opacity: 0; pointer-events: none;
+  &:hover { background: $danger; color: white; }
 }
 
 // ── Filter chips ───────────────────────────────────────────────────────────
@@ -318,6 +382,13 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   padding: 12px 16px; border-bottom: 1px solid $line; transition: background 0.15s;
   &:last-child { border-bottom: none; }
   &:hover { background: $panel-2; }
+  &.selected { background: rgba(74,214,196,.06); }
+}
+
+.file-select {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 18px; height: 18px; cursor: pointer;
+  input[type="checkbox"] { width: 16px; height: 16px; accent-color: $accent; cursor: pointer; margin: 0; }
 }
 
 .file-icon-box {
@@ -346,7 +417,43 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   cursor: pointer; transition: all 0.2s; font-family: $font-sans;
   &.view-btn:hover     { border-color: $accent;  color: $accent;  background: rgba(74,214,196,.06); }
   &.download-btn:hover { border-color: #3b82f6;  color: #3b82f6;  background: rgba(59,130,246,.06); }
+  &.move-btn:hover     { border-color: $warn;    color: $warn;    background: rgba(245,185,74,.08); }
   &.delete-btn:hover   { border-color: $danger;  color: $danger;  background: rgba(239,68,68,.06); }
+}
+
+// ── Bulk selection ─────────────────────────────────────────────────────────
+.files-list-header {
+  display: flex; align-items: center; padding: 4px 4px 10px;
+}
+
+.select-all-checkbox {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 12px; font-weight: 600; color: $text-dim;
+  input[type="checkbox"] { width: 16px; height: 16px; accent-color: $accent; cursor: pointer; margin: 0; }
+}
+
+.bulk-actions-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 16px; margin-bottom: 12px;
+  background: rgba(74,214,196,.08); border: 1px solid rgba(74,214,196,.25); border-radius: $radius;
+}
+
+.bulk-info {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: $accent;
+  i { font-size: 18px; }
+}
+
+.bulk-actions { display: flex; align-items: center; gap: 8px; }
+
+.bulk-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: $font-sans;
+  i { font-size: 15px; }
+  &.move-btn  { background: $panel; border: 1px solid $line; color: $text-dim; &:hover { border-color: $warn; color: $warn; background: rgba(245,185,74,.08); } }
+  &.delete-btn { background: $danger; border: 1px solid $danger; color: white; &:hover { background: #dc2626; } }
+  &.clear-btn { background: transparent; border: 1px solid $line; color: $text-faint; &:hover { border-color: $line-2; color: $text-dim; } }
 }
 
 .no-files {
@@ -355,36 +462,125 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   p { font-size: 14px; color: $text-dim; margin: 0; }
 }
 
+// ── Loading / empty states ────────────────────────────────────────────────
+.loading-state, .empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center;
+  i { font-size: 44px; color: $text-faint; margin-bottom: 12px; }
+  p { font-size: 14px; font-weight: 600; color: $text-dim; margin: 0 0 4px; }
+  span { font-size: 12px; color: $text-faint; }
+}
+
+.spinner {
+  width: 36px; height: 36px; border: 3px solid $line; border-top-color: $accent;
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 // ── Preview dialog ─────────────────────────────────────────────────────────
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
-  z-index: 2000; animation: fadeIn 0.15s ease;
+  position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(2px);
+  z-index: 2000; animation: fadeIn 0.18s ease-out; will-change: opacity;
 }
 
 .preview-dialog {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
   background: $panel; border: 1px solid $line; border-radius: 14px;
-  width: 90vw; max-width: 900px; max-height: 90vh;
+  width: 94vw; max-width: 1200px; height: 88vh; max-height: 88vh;
   display: flex; flex-direction: column;
   box-shadow: 0 24px 60px rgba(0,0,0,.6); z-index: 2001; overflow: hidden;
-  animation: slideUp 0.2s ease;
+  animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .preview-header {
   display: flex; align-items: center; gap: 12px;
   padding: 16px 20px; border-bottom: 1px solid $line; flex-shrink: 0;
-  .file-icon { font-size: 24px; color: $accent; }
-  .file-name-h { font-size: 14px; font-weight: 600; color: $text; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .file-size-h { font-size: 12px; color: $text-faint; font-family: $font-mono; flex-shrink: 0; }
 }
 
-.preview-download-btn, .preview-close-btn {
-  padding: 7px 14px; border-radius: $radius; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-}
-.preview-download-btn { background: $accent; border: none; color: $bg; &:hover { filter: brightness(1.08); } }
-.preview-close-btn    { background: transparent; border: 1px solid $line; color: $text-dim; &:hover { border-color: $danger; color: $danger; } }
+.preview-file-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
-.preview-body { flex: 1; overflow: auto; padding: 16px; display: flex; align-items: center; justify-content: center; min-height: 300px; }
+.preview-file-icon {
+  width: 40px; height: 40px; border-radius: $radius; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  i { font-size: 20px; }
+}
+
+.preview-file-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.preview-file-name { font-size: 14px; font-weight: 600; color: $text; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-file-size { font-size: 12px; color: $text-faint; font-family: $font-mono; }
+
+.preview-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.preview-download-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: $radius; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  background: $accent; border: none; color: $bg;
+  i { font-size: 15px; }
+  &:hover { filter: brightness(1.08); }
+  &.large { padding: 10px 22px; font-size: 13px; margin-top: 4px; }
+}
+
+.preview-close-btn {
+  width: 36px; height: 36px; padding: 0; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 18px; cursor: pointer; transition: all 0.2s;
+  background: transparent; border: 1px solid $line; color: $text-dim;
+  &:hover { border-color: $danger; color: $danger; background: rgba(239,68,68,.08); }
+}
+
+.preview-body { flex: 1; overflow: auto; padding: 16px; display: flex; align-items: center; justify-content: center; min-height: 0; }
+
+.preview-loading {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  p { font-size: 13px; color: $text-dim; margin: 0; }
+}
+
+.preview-image-wrap { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.preview-image { max-width: 100%; max-height: 100%; border-radius: 8px; object-fit: contain; }
+
+.preview-iframe { width: 100%; height: 100%; border: none; border-radius: 8px; background: white; }
+
+.preview-csv-wrap { width: 100%; height: 100%; overflow: auto; align-self: flex-start; }
+.csv-scroll { width: 100%; overflow: auto; }
+.csv-table {
+  width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap;
+  th, td { padding: 8px 12px; border: 1px solid $line; text-align: left; }
+  thead th { background: $panel-2; color: $text; font-weight: 700; position: sticky; top: 0; }
+  tbody td { color: $text-dim; }
+  tbody tr:hover { background: $panel-2; }
+}
+.csv-limit-note { font-size: 11px; color: $text-faint; margin: 8px 0 0; text-align: center; font-family: $font-mono; }
+
+.preview-office-wrap {
+  width: 100%; height: 100%; overflow: auto; align-self: flex-start;
+  background: white; border-radius: 8px; padding: 24px;
+}
+.preview-office-body {
+  color: #1a1a1a; font-size: 14px; line-height: 1.6;
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #ddd; padding: 6px 10px; }
+  img { max-width: 100%; }
+}
+
+.preview-text-wrap { width: 100%; height: 100%; overflow: auto; align-self: flex-start; }
+.preview-text {
+  margin: 0; padding: 16px; background: $bg-2; border-radius: 8px; border: 1px solid $line;
+  font-family: $font-mono; font-size: 12px; color: $text-dim;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+.preview-unsupported {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 40px 20px;
+}
+.unsupported-icon {
+  width: 64px; height: 64px; border-radius: 16px; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center;
+  i { font-size: 32px; }
+}
+.unsupported-title { font-size: 15px; font-weight: 700; color: $text; margin: 0; }
+.unsupported-sub { font-size: 13px; color: $text-dim; margin: 0 0 12px; }
 
 // ── Modals ─────────────────────────────────────────────────────────────────
 .modal-overlay {
@@ -394,10 +590,12 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 .modal-dialog {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
   background: $panel; border: 1px solid $line; border-radius: 14px;
-  width: 90%; max-width: 420px;
+  width: 90vw; max-width: 420px;
   box-shadow: 0 24px 60px rgba(0,0,0,.5); overflow: hidden; pointer-events: auto;
-  animation: slideUp 0.2s ease;
+  z-index: 3001; animation: modalPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
 .modal-content { pointer-events: auto; }
@@ -405,13 +603,31 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 .modal-header {
   padding: 20px 24px; border-bottom: 1px solid $line;
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  i { font-size: 26px; color: $danger; }
   h3 { font-size: 17px; font-weight: 700; color: $text; margin: 0; }
+}
+
+.modal-icon-wrap {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(74,214,196,.12); color: $accent;
+  i { font-size: 24px; color: inherit; }
+  &.delete-icon { background: rgba(239,68,68,.12); color: $danger; }
 }
 
 .modal-body {
   padding: 20px 24px;
   p { font-size: 14px; color: $text-dim; margin: 0; text-align: center; }
+}
+
+.file-name-highlight {
+  display: block; text-align: center; font-size: 14px; font-weight: 700; color: $text;
+  margin: 8px 0; word-break: break-word;
+}
+
+.modal-warning {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 10px !important; font-size: 12px !important; color: $warn !important;
+  i { font-size: 15px; flex-shrink: 0; }
 }
 
 .modal-footer {
@@ -420,11 +636,33 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 .new-folder-form { display: flex; flex-direction: column; gap: 12px; }
 .folder-name-input {
-  height: 40px; padding: 0 14px; border: 1px solid $line; border-radius: $radius;
+  width: 100%; height: 40px; padding: 0 14px; border: 1px solid $line; border-radius: $radius;
   background: $bg-2; color: $text; font-size: 13px; font-family: $font-sans;
   &:focus { outline: none; border-color: $accent; }
   &::placeholder { color: $text-faint; }
 }
+.folder-name-error { font-size: 12px; color: $danger; margin: 8px 0 0; text-align: center; }
+
+// ── Move to folder modal ──────────────────────────────────────────────────
+.modal-dialog.move-modal { max-width: 440px; }
+
+.move-modal-hint { font-size: 12px !important; color: $text-faint !important; margin: 0 0 12px !important; }
+
+.move-folder-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 280px; overflow-y: auto;
+}
+
+.move-folder-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border: 1px solid $line; background: $bg-2; border-radius: $radius;
+  font-size: 13px; font-weight: 500; color: $text; text-align: left;
+  cursor: pointer; transition: all 0.2s; font-family: $font-sans;
+  i { font-size: 18px; color: $warn; flex-shrink: 0; }
+  &:hover { border-color: $accent; background: rgba(74,214,196,.06); color: $accent; i { color: $accent; } }
+}
+
+.move-no-folders { font-size: 12px !important; color: $text-faint !important; text-align: center !important; margin: 8px 0 0 !important; }
 
 .btn-cancel {
   padding: 9px 20px; border: 1px solid $line; background: transparent;
@@ -433,18 +671,26 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   &:hover { border-color: $line-2; color: $text; }
 }
 
-.btn-confirm {
+.btn-delete, .btn-create-folder {
+  display: flex; align-items: center; gap: 6px;
   padding: 9px 22px; border: none; border-radius: $radius;
   font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  &.primary { background: $accent; color: $bg; &:hover { filter: brightness(1.08); } }
-  &.danger   { background: $danger; color: white; &:hover { background: #dc2626; } }
+  i { font-size: 16px; }
 }
+.btn-delete { background: $danger; color: white; &:hover { background: #dc2626; } }
+.btn-create-folder { background: $accent; color: $bg; &:hover { filter: brightness(1.08); } }
 
 // ── Animations ─────────────────────────────────────────────────────────────
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+// Note: dialogs are centered via `transform: translate(-50%,-50%)` on a static
+// position:fixed rule. A keyframe that only animates translateY (like the old
+// `slideUp`) replaces that whole transform for the animation's duration, so the
+// dialog renders off-center and then jumps into place the instant the animation
+// ends — that jump-cut is what read as "laggy". Keeping the centering offset in
+// every keyframe avoids it.
+@keyframes modalPopIn {
+  from { opacity: 0; transform: translate(-50%, -50%) translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
@@ -489,28 +735,83 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .badge-status { background: rgba(100,116,139,.1); color: #64748b; &.active { background: rgba(26,143,127,.1); color: #1a8f7f; } }
   .back-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
   .new-folder-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
-  .bc-item.bc-folder { color: #3d5a6e; }
+  .path-bar { background: #f8fafc; border-color: #c5d8e6; }
+  .bc-item.bc-project:hover { background: rgba(13,33,55,.06); }
+  .bc-item.bc-folder {
+    color: #3d5a6e;
+    &:hover:not(:disabled) { background: rgba(13,33,55,.06); color: #0d2137; }
+    &.bc-current, &:disabled { color: #0d2137; background: rgba(13,33,55,.05); &:hover { background: rgba(13,33,55,.05); } }
+  }
   .upload-zone { background: #f8fafc; border-color: #c5d8e6; &:hover, &.drag-over { border-color: #1a8f7f; background: rgba(26,143,127,.03); } }
   .upload-title { color: #0d2137; span { color: #1a8f7f; } }
   .upload-sub { color: #64748b; }
   .upload-icon-wrap { background: rgba(26,143,127,.08); border-color: rgba(26,143,127,.2); i { color: #1a8f7f; } }
-  .folder-card { background: white; border-color: #c5d8e6; }
+  .block-label { color: #94a3b8; i { color: #94a3b8; } }
+  .block-label-count { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; }
+  .folder-card {
+    background: white; border-color: #c5d8e6;
+    &:hover { border-color: #ca8a04; background: #fffdf5; box-shadow: 0 8px 20px rgba(0,0,0,.06); }
+  }
+  .folder-icon-wrap { background: rgba(202,138,4,.1); i { color: #ca8a04; } }
   .folder-name { color: #0d2137; }
   .folder-count { color: #64748b; }
+  .folder-enter-hint { color: #94a3b8; }
+  .folder-delete-btn { background: #f1f5f9; color: #94a3b8; &:hover { background: #ef4444; color: white; } }
   .filter-chip { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &.active { background: rgba(26,143,127,.1); border-color: #1a8f7f; color: #1a8f7f; .chip-count { color: #1a8f7f; } } }
   .files-list { background: white; border-color: #c5d8e6; }
-  .file-row { border-bottom-color: #e8f1f5; &:hover { background: #f0f7fb; } }
+  .file-row { border-bottom-color: #e8f1f5; &:hover { background: #f0f7fb; } &.selected { background: rgba(26,143,127,.06); } }
   .file-name { color: #0d2137; }
   .file-type-badge { background: #f1f5f9; border-color: #c5d8e6; color: #64748b; }
   .file-meta-item { color: #64748b; }
-  .action-btn { border-color: #c5d8e6; color: #3d5a6e; &.view-btn:hover { border-color: #1a8f7f; color: #1a8f7f; background: rgba(26,143,127,.05); } }
+  .action-btn { border-color: #c5d8e6; color: #3d5a6e; &.view-btn:hover { border-color: #1a8f7f; color: #1a8f7f; background: rgba(26,143,127,.05); } &.move-btn:hover { border-color: #ca8a04; color: #ca8a04; background: rgba(202,138,4,.08); } }
+
+  // ── Bulk selection ──
+  .select-all-checkbox { color: #3d5a6e; }
+  .bulk-actions-bar { background: rgba(26,143,127,.06); border-color: rgba(26,143,127,.2); }
+  .bulk-info { color: #1a8f7f; }
+  .bulk-btn {
+    &.move-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #ca8a04; color: #ca8a04; background: rgba(202,138,4,.08); } }
+    &.clear-btn { border-color: #c5d8e6; color: #94a3b8; &:hover { border-color: #94a3b8; color: #3d5a6e; } }
+  }
+
+  // ── Loading / empty states ──
+  .loading-state, .empty-state { i { color: #94a3b8; } p { color: #3d5a6e; } span { color: #64748b; } }
+  .spinner { border-color: #e2e8f0; border-top-color: #1a8f7f; }
+
+  // ── Preview dialog ──
   .preview-dialog { background: white; border-color: #c5d8e6; }
-  .preview-header { border-bottom-color: #c5d8e6; .file-name-h { color: #0d2137; } .file-size-h { color: #64748b; } }
+  .preview-header { border-bottom-color: #c5d8e6; }
+  .preview-file-name { color: #0d2137; }
+  .preview-file-size { color: #64748b; }
   .preview-close-btn { border-color: #c5d8e6; color: #3d5a6e; }
+  .preview-loading p { color: #3d5a6e; }
+  .csv-table {
+    th, td { border-color: #e2e8f0; }
+    thead th { background: #f1f5f9; color: #0d2137; }
+    tbody td { color: #3d5a6e; }
+    tbody tr:hover { background: #f8fafc; }
+  }
+  .csv-limit-note { color: #94a3b8; }
+  .preview-text { background: #f8fafc; border-color: #e2e8f0; color: #3d5a6e; }
+  .unsupported-title { color: #0d2137; }
+  .unsupported-sub { color: #3d5a6e; }
+
+  // ── Modals ──
   .modal-dialog { background: white; border-color: #c5d8e6; }
   .modal-header { border-bottom-color: #c5d8e6; h3 { color: #0d2137; } }
+  .modal-icon-wrap { background: rgba(26,143,127,.1); color: #1a8f7f; &.delete-icon { background: rgba(239,68,68,.1); color: #ef4444; } }
   .modal-body p { color: #3d5a6e; }
+  .file-name-highlight { color: #0d2137; }
   .modal-footer { background: #f8fafc; }
+  .folder-name-input { background: #f8fafc; border-color: #c5d8e6; color: #0d2137; &::placeholder { color: #94a3b8; } }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; } }
-  .folder-name-input { background: #f8fafc; border-color: #c5d8e6; color: #0d2137; }
+
+  // ── Move to folder modal ──
+  .move-modal-hint { color: #94a3b8 !important; }
+  .move-folder-option {
+    background: #f8fafc; border-color: #c5d8e6; color: #0d2137;
+    i { color: #ca8a04; }
+    &:hover { border-color: #1a8f7f; background: rgba(26,143,127,.06); color: #1a8f7f; i { color: #1a8f7f; } }
+  }
+  .move-no-folders { color: #94a3b8 !important; }
 }

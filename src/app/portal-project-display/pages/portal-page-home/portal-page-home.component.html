@@ -34,13 +34,16 @@
   </div>
 
   <section class="body">
-    <div class="logo-strip">
-        <img *ngFor="let logo of project.content.home.partnerLogos; let i = index"
-             [src]="logo.url"
-             loading="lazy"
-             decoding="async"
-             class="logo"
-             [class.logo--primary]="i === 0">
+    <div class="logo-strip" [class.static]="!isLogoMarqueeActive">
+        <div class="logo-track" [class.static]="!isLogoMarqueeActive">
+          <div class="logo-item"
+               *ngFor="let logo of loopedPartnerLogos">
+            <img [src]="logo.url"
+                 loading="lazy"
+                 decoding="async"
+                 class="logo">
+          </div>
+        </div>
     </div>
 
     <!-- Background Ocean Video is hardcoded in original body, preserving that aesthetic or using dynamic video -->

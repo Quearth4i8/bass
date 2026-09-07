@@ -23,7 +23,11 @@ export class PortalProjectsListComponent implements OnInit {
   projectSlug: string = '';
   projectName = '';
   activeTab: string = 'home';
-  
+
+  private mediaFolder(category: string): string {
+    return `${this.projectName}/${category}`;
+  }
+
   homeImages: any[] = [
     { id: 1, url: '', title: '', subtitle: '', order: 1, expanded: true }
   ];
@@ -45,9 +49,7 @@ export class PortalProjectsListComponent implements OnInit {
 
   homeProjectId = '';
 
-  homeInfoBlocks: any[] = [
-    { id: 1, imageUrl: '', title: '', text: '', order: 1 }
-  ];
+  homeInfoBlocks: any[] = [];
 
   scientificMeritParagraphs: any[] = [
     { id: 1, content: '', order: 1 }
@@ -74,10 +76,14 @@ export class PortalProjectsListComponent implements OnInit {
   ];
 
   galleryImages: any[] = [];
+  galleryImagesPerPage = 30;
+  galleryCurrentPage = 1;
+  selectedGalleryIndices = new Set<number>();
 
   galleryViewerOpen = false;
   galleryViewerIndex = 0;
   galleryZoom = 1;
+  Math = Math;
 
   teamSections: any[] = [
     {
@@ -241,30 +247,39 @@ export class PortalProjectsListComponent implements OnInit {
 
   onImageSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.homeImages[index].url = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('carousel')).subscribe({
+      next: (url) => {
+        this.homeImages[index].url = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload image. Check file size and try again.'
+        });
+      }
+    });
   }
 
   onLogoSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.homePartnerLogos[index].url = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('logos')).subscribe({
+      next: (url) => {
+        this.homePartnerLogos[index].url = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload logo. Check file size and try again.'
+        });
+      }
+    });
   }
 
   addLogo(): void {
-    if (this.homePartnerLogos.length >= 10) {
-      return;
-    }
     const newId = this.homePartnerLogos.length > 0
       ? Math.max(...this.homePartnerLogos.map(l => l.id)) + 1
       : 1;
@@ -297,7 +312,7 @@ export class PortalProjectsListComponent implements OnInit {
     if (!file) return;
     this.uploadingHomeVideo = true;
     this.homeVideoFile.name = file.name;
-    this.portalMediaService.uploadFile(file).subscribe({
+    this.portalMediaService.uploadFile(file, this.mediaFolder('videos')).subscribe({
       next: (url) => {
         this.homeVideoFile.url = url;
         this.uploadingHomeVideo = false;
@@ -319,13 +334,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onInfoImageSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.homeInfoBlocks[index].imageUrl = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('info')).subscribe({
+      next: (url) => {
+        this.homeInfoBlocks[index].imageUrl = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload image. Check file size and try again.'
+        });
+      }
+    });
   }
 
   addInfoBlock(): void {
@@ -342,9 +363,6 @@ export class PortalProjectsListComponent implements OnInit {
   }
 
   removeInfoBlock(index: number): void {
-    if (this.homeInfoBlocks.length <= 1) {
-      return;
-    }
     this.homeInfoBlocks.splice(index, 1);
     this.updateInfoBlockOrder();
   }
@@ -627,13 +645,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onPartnersLogoSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.partnersLogos[index].url = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('logos')).subscribe({
+      next: (url) => {
+        this.partnersLogos[index].url = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload logo. Check file size and try again.'
+        });
+      }
+    });
   }
 
   addPartnersLogo(): void {
@@ -667,11 +691,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onAssociatePartnersLogoSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => { this.associatePartnersLogos[index].url = e.target.result; };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('logos')).subscribe({
+      next: (url) => {
+        this.associatePartnersLogos[index].url = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload logo. Check file size and try again.'
+        });
+      }
+    });
   }
 
   addAssociatePartnersLogo(): void {
@@ -734,13 +766,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onFunderLogoSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.funderLogos[index].url = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('logos')).subscribe({
+      next: (url) => {
+        this.funderLogos[index].url = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload logo. Check file size and try again.'
+        });
+      }
+    });
   }
 
   addFunderLogo(): void {
@@ -782,27 +820,240 @@ export class PortalProjectsListComponent implements OnInit {
       return;
     }
 
+    if (!this.projectName) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Project name not loaded. Please refresh the page.'
+      });
+      return;
+    }
+
     Array.from(files).forEach((file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const newId = this.galleryImages.length > 0
-          ? Math.max(...this.galleryImages.map(img => img.id)) + 1
-          : 1;
-        this.galleryImages.push({
-          id: newId,
-          url: e.target.result,
-          name: file.name
-        });
-      };
-      reader.readAsDataURL(file);
+      console.log('Uploading file:', file.name, 'to project:', this.projectName);
+      this.portalMediaService.uploadFile(file, this.mediaFolder('gallery')).subscribe({
+        next: (url) => {
+          const newId = this.galleryImages.length > 0
+            ? Math.max(...this.galleryImages.map(img => img.id)) + 1
+            : 1;
+          this.galleryImages.push({
+            id: newId,
+            url: url,
+            name: file.name
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Upload failed',
+            detail: `Failed to upload ${file.name}. Check file size and try again.`
+          });
+        }
+      });
     });
 
     // allow selecting the same file again
     event.target.value = '';
   }
 
+  // Delete-confirmation modal state — shared by the single-image trash button
+  // and the bulk "Delete Selected" button.
+  deleteConfirmOpen = false;
+  deleteConfirmMode: 'single' | 'bulk' | null = null;
+  deleteConfirmIndex: number | null = null;
+
+  get deleteConfirmCount(): number {
+    return this.deleteConfirmMode === 'bulk' ? this.selectedGalleryIndices.size : 1;
+  }
+
   removeGalleryImage(index: number): void {
-    this.galleryImages.splice(index, 1);
+    if (!this.galleryImages[index]) return;
+    this.deleteConfirmMode = 'single';
+    this.deleteConfirmIndex = index;
+    this.deleteConfirmOpen = true;
+  }
+
+  cancelDeleteGalleryImages(): void {
+    this.deleteConfirmOpen = false;
+    this.deleteConfirmMode = null;
+    this.deleteConfirmIndex = null;
+  }
+
+  confirmDeleteGalleryImages(): void {
+    if (this.deleteConfirmMode === 'single' && this.deleteConfirmIndex !== null) {
+      this.performRemoveGalleryImage(this.deleteConfirmIndex);
+    } else if (this.deleteConfirmMode === 'bulk') {
+      this.performDeleteSelectedGalleryImages();
+    }
+    this.deleteConfirmOpen = false;
+    this.deleteConfirmMode = null;
+    this.deleteConfirmIndex = null;
+  }
+
+  private performRemoveGalleryImage(index: number): void {
+    const image = this.galleryImages[index];
+    if (!image) return;
+
+    // Extract filename from URL (handle both formats: uuid.jpg or project-name/uuid.jpg)
+    const urlParts = image.url.split('/');
+    const filename = urlParts[urlParts.length - 1];
+
+    // Delete from backend first
+    if (filename && this.projectName) {
+      this.portalMediaService.deleteFile(this.mediaFolder('gallery'), filename).subscribe({
+        next: () => {
+          // Remove from frontend array after successful backend delete
+          this.galleryImages.splice(index, 1);
+          if (this.galleryCurrentPage > this.galleryTotalPages && this.galleryTotalPages > 0) {
+            this.galleryCurrentPage = this.galleryTotalPages;
+          }
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Image deleted successfully'
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete image'
+          });
+        }
+      });
+    } else {
+      // Fallback: just remove from array if no filename
+      this.galleryImages.splice(index, 1);
+    }
+  }
+
+  isGalleryImageSelected(index: number): boolean {
+    return this.selectedGalleryIndices.has(index);
+  }
+
+  toggleGalleryImageSelection(index: number): void {
+    if (this.selectedGalleryIndices.has(index)) {
+      this.selectedGalleryIndices.delete(index);
+    } else {
+      this.selectedGalleryIndices.add(index);
+    }
+  }
+
+  get allGalleryImagesSelected(): boolean {
+    return this.galleryImages.length > 0 && this.selectedGalleryIndices.size === this.galleryImages.length;
+  }
+
+  toggleSelectAllGalleryImages(): void {
+    if (this.allGalleryImagesSelected) {
+      this.selectedGalleryIndices.clear();
+    } else {
+      this.selectedGalleryIndices = new Set(this.galleryImages.map((_, i) => i));
+    }
+  }
+
+  deleteSelectedGalleryImages(): void {
+    if (this.selectedGalleryIndices.size === 0) return;
+    this.deleteConfirmMode = 'bulk';
+    this.deleteConfirmIndex = null;
+    this.deleteConfirmOpen = true;
+  }
+
+  private performDeleteSelectedGalleryImages(): void {
+    // Highest index first — removing an item shifts every index after it, so
+    // working back-to-front keeps the not-yet-processed indices valid.
+    const indices = Array.from(this.selectedGalleryIndices).sort((a, b) => b - a);
+    this.deleteGalleryImagesSequentially(indices, 0);
+  }
+
+  private deleteGalleryImagesSequentially(indices: number[], failed: number): void {
+    if (indices.length === 0) {
+      this.selectedGalleryIndices.clear();
+      if (this.galleryCurrentPage > this.galleryTotalPages && this.galleryTotalPages > 0) {
+        this.galleryCurrentPage = this.galleryTotalPages;
+      }
+      if (failed > 0) {
+        this.messageService.add({ severity: 'warn', summary: 'Partially deleted', detail: `${failed} image${failed > 1 ? 's' : ''} could not be deleted` });
+      } else {
+        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Selected images removed' });
+      }
+      return;
+    }
+
+    const index = indices.shift()!;
+    const image = this.galleryImages[index];
+    if (!image) {
+      this.deleteGalleryImagesSequentially(indices, failed);
+      return;
+    }
+
+    const urlParts = image.url.split('/');
+    const filename = urlParts[urlParts.length - 1];
+    if (!filename || !this.projectName) {
+      this.galleryImages.splice(index, 1);
+      this.deleteGalleryImagesSequentially(indices, failed);
+      return;
+    }
+
+    this.portalMediaService.deleteFile(this.mediaFolder('gallery'), filename).subscribe({
+      next: () => {
+        this.galleryImages.splice(index, 1);
+        this.deleteGalleryImagesSequentially(indices, failed);
+      },
+      error: () => {
+        this.deleteGalleryImagesSequentially(indices, failed + 1);
+      }
+    });
+  }
+
+  onImageError(index: number): void {
+    const image = this.galleryImages[index];
+    if (!image) return;
+
+    console.warn('Image failed to load:', image.url);
+
+    // Extract filename from URL
+    const urlParts = image.url.split('/');
+    const filename = urlParts[urlParts.length - 1];
+
+    // Automatically remove from database if file doesn't exist on disk
+    if (filename && this.projectName) {
+      this.portalMediaService.deleteFile(this.mediaFolder('gallery'), filename).subscribe({
+        next: () => {
+          this.galleryImages.splice(index, 1);
+          if (this.galleryCurrentPage > this.galleryTotalPages && this.galleryTotalPages > 0) {
+            this.galleryCurrentPage = this.galleryTotalPages;
+          }
+        },
+        error: () => {
+          // Even if delete fails, remove from UI since file doesn't exist
+          this.galleryImages.splice(index, 1);
+        }
+      });
+    }
+  }
+
+  get paginatedGalleryImages(): any[] {
+    const start = (this.galleryCurrentPage - 1) * this.galleryImagesPerPage;
+    const end = start + this.galleryImagesPerPage;
+    return this.galleryImages.slice(start, end);
+  }
+
+  get galleryTotalPages(): number {
+    return Math.ceil(this.galleryImages.length / this.galleryImagesPerPage);
+  }
+
+  galleryGoToPage(page: number): void {
+    if (page >= 1 && page <= this.galleryTotalPages) {
+      this.galleryCurrentPage = page;
+    }
+  }
+
+  galleryNextPage(): void {
+    this.galleryGoToPage(this.galleryCurrentPage + 1);
+  }
+
+  galleryPrevPage(): void {
+    this.galleryGoToPage(this.galleryCurrentPage - 1);
   }
 
   openGalleryViewer(index: number): void {
@@ -860,11 +1111,30 @@ export class PortalProjectsListComponent implements OnInit {
     this.saveAll();
   }
 
+  eventSearchTerm: string = '';
+  filteredEvents: { ev: any; i: number }[] = this.events.map((ev, i) => ({ ev, i }));
+
+  onEventSearchChange(term: string): void {
+    this.eventSearchTerm = term;
+    this.updateFilteredEvents();
+  }
+
+  updateFilteredEvents(): void {
+    const term = this.eventSearchTerm.trim().toLowerCase();
+    const indexed = this.events.map((ev, i) => ({ ev, i }));
+    this.filteredEvents = !term ? indexed : indexed.filter(({ ev }) =>
+      (ev.title || '').toLowerCase().includes(term) ||
+      (ev.organiser || '').toLowerCase().includes(term) ||
+      (ev.location || '').toLowerCase().includes(term) ||
+      (ev.speaker || '').toLowerCase().includes(term)
+    );
+  }
+
   addEvent(): void {
     const newId = this.events.length > 0
       ? Math.max(...this.events.map(e => e.id)) + 1
       : 1;
-    this.events.push({
+    this.events.unshift({
       id: newId,
       title: '',
       organiser: '',
@@ -876,10 +1146,12 @@ export class PortalProjectsListComponent implements OnInit {
       participants: '',
       status: 'ongoing'
     });
+    this.updateFilteredEvents();
   }
 
   removeEvent(index: number): void {
     this.events.splice(index, 1);
+    this.updateFilteredEvents();
   }
 
   moveEvent(index: number, direction: 'up' | 'down'): void {
@@ -888,6 +1160,7 @@ export class PortalProjectsListComponent implements OnInit {
     } else if (direction === 'down' && index < this.events.length - 1) {
       [this.events[index], this.events[index + 1]] = [this.events[index + 1], this.events[index]];
     }
+    this.updateFilteredEvents();
   }
 
   getEventDay(dateStr: string): string {
@@ -1154,13 +1427,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onTeamMemberImageSelected(event: any, sectionIndex: number, memberIndex: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.teamSections[sectionIndex].members[memberIndex].image = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('team')).subscribe({
+      next: (url) => {
+        this.teamSections[sectionIndex].members[memberIndex].image = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload image. Check file size and try again.'
+        });
+      }
+    });
   }
 
   saveTeam(): void {
@@ -1200,13 +1479,19 @@ export class PortalProjectsListComponent implements OnInit {
 
   onParticipantImageSelected(event: any, index: number): void {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.participants[index].image = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    this.portalMediaService.uploadFile(file, this.mediaFolder('participants')).subscribe({
+      next: (url) => {
+        this.participants[index].image = url;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Upload failed',
+          detail: 'Could not upload image. Check file size and try again.'
+        });
+      }
+    });
   }
 
   saveParticipants(): void {
@@ -1294,7 +1579,7 @@ export class PortalProjectsListComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     this.uploadingOutputVideo = index;
-    this.portalMediaService.uploadFile(file).subscribe({
+    this.portalMediaService.uploadFile(file, this.mediaFolder('videos')).subscribe({
       next: (url) => {
         this.outputs[index].videoUrl = url;
         this.uploadingOutputVideo = -1;
@@ -1317,7 +1602,7 @@ export class PortalProjectsListComponent implements OnInit {
     this.homeProjectId = content.home.projectId ?? '';
     this.homeGeoSections = content.home.geoSections?.length ? content.home.geoSections : this.homeGeoSections;
     this.homeVideoFile = content.home.video || this.homeVideoFile;
-    this.homeInfoBlocks = content.home.infoBlocks?.length ? content.home.infoBlocks : this.homeInfoBlocks;
+    this.homeInfoBlocks = content.home.infoBlocks || [];
 
     this.scientificMeritParagraphs = content.scientificMerit.paragraphs?.length ? content.scientificMerit.paragraphs : this.scientificMeritParagraphs;
     this.objectivesParagraphs = content.objectives.paragraphs?.length ? content.objectives.paragraphs : this.objectivesParagraphs;
@@ -1329,6 +1614,7 @@ export class PortalProjectsListComponent implements OnInit {
 
     this.galleryImages = content.gallery.images || [];
     this.events = content.events.events || [];
+    this.updateFilteredEvents();
     this.teamSections = content.team.sections || [];
     this.participants = content.participants.participants || [];
     this.outputs = content.outputs?.outputs || [];

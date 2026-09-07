@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PortalProjectContextService } from '../../../portal/services/portal-project-context.service';
-import { PortalProject } from '../../../portal/models/portal-project.model';
+import { PortalProject, PortalPartnerLogo } from '../../../portal/models/portal-project.model';
 
 @Component({
   selector: 'app-portal-page-home',
@@ -115,5 +115,21 @@ export class PortalPageHomeComponent implements OnInit, OnDestroy, AfterViewInit
   setSlide(i: number): void {
     this.activeSlide = i;
     this.startCarousel();
+  }
+
+  // Marquee only makes sense once there are enough logos to actually need scrolling —
+  // below that, translateX(0 -> -50%) on a 2-item track just makes the single/handful
+  // of logos visibly snap back on every loop instead of scrolling smoothly.
+  private static readonly MARQUEE_MIN_LOGOS = 5;
+
+  get isLogoMarqueeActive(): boolean {
+    return (this.project?.content.home.partnerLogos?.length ?? 0) >= PortalPageHomeComponent.MARQUEE_MIN_LOGOS;
+  }
+
+  // Duplicated once so the marquee track can scroll from 0 to -50% and loop seamlessly.
+  // Left as-is (no duplication) when the marquee is inactive, so the logos just render once.
+  get loopedPartnerLogos(): PortalPartnerLogo[] {
+    const logos = this.project?.content.home.partnerLogos ?? [];
+    return this.isLogoMarqueeActive ? [...logos, ...logos] : logos;
   }
 }
