@@ -116,27 +116,57 @@
 }
 
 :host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  display: block;
+  height: 100vh;
+  overflow: hidden;
   background: #f4f7fb;
+
+  /* Overwritten at runtime with the nav's measured height (see component). */
+  --portal-nav-h: 56px;
 }
 
-.portal-root {
+/* Shell = viewport box. Nothing here scrolls; the nav and the up-button are both
+   fixed, and the scroll container is pinned under the nav. */
+.portal-shell {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The one and only scroller for portal pages. It is pinned rather than laid out
+   in flow so that its top edge is exactly the nav's bottom edge - in flow, any
+   sibling that renders a stray line box would push it down and open a gap.
+   Its scrollbar therefore starts under the header, and because it always
+   reserves its gutter the usable width never changes between a page that
+   overflows and one that doesn't. */
+.portal-scroll {
+  position: fixed;
+  top: var(--portal-nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 100vh;
+  overflow-y: scroll; /* fallback for browsers without scrollbar-gutter */
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
+@supports (scrollbar-gutter: stable) {
+  .portal-scroll {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* `1 0 auto` keeps the footer at the bottom on pages too short to fill the
+   container, without capping how tall the content may grow. */
 .portal-content {
-  flex: 1;
-  padding-top: 56px;
+  flex: 1 0 auto;
 }
 
 /* Not Found */
 .not-found-container {
-  min-height: calc(100vh - 160px);
+  min-height: calc(100vh - var(--portal-nav-h) - 160px);
   display: flex;
   align-items: center;
   justify-content: center;

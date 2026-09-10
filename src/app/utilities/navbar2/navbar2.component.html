@@ -1,27 +1,56 @@
 <ng-container *ngIf="!forceLegacyNav && portalMode; else legacyNavbar2">
-  <header class="portal-shell-nav sticky">
+  <header
+    #portalHeader
+    class="portal-shell-nav sticky"
+    [class.nav-collapsed]="isNavCollapsed"
+    [class.menu-open]="isPortalMenuOpen"
+  >
     <div class="logo-section">
       <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
       <span class="portal-pid" *ngIf="portalProjectId">{{ portalProjectId }}</span>
     </div>
 
-    <nav class="portal-nav-center" aria-label="Project sections">
-      <ul>
-        <li *ngFor="let link of portalLinks">
-          <a
-            [routerLink]="portalLink(link.path)"
-            routerLinkActive="nav-active"
-            [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
-          >
-            {{ link.label }}
-          </a>
-        </li>
+    <!-- Always rendered, even when collapsed (then it is hidden off-flow), so its
+         natural row width stays measurable and the bar can decide whether the
+         inline row still fits. See syncNavFit(). -->
+    <nav
+      class="portal-nav-center"
+      #navRow
+      aria-label="Project sections"
+      [attr.aria-hidden]="isNavCollapsed ? 'true' : null"
+    >
+      <ul #navRowList>
+        <ng-container *ngTemplateOutlet="navLinkItems"></ng-container>
       </ul>
     </nav>
 
     <div class="portal-nav-actions">
       <app-custom-button></app-custom-button>
+
+      <!-- Always laid out so collapsing never changes the bar's geometry;
+           CSS hides it until the row stops fitting. -->
+      <button
+        type="button"
+        class="portal-nav-toggle"
+        (click)="togglePortalMenu()"
+        [attr.aria-expanded]="isPortalMenuOpen"
+        aria-controls="portal-nav-menu"
+        aria-label="Project sections menu"
+      >
+        <i class="bx" [ngClass]="isPortalMenuOpen ? 'bx-x' : 'bx-menu'"></i>
+      </button>
     </div>
+
+    <nav
+      *ngIf="isNavCollapsed"
+      id="portal-nav-menu"
+      class="portal-nav-drawer"
+      aria-label="Project sections"
+    >
+      <ul>
+        <ng-container *ngTemplateOutlet="navLinkItems"></ng-container>
+      </ul>
+    </nav>
   </header>
 </ng-container>
 
@@ -36,4 +65,17 @@
     </ul>
     <app-custom-button></app-custom-button>
   </header>
+</ng-template>
+
+<ng-template #navLinkItems>
+  <li *ngFor="let link of portalLinks">
+    <a
+      [routerLink]="portalLink(link.path)"
+      routerLinkActive="nav-active"
+      [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
+      (click)="closePortalMenu()"
+    >
+      {{ link.label }}
+    </a>
+  </li>
 </ng-template>

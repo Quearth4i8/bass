@@ -9,10 +9,11 @@ header.portal-shell-nav {
   z-index: 100000;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: minmax(100px, 1fr) minmax(0, 5fr) minmax(140px, 1fr);
+  grid-template-columns: auto minmax(0, 5fr) auto;
   align-items: center;
   column-gap: 12px;
-  padding: 20px 100px;
+  --nav-pad-x: clamp(20px, 5.2vw, 100px);
+  padding: 20px var(--nav-pad-x);
   min-height: 56px;
   background: transparent;
   box-shadow: none;
@@ -20,7 +21,7 @@ header.portal-shell-nav {
 }
 
 header.portal-shell-nav.sticky {
-  padding: 10px 100px;
+  padding: 10px var(--nav-pad-x);
   min-height: 56px;
   background-color: var(--portal-accent, #1a5f7a);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -29,6 +30,13 @@ header.portal-shell-nav.sticky {
 header.portal-shell-nav .logo-section {
   justify-self: start;
   min-width: 0;
+  /* Capped and truncating in *every* state, so a long project title can neither
+     blow the bar out nor change the layout when the nav collapses.
+     Viewport-relative on purpose: a percentage would resolve against this item's
+     own grid area, which is itself sized to the title - so 45% would cut every
+     title to 45% of its own width, however much room the bar actually had. */
+  max-width: min(45vw, 560px);
+  overflow: hidden;
 }
 
 header.portal-shell-nav .logo {
@@ -43,20 +51,27 @@ header.portal-shell-nav .logo {
   white-space: nowrap;
   line-height: 1.2;
   text-transform: none;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .portal-nav-center {
   justify-self: center;
   min-width: 0;
   max-width: 100%;
+  /* Belt and braces: if the row is ever a hair too wide for its cell it clips
+     rather than overlapping the logo and the actions. */
+  overflow: hidden;
 }
 
 .portal-nav-center ul {
   display: flex;
-  flex-wrap: wrap;
+  /* Never wrap: a second line is what made the bar grow to double height. */
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 2px 4px;
+  gap: 0 4px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -93,39 +108,137 @@ header.portal-shell-nav .logo {
   justify-self: end;
   display: flex;
   align-items: center;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-@media (max-width: 1200px) {
-  header.portal-shell-nav,
-  header.portal-shell-nav.sticky {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
-    row-gap: 12px;
-    justify-items: stretch;
-    padding: 14px 20px;
-  }
+.portal-nav-toggle {
+  /* Always laid out (see the collapsed block below); hidden until needed.
+     `visibility` also keeps it out of the tab order while hidden. */
+  visibility: hidden;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 
-  header.portal-shell-nav .logo-section {
-    justify-self: center;
-    text-align: center;
-  }
+  i { font-size: 22px; line-height: 1; }
 
-  .portal-nav-center {
-    justify-self: stretch;
-    order: 3;
-  }
+  &:hover { background: rgba(255, 255, 255, 0.22); }
+  &:focus-visible { outline: 2px solid #e79954; outline-offset: 2px; }
+}
 
-  .portal-nav-center ul {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
+/* --- Step 1: tighten before collapsing -------------------------------------
+   Ten labels plus a logo and a button is a lot of row. Buy width back from the
+   per-link spacing first, so the inline nav survives a few hundred more pixels
+   before it has to become a drawer. */
+@media (max-width: 1500px) {
+  .portal-nav-center a {
+    margin: 0 2px;
+    padding: 6px 3px;
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
   }
+}
 
-  .portal-nav-actions {
-    justify-self: center;
-    order: 2;
+/* --- Step 2: collapse to a drawer -----------------------------------------
+   Driven by `.nav-collapsed`, which navbar2 sets by measuring the row against
+   the column it is given - see syncNavFit(). A fixed breakpoint can't do this
+   job because the project title varies per portal.
+
+   Collapsing changes visibility only - never geometry. The row keeps its grid
+   column and the toggle keeps its slot, so `nav.clientWidth` and the row's
+   natural width read the same whether or not the bar is collapsed. That is what
+   makes the fit test state-independent, and therefore unable to oscillate. */
+header.portal-shell-nav.nav-collapsed .portal-nav-center {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+header.portal-shell-nav.nav-collapsed .portal-nav-toggle {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Absolutely positioned so opening the menu overlays the page instead of
+   growing the header - the shell reserves the header's measured height. */
+.portal-nav-drawer {
+  position: absolute;
+  top: 100%;
+  /* The containing block is the header's padding box, so pull back out by the
+     bar's own inline padding to sit flush with the viewport edges. */
+  left: calc(-1 * var(--nav-pad-x));
+  right: calc(-1 * var(--nav-pad-x));
+  max-height: 0;
+  overflow: hidden;
+  /* Not just clipped: without this the closed panel's links stay in the tab
+     order and focus disappears into an invisible menu. */
+  visibility: hidden;
+  background-color: var(--portal-accent, #1a5f7a);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  transition: max-height 0.28s ease, visibility 0s linear 0.28s;
+}
+
+header.portal-shell-nav.menu-open .portal-nav-drawer {
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+  visibility: visible;
+  transition: max-height 0.28s ease, visibility 0s;
+}
+
+.portal-nav-drawer ul {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+
+.portal-nav-drawer li {
+  list-style: none;
+}
+
+.portal-nav-drawer a {
+  display: block;
+  padding: 12px var(--nav-pad-x);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-size: 0.95rem;
+  border-left: 3px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.portal-nav-drawer a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e79954;
+}
+
+.portal-nav-drawer a.nav-active {
+  color: #e79954;
+  border-left-color: #e79954;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Very narrow: the portal button's label is the first thing worth dropping. */
+@media (max-width: 560px) {
+  header.portal-shell-nav .logo {
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-nav-drawer {
+    transition: none;
   }
 }

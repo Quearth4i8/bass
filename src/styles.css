@@ -34,6 +34,33 @@
 }
   
 
+/* ---------------------------------------------------------------
+   Stable scrollbar gutter.
+   The window scrollbar is what scrolls the whole app (navbar included).
+   Without this, a page that fits the viewport has no scrollbar and a page
+   that overflows has one, so the usable width changes by ~15px and every
+   route switch visibly shifts the navbar and content left/right.
+   Reserving the gutter permanently keeps the layout width constant.
+   --------------------------------------------------------------- */
+html {
+  overflow-y: scroll; /* fallback for browsers without scrollbar-gutter */
+}
+
+@supports (scrollbar-gutter: stable) {
+  html {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Portal shell scrolls inside its own container (below the fixed nav), so the
+   window must not scroll or reserve a gutter of its own - otherwise two
+   scrollbars / a double gutter show up on the right edge. */
+html.portal-shell-active {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* Toast Notifications - Position at top right */

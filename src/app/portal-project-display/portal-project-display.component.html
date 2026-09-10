@@ -1,27 +1,33 @@
-<ng-container *ngIf="!notFound; else notFoundTpl">
-  <div class="portal-root" [style.--portal-accent]="portalAccentHex">
-    <app-navbar2></app-navbar2>
+<!-- The shell itself never scrolls: the fixed nav sits on top and `.portal-scroll`
+     below it is the page's scroll container, so the scrollbar starts under the
+     header instead of running the full viewport height beside it. -->
+<div class="portal-shell"
+     [style.--portal-accent]="portalAccentHex"
+     [style.--portal-nav-h]="portalNavHeightPx">
+  <app-navbar2 [forceLegacyNav]="notFound"></app-navbar2>
 
+  <div class="portal-scroll" #portalScroll>
     <div class="portal-content">
-      <router-outlet></router-outlet>
+      <ng-container *ngIf="!notFound; else notFoundTpl">
+        <router-outlet></router-outlet>
+      </ng-container>
+
+      <ng-template #notFoundTpl>
+        <div class="not-found-container">
+          <div class="not-found-box">
+            <i class='bx bx-search-alt'></i>
+            <h1>Project Not Found</h1>
+            <p>The project you're looking for doesn't exist or has been removed.</p>
+            <button class="back-home-btn" (click)="goBack()">
+              <i class='bx bx-home'></i> Back to Projects
+            </button>
+          </div>
+        </div>
+      </ng-template>
     </div>
 
-    <app-upbutton></app-upbutton>
     <app-footer></app-footer>
   </div>
-</ng-container>
 
-<ng-template #notFoundTpl>
-  <app-navbar2 [forceLegacyNav]="true"></app-navbar2>
-  <div class="not-found-container">
-    <div class="not-found-box">
-      <i class='bx bx-search-alt'></i>
-      <h1>Project Not Found</h1>
-      <p>The project you're looking for doesn't exist or has been removed.</p>
-      <button class="back-home-btn" (click)="goBack()">
-        <i class='bx bx-home'></i> Back to Projects
-      </button>
-    </div>
-  </div>
-  <app-footer></app-footer>
-</ng-template>
+  <app-upbutton [scrollContainer]="portalScroll"></app-upbutton>
+</div>

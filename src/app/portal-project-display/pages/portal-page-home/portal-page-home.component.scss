@@ -10,10 +10,12 @@
     color: #ffffff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6);
 }
-:host { display: block; margin-top: -56px; }
+/* The shell already reserves the nav strip and scrolls below it, so the hero no
+   longer has to pull itself up under a fixed bar. */
+:host { display: block; }
 
 .slider {
-    height: 100vh;
+    height: calc(100vh - var(--portal-nav-h, 56px));
     position: relative;
 }
 .slider .list .item {
@@ -166,7 +168,8 @@
 .hero-container {
   position: relative;
   height: auto;
-  padding-top: 50px;
+  /* No top padding: this 50px band only ever existed to sit behind the fixed
+     nav, and the shell now starts the content below it. */
   background: #010101;
 }
 
