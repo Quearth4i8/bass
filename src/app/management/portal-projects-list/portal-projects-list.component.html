@@ -962,7 +962,7 @@
                   </div>
                   <span class="event-status-badge" [class.ongoing]="item.ev.status === 'ongoing'" [class.finished]="item.ev.status === 'finished'" [class.canceled]="item.ev.status === 'canceled'">
                     <span class="status-dot"></span>
-                    {{ item.ev.status === 'ongoing' ? 'On Going' : (item.ev.status === 'finished' ? 'Finished' : 'Canceled') }}
+                    {{ item.ev.status === 'ongoing' ? 'On Going' : (item.ev.status === 'finished' ? 'Closed' : 'Canceled') }}
                   </span>
                 </div>
 
@@ -1000,7 +1000,7 @@
                         <button class="event-input custom-select-trigger" (click)="toggleEventStatusDropdown($event, item.i)">
                           <span class="selected-status">
                             <span class="status-dot" [class.ongoing]="item.ev.status === 'ongoing'" [class.finished]="item.ev.status === 'finished'" [class.canceled]="item.ev.status === 'canceled'"></span>
-                            {{ item.ev.status === 'ongoing' ? 'On Going' : (item.ev.status === 'finished' ? 'Finished' : 'Canceled') }}
+                            {{ item.ev.status === 'ongoing' ? 'On Going' : (item.ev.status === 'finished' ? 'Closed' : 'Canceled') }}
                           </span>
                           <i class='bx bx-chevron-down'></i>
                         </button>
@@ -1011,7 +1011,7 @@
                           </li>
                           <li (click)="selectEventStatus('finished', item.i)">
                             <span class="status-dot finished"></span>
-                            Finished
+                            Closed
                           </li>
                           <li (click)="selectEventStatus('canceled', item.i)">
                             <span class="status-dot canceled"></span>
@@ -1084,7 +1084,9 @@
             </div>
           </div>
 
-          <div class="team-sections-list">
+          <!-- cdkDropListGroup wires every section's grid together, so a card can be
+               dragged from one section straight into another. -->
+          <div class="team-sections-list" cdkDropListGroup>
             <div class="team-section-card" *ngFor="let section of teamSections; let sIdx = index">
               <div class="section-card-header">
                 <div class="section-title-group">
@@ -1104,13 +1106,24 @@
                 </div>
               </div>
 
-              <div class="section-members-grid">
+              <!-- Sorting is off deliberately. This grid wraps, and CDK 17's only
+                   orientations are horizontal (matches on x alone) and vertical
+                   (on y alone) - on a wrapped grid either one resolves the drop
+                   to a card in the wrong row. Drops therefore append to the
+                   target section, and ordering stays with the arrow buttons. -->
+              <div class="section-members-grid"
+                   cdkDropList
+                   cdkDropListSortingDisabled
+                   [cdkDropListData]="section.members"
+                   (cdkDropListDropped)="onTeamMemberDrop($event)">
                 <div class="member-add-tile" (click)="addTeamMemberToSection(sIdx)">
                   <i class='bx bx-plus'></i>
                   <span>Add Member</span>
                 </div>
                 
-                <div class="member-item-card" *ngFor="let member of section.members; let mIdx = index">
+                <div class="member-item-card" *ngFor="let member of section.members; let mIdx = index"
+                     cdkDrag
+                     [cdkDragPreviewClass]="isLight ? 'member-drag-preview-light' : 'member-drag-preview-dark'">
                   <div class="member-card-banner"></div>
                   <div class="member-photo-box">
                     <img *ngIf="member.image" [src]="member.image" alt="Member">
@@ -1129,6 +1142,10 @@
                   </div>
 
                   <div class="member-item-actions">
+                    <button class="member-mini-btn member-drag-handle" cdkDragHandle type="button"
+                            title="Drag to reorder, or onto another section to move">
+                      <i class='bx bx-move'></i>
+                    </button>
                     <button class="member-mini-btn" (click)="moveTeamMemberInSection(sIdx, mIdx, 'up')" [disabled]="mIdx === 0">
                       <i class='bx bx-chevron-left'></i>
                     </button>

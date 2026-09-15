@@ -16,14 +16,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
-  display: grid;
-  height: 100%;
-  width: 100%;
+:host {
+  display: block;
   font-family: "Poppins", sans-serif;
-  place-items: center;
-  background: transparent;
+  /* Headroom for the tooltip, which pops up above the icons. Without it the
+     tooltip spills past the footer's top border into the section above. */
+  padding-top: 26px;
 }
 
 .wrapper {
@@ -49,18 +47,39 @@ body {
   transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
+/* Stretch the link over the whole disc so the entire circle is clickable,
+   not just the glyph in the middle. */
+.wrapper .icon a {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
 .wrapper .tooltip {
   position: absolute;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  /* nowrap: the tooltip's containing block is the 50px disc, so "Facebook"
+     would otherwise wrap onto two lines. */
+  white-space: nowrap;
   font-size: 14px;
-  background: #ffffff;
+  background: #1a2a4a;
   color: #ffffff;
   padding: 5px 8px;
   border-radius: 5px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: top 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+              opacity 0.2s ease,
+              visibility 0.2s ease,
+              background 0.2s ease;
 }
 
 .wrapper .tooltip::before {
@@ -68,18 +87,17 @@ body {
   content: "";
   height: 8px;
   width: 8px;
-  background: #ffffff;
+  background: #1a2a4a;
   bottom: -3px;
   left: 50%;
   transform: translate(-50%) rotate(45deg);
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: background 0.2s ease;
 }
 
 .wrapper .icon:hover .tooltip {
-  top: -45px;
+  top: -42px;
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
 }
 
 .icon.facebook span i {
@@ -110,4 +128,3 @@ body {
   background: #0d2839;
   color: #ffffff;
 }
-

@@ -147,3 +147,22 @@ body[data-theme="light"] .p-toast .p-toast-close-icon:hover {
 }
 body[data-theme="light"] .p-toast .p-toast-message-success { border-left-color: #1a8f7f; }
 body[data-theme="light"] .p-toast .p-toast-message-success .p-toast-message-icon { color: #1a8f7f; background: rgba(26, 143, 127, 0.1); }
+
+/* ── Portal gallery lightbox ──────────────────────────────────────────────
+   The lightbox lives inside .portal-scroll, which is position:fixed and so
+   forms a stacking context: its own z-index caps everything within it, and no
+   value on the overlay can lift it past the navbar's z-index: 100000.
+
+   Dropping the navbar to z-index: auto for the duration is what lets the
+   overlay through. Both the navbar and .portal-scroll are then positioned
+   z-auto elements in the root stacking context, so they paint in DOM order -
+   and the navbar comes first in the shell markup, which puts .portal-scroll
+   (and the overlay inside it) on top. The navbar stays in place and simply
+   shows through the overlay's 8% transparency, dimmed like the rest of the
+   page. Freeze the scroller too, so the grid does not drift behind the image. */
+body.gallery-lightbox-open header.portal-shell-nav {
+  z-index: auto;
+}
+body.gallery-lightbox-open .portal-scroll {
+  overflow-y: hidden;
+}

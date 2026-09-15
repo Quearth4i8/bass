@@ -279,6 +279,99 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   }
 }
 
+// ── Navbar identity (brand mode + logo) ───────────────────────────────────
+.brand-dropdown { position: relative; }
+
+.brand-dropdown-trigger {
+  width: 100%; height: 40px; padding: 0 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border-radius: $radius; border: 1px solid $line;
+  font-size: 13px; color: $text; background: $bg-2; font-family: $font-sans;
+  cursor: pointer; transition: border-color 0.2s;
+
+  i { font-size: 18px; color: $text-faint; transition: transform 0.2s; }
+
+  &:hover { border-color: $line-2; }
+  &.open {
+    border-color: $accent;
+    i { transform: rotate(180deg); color: $accent; }
+  }
+}
+
+.brand-dropdown-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  margin: 0; padding: 6px; list-style: none;
+  background: $panel; border: 1px solid $line-2; border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0,0,0,.45);
+  z-index: 30;
+
+  li {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 9px 12px; border-radius: 8px;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+
+    &:hover { background: $bg-2; }
+    &.active {
+      background: rgba(74,214,196,.12);
+      .brand-option-label { color: $accent; }
+    }
+  }
+}
+
+.brand-option-label { font-size: 13px; font-weight: 500; color: $text; }
+.brand-option-hint { font-size: 11px; color: $text-faint; line-height: 1.4; }
+
+// Which mode suits a logo is really a question of its shape, so the guidance
+// sits next to the picker rather than in a manual nobody reads.
+.brand-mode-hint {
+  font-size: 11px; color: $text-faint; line-height: 1.5;
+}
+
+.brand-logo-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+
+// A real button, not a caption. This element is a <label> inside .form-field,
+// so without an explicit style it inherits that block's label rule - 11px
+// uppercase mono in the faint caption colour, no cursor, no hover. It also
+// cannot reuse .image-upload-label: that one is scoped to .edit-image-preview
+// and is an absolutely-positioned overlay that fades in over the image.
+// `label.` in the selector outranks `.form-field label` outright, rather than
+// relying on source order to break a specificity tie.
+.brand-logo-row label.brand-logo-upload {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid $line; border-radius: $radius;
+  background: $bg-2;
+  font-family: $font-sans; font-size: 13px; font-weight: 500;
+  letter-spacing: normal; text-transform: none;
+  color: $text-dim;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+
+  i { font-size: 16px; }
+
+  &:hover { background: rgba(74,214,196,.08); border-color: $accent; color: $accent; }
+  &:active { background: rgba(74,214,196,.14); }
+}
+
+// Checkerboard: most logos are transparent PNGs, and on a flat panel a white
+// logo is invisible and a dark one looks like it has a background.
+.brand-logo-preview {
+  width: 140px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border-radius: $radius; border: 1px solid $line;
+  background-color: $bg-2;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.05) 75%),
+    linear-gradient(45deg, rgba(255,255,255,.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.05) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+
+  img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  &.empty { font-size: 11px; color: $text-faint; font-family: $font-mono; }
+}
+
 // ── Modals ─────────────────────────────────────────────────────────────────
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(4px);
@@ -289,7 +382,11 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 .modal-dialog {
   background: $panel; border: 1px solid $line; border-radius: 14px;
   width: 90%; max-width: 500px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.5); animation: slideUp 0.2s ease; overflow: hidden; pointer-events: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5); animation: slideUp 0.2s ease; pointer-events: auto;
+  // Not overflow:hidden - that clipped the identity dropdown whenever the menu
+  // ran past the dialog's edge. The footer carries its own radius instead, so
+  // its panel background still follows the dialog's rounded corners.
+  overflow: visible;
   &.small { max-width: 380px; }
 }
 
@@ -305,7 +402,10 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 .modal-body { padding: 20px 24px; p { font-size: 14px; color: $text-dim; margin: 0; text-align: center; } }
 
-.modal-footer { padding: 16px 24px; background: $panel-2; display: flex; justify-content: flex-end; gap: 12px; }
+.modal-footer {
+  padding: 16px 24px; background: $panel-2; display: flex; justify-content: flex-end; gap: 12px;
+  border-radius: 0 0 14px 14px;
+}
 
 .btn-cancel {
   padding: 9px 20px; border: 1px solid $line; background: transparent;
@@ -366,6 +466,36 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .toggle-switch .switch-label { color: #0d2137; }
   .form-field label { color: #64748b; }
   .form-field input[type="text"] { background: #f8fafc; border-color: #c5d8e6; color: #0d2137; &:focus { border-color: #1a8f7f; } }
+  .modal-footer { border-radius: 0 0 14px 14px; }
+  .brand-dropdown-trigger {
+    background: #f8fafc; border-color: #c5d8e6; color: #0d2137;
+    i { color: #94a3b8; }
+    &:hover { border-color: #94a3b8; }
+    &.open { border-color: #1a8f7f; i { color: #1a8f7f; } }
+  }
+  .brand-dropdown-menu {
+    background: #ffffff; border-color: #c5d8e6; box-shadow: 0 16px 36px rgba(0,0,0,.14);
+    li {
+      &:hover { background: #f0f7fb; }
+      &.active { background: rgba(26,143,127,.1); .brand-option-label { color: #1a8f7f; } }
+    }
+  }
+  .brand-option-label { color: #0d2137; }
+  .brand-option-hint { color: #64748b; }
+  .brand-mode-hint { color: #64748b; }
+  .brand-logo-row label.brand-logo-upload {
+    background: #f8fafc; border-color: #c5d8e6; color: #3d5a6e;
+    &:hover { background: rgba(26,143,127,.08); border-color: #1a8f7f; color: #1a8f7f; }
+    &:active { background: rgba(26,143,127,.14); }
+  }
+  .brand-logo-preview {
+    border-color: #c5d8e6;
+    background-color: #f8fafc;
+    background-image:
+      linear-gradient(45deg, rgba(0,0,0,.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.05) 75%),
+      linear-gradient(45deg, rgba(0,0,0,.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.05) 75%);
+    &.empty { color: #64748b; }
+  }
   .edit-image-preview { border-color: #c5d8e6; }
   .modal-dialog { background: white; border-color: #c5d8e6; }
   .modal-header { border-bottom-color: #c5d8e6; h3 { color: #0d2137; } i { background: rgba(26,143,127,.1); color: #1a8f7f; } &.danger i { background: #fef2f2; color: #ef4444; } }

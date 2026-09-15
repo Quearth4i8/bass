@@ -125,6 +125,43 @@
               <label>Theme color (navbar &amp; scroll button)</label>
               <input type="color" [(ngModel)]="editingProject.accentColor" title="Accent color">
             </div>
+            <div class="form-field">
+              <label>Navbar identity</label>
+              <div class="brand-dropdown" (click)="$event.stopPropagation()">
+                <button type="button" class="brand-dropdown-trigger"
+                        [class.open]="openBrandModeDropdown === 'edit'"
+                        (click)="toggleBrandModeDropdown('edit', $event)">
+                  <span>{{ brandModeLabel(editingProject.brandMode) }}</span>
+                  <i class='bx bx-chevron-down'></i>
+                </button>
+                <ul class="brand-dropdown-menu" *ngIf="openBrandModeDropdown === 'edit'">
+                  <li *ngFor="let m of brandModes"
+                      [class.active]="m.value === editingProject.brandMode"
+                      (click)="selectBrandMode('edit', m.value)">
+                    <span class="brand-option-label">{{ m.label }}</span>
+                    <span class="brand-option-hint">{{ m.hint }}</span>
+                  </li>
+                </ul>
+              </div>
+              <small class="brand-mode-hint">{{ brandHint(editingProject.brandMode) }}</small>
+            </div>
+            <div class="form-field"
+                 *ngIf="editingProject.brandMode === 'logo' || editingProject.brandMode === 'logo-title'">
+              <label>Project logo</label>
+              <div class="brand-logo-row">
+                <div class="brand-logo-preview" [class.empty]="!editingProject.logo">
+                  <img *ngIf="editingProject.logo" [src]="editingProject.logo" alt="Logo preview">
+                  <span *ngIf="!editingProject.logo">No logo</span>
+                </div>
+                <label class="brand-logo-upload" for="edit-project-logo">
+                  <i class='bx bx-upload'></i>
+                  <span>{{ editingProject.logo ? 'Replace' : 'Upload' }}</span>
+                </label>
+                <button type="button" class="btn-cancel" *ngIf="editingProject.logo" (click)="clearEditLogo()">Remove</button>
+              </div>
+              <input type="file" id="edit-project-logo" (change)="onEditLogoSelected($event)" accept="image/*" hidden>
+              <small class="brand-mode-hint">Without a logo the navbar falls back to title + project ID.</small>
+            </div>
             <div class="status-toggle-row">
               <span class="field-label">Project Status</span>
               <div class="toggle-switch" (click)="editingProject.isActive = !editingProject.isActive">
@@ -175,6 +212,43 @@
             <div class="form-field">
               <label>Theme color (navbar &amp; scroll button)</label>
               <input type="color" [(ngModel)]="newProject.accentColor" title="Accent color">
+            </div>
+            <div class="form-field">
+              <label>Navbar identity</label>
+              <div class="brand-dropdown" (click)="$event.stopPropagation()">
+                <button type="button" class="brand-dropdown-trigger"
+                        [class.open]="openBrandModeDropdown === 'add'"
+                        (click)="toggleBrandModeDropdown('add', $event)">
+                  <span>{{ brandModeLabel(newProject.brandMode) }}</span>
+                  <i class='bx bx-chevron-down'></i>
+                </button>
+                <ul class="brand-dropdown-menu" *ngIf="openBrandModeDropdown === 'add'">
+                  <li *ngFor="let m of brandModes"
+                      [class.active]="m.value === newProject.brandMode"
+                      (click)="selectBrandMode('add', m.value)">
+                    <span class="brand-option-label">{{ m.label }}</span>
+                    <span class="brand-option-hint">{{ m.hint }}</span>
+                  </li>
+                </ul>
+              </div>
+              <small class="brand-mode-hint">{{ brandHint(newProject.brandMode) }}</small>
+            </div>
+            <div class="form-field"
+                 *ngIf="newProject.brandMode === 'logo' || newProject.brandMode === 'logo-title'">
+              <label>Project logo</label>
+              <div class="brand-logo-row">
+                <div class="brand-logo-preview" [class.empty]="!newProject.logo">
+                  <img *ngIf="newProject.logo" [src]="newProject.logo" alt="Logo preview">
+                  <span *ngIf="!newProject.logo">No logo</span>
+                </div>
+                <label class="brand-logo-upload" for="add-project-logo">
+                  <i class='bx bx-upload'></i>
+                  <span>{{ newProject.logo ? 'Replace' : 'Upload' }}</span>
+                </label>
+                <button type="button" class="btn-cancel" *ngIf="newProject.logo" (click)="clearAddLogo()">Remove</button>
+              </div>
+              <input type="file" id="add-project-logo" (change)="onAddLogoSelected($event)" accept="image/*" hidden>
+              <small class="brand-mode-hint">Without a logo the navbar falls back to title + project ID.</small>
             </div>
             <div class="status-toggle-row">
               <span class="field-label">Project Status</span>

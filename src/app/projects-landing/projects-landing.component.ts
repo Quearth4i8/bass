@@ -10,6 +10,10 @@ import { ThemeService } from '../services/ThemeService';
   encapsulation: ViewEncapsulation.None,
 })
 export class ProjectsLandingComponent implements OnInit, OnDestroy {
+  /* Read once at construction rather than hardcoded, so the footer's
+     copyright cannot fall out of date. */
+  readonly currentYear = new Date().getFullYear();
+
   @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
 
   username = '';

@@ -12,7 +12,7 @@
         <button class="theme-btn" (click)="themeService.toggle()" [title]="themeService.isLight ? 'Switch to dark' : 'Switch to light'">
           <i class='bx' [class.bx-sun]="!themeService.isLight" [class.bx-moon]="themeService.isLight"></i>
         </button>
-        <a routerLink="/overview" class="home-btn" title="Home">
+        <a routerLink="/" class="home-btn" title="Home">
           <i class='bx bx-home'></i>
         </a>
       </div>

@@ -15,6 +15,12 @@ export class PortalPageGalleryComponent implements OnInit {
   lightboxOpen = false;
   lightboxIndex = 0;
 
+  /* .portal-scroll is position:fixed and therefore a stacking context, so the
+     overlay cannot outrank the fixed navbar on its own. Flag the body and let
+     the global rule in styles.css demote the navbar (and lock the scroller)
+     for as long as the lightbox is open. */
+  private static readonly BODY_OPEN_CLASS = 'gallery-lightbox-open';
+
   imagesPerPage = 30;
   currentPage = 1;
   Math = Math;
@@ -36,6 +42,14 @@ export class PortalPageGalleryComponent implements OnInit {
           this.lightboxIndex = 0;
         }
       });
+
+    // A route change closes the component without closing the lightbox, which
+    // would leave the navbar hidden on the next page.
+    this.destroyRef.onDestroy(() => this.setBodyLightboxState(false));
+  }
+
+  private setBodyLightboxState(open: boolean): void {
+    document.body.classList.toggle(PortalPageGalleryComponent.BODY_OPEN_CLASS, open);
   }
 
   get paginatedImages() {
@@ -66,10 +80,12 @@ export class PortalPageGalleryComponent implements OnInit {
   openLightbox(index: number): void {
     this.lightboxIndex = index;
     this.lightboxOpen = true;
+    this.setBodyLightboxState(true);
   }
 
   closeLightbox(): void {
     this.lightboxOpen = false;
+    this.setBodyLightboxState(false);
   }
 
   prevImage(): void {

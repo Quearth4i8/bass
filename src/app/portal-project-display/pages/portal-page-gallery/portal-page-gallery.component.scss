@@ -53,75 +53,91 @@
   }
 }
 
-/* Lightbox — above fixed navbar (z-index 100000) */
+/* Lightbox. The z-index below only ranks this overlay *inside* .portal-scroll:
+   that ancestor is position:fixed, which makes it a stacking context, so no
+   value here can by itself lift the overlay past the fixed navbar. The
+   body.gallery-lightbox-open rule in styles.css drops the navbar to z-index
+   auto while the lightbox is open, which is what lets this paint over it. */
 .lightbox-overlay {
+  /* Gutters reserve the room the chrome occupies, so a picture scaled to fill
+     the stage still never runs under the close button or the arrows. */
+  --lb-gutter-x: 88px;
+  --lb-gutter-top: 68px;
+  --lb-gutter-bottom: 56px;
+
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.92);
   z-index: 1000010;
   display: flex; align-items: center; justify-content: center;
-  padding: 72px 24px 24px;
+  padding: var(--lb-gutter-top) var(--lb-gutter-x) var(--lb-gutter-bottom);
   box-sizing: border-box;
 
-  .lightbox-box {
-    position: relative;
-    max-width: 92vw;
-    max-height: 92vh;
-    display: flex; align-items: center;
+  /* The stage is a constant-size box and every picture is letterboxed into it,
+     so switching between a portrait and a landscape shot no longer resizes
+     anything around it. */
+  .lightbox-stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-self: stretch;
+    display: flex; align-items: center; justify-content: center;
 
     .lb-image {
-      max-width: min(88vw, 100%);
-      max-height: min(calc(100vh - 120px), 88vh);
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
       border-radius: 6px;
     }
+  }
 
-    /* ── Modern button style matching landing page ── */
-    .lb-close {
-      position: absolute; top: -48px; right: 0;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.7);
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      cursor: pointer; font-size: 22px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-      &:hover {
-        background: rgba(255,255,255,0.16);
-        border-color: rgba(255,255,255,0.4);
-        color: #fff;
-      }
+  /* ── Modern button style matching landing page ── */
+  .lb-close,
+  .lb-arrow {
+    position: absolute;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    &:hover {
+      background: rgba(255,255,255,0.16);
+      border-color: rgba(255,255,255,0.4);
+      color: #fff;
     }
+  }
 
+  .lb-close {
+    top: 16px; right: 20px;
+    width: 36px; height: 36px;
+    font-size: 22px;
+  }
+
+  .lb-arrow {
+    top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    font-size: 26px;
+    &.lb-prev { left: 20px; }
+    &.lb-next { right: 20px; }
+  }
+
+  .lb-counter {
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.6); font-size: 13px;
+    font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 640px) {
+    --lb-gutter-x: 60px;
+    --lb-gutter-top: 60px;
+    --lb-gutter-bottom: 48px;
+
+    .lb-close { top: 12px; right: 12px; width: 32px; height: 32px; font-size: 20px; }
     .lb-arrow {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.7);
-      width: 44px; height: 44px;
-      border-radius: 8px;
-      cursor: pointer; font-size: 26px;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-      &:hover {
-        background: rgba(255,255,255,0.16);
-        border-color: rgba(255,255,255,0.4);
-        color: #fff;
-      }
-      &.lb-prev { left: -56px; }
-      &.lb-next { right: -56px; }
-      @media (max-width: 640px) {
-        &.lb-prev { left: -48px; }
-        &.lb-next { right: -48px; }
-        width: 36px; height: 36px; font-size: 20px;
-      }
-    }
-
-    .lb-counter {
-      position: absolute; bottom: -36px; left: 50%; transform: translateX(-50%);
-      color: rgba(255,255,255,0.6); font-size: 13px;
-      font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
-      letter-spacing: 0.06em;
+      width: 36px; height: 36px; font-size: 20px;
+      &.lb-prev { left: 10px; }
+      &.lb-next { right: 10px; }
     }
   }
 }

@@ -53,11 +53,34 @@ export class PortalPageEventsComponent implements OnInit {
   private updateFilteredEvents(): void {
     const events = this.project?.content?.events?.events || [];
     const term = this.searchTerm.trim().toLowerCase();
-    this.filteredEvents = !term ? events : events.filter((event: any) =>
+    const matched = !term ? events : events.filter((event: any) =>
       (event.title || '').toLowerCase().includes(term) ||
       (event.organiser || '').toLowerCase().includes(term) ||
       (event.location || '').toLowerCase().includes(term) ||
       (event.speaker || '').toLowerCase().includes(term)
     );
+    this.filteredEvents = this.sortNewestFirst(matched);
+  }
+
+  // Most recent start date at the top. Copies before sorting: with no search
+  // term `matched` is the project's own events array, and sorting in place
+  // would reorder the stored content behind the admin's back.
+  private sortNewestFirst(events: any[]): any[] {
+    return [...events].sort((a, b) => {
+      const ta = this.eventStartTime(a);
+      const tb = this.eventStartTime(b);
+      if (ta === tb) return 0;
+      // An event with no usable date sinks to the bottom instead of being
+      // treated as 1970 and sorting as the oldest entry.
+      if (ta === null) return 1;
+      if (tb === null) return -1;
+      return tb - ta;
+    });
+  }
+
+  private eventStartTime(event: any): number | null {
+    if (!event?.startDate) return null;
+    const time = new Date(event.startDate + 'T00:00:00').getTime();
+    return Number.isNaN(time) ? null : time;
   }
 }

@@ -124,6 +124,12 @@ export class AuthService {
   bootstrapFromToken(): Observable<void> {
     const token = this.getToken();
     if (!token) return of(void 0);
+    // A stale token left in localStorage is sent on every request and rejected
+    // by the backend, so clear it up front rather than letting it linger.
+    if (this.isTokenExpired()) {
+      this.logout();
+      return of(void 0);
+    }
     const payload = this.decodeJwtPayload(token);
     const role = this.extractRole(payload);
     const username = payload?.username || payload?.sub;

@@ -1,3 +1,72 @@
+<!-- ── Hero ──────────────────────────────────────────────────────────────
+     Moved here from the Overview page, which now opens straight into the
+     TRIX dashboards. -->
+<section class="hero">
+
+  <div class="hero-top fade-up">
+    <div class="hero-tag">
+      <span class="label label-accent">// BASSIANA Portal</span>
+      <span class="hero-tag-line"></span>
+      <span class="label">Marine Ecosystems Database</span>
+    </div>
+    <div class="hero-actions">
+      <a routerLink="/projects" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Projects
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-body">
+    <div class="hero-left">
+      <h1 class="hero-title fade-up" style="transition-delay:80ms">
+        Marine ecosystems,<br>
+        <em>monitored at scale.</em>
+      </h1>
+      <p class="hero-sub fade-up" style="transition-delay:160ms">
+        BASSIANA is the centralized long-term observation database for marine, coastal,
+        lagoon and freshwater ecosystems across the southern Mediterranean — built to
+        help researchers, policy makers and ecosystem managers understand how
+        ecosystems respond to change.
+      </p>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="stats-strip fade-up" style="transition-delay:240ms">
+    <div class="stat">
+      <div class="stat-value">
+        <span *ngIf="totalResearchProjects !== null">{{ totalResearchProjects }}</span>
+        <span *ngIf="totalResearchProjects === null" class="stat-loading">—</span>
+      </div>
+      <div class="label stat-label">Research Projects</div>
+      <div class="stat-delta">INSTM database</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">2020</div>
+      <div class="label stat-label">Programme Launch</div>
+      <div class="stat-delta">5y running</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">4</div>
+      <div class="label stat-label">Ecosystem Categories</div>
+      <div class="stat-delta">marine · coastal · lagoon · river</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">
+        <span *ngIf="activePortalProjects !== null">{{ activePortalProjects }}</span>
+        <span *ngIf="activePortalProjects === null" class="stat-loading">—</span>
+      </div>
+      <div class="label stat-label">Active Portals</div>
+      <div class="stat-delta" *ngIf="totalPortalProjects !== null">{{ totalPortalProjects }} total</div>
+    </div>
+  </div>
+
+</section>
+
 <section class="section">
   <div class="section-head fade-up">
     <h2 class="section-title">BASSIANA overview</h2>

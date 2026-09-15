@@ -172,10 +172,14 @@ header.portal-shell-nav.nav-collapsed .portal-nav-toggle {
 .portal-nav-drawer {
   position: absolute;
   top: 100%;
-  /* The containing block is the header's padding box, so pull back out by the
-     bar's own inline padding to sit flush with the viewport edges. */
-  left: calc(-1 * var(--nav-pad-x));
-  right: calc(-1 * var(--nav-pad-x));
+  /* The header is fixed, full-width and border-box, so its padding box - the
+     containing block for this panel - already spans the viewport exactly. 0 is
+     therefore flush with the edges. This used to pull back by --nav-pad-x on
+     both sides, which pushed the panel off-screen by that much; it only looked
+     right because the links happened to pad by the same variable and cancelled
+     it out, and it broke the moment those two numbers stopped matching. */
+  left: 0;
+  right: 0;
   max-height: 0;
   overflow: hidden;
   /* Not just clipped: without this the closed panel's links stay in the tab
@@ -209,7 +213,11 @@ header.portal-shell-nav.menu-open .portal-nav-drawer {
 
 .portal-nav-drawer a {
   display: block;
-  padding: 12px var(--nav-pad-x);
+  /* Its own gutter rather than the bar's --nav-pad-x. The drawer only opens
+     once the bar has collapsed, i.e. at narrow widths, where that clamp bottoms
+     out at 20px - too tight for a full-bleed list, and tighter still with the
+     3px active border sitting inside it. */
+  padding: 14px 24px;
   color: #fff;
   text-decoration: none;
   font-weight: 500;

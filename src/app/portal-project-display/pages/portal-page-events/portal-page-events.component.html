@@ -30,7 +30,7 @@
         <div class="event-top">
           <h3 class="event-title">{{ event.title }}</h3>
           <span class="event-status" [ngClass]="getStatusClass(event.status)">
-            {{ event.status === 'ongoing' ? 'On Going' : (event.status === 'finished' ? 'Finished' : 'Canceled') }}
+            {{ event.status === 'ongoing' ? 'On Going' : (event.status === 'finished' ? 'Closed' : 'Canceled') }}
           </span>
         </div>
         

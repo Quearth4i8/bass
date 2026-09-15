@@ -16,6 +16,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
 import { PortalProjectContextService } from '../../portal/services/portal-project-context.service';
+import { PortalBrandMode } from '../../portal/models/portal-project.model';
 import { PORTAL_TOP_NAV_LINKS } from '../../portal/portal-top-nav-links';
 
 @Component({
@@ -33,7 +34,28 @@ export class Navbar2Component implements OnInit, AfterViewChecked, OnDestroy {
   portalSlug = '';
   portalTitle = '';
   portalProjectId = '';
+  portalLogo = '';
+  private storedBrandMode: PortalBrandMode = 'title-id';
   private lastPortalSlug = '';
+
+  /**
+   * The mode actually rendered. A mode that needs a logo falls back to
+   * `title-id` when the project has none, so an admin who picks `logo` before
+   * uploading one gets the old text bar rather than a broken image on every
+   * page of that portal.
+   */
+  get brandMode(): PortalBrandMode {
+    const needsLogo = this.storedBrandMode === 'logo' || this.storedBrandMode === 'logo-title';
+    return needsLogo && !this.portalLogo ? 'title-id' : this.storedBrandMode;
+  }
+
+  get showsLogo(): boolean {
+    return this.brandMode === 'logo' || this.brandMode === 'logo-title';
+  }
+
+  get showsTitle(): boolean {
+    return this.brandMode !== 'logo';
+  }
 
   readonly portalLinks = PORTAL_TOP_NAV_LINKS;
 
@@ -78,6 +100,8 @@ export class Navbar2Component implements OnInit, AfterViewChecked, OnDestroy {
         .subscribe((meta) => {
           if (meta?.title && (!this.portalSlug || meta.slug === this.portalSlug)) {
             this.portalTitle = meta.title;
+            this.portalLogo = meta.logo?.trim() ?? '';
+            this.storedBrandMode = meta.brandMode ?? 'title-id';
           }
         });
 

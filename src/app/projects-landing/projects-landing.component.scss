@@ -240,7 +240,9 @@ app-projects-landing {
 .admin-compact { display: flex; flex-direction: column; gap: 2px; }
 
 // ── Hero ──────────────────────────────────────────────────────────────────
-.hero { padding: 64px 0 48px; position: relative; }
+/* 32px top matches .trix-page on the Overview page. The 64px lead-in this
+   used to carry left too much dead space above the hero tag. */
+.hero { padding: 32px 0 48px; position: relative; }
 
 // top bar: tag label left, buttons right
 .hero-top {
@@ -288,6 +290,25 @@ app-projects-landing {
 .btn-primary { background: $accent; color: $bg; &:hover { background: lighten($accent, 8%); } }
 .btn-ghost   { border: 1px solid $line-2; color: $text; background: transparent; &:hover { background: rgba(255,255,255,0.04); border-color: $accent; } }
 
+/* Nav-scale variant of .btn-primary. The hero sizing (12px/22px padding, 41px
+   tall) towers over the 34-36px square theme and admin buttons it now sits
+   beside, so match their height and pick up .nav-meta's mono type. */
+.nav-db-btn {
+  height: 36px;
+  padding: 0 14px;
+  gap: 8px;
+  font-family: $font-mono;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+
+  /* Icon only once the nav runs out of room. */
+  @media (max-width: 700px) {
+    padding: 0 10px;
+    span { display: none; }
+  }
+}
+
 // Stats strip
 .stats-strip {
   display: grid; grid-template-columns: repeat(4, 1fr);
@@ -308,6 +329,10 @@ app-projects-landing {
 
 // ── Sections ──────────────────────────────────────────────────────────────
 .section { padding: 72px 0 0; }
+/* On the About page the hero now sits directly above the first content
+   section, and the hero's 48px bottom padding would otherwise stack with
+   this 72px into a 120px gap. */
+.hero + .section { padding-top: 32px; }
 .section-divider { height: 1px; background: $line; margin: 20px 0; }
 
 .section-head {
@@ -806,6 +831,17 @@ app-projects-landing {
 }
 
 // ── TRIX · Regional overview maps (two coastline cards side by side) ──────
+/* Wrapper for the Overview page, which is now only the TRIX dashboards. It
+   used to reuse .hero and inherit that 64px top padding, which left far too
+   much dead space above the first card now that no hero sits in it. */
+.trix-page {
+  padding: 32px 0 48px;
+  position: relative;
+
+  /* The grid's own top margin would otherwise stack onto the padding above. */
+  > .trix-overview-grid { margin-top: 0; }
+}
+
 .trix-overview-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

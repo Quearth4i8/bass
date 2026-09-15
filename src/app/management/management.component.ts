@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostBinding, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostBinding, HostListener, OnInit } from '@angular/core';
 import { ThemeService } from '../services/ThemeService';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidebarService } from '../services/sidebarservice';
@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { PortalProjectsService } from '../portal/services/portal-projects.service';
-import { PortalProjectMeta } from '../portal/models/portal-project.model';
+import { PORTAL_BRAND_MODES, PortalProjectMeta } from '../portal/models/portal-project.model';
 
 @Component({
   selector: 'app-management',
@@ -16,6 +16,38 @@ import { PortalProjectMeta } from '../portal/models/portal-project.model';
 export class ManagementComponent implements OnInit {
   @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   isSidebarVisible = true;
+
+  /** Options for the navbar identity picker; see PortalBrandMode. */
+  readonly brandModes = PORTAL_BRAND_MODES;
+
+  /** Which modal's identity dropdown is open, if any. */
+  openBrandModeDropdown: 'edit' | 'add' | null = null;
+
+  toggleBrandModeDropdown(which: 'edit' | 'add', event: MouseEvent): void {
+    // The document listener below would otherwise close it in the same tick.
+    event.stopPropagation();
+    this.openBrandModeDropdown = this.openBrandModeDropdown === which ? null : which;
+  }
+
+  selectBrandMode(which: 'edit' | 'add', mode: string): void {
+    const target = which === 'edit' ? this.editingProject : this.newProject;
+    if (target) target.brandMode = mode;
+    this.openBrandModeDropdown = null;
+  }
+
+  brandModeLabel(mode: string): string {
+    return this.brandModes.find((m) => m.value === mode)?.label ?? '';
+  }
+
+  @HostListener('document:click')
+  closeBrandModeDropdown(): void {
+    this.openBrandModeDropdown = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.openBrandModeDropdown = null;
+  }
   // Add Project State
   isAddModalOpen = false;
   newProject: any = {
@@ -25,6 +57,8 @@ export class ManagementComponent implements OnInit {
     isActive: true,
     status: 'Active',
     accentColor: '#1a5f7a',
+    logo: '',
+    brandMode: 'title-id',
   };
 
   // Edit Project State
@@ -96,6 +130,8 @@ export class ManagementComponent implements OnInit {
       isActive: true,
       status: 'Active',
       accentColor: '#1a5f7a',
+      logo: '',
+      brandMode: 'title-id',
     };
     this.isAddModalOpen = true;
   }
@@ -124,6 +160,8 @@ export class ManagementComponent implements OnInit {
           image: this.newProject.image,
           isActive: this.newProject.isActive,
           accentColor: this.newProject.accentColor,
+          logo: this.newProject.logo,
+          brandMode: this.newProject.brandMode,
         })
         .subscribe({
           next: (res) => {
@@ -157,6 +195,8 @@ export class ManagementComponent implements OnInit {
     this.editingProject = {
       ...project,
       accentColor: project.accentColor || '#1a5f7a',
+      logo: project.logo || '',
+      brandMode: project.brandMode || 'title-id',
     };
     this.isEditModalOpen = true;
   }
@@ -165,6 +205,36 @@ export class ManagementComponent implements OnInit {
     this.isEditModalOpen = false;
     this.editingProject = null;
     this.editingProjectIndex = -1;
+  }
+
+  brandHint(mode: string): string {
+    return this.brandModes.find((m) => m.value === mode)?.hint ?? '';
+  }
+
+  onAddLogoSelected(event: any): void {
+    this.readImageInto(event, (url) => { this.newProject.logo = url; });
+  }
+
+  onEditLogoSelected(event: any): void {
+    this.readImageInto(event, (url) => { this.editingProject.logo = url; });
+  }
+
+  clearEditLogo(): void {
+    this.editingProject.logo = '';
+  }
+
+  clearAddLogo(): void {
+    this.newProject.logo = '';
+  }
+
+  private readImageInto(event: any, assign: (dataUrl: string) => void): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => assign(e.target.result);
+    reader.readAsDataURL(file);
+    // Let the same file be picked again after a clear.
+    event.target.value = '';
   }
 
   onEditImageSelected(event: any): void {
@@ -187,12 +257,23 @@ export class ManagementComponent implements OnInit {
       image: this.editingProject.image,
       isActive: this.editingProject.isActive,
       accentColor: this.editingProject.accentColor,
+      logo: this.editingProject.logo,
+      brandMode: this.editingProject.brandMode,
     }).subscribe({
       next: (res) => {
         if (res) {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Project updated successfully' });
           this.closeEditModal();
+          return;
         }
+        // updateMeta() swallows HTTP failures and emits null, so without this
+        // branch a rejected save looked like nothing happening at all - the
+        // modal stayed open and the old values came back on reopening.
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update project. Changes were not saved.',
+        });
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update project' });

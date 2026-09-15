@@ -47,6 +47,8 @@ export class PortalProjectContextService {
             image: p.image,
             isActive: p.isActive,
             accentColor: p.accentColor,
+            logo: p.logo,
+            brandMode: p.brandMode,
           }
         : null,
     ),

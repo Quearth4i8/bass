@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import {
+  PortalBrandMode,
   PortalProject,
   PortalProjectContent,
   PortalProjectMeta,
@@ -32,10 +33,22 @@ function expandShortHex(hex: string): string {
   return `#${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`;
 }
 
+const BRAND_MODES: PortalBrandMode[] = ['title-id', 'title', 'logo', 'logo-title'];
+
+/**
+ * Anything unrecognised - including the null every project carries until a mode
+ * is chosen - renders the way portals did before brand modes existed.
+ */
+function normalizeBrandMode(value: string | undefined): PortalBrandMode {
+  return BRAND_MODES.includes(value as PortalBrandMode) ? (value as PortalBrandMode) : 'title-id';
+}
+
 function normalizeProject(p: PortalProject): PortalProject {
   return {
     ...p,
     accentColor: normalizeHexColor(p.accentColor, DEFAULT_PORTAL_ACCENT),
+    logo: p.logo?.trim() || '',
+    brandMode: normalizeBrandMode(p.brandMode),
   };
 }
 

@@ -183,7 +183,9 @@
 .logo-strip {
   overflow: hidden;
   width: 100%;
-  padding: 2.5rem 0;
+  /* Weighted toward the top: the strip sat 40px under the hero's hard bottom
+     edge, which read as the cards being shoved against it. */
+  padding: 4rem 0 3rem;
   -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
   mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
 
@@ -199,7 +201,11 @@
   flex-wrap: nowrap;
   align-items: stretch;
   width: max-content;
-  gap: 1rem;
+  /* Spacing lives on the items, not here as `gap`. The track holds the logo
+     list twice and loops by translating -50%, but with a gap the half-way
+     point lands mid-gap rather than exactly one set along, so every cycle
+     snapped back by half a gap. Per-item margin makes the two halves
+     identical in width and the loop seamless. */
   animation: logo-marquee 30s linear infinite;
   will-change: transform;
   transform: translateZ(0);
@@ -209,8 +215,11 @@
     width: 100%;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 1.25rem;
     animation: none;
     transform: none;
+
+    .logo-item { margin-right: 0; }
   }
 }
 
@@ -228,43 +237,49 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  height: 140px;
-  min-width: 140px;
-  padding: 1.25rem 1.75rem;
+  /* The tile hugs its logo instead of being a fixed size. These logos range
+     from square (INSTM) to about 5:1 (USAID), so any single tile width leaves
+     the narrow ones stranded in white. Sizing to content means every tile
+     carries the same 34px of padding around its logo - the whitespace then
+     reads as even and deliberate rather than as a gap. */
+  height: 120px;
+  padding: 28px 34px;
+  margin-right: 1.25rem;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-}
-
-.logo-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.1);
 }
 
 .logo {
-  max-width: 100%;
-  max-height: 100%;
+  /* Fills the tile's 64px inner height, so the tile's own padding is the only
+     breathing room and it is identical on every card. The width cap is purely
+     to stop a very wide logo (USAID is roughly 5:1) from making its tile twice
+     the length of the rest. */
+  max-height: 64px;
+  max-width: 190px;
   width: auto;
   height: auto;
   object-fit: contain;
-  filter: grayscale(15%);
-  opacity: 0.9;
-  transition: filter 200ms ease, opacity 200ms ease;
 }
 
-.logo-item:hover .logo {
-  filter: none;
-  opacity: 1;
+@media (max-width: 560px) {
+  .logo-strip { padding: 2.75rem 0 2.25rem; }
+  .logo-item { height: 96px; padding: 22px 24px; }
+  .logo { max-height: 52px; max-width: 150px; }
 }
 
 
 .container2 {
-  padding: 0 4rem;
-  max-width: 1400px;
-  margin: 0 auto 50px;
+  /* 1600px matches the widest container in the portal (the gallery). At 1400
+     with 64px gutters the card capped out at 1272px, so a 1920 screen showed
+     ~320px of dead space down either side. */
+  padding: 0 2.5rem;
+  max-width: 1600px;
+  /* Was `0 auto 50px`. With no top margin the first card ran straight into the
+     logo strip's band above it. Adjacent siblings collapse their margins, so
+     the gap between consecutive cards stays 60px rather than becoming 120. */
+  margin: 60px auto;
 }
 
 .content-wrapper {
@@ -283,14 +298,6 @@
     0 10px 15px -3px rgba(0, 0, 0, 0.04),
     0 4px 6px -2px rgba(0, 0, 0, 0.02),
     0 40px 60px -15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.06),
-      0 10px 10px -5px rgba(0, 0, 0, 0.03);
-  }
 }
 
 .text-section-left,
@@ -354,11 +361,6 @@ h5 {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.5s ease;
-}
-
-.image-wrap:hover .image {
-  transform: scale(1.05);
 }
 
 @media (max-width: 768px) {

@@ -5,10 +5,17 @@
     [class.nav-collapsed]="isNavCollapsed"
     [class.menu-open]="isPortalMenuOpen"
   >
-    <div class="logo-section">
-      <a [routerLink]="portalLink('home')" class="logo">{{ portalTitle }}</a>
-      <span class="portal-pid" *ngIf="portalProjectId">{{ portalProjectId }}</span>
-    </div>
+    <!-- Identity block. Four layouts, chosen per project in management; see
+         PortalBrandMode. The class drives the geometry - a wide wordmark in
+         `logo` mode gets room to read, an emblem in `logo-title` mode is boxed
+         beside the title, and the text modes are unchanged from before. -->
+    <a [routerLink]="portalLink('home')" class="logo-section" [ngClass]="'brand-' + brandMode">
+      <img *ngIf="showsLogo" class="portal-logo" [src]="portalLogo" [alt]="portalTitle">
+      <span class="portal-brand-text" *ngIf="showsTitle">
+        <span class="logo">{{ portalTitle }}</span>
+        <span class="portal-pid" *ngIf="brandMode === 'title-id' && portalProjectId">{{ portalProjectId }}</span>
+      </span>
+    </a>
 
     <!-- Always rendered, even when collapsed (then it is hidden off-flow), so its
          natural row width stays measurable and the bar can decide whether the

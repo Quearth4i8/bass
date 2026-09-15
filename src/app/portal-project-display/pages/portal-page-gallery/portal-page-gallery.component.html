@@ -47,18 +47,30 @@
     <i class='bx bx-image'></i>
     <p>There is no data.</p>
   </div>
-  <!-- Lightbox -->
+  <!-- Lightbox: the chrome (close, arrows, counter) is anchored to the overlay,
+       not to the picture, so it stays put whatever the image's aspect ratio. -->
   <div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="closeLightbox()">
-    <div class="lightbox-box" (click)="$event.stopPropagation()">
-      <button class="lb-close" (click)="closeLightbox()"><i class='bx bx-x'></i></button>
-      <button class="lb-arrow lb-prev" (click)="prevImage()"><i class='bx bx-chevron-left'></i></button>
+    <button class="lb-close" (click)="closeLightbox(); $event.stopPropagation()" aria-label="Close">
+      <i class='bx bx-x'></i>
+    </button>
+
+    <button class="lb-arrow lb-prev" (click)="prevImage(); $event.stopPropagation()" aria-label="Previous image">
+      <i class='bx bx-chevron-left'></i>
+    </button>
+
+    <div class="lightbox-stage">
       <img
         [src]="project.content.gallery.images[lightboxIndex].url"
         [alt]="project.content.gallery.images[lightboxIndex].name"
         class="lb-image"
+        (click)="$event.stopPropagation()"
       >
-      <button class="lb-arrow lb-next" (click)="nextImage()"><i class='bx bx-chevron-right'></i></button>
-      <div class="lb-counter">{{ lightboxIndex + 1 }} / {{ project.content.gallery.images.length }}</div>
     </div>
+
+    <button class="lb-arrow lb-next" (click)="nextImage(); $event.stopPropagation()" aria-label="Next image">
+      <i class='bx bx-chevron-right'></i>
+    </button>
+
+    <div class="lb-counter">{{ lightboxIndex + 1 }} / {{ project.content.gallery.images.length }}</div>
   </div>
 </ng-container>

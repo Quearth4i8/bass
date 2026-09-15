@@ -62,9 +62,12 @@ const routes: Routes = [
     path: '',
     component: ProjectsLandingComponent,
     children: [
-      { path: '', redirectTo: 'overview', pathMatch: 'full' },
-      { path: 'overview',    component: LandingOverviewComponent },
-      { path: 'about',       component: LandingAboutComponent },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home',        component: LandingAboutComponent },
+      { path: 'index',       component: LandingOverviewComponent },
+      // Kept so links and bookmarks to the old URLs still land.
+      { path: 'about',       redirectTo: 'home',  pathMatch: 'full' },
+      { path: 'overview',    redirectTo: 'index', pathMatch: 'full' },
       { path: 'geodatabase', component: LandingGeodatabaseComponent },
       { path: 'portals',     component: LandingPortalsComponent },
       { path: 'team',        component: LandingTeamComponent },

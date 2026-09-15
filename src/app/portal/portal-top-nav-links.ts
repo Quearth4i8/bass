@@ -11,8 +11,8 @@ export const PORTAL_TOP_NAV_LINKS: PortalTopNavLink[] = [
   { path: 'partners', label: 'Partners' },
   { path: 'funders',   label: 'Funders' },
   { path: 'team', label: 'Team' },
-  { path: 'events', label: 'Events' },
   { path: 'participants', label: 'Participants' },
+  { path: 'events', label: 'Events' },
   { path: 'gallery', label: 'Gallery' },
   { path: 'outputs', label: 'Outputs' },
 ];

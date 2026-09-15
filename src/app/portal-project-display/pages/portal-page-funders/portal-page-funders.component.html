@@ -10,8 +10,8 @@
   <section class="logos-section" *ngIf="project.content.partnersFunders.funderLogos.length; else empty">
     <div class="logo-grid">
       <div class="logo-tile" *ngFor="let logo of project.content.partnersFunders.funderLogos">
-        <img [src]="logo.url" alt="funder" loading="lazy">
-        <span class="logo-name" *ngIf="logo.name">{{ logo.name }}</span>
+        <img [src]="logo.url" [alt]="logo.name || 'funder'" loading="lazy">
+        <span class="logo-tooltip" *ngIf="logo.name">{{ logo.name }}</span>
       </div>
     </div>
   </section>

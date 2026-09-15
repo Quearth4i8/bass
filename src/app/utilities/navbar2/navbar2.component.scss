@@ -33,11 +33,60 @@ header .logo {
   transition: 0.6s;
 }
 
+// ── Project identity block ──────────────────────────────────────────────────
+// One of four layouts, picked per project (PortalBrandMode). The whole block is
+// a link to the portal home in every mode.
 .logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  min-width: 0;
+
+  // Text-only modes have nothing to sit beside, so no gap.
+  &.brand-title-id,
+  &.brand-title { gap: 0; }
+}
+
+.portal-brand-text {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
+  min-width: 0;
+}
+
+// Every logo is seated on a white chip. These assets come from many sources:
+// some are transparent PNGs, others are JPEGs with a baked-in white background
+// that showed as a hard white rectangle floating on the coloured bar. Putting
+// both on the same rounded white tile makes them look identical and
+// deliberate - the same treatment the partner logo strip on the portal home
+// already uses. box-sizing keeps the padding inside the sizes set below, so
+// the nav's width budget is unchanged.
+.portal-logo {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+// Wordmark alone: nothing else is competing for the bar's width budget, so let
+// a long logo run to a width where it can actually be read.
+.brand-logo .portal-logo {
+  height: 42px;
+  max-width: 260px;
+  padding: 5px 10px;
+}
+
+// Emblem beside the title: a fixed square keeps the title as the anchor and
+// costs the nav only the box plus the gap. See syncNavFit() in the component -
+// the inline link row collapses to a drawer once the bar stops fitting.
+.brand-logo-title .portal-logo {
+  height: 40px;
+  width: 40px;
+  padding: 5px;
 }
 
 .portal-pid {

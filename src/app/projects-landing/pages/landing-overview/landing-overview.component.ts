@@ -1,9 +1,6 @@
 import { Component, DestroyRef, HostListener, AfterViewInit, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { TrixService, TrixRegionData, TrixResult, TrixSeason, calcTrix, classify } from '../../../services/trix.service';
 import { TrixPredictionService, TrixPredRegion, TrixPredResult } from '../../../services/trix-prediction.service';
-import { PortalProjectsService } from '../../../portal/services/portal-projects.service';
-import { ProjectService } from '../../../services/ProjectService';
-import { ProjectGroupService } from '../../../services/ProjectGroupService';
 import { ThemeService } from '../../../services/ThemeService';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -151,10 +148,6 @@ export class LandingOverviewComponent implements OnInit, AfterViewInit, OnDestro
   predError = false;
   selectedPredSeason: TrixSeason = detectCurrentSeason();
 
-  totalResearchProjects: number | null = null;
-  totalPortalProjects: number | null = null;
-  activePortalProjects: number | null = null;
-
   readonly COUNTRIES = COUNTRY_DEFS;
   // All 24 Tunisian governorate boundaries, layered over TUNISIA_PATH so the
   // map is "cut by regions"; only Bizerte/Tunis/Gabès get a TRIX-status fill.
@@ -203,9 +196,6 @@ export class LandingOverviewComponent implements OnInit, AfterViewInit, OnDestro
   constructor(
     private trixService: TrixService,
     private trixPredService: TrixPredictionService,
-    private portalProjectsService: PortalProjectsService,
-    private projectService: ProjectService,
-    private projectGroupService: ProjectGroupService,
     private destroyRef: DestroyRef,
     private el: ElementRef,
     public themeService: ThemeService,
@@ -225,18 +215,6 @@ export class LandingOverviewComponent implements OnInit, AfterViewInit, OnDestro
         next: data => { this.predData = this.sortByCanonicalOrder(data); this.predLoading = false; },
         error: ()   => { this.predLoading = false; this.predError = true; }
       });
-
-    this.portalProjectsService.list()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(projects => {
-        this.totalPortalProjects = projects.length;
-        this.activePortalProjects = projects.filter(p => p.isActive).length;
-      });
-
-    this.projectService.getAllProjects().subscribe({
-      next: p => { this.totalResearchProjects = p.length; },
-      error: () => {}
-    });
   }
 
   ngAfterViewInit(): void {

@@ -126,6 +126,22 @@ export interface PortalProjectContent {
   };
 }
 
+/**
+ * How the portal navbar renders a project's identity.
+ * - `title-id`   title over the grant id (the long-standing default)
+ * - `title`      title alone
+ * - `logo`       logo alone, free to run wide - suits horizontal wordmarks
+ * - `logo-title` square logo box to the left of the title - suits emblems
+ */
+export type PortalBrandMode = 'title-id' | 'title' | 'logo' | 'logo-title';
+
+export const PORTAL_BRAND_MODES: { value: PortalBrandMode; label: string; hint: string }[] = [
+  { value: 'title-id',   label: 'Title + project ID', hint: 'Default. No logo needed.' },
+  { value: 'title',      label: 'Title only',         hint: 'For short project names.' },
+  { value: 'logo',       label: 'Logo only',          hint: 'Best for wide, horizontal wordmarks.' },
+  { value: 'logo-title', label: 'Logo + title',       hint: 'Best for square or round emblems.' },
+];
+
 export interface PortalProjectMeta {
   slug: PortalProjectSlug;
   title: string;
@@ -136,6 +152,10 @@ export interface PortalProjectMeta {
   accentColor?: string;
   /** Display order on the landing page (1 = first). */
   order?: number;
+  /** Project logo URL. Empty or absent for projects without one. */
+  logo?: string;
+  /** Which identity layout the portal navbar uses. Defaults to `title-id`. */
+  brandMode?: PortalBrandMode;
 }
 
 export interface PortalProject extends PortalProjectMeta {

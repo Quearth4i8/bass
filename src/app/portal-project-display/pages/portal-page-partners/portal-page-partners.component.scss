@@ -57,13 +57,14 @@
 
   .logo-tile {
     flex: 0 0 calc(25% - 15px);
+    // Anchors the tooltip that replaced the caption which used to sit here.
+    position: relative;
     background: #fff;
     border: 1px solid rgba(215,225,235,0.9);
     border-radius: 16px;
-    padding: 28px 20px 22px;
-    min-height: 160px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 14px;
+    padding: 24px;
+    min-height: 170px;
+    display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 
@@ -71,23 +72,61 @@
       transform: translateY(-4px);
       box-shadow: 0 14px 32px rgba(0,0,0,0.1);
       border-color: var(--portal-accent, #4fc3f7);
+      // Lift above neighbouring tiles, so this tooltip is not painted under
+      // the tiles that come after it in the grid.
+      z-index: 2;
     }
 
+    // With the caption gone the logo gets the whole tile, so it can be read at
+    // a useful size instead of sharing the space with a line of text.
     img {
-      height: 100px;
-      width: auto;
+      height: 122px;
+      width: 100%;
       max-width: 100%;
       object-fit: contain;
       flex-shrink: 0;
     }
 
-    .logo-name {
+    // The name, on demand. `width: max-content` with a max-width lets a short
+    // name sit on one line and a long one wrap, rather than being stretched to
+    // the tile's width or forced onto one overflowing line.
+    .logo-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      width: max-content;
+      max-width: 240px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #1a2a4a;
+      color: #fff;
       font-size: 12.5px;
       font-weight: 600;
-      color: #475569;
+      line-height: 1.4;
       text-align: center;
-      line-height: 1.35;
-      word-break: break-word;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(4px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+      z-index: 3;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: #1a2a4a;
+      }
+    }
+
+    &:hover .logo-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
     }
   }
 }
@@ -105,7 +144,7 @@
   .logos-section { padding: 28px 14px 44px; }
   .logo-grid {
     gap: 12px;
-    .logo-tile { flex: 0 0 calc(50% - 6px); min-height: 120px; padding: 22px 16px; }
-    img { height: 70px; }
+    .logo-tile { flex: 0 0 calc(50% - 6px); min-height: 130px; padding: 18px; }
+    img { height: 94px; }
   }
 }

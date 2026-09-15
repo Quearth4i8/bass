@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
+import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 
 import { PortalProjectsService } from '../../portal/services/portal-projects.service';
 import { PortalMediaService } from '../../portal/services/portal-media.service';
@@ -1423,6 +1424,44 @@ export class PortalProjectsListComponent implements OnInit {
 
   private updateTeamMemberOrderInSection(sectionIndex: number): void {
     this.teamSections[sectionIndex].members.forEach((m: any, i: number) => m.order = i + 1);
+  }
+
+  // Drag a member card onto another section to recategorise it. Every section's
+  // grid is a drop list in one cdkDropListGroup, so the container data here is
+  // the target section's `members` array.
+  //
+  // `event.currentIndex` is deliberately ignored: sorting is disabled on these
+  // grids (see the template for why), which leaves that index meaningless, so
+  // the member is appended to the end of the target section instead.
+  onTeamMemberDrop(event: CdkDragDrop<any[]>): void {
+    // Dropping back on the same section is a no-op; ordering within a section
+    // is done with the arrow buttons on each card.
+    if (event.previousContainer === event.container) {
+      return;
+    }
+
+    const member = event.previousContainer.data[event.previousIndex];
+
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.container.data.length,
+    );
+
+    // Member ids are only unique within a section (addTeamMemberToSection
+    // numbers from 1 per section), so a move can drop a duplicate id into the
+    // target. Reissue one rather than let two members there share an id.
+    if (event.container.data.filter((m: any) => m.id === member.id).length > 1) {
+      member.id = this.nextTeamMemberId(event.container.data);
+    }
+
+    this.teamSections.forEach((_, i) => this.updateTeamMemberOrderInSection(i));
+  }
+
+  private nextTeamMemberId(members: any[]): number {
+    const used = members.map((m: any) => Number(m.id) || 0);
+    return used.length > 0 ? Math.max(...used) + 1 : 1;
   }
 
   onTeamMemberImageSelected(event: any, sectionIndex: number, memberIndex: number): void {
