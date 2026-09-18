@@ -2,10 +2,7 @@
 
 <ng-container *ngIf="!loading && project">
 
-  <div class="page-header">
-    <h2 class="page-section-title">Funders</h2>
-    <div class="header-divider"></div>
-  </div>
+  <app-portal-page-hero title="Funders"></app-portal-page-hero>
 
   <section class="logos-section" *ngIf="project.content.partnersFunders.funderLogos.length; else empty">
     <div class="logo-grid">

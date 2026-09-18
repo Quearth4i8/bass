@@ -38,8 +38,11 @@
         <div class="logo-track" [class.static]="!isLogoMarqueeActive">
           <div class="logo-item"
                *ngFor="let logo of loopedPartnerLogos">
+            <!-- Not lazy: the track scrolls continuously, so every logo is
+                 always seconds from being on screen. Deferring them meant the
+                 second half of the loop arrived as empty tiles and popped in
+                 once the fetch caught up. -->
             <img [src]="logo.url"
-                 loading="lazy"
                  decoding="async"
                  class="logo">
           </div>

@@ -12,7 +12,8 @@
             routerLinkActive="nav-active"
             [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
           >
-            {{ link.label }}
+            <i class="bx nav-link-icon" [ngClass]="link.icon" aria-hidden="true"></i>
+            <span>{{ link.label }}</span>
           </a>
         </li>
       </ul>

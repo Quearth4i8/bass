@@ -1,62 +1,95 @@
 <div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
 
 <ng-container *ngIf="!loading && project">
-  <div class="page-header">
-    <h2 class="page-section-title">Events</h2>
-    <div class="header-divider"></div>
-  </div>
+  <app-portal-page-hero title="Events"></app-portal-page-hero>
 
   <div class="events-search-bar" *ngIf="project.content.events.events?.length">
     <div class="events-search-box">
-      <i class='bx bx-search'></i>
+      <i class='bx bx-search search-leading'></i>
       <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Search events by title, organiser, location or speaker...">
       <button class="events-search-clear" type="button" *ngIf="searchTerm" (click)="onSearchChange('')" title="Clear search">
         <i class='bx bx-x'></i>
       </button>
+      <span class="search-action" aria-hidden="true"><i class='bx bx-search'></i></span>
     </div>
   </div>
 
   <div class="events-container" *ngIf="project.content.events.events?.length">
     <div class="event-card" *ngFor="let event of filteredEvents">
+
+      <!-- Calendar tile: weekday, day number, month + year. -->
       <div class="event-date-col">
-        <span class="event-day">{{ getEventDay(event.startDate) }}</span>
-        <span class="event-full-date">{{ formatEventDate(event.startDate) }}</span>
+        <i class='bx bx-calendar date-icon'></i>
+        <span class="event-weekday">{{ getEventDay(event.startDate) }}</span>
+        <span class="event-daynum">{{ getEventDayNumber(event.startDate) }}</span>
+        <span class="event-monthyear">{{ getEventMonthYear(event.startDate) }}</span>
         <div class="event-range" *ngIf="event.endDate && event.endDate !== event.startDate">
-          <span class="range-to">to</span>
-          <span class="event-full-date">{{ formatEventDate(event.endDate) }}</span>
+          <span class="range-to">until</span>
+          <span class="range-date">{{ formatEventDate(event.endDate) }}</span>
         </div>
       </div>
+
       <div class="event-body">
         <div class="event-top">
           <h3 class="event-title">{{ event.title }}</h3>
           <span class="event-status" [ngClass]="getStatusClass(event.status)">
+            <span class="status-dot"></span>
             {{ event.status === 'ongoing' ? 'On Going' : (event.status === 'finished' ? 'Closed' : 'Canceled') }}
           </span>
         </div>
-        
-        <div class="event-meta-grid">
-          <p class="event-meta-item" *ngIf="event.organiser">
-            <i class='bx bx-buildings'></i> 
-            <strong>Organiser:</strong> {{ event.organiser }}
-          </p>
-          <p class="event-meta-item" *ngIf="event.location">
-            <i class='bx bx-map-pin'></i> 
-            <strong>Location:</strong> {{ event.location }}
-          </p>
-          <p class="event-meta-item" *ngIf="event.speaker">
-            <i class='bx bx-user-voice'></i> 
-            <strong>Speaker:</strong> {{ event.speaker }}
-          </p>
-          <p class="event-meta-item" *ngIf="event.participants">
-            <i class='bx bx-group'></i> 
-            <strong>Participant(s):</strong> {{ event.participants }}
-          </p>
-        </div>
 
-        <div class="event-presentation" *ngIf="event.presentation">
-          <h4 class="presentation-title">Presentation</h4>
-          <p class="presentation-text">{{ event.presentation }}</p>
-        </div>
+        <!-- Logistics only: who ran it and where. Participants moved out of
+             this row - they belong to the talk, not to the venue. -->
+        <dl class="event-facts" *ngIf="event.organiser || event.location">
+          <div class="fact" *ngIf="event.organiser">
+            <i class='bx bxs-user-detail fact-icon'></i>
+            <dt>Organiser</dt>
+            <dd>{{ event.organiser }}</dd>
+          </div>
+          <div class="fact" *ngIf="event.location">
+            <i class='bx bxs-map fact-icon'></i>
+            <dt>Location</dt>
+            <dd>{{ event.location }}</dd>
+          </div>
+        </dl>
+
+        <!-- The talk: who gave it, who attended it, and what was covered - in
+             that order, each on its own full-width row rather than squeezed
+             into a column of the row above. -->
+        <section class="event-talk"
+                 *ngIf="event.presentation || event.speaker || event.participants">
+
+          <div class="talk-people" *ngIf="event.speaker || event.participants">
+            <div class="talk-row" *ngIf="event.speaker">
+              <i class='bx bxs-microphone talk-icon'></i>
+              <div class="talk-row-body">
+                <span class="talk-label">Speaker</span>
+                <p class="talk-value">{{ event.speaker }}</p>
+              </div>
+            </div>
+
+            <div class="talk-row" *ngIf="event.participants">
+              <i class='bx bxs-group talk-icon'></i>
+              <div class="talk-row-body">
+                <span class="talk-label">Participants</span>
+                <p class="talk-value">{{ event.participants }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="talk-presentation" *ngIf="event.presentationItems?.length">
+            <span class="talk-label">Presentation</span>
+
+            <!-- One point per line when the abstract is a list, a plain
+                 paragraph when it is prose. -->
+            <ul class="presentation-list" *ngIf="event.presentationItems.length > 1">
+              <li *ngFor="let point of event.presentationItems">{{ point }}</li>
+            </ul>
+            <p class="presentation-text" *ngIf="event.presentationItems.length === 1">
+              {{ event.presentationItems[0] }}
+            </p>
+          </div>
+        </section>
       </div>
     </div>
 

@@ -61,6 +61,15 @@ export class PortalProjectsService {
 
   readonly allProjects$: Observable<PortalProject[]> = this.projects$.asObservable();
 
+  /**
+   * The store seeds itself with `[]`, so an empty list means either "not
+   * fetched yet" or "there genuinely are none" - a view that cannot tell them
+   * apart shows its empty state to everyone for the length of the request.
+   * This turns true once the first fetch has settled, either way.
+   */
+  private readonly loaded$$ = new BehaviorSubject<boolean>(false);
+  readonly loaded$: Observable<boolean> = this.loaded$$.asObservable();
+
   constructor(
     private readonly http: HttpClient,
     private readonly auth: AuthService,
@@ -132,9 +141,15 @@ export class PortalProjectsService {
   private refresh(): Observable<PortalProject[]> {
     return this.http.get<PortalProject[]>(`${this.baseUrl}/portal-projects`).pipe(
       map((projects) => projects.map((p) => normalizeProject(p))),
-      tap((projects) => this.projects$.next(projects)),
+      tap((projects) => {
+        this.projects$.next(projects);
+        this.loaded$$.next(true);
+      }),
       catchError(() => {
         this.projects$.next([]);
+        // Settled, even though it failed: the list is as complete as it is
+        // going to get, and a view waiting on this must stop waiting.
+        this.loaded$$.next(true);
         return of([]);
       }),
     );

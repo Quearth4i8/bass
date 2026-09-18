@@ -30,6 +30,9 @@ export class PortalProjectDisplayComponent
   project: PortalProjectMeta | null = null;
   slug = '';
   notFound = false;
+
+  /** Chrome is withheld while the first lookup runs - see the template. */
+  booting = true;
   isMobileNavOpen = false;
 
   /** Measured height of the fixed nav; the shell reserves exactly this much. */
@@ -95,8 +98,21 @@ export class PortalProjectDisplayComponent
     this.context.projectMeta$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((meta) => {
-        this.notFound = !!this.context.getActiveSlug() && meta === null;
         this.project = meta;
+      });
+
+    // Not derived from `meta === null` any more: that is also what a project
+    // looks like while its request is still in flight, so the not-found screen
+    // was showing for the length of every portal load. Only a lookup that has
+    // finished and come back empty flips this.
+    this.context.lookupState$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((state) => {
+        this.notFound = state === 'missing';
+        // `!this.project` matters: the store re-emits whenever portal data is
+        // saved, which puts the lookup back into `loading`. Once a project has
+        // been shown, a refresh behind it must not blank the page.
+        this.booting = state === 'loading' && !this.project;
       });
   }
 

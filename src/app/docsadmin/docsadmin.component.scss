@@ -18,6 +18,12 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 * { box-sizing: border-box; }
 
+/* Tell the browser which scheme its own widgets are drawn in. Without this the
+   UA assumes light and paints the date field's calendar button, the number
+   spinners and the scrollbars in near-black - invisible on a dark panel. This
+   is the only way to reach that chrome; it has no CSS of its own. */
+:host { color-scheme: dark; }
+
 // ── Layout ─────────────────────────────────────────────────────────────────
 .admin-wrapper {
   min-height: 100vh; background: $bg;
@@ -711,6 +717,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Light theme ────────────────────────────────────────────────────────────
 .admin-wrapper.theme-light {
+  color-scheme: light;
   background: #f0f7fb; color: #0d2137;
 
   .admin-header  { background: #ffffff; border-bottom-color: #c5d8e6; }

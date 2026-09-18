@@ -1,10 +1,7 @@
 <div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
 
 <ng-container *ngIf="!loading && project">
-  <div class="page-header">
-    <h2 class="page-section-title">Gallery</h2>
-    <div class="header-divider"></div>
-  </div>
+  <app-portal-page-hero title="Gallery"></app-portal-page-hero>
 
   <div class="gallery-grid" *ngIf="project.content.gallery.images?.length">
     <div
@@ -12,7 +9,7 @@
       *ngFor="let img of paginatedImages; let i = index"
       (click)="openLightbox((currentPage - 1) * imagesPerPage + i)"
     >
-      <img [src]="img.url" [alt]="img.name || 'Gallery image'" loading="lazy" decoding="async">
+      <img [src]="thumbUrl(img.url)" [alt]="img.name || 'Gallery image'" loading="lazy" decoding="async">
       <div class="gallery-overlay">
         <i class='bx bx-zoom-in'></i>
       </div>

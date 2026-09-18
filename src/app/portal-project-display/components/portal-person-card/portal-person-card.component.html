@@ -1,0 +1,20 @@
+<article class="person-card">
+  <!-- Flush against the card's left edge and as tall as the card, so the
+       portrait is shown at the largest size the layout allows. -->
+  <div class="person-photo">
+    <img [src]="photo" [alt]="person.name" loading="lazy" decoding="async">
+  </div>
+
+  <div class="person-body">
+    <h4 class="person-name">{{ person.name }}</h4>
+
+    <p class="person-role" *ngIf="role">{{ role }}</p>
+
+    <!-- Pushed to the foot of the card, under a rule, so that a row of cards
+         lines up on this line however long the roles above it run. -->
+    <p class="person-institute" *ngIf="institute">
+      <i class='bx bxs-institution'></i>
+      <span>{{ institute }}</span>
+    </p>
+  </div>
+</article>

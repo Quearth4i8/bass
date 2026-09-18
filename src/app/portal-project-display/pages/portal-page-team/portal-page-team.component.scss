@@ -2,10 +2,10 @@
   display: block;
   background: #f4f7fb;
 
-  /* card + avatar metrics, scaled up on very large screens */
-  --card-min: 300px;
-  --avatar-w: 90px;
-  --avatar-h: 112px;
+  /* card + portrait metrics, scaled up on very large screens. The portrait
+     column runs the full height of the card, so only its width is set here. */
+  --card-min: 320px;
+  --avatar-w: 104px;
   --grid-max: 1400px;
 }
 
@@ -94,99 +94,12 @@
      member renders one normal-width card instead of one full-width slab */
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min)), 1fr));
   align-items: stretch;
+  /* Equal rows, not just equal cards within a row: without this each row sizes
+     to its own tallest card, so one row of two-line institutes left the row
+     under it visibly shorter. */
+  grid-auto-rows: 1fr;
   gap: 16px;
 }
-
-.member-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 20px;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 18px;
-  height: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(to right, transparent, var(--portal-accent, #4fc3f7), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--portal-accent, #4fc3f7);
-    box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.14);
-    &::before { opacity: 1; }
-  }
-}
-
-.avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.avatar {
-  width: var(--avatar-w);
-  height: var(--avatar-h);
-  border-radius: 10px;
-  overflow: hidden;
-  background: #f1f5f9;
-  box-shadow: 0 0 0 1px #e2e8f0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 15%;
-    display: block;
-  }
-}
-
-.avatar-dot {
-  position: absolute;
-  bottom: -4px; right: -4px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: var(--portal-accent, #4fc3f7);
-  border: 2px solid #fff;
-  z-index: 1;
-}
-
-.member-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  flex: 1;
-}
-
-.member-name {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  margin: 0 0 4px;
-  color: #1a2a4a;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-
-.member-role {
-  font-size: 12px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.4;
-}
-
 
 @media (max-width: 1200px) {
   .page-header { padding-top: 160px; }
@@ -205,11 +118,27 @@
 
 /* Wider screens: more room + larger portraits instead of tiny stretched cards */
 @media (min-width: 1700px) {
-  :host { --grid-max: 1640px; --card-min: 330px; --avatar-w: 104px; --avatar-h: 130px; }
+  :host { --grid-max: 1640px; --card-min: 350px; --avatar-w: 118px; --avatar-min-h: 142px; }
 }
 
 @media (min-width: 2100px) {
-  :host { --grid-max: 1960px; --card-min: 360px; --avatar-w: 116px; --avatar-h: 145px; }
-  .member-name { font-size: 16px; }
-  .member-role { font-size: 13px; }
+  /* The card is its own component now, so its type scales through the custom
+     properties it reads rather than by reaching into its markup. */
+  :host {
+    --grid-max: 1960px; --card-min: 380px; --avatar-w: 130px; --avatar-min-h: 156px;
+    --person-name-size: 17px; --person-role-size: 11.5px; --person-meta-size: 13.5px;
+  }
+}
+
+/* ── Loader, held back ──────────────────────────────────────────────────────
+   The project is nearly always already in hand by the time this page is built
+   - the shell holds the resolved value and replays it - so this loader would
+   otherwise appear and vanish within a frame or two on every navigation, which
+   reads as a flicker rather than as progress. Delayed, it is seen only when
+   there is really something to wait for. */
+.page-loader { animation: page-loader-in 0.7s ease 240ms both; }
+@keyframes page-loader-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader .spinner { animation-duration: 1.6s; }
 }

@@ -1,15 +1,34 @@
 <footer class="full-height-footer">
+
+    <!-- Wave transition into the footer, in place of the old hard 2px rule.
+         Both paths trace the same curve: the body is filled below it and the
+         accent is stroked along it, so the line is the footer's top edge rather
+         than a separate ribbon floating above it. -->
+    <div class="footer-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false">
+        <path class="wave-body"
+              d="M0,44 C260,74 460,74 720,54 C980,34 1180,24 1440,28 L1440,100 L0,100 Z"/>
+        <path class="wave-edge" fill="none" vector-effect="non-scaling-stroke"
+              d="M0,44 C260,74 460,74 720,54 C980,34 1180,24 1440,28"/>
+      </svg>
+    </div>
+
+    <div class="footer-body">
     <div class="container-fluid">
         <div class="row align-items-center justify-content-between">
-            <div class="col-lg-4 text-lg-left" >
-                <h3>Copyright © INSTM {{ currentYear }}</h3>
+            <!-- text-lg-left / text-lg-right were Bootstrap 4 names and do
+                 nothing in 5, which is why neither column sat where it was
+                 meant to. Aligned in this component's own stylesheet instead. -->
+            <div class="col-lg-4 footer-col-start">
+                <p class="footer-copyright">Copyright © INSTM {{ currentYear }}</p>
             </div>
             <div class="col-lg-4 text-center">
                 <app-custom-fb-buttons></app-custom-fb-buttons>
             </div>
-            <div class="col-lg-4 text-lg-right" style="padding-right:5%">
-                <img class="img-fluid" src="assets/images/all_logo.png" style="height: 55px;">
+            <div class="col-lg-4 footer-col-end">
+                <img class="img-fluid" src="assets/images/all_logo.png">
             </div>
         </div>
+    </div>
     </div>
 </footer>

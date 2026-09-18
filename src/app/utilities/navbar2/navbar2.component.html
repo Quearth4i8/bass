@@ -82,7 +82,8 @@
       [routerLinkActiveOptions]="{ exact: link.path === 'home' }"
       (click)="closePortalMenu()"
     >
-      {{ link.label }}
+      <i class="bx nav-link-icon" [ngClass]="link.icon" aria-hidden="true"></i>
+      <span>{{ link.label }}</span>
     </a>
   </li>
 </ng-template>

@@ -52,6 +52,39 @@ export class PortalPageGalleryComponent implements OnInit {
     document.body.classList.toggle(PortalPageGalleryComponent.BODY_OPEN_CLASS, open);
   }
 
+  /**
+   * Rewrites a media URL to the backend's cached thumbnail route. Grid tiles are
+   * ~300px wide, and serving the full-resolution original into them was the
+   * whole reason this page was slow - a single phone photo can be several MB.
+   *
+   * Only our own /media/ URLs are rewritten; anything else (an absolute external
+   * URL, a data: URL, a local asset) is passed straight through.
+   */
+  thumbUrl(url: string, width = 480): string {
+    const marker = '/media/';
+    const i = url?.indexOf(marker) ?? -1;
+    if (i < 0) return url;
+    return `${url.slice(0, i + marker.length)}thumb/${url.slice(i + marker.length)}?w=${width}`;
+  }
+
+  /**
+   * Warm the next and previous full-size images so stepping through the
+   * lightbox does not wait on a fresh download each time.
+   */
+  private preloadNeighbours(index: number): void {
+    const images = this.project?.content.gallery.images ?? [];
+    const len = images.length;
+    if (len < 2) return;
+    for (const offset of [1, -1]) {
+      const url = images[(index + offset + len) % len]?.url;
+      if (url) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = url;
+      }
+    }
+  }
+
   get paginatedImages() {
     if (!this.project?.content.gallery.images) return [];
     const start = (this.currentPage - 1) * this.imagesPerPage;
@@ -81,6 +114,7 @@ export class PortalPageGalleryComponent implements OnInit {
     this.lightboxIndex = index;
     this.lightboxOpen = true;
     this.setBodyLightboxState(true);
+    this.preloadNeighbours(index);
   }
 
   closeLightbox(): void {
@@ -91,11 +125,13 @@ export class PortalPageGalleryComponent implements OnInit {
   prevImage(): void {
     const len = this.project?.content.gallery.images.length || 1;
     this.lightboxIndex = (this.lightboxIndex - 1 + len) % len;
+    this.preloadNeighbours(this.lightboxIndex);
   }
 
   nextImage(): void {
     const len = this.project?.content.gallery.images.length || 1;
     this.lightboxIndex = (this.lightboxIndex + 1) % len;
+    this.preloadNeighbours(this.lightboxIndex);
   }
 
   @HostListener('document:keydown', ['$event'])

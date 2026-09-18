@@ -4,7 +4,21 @@
     <span class="label" *ngIf="totalPortalProjects !== null">{{ totalPortalProjects | number:'2.0-0' }} initiatives</span>
   </div>
 
-  <div class="projects-grid">
+  <!-- Placeholders rather than an empty grid: the page used to render its
+       heading over nothing at all until the request came back, then snap the
+       cards in. These hold the shape of what is coming. -->
+  <div class="projects-grid" *ngIf="loading">
+    <div class="project-card project-card--skeleton" *ngFor="let s of skeletons">
+      <div class="skeleton-img"></div>
+      <div class="project-body">
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="projects-grid" *ngIf="!loading">
     <article
       *ngFor="let project of projects; let i = index"
       class="project-card fade-up"
@@ -36,4 +50,8 @@
       </div>
     </article>
   </div>
+
+  <p class="portals-empty" *ngIf="!loading && !projects.length">
+    No portal projects are published yet.
+  </p>
 </section>

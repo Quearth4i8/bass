@@ -1,10 +1,7 @@
 <div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
 
 <ng-container *ngIf="!loading && project">
-  <div class="page-header">
-    <h2 class="page-section-title">Scientific Merit</h2>
-    <div class="header-divider"></div>
-  </div>
+  <app-portal-page-hero title="Scientific Merit"></app-portal-page-hero>
 
   <div class="content-container" *ngIf="nonEmptyParagraphs(project.content.scientificMerit.paragraphs).length">
     <div

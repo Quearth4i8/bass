@@ -91,14 +91,14 @@ export class PortalProjectsListComponent implements OnInit {
       id: 1,
       title: 'Principal Investigators',
       members: [
-        { id: 1, name: 'Dr. Jane Smith', role: 'Project Coordinator', image: '', order: 1 }
+        { id: 1, name: 'Dr. Jane Smith', role: 'Project Coordinator', institute: '', image: '', order: 1 }
       ],
       order: 1
     }
   ];
 
   participants: any[] = [
-    { id: 1, name: 'John Doe', role: 'Data Specialist', image: '', order: 1 }
+    { id: 1, name: 'John Doe', role: 'Data Specialist', institute: '', image: '', order: 1 }
   ];
 
   outputs: any[] = [];
@@ -1402,6 +1402,7 @@ export class PortalProjectsListComponent implements OnInit {
       id: newId,
       name: '',
       role: '',
+      institute: '',
       image: '',
       order: section.members.length + 1
     });
@@ -1493,6 +1494,7 @@ export class PortalProjectsListComponent implements OnInit {
       id: newId,
       name: '',
       role: '',
+      institute: '',
       image: '',
       order: this.participants.length + 1
     });

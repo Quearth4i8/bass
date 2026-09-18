@@ -48,6 +48,8 @@ import { ProjectsLandingComponent } from './projects-landing/projects-landing.co
 import { ManagementComponent } from './management/management.component';
 import { WikiadminComponent } from './wikiadmin/wikiadmin.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { PortalPageHeroComponent } from './portal-project-display/components/portal-page-hero/portal-page-hero.component';
+import { PortalPersonCardComponent } from './portal-project-display/components/portal-person-card/portal-person-card.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { ContentEditableHtmlDirective } from './management/portal-projects-list/content-editable-html.directive';
 import { AuthInterceptor } from './auth/auth.interceptor';
@@ -71,7 +73,6 @@ import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.c
 // Landing pages
 import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
 import { LandingAboutComponent } from './projects-landing/pages/landing-about/landing-about.component';
-import { LandingGeodatabaseComponent } from './projects-landing/pages/landing-geodatabase/landing-geodatabase.component';
 import { LandingPortalsComponent } from './projects-landing/pages/landing-portals/landing-portals.component';
 import { LandingTeamComponent } from './projects-landing/pages/landing-team/landing-team.component';
 import { LandingOutputsComponent } from './projects-landing/pages/landing-outputs/landing-outputs.component';
@@ -100,6 +101,8 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     ManagementComponent,
     WikiadminComponent,
     PortalProjectsListComponent,
+    PortalPageHeroComponent,
+    PortalPersonCardComponent,
     ContentEditableHtmlDirective,
     // Portal public display
     PortalProjectDisplayComponent,
@@ -117,7 +120,6 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     // Landing pages
     LandingOverviewComponent,
     LandingAboutComponent,
-    LandingGeodatabaseComponent,
     LandingPortalsComponent,
     LandingTeamComponent,
     LandingOutputsComponent,

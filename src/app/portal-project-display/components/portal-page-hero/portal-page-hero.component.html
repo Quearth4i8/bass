@@ -1,0 +1,14 @@
+<header class="page-hero">
+  <img class="hero-bg" *ngIf="heroImage" [src]="heroImage" alt="" aria-hidden="true">
+  <div class="hero-tint"></div>
+
+  <div class="hero-inner">
+    <h2 class="hero-title">{{ title }}</h2>
+  </div>
+
+  <div class="hero-wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false">
+      <path d="M0,58 C260,18 520,18 780,44 C1040,70 1240,84 1440,56 L1440,100 L0,100 Z"/>
+    </svg>
+  </div>
+</header>

@@ -12,7 +12,11 @@ header.portal-shell-nav {
   grid-template-columns: auto minmax(0, 5fr) auto;
   align-items: center;
   column-gap: 12px;
-  --nav-pad-x: clamp(20px, 5.2vw, 100px);
+  /* Was clamp(20px, 5.2vw, 100px), which parked the logo and the portal
+     button ~100px off each edge on a wide screen. Tighter gutters also
+     hand the link row more width, so the bar collapses to the drawer
+     later than it used to. */
+  --nav-pad-x: clamp(16px, 2.4vw, 40px);
   padding: 20px var(--nav-pad-x);
   min-height: 56px;
   background: transparent;
@@ -82,9 +86,12 @@ header.portal-shell-nav .logo {
 }
 
 .portal-nav-center a {
-  display: inline-block;
-  margin: 0 6px;
-  padding: 6px 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 4px;
+  padding: 7px 10px;
+  border-radius: 8px;
   text-decoration: none;
   color: #fff;
   font-weight: 500;
@@ -96,12 +103,17 @@ header.portal-shell-nav .logo {
 }
 
 .portal-nav-center a:hover {
-  color: #e79954;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
+/* A filled pill rather than an underline: with icons in the row an underline
+   sits awkwardly far below the glyph, and the pill reads at a glance. */
 .portal-nav-center a.nav-active {
-  color: #e79954;
-  border-bottom-color: #e79954;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border-bottom-color: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .portal-nav-actions {
@@ -117,6 +129,13 @@ header.portal-shell-nav .logo {
      `visibility` also keeps it out of the tab order while hidden. */
   visibility: hidden;
   pointer-events: none;
+  /* Placed before the portal button rather than after it. While hidden this
+     slot is still occupied - it has to be, because syncNavFit() requires the
+     actions column to measure the same in both states - and sitting last it
+     pushed the portal button a button's width in from the gutter. Reordering
+     moves that dead space between the links and the button, where nothing
+     shows, and leaves the container's total width untouched. */
+  order: -1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -133,7 +152,7 @@ header.portal-shell-nav .logo {
   i { font-size: 22px; line-height: 1; }
 
   &:hover { background: rgba(255, 255, 255, 0.22); }
-  &:focus-visible { outline: 2px solid #e79954; outline-offset: 2px; }
+  &:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.85); outline-offset: 2px; }
 }
 
 /* --- Step 1: tighten before collapsing -------------------------------------
@@ -142,8 +161,9 @@ header.portal-shell-nav .logo {
    before it has to become a drawer. */
 @media (max-width: 1500px) {
   .portal-nav-center a {
-    margin: 0 2px;
-    padding: 6px 3px;
+    margin: 0 1px;
+    padding: 6px 7px;
+    gap: 5px;
     font-size: clamp(0.8rem, 1vw, 0.95rem);
   }
 }
@@ -212,7 +232,9 @@ header.portal-shell-nav.menu-open .portal-nav-drawer {
 }
 
 .portal-nav-drawer a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   /* Its own gutter rather than the bar's --nav-pad-x. The drawer only opens
      once the bar has collapsed, i.e. at narrow widths, where that clamp bottoms
      out at 20px - too tight for a full-bleed list, and tighter still with the
@@ -228,14 +250,34 @@ header.portal-shell-nav.menu-open .portal-nav-drawer {
 }
 
 .portal-nav-drawer a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e79954;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .portal-nav-drawer a.nav-active {
-  color: #e79954;
-  border-left-color: #e79954;
-  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-left-color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Icons sit alongside the label in both the inline row and the drawer. Sized in
+   `em` so they track each context's font-size, and held back from full white so
+   the label stays the thing you read first. */
+.nav-link-icon {
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.portal-nav-center .nav-link-icon { font-size: 1.05em; }
+.portal-nav-drawer .nav-link-icon { font-size: 1.2rem; }
+
+.portal-nav-center a:hover .nav-link-icon,
+.portal-nav-center a.nav-active .nav-link-icon,
+.portal-nav-drawer a:hover .nav-link-icon,
+.portal-nav-drawer a.nav-active .nav-link-icon {
+  opacity: 1;
 }
 
 /* Very narrow: the portal button's label is the first thing worth dropping. */

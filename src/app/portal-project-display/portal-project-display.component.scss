@@ -164,6 +164,67 @@
   flex: 1 0 auto;
 }
 
+/* Boot: the neutral screen shown while the project - and with it the portal's
+   accent colour - is still being fetched. Greys only, deliberately: anything
+   keyed to --portal-accent here would be the default teal, which is the flash
+   this screen exists to avoid.
+
+   Held back a beat before it fades in. A warm load resolves in well under that,
+   so the usual experience is no spinner at all rather than one that appears and
+   disappears inside the same few frames - which reads as a glitch, not as
+   progress. It only ever shows up when there is genuinely something to wait
+   for. */
+.portal-boot {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f6fb;
+  animation: portal-boot-in 0.7s ease 260ms both;
+}
+
+.portal-boot-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2.5px solid rgba(26, 42, 74, 0.1);
+  border-top-color: #8a97a8;
+  border-radius: 50%;
+  animation: portal-boot-spin 0.9s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+
+@keyframes portal-boot-spin { to { transform: rotate(360deg); } }
+@keyframes portal-boot-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Page transitions ───────────────────────────────────────────────────────
+   Every portal page rises a little as it fades in, so a navigation reads as a
+   move rather than a repaint. ::ng-deep because the router builds these hosts
+   itself: they never carry this component's scoping attribute, so an ordinary
+   rule here cannot reach them.
+
+   The transform is gone by the end (`transform: none` in the last keyframe and
+   `both` to hold it), which matters: a lingering transform would make this
+   element the containing block for the gallery's fixed-position lightbox. */
+:host ::ng-deep .portal-content > :not(router-outlet) {
+  /* Deliberately the landing pages' own reveal, to the millisecond: .7s ease
+     over an 18px rise, as set by `.fade-up` in projects-landing. A portal page
+     that arrived in half that time felt hurried next to everything else in the
+     site. Keep the two in step if either is ever retuned. */
+  animation: portal-page-enter 0.7s ease both;
+}
+
+@keyframes portal-page-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Taking someone at their word when they ask for less movement. */
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep .portal-content > :not(router-outlet) { animation: none; }
+  .portal-boot { animation-delay: 0ms; }
+  .portal-boot-spinner { animation-duration: 1.6s; }
+}
+
 /* Not Found */
 .not-found-container {
   min-height: calc(100vh - var(--portal-nav-h) - 160px);

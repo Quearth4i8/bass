@@ -1,27 +1,92 @@
 .full-height-footer {
   width: 100%;
-  background-color: #dde6f0;
+  // The band colour moves to .footer-body: the footer itself has to stay
+  // transparent, or it would paint a rectangle behind the wave and the curve
+  // would not show at all.
+  background: transparent;
   color: #1a2a4a;
-  padding-top: 24px;
   margin-top: 0;
-  padding-bottom: 20px;
   text-align: center;
-  border-top: 2px solid #c5d5e8;
 }
 
-.full-height-footer h3 {
-  font-size: 1.2rem;
-  color: #1a2a4a;
+.footer-wave {
+  line-height: 0; // kills the inline-descender gap under the svg
+
+  svg {
+    display: block;
+    width: 100%;
+    /* Shorter than the viewBox's 100 units, so preserveAspectRatio="none"
+       squashes the curve vertically by height/100 - a flatter wave, which is
+       what keeps the footer from eating the bottom of the page. Deepen the
+       path, not this, if the curve needs to read stronger again. */
+    height: 60px;
+  }
+
+  .wave-body {
+    fill: #10243d; // same as .footer-body, so the curve reads as one shape
+  }
+
+  // Drawn on the body's own boundary, so it reads as the footer's top edge.
+  // Half the stroke sits over the fill and half above it, which keeps the line
+  // crisp without opening a gap. Uses the project's accent, so each portal's
+  // footer matches its theme.
+  .wave-edge {
+    stroke: var(--portal-accent, #1a5f7a);
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+/* Dark band, so the footer closes the page instead of fading into it. */
+.footer-body {
+  background: #10243d;
+  padding: 8px 0 14px;
+}
+
+@media (max-width: 1024px) {
+  .footer-wave svg { height: 48px; }
+  .footer-wave .wave-edge { stroke-width: 2.5; }
+}
+
+@media (max-width: 560px) {
+  /* Narrower viewports compress the curve horizontally, so it stays visibly
+     wavy at a shorter height than a desktop strip needs. */
+  .footer-wave svg { height: 34px; }
+  .footer-wave .wave-edge { stroke-width: 2; }
+}
+
+/* A copyright notice, not a heading - it was an <h3>, which is why it came out
+   1.2rem and bold. */
+.footer-copyright {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.62);
+  margin: 0;
 }
 
 .full-height-footer div {
   font-size: 0.9rem;
-  color: #4a6080;
+  color: rgba(255, 255, 255, 0.62);
 }
 
+
+
+/* Copyright to the left, logos to the right, social icons centred between.
+   The container carries the side inset: .row's -12px gutter margins eat into
+   it, so the padding here is what lands, less that 12px. */
+.footer-body .container-fluid {
+  padding-left: clamp(28px, 4.5vw, 72px);
+  padding-right: clamp(28px, 4.5vw, 72px);
+}
+
+.footer-col-start { text-align: left; }
+.footer-col-end   { text-align: right; }
+
+/* No plate behind these: the PNG carries its own ground, so a white box under
+   it only framed it. */
 .full-height-footer img {
-  height: 55px;
-  margin: 0 auto;
+  height: 64px;
+  margin: 0;
 }
 @media (max-width: 768px) {
 .full-height-footer .row {
@@ -38,4 +103,8 @@
     max-width: 100%;
     height: auto;
   }
+
+  /* Stacked: the edges they were pinned to are no longer opposite each other. */
+  .footer-col-start,
+  .footer-col-end { text-align: center; }
 }

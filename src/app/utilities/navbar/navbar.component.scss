@@ -112,10 +112,15 @@
     height: 100vh;
     background-size: cover;
   }
-  header ul li a:hover{
+  /* `>` so this stays on the legacy bar, whose <ul> is a direct child of
+     <header>. As a loose descendant it also matched the portal nav's links
+     (header > nav.portal-nav-center > ul > li > a) and, with .sticky always
+     present on the portal header, outranked .portal-nav-center a:hover - so
+     the portal links kept hovering orange however that rule was changed. */
+  header > ul li a:hover{
     color: #e79954;
   }
-  header.sticky ul li a:hover{
+  header.sticky > ul li a:hover{
     color: #e79954;
   }
   header.sticky .logo,

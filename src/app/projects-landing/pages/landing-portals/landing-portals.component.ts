@@ -11,6 +11,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class LandingPortalsComponent implements OnInit, AfterViewInit, OnDestroy {
   projects: PortalProjectMeta[] = [];
   totalPortalProjects: number | null = null;
+
+  /** True until the project list has actually been fetched - see `loaded$`. */
+  loading = true;
+
+  /** Placeholder cards to stand in for the real ones while they load. */
+  readonly skeletons = [0, 1, 2];
+
   private io?: IntersectionObserver;
 
   constructor(
@@ -32,6 +39,15 @@ export class LandingPortalsComponent implements OnInit, AfterViewInit, OnDestroy
         });
         this.totalPortalProjects = projects.length;
         setTimeout(() => this.observeFade(), 80);
+      });
+
+    // Separate from the list itself: the store emits its seed `[]` immediately,
+    // so the arrival of a list is not the same event as the list being known.
+    this.portalProjectsService.loaded$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((loaded) => {
+        this.loading = !loaded;
+        if (loaded) setTimeout(() => this.observeFade(), 80);
       });
   }
 

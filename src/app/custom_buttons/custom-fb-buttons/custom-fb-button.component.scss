@@ -21,7 +21,7 @@
   font-family: "Poppins", sans-serif;
   /* Headroom for the tooltip, which pops up above the icons. Without it the
      tooltip spills past the footer's top border into the section above. */
-  padding-top: 26px;
+  padding-top: 14px;
 }
 
 .wrapper {
@@ -31,18 +31,20 @@
 
 .wrapper .icon {
   position: relative;
-  background: #ffffff;
+  /* Outlined rather than filled: the footer band behind these is navy now, and
+     solid white discs read as holes punched in it. */
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
-  padding: 15px;
-  margin: 10px;
-  width: 50px;
-  height: 50px;
-  font-size: 18px;
+  padding: 12px;
+  margin: 4px 10px;
+  width: 38px;
+  height: 38px;
+  font-size: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -95,22 +97,22 @@
 }
 
 .wrapper .icon:hover .tooltip {
-  top: -42px;
+  top: -34px;
   opacity: 1;
   visibility: visible;
 }
 
 .icon.facebook span i {
-  color: #3b5998;
+  color: rgba(255, 255, 255, 0.85);
 }
 .icon.facebook:hover span i {
   color: #ffffff;
 }
 .icon.twitter span i {
-  color: #000000;
+  color: rgba(255, 255, 255, 0.85);
 }
 .icon.twitter:hover span i {
-  color: #ffffff;
+  color: #0d2839;
 }
 
 
@@ -119,12 +121,14 @@
 .wrapper .facebook:hover .tooltip,
 .wrapper .facebook:hover .tooltip::before {
   background: #1877F2;
+  border-color: #1877F2;
   color: #ffffff;
 }
 
 .wrapper .twitter:hover,
 .wrapper .twitter:hover .tooltip,
 .wrapper .twitter:hover .tooltip::before {
-  background: #0d2839;
-  color: #ffffff;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0d2839;
 }

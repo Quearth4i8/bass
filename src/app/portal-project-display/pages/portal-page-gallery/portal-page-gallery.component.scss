@@ -25,6 +25,11 @@
   .gallery-item {
     position: relative;
     aspect-ratio: 4/3;
+    /* Skip layout, paint and decode for tiles scrolled out of view. The tile
+       already has a fixed aspect ratio, so the placeholder size below matches
+       what it will occupy and the scrollbar does not jump. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 240px;
     overflow: hidden;
     border-radius: 10px;
     cursor: pointer;
@@ -247,4 +252,17 @@
       }
     }
   }
+}
+
+/* ── Loader, held back ──────────────────────────────────────────────────────
+   The project is nearly always already in hand by the time this page is built
+   - the shell holds the resolved value and replays it - so this loader would
+   otherwise appear and vanish within a frame or two on every navigation, which
+   reads as a flicker rather than as progress. Delayed, it is seen only when
+   there is really something to wait for. */
+.page-loader { animation: page-loader-in 0.7s ease 240ms both; }
+@keyframes page-loader-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader .spinner { animation-duration: 1.6s; }
 }

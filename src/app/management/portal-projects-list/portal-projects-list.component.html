@@ -1137,8 +1137,11 @@
                   </div>
 
                   <div class="member-info-fields">
-                    <input type="text" [(ngModel)]="member.name" placeholder="Name" class="member-name-input">
+                    <input type="text" [(ngModel)]="member.name" placeholder="Name" class="member-name-input"
+                           [title]="member.name || ''">
                     <input type="text" [(ngModel)]="member.role" placeholder="Role" class="member-role-input">
+                    <input type="text" [(ngModel)]="member.institute" placeholder="Institute" class="member-institute-input"
+                           [title]="member.institute || ''">
                   </div>
 
                   <div class="member-item-actions">
@@ -1206,8 +1209,11 @@
               </div>
 
               <div class="member-info-fields">
-                <input type="text" [(ngModel)]="p.name" placeholder="Name" class="member-name-input">
+                <input type="text" [(ngModel)]="p.name" placeholder="Name" class="member-name-input"
+                           [title]="p.name || ''">
                 <input type="text" [(ngModel)]="p.role" placeholder="Role" class="member-role-input">
+                <input type="text" [(ngModel)]="p.institute" placeholder="Institute" class="member-institute-input"
+                       [title]="p.institute || ''">
               </div>
 
               <div class="member-item-actions">

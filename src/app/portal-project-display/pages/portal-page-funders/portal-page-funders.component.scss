@@ -1,3 +1,8 @@
+/* The name tooltip on a logo tile. Keyed to the project's accent rather than a
+   fixed navy, so it matches the portal it is shown in - darkened well past the
+   accent itself, because an accent can be light and the label is white on it. */
+$logo-tooltip-bg: color-mix(in srgb, var(--portal-accent, #1a5f7a), #0a1c30 58%);
+
 .page-loader {
   display: flex; align-items: center; justify-content: center; min-height: 60vh;
   .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -87,7 +92,7 @@
       max-width: 240px;
       padding: 8px 12px;
       border-radius: 8px;
-      background: #1a2a4a;
+      background: $logo-tooltip-bg;
       color: #fff;
       font-size: 12.5px;
       font-weight: 600;
@@ -108,7 +113,7 @@
         left: 50%;
         transform: translateX(-50%);
         border: 5px solid transparent;
-        border-top-color: #1a2a4a;
+        border-top-color: $logo-tooltip-bg;
       }
     }
 
@@ -135,4 +140,17 @@
     .logo-tile { flex: 0 0 calc(50% - 6px); min-height: 130px; padding: 18px; }
     img { height: 94px; }
   }
+}
+
+/* ── Loader, held back ──────────────────────────────────────────────────────
+   The project is nearly always already in hand by the time this page is built
+   - the shell holds the resolved value and replays it - so this loader would
+   otherwise appear and vanish within a frame or two on every navigation, which
+   reads as a flicker rather than as progress. Delayed, it is seen only when
+   there is really something to wait for. */
+.page-loader { animation: page-loader-in 0.7s ease 240ms both; }
+@keyframes page-loader-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader .spinner { animation-duration: 1.6s; }
 }

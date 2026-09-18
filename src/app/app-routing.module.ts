@@ -26,7 +26,6 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
 // Landing pages
 import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
 import { LandingAboutComponent } from './projects-landing/pages/landing-about/landing-about.component';
-import { LandingGeodatabaseComponent } from './projects-landing/pages/landing-geodatabase/landing-geodatabase.component';
 import { LandingPortalsComponent } from './projects-landing/pages/landing-portals/landing-portals.component';
 import { LandingTeamComponent } from './projects-landing/pages/landing-team/landing-team.component';
 import { LandingOutputsComponent } from './projects-landing/pages/landing-outputs/landing-outputs.component';
@@ -68,7 +67,7 @@ const routes: Routes = [
       // Kept so links and bookmarks to the old URLs still land.
       { path: 'about',       redirectTo: 'home',  pathMatch: 'full' },
       { path: 'overview',    redirectTo: 'index', pathMatch: 'full' },
-      { path: 'geodatabase', component: LandingGeodatabaseComponent },
+      { path: 'geodatabase', redirectTo: 'home', pathMatch: 'full' },
       { path: 'portals',     component: LandingPortalsComponent },
       { path: 'team',        component: LandingTeamComponent },
       { path: 'outputs',     component: LandingOutputsComponent },

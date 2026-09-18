@@ -492,3 +492,16 @@ h5 {
     max-width: 95%;
   }
 }
+
+/* ── Loader, held back ──────────────────────────────────────────────────────
+   The project is nearly always already in hand by the time this page is built
+   - the shell holds the resolved value and replays it - so this loader would
+   otherwise appear and vanish within a frame or two on every navigation, which
+   reads as a flicker rather than as progress. Delayed, it is seen only when
+   there is really something to wait for. */
+.page-loader { animation: page-loader-in 0.7s ease 240ms both; }
+@keyframes page-loader-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader .spinner { animation-duration: 1.6s; }
+}

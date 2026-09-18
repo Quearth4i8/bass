@@ -70,6 +70,12 @@ export interface PortalEvent {
 export interface PortalPerson extends OrderedEntity {
   name: string;
   role: string;
+  /**
+   * Where they work. Optional in practice: entries created before this field
+   * existed carry the institute inside `role` ("Researcher, INSTM"), and the
+   * cards simply omit the line when it is empty.
+   */
+  institute?: string;
   image: string;
 }
 
