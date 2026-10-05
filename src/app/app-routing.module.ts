@@ -20,7 +20,6 @@ import { PortalPageFundersComponent } from './portal-project-display/pages/porta
 import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
 import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
-import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 
 // Landing pages
@@ -52,7 +51,7 @@ const routes: Routes = [
       { path: 'gallery',          component: PortalPageGalleryComponent },
       { path: 'events',           component: PortalPageEventsComponent },
       { path: 'team',             component: PortalPageTeamComponent },
-      { path: 'participants',     component: PortalPageParticipantsComponent },
+      { path: 'participants',     redirectTo: 'team' },
       { path: 'outputs',          component: PortalPageOutputsComponent },
     ]
   },

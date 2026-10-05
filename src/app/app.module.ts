@@ -64,7 +64,6 @@ import { PortalPageFundersComponent } from './portal-project-display/pages/porta
 import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
 import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
-import { PortalPageParticipantsComponent } from './portal-project-display/pages/portal-page-participants/portal-page-participants.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
@@ -114,7 +113,6 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     PortalPageGalleryComponent,
     PortalPageEventsComponent,
     PortalPageTeamComponent,
-    PortalPageParticipantsComponent,
     PortalPageOutputsComponent,
     SafeHtmlPipe,
     // Landing pages

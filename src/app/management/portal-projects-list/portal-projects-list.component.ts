@@ -97,10 +97,6 @@ export class PortalProjectsListComponent implements OnInit {
     }
   ];
 
-  participants: any[] = [
-    { id: 1, name: 'John Doe', role: 'Data Specialist', institute: '', image: '', order: 1 }
-  ];
-
   outputs: any[] = [];
 
   totalProjectsCount = 0;
@@ -163,7 +159,6 @@ export class PortalProjectsListComponent implements OnInit {
     { id: 'gallery', label: 'Gallery', icon: 'bx-images' },
     { id: 'events', label: 'Events', icon: 'bx-calendar' },
     { id: 'team', label: 'Team', icon: 'bx-group' },
-    { id: 'participants', label: 'Participants', icon: 'bx-user-voice' },
     { id: 'outputs', label: 'Outputs', icon: 'bx-video' }
   ];
 
@@ -221,7 +216,8 @@ export class PortalProjectsListComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((tab) => {
-        this.activeTab = tab || 'home';
+        // Participants became a section of Team; old bookmarks land there.
+        this.activeTab = tab === 'participants' ? 'team' : (tab || 'home');
       });
   }
 
@@ -1486,59 +1482,6 @@ export class PortalProjectsListComponent implements OnInit {
     this.saveAll();
   }
 
-  addParticipant(): void {
-    const newId = this.participants.length > 0
-      ? Math.max(...this.participants.map(p => p.id)) + 1
-      : 1;
-    this.participants.push({
-      id: newId,
-      name: '',
-      role: '',
-      institute: '',
-      image: '',
-      order: this.participants.length + 1
-    });
-  }
-
-  removeParticipant(index: number): void {
-    this.participants.splice(index, 1);
-    this.updateParticipantOrder();
-  }
-
-  moveParticipant(index: number, direction: 'up' | 'down'): void {
-    if (direction === 'up' && index > 0) {
-      [this.participants[index], this.participants[index - 1]] = [this.participants[index - 1], this.participants[index]];
-    } else if (direction === 'down' && index < this.participants.length - 1) {
-      [this.participants[index], this.participants[index + 1]] = [this.participants[index + 1], this.participants[index]];
-    }
-    this.updateParticipantOrder();
-  }
-
-  private updateParticipantOrder(): void {
-    this.participants.forEach((p, i) => p.order = i + 1);
-  }
-
-  onParticipantImageSelected(event: any, index: number): void {
-    const file = event.target.files[0];
-    if (!file) return;
-    this.portalMediaService.uploadFile(file, this.mediaFolder('participants')).subscribe({
-      next: (url) => {
-        this.participants[index].image = url;
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Upload failed',
-          detail: 'Could not upload image. Check file size and try again.'
-        });
-      }
-    });
-  }
-
-  saveParticipants(): void {
-    this.saveAll();
-  }
-
   addImage(): void {
     const newId = this.homeImages.length > 0 
       ? Math.max(...this.homeImages.map(img => img.id)) + 1 
@@ -1657,7 +1600,6 @@ export class PortalProjectsListComponent implements OnInit {
     this.events = content.events.events || [];
     this.updateFilteredEvents();
     this.teamSections = content.team.sections || [];
-    this.participants = content.participants.participants || [];
     this.outputs = content.outputs?.outputs || [];
   }
 
@@ -1691,9 +1633,6 @@ export class PortalProjectsListComponent implements OnInit {
       },
       team: {
         sections: this.teamSections,
-      },
-      participants: {
-        participants: this.participants,
       },
       outputs: {
         outputs: this.outputs,

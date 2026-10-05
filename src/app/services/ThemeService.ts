@@ -4,7 +4,7 @@ export type Theme = 'dark' | 'light';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private _theme: Theme = 'dark';
+  private _theme: Theme = 'light';
 
   constructor() {
     const saved = localStorage.getItem('bassiana-theme') as Theme | null;

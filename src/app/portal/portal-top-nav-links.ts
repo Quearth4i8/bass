@@ -15,7 +15,6 @@ export const PORTAL_TOP_NAV_LINKS: PortalTopNavLink[] = [
   { path: 'partners',         label: 'Partners',         icon: 'bx-buildings' },
   { path: 'funders',          label: 'Funders',          icon: 'bx-coin-stack' },
   { path: 'team',             label: 'Team',             icon: 'bx-group' },
-  { path: 'participants',     label: 'Participants',     icon: 'bx-user-voice' },
   { path: 'events',           label: 'Events',           icon: 'bx-calendar-event' },
   { path: 'gallery',          label: 'Gallery',          icon: 'bx-images' },
   { path: 'outputs',          label: 'Outputs',          icon: 'bx-file' },

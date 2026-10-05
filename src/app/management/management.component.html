@@ -71,10 +71,11 @@
             <h3 class="card-title">{{ project.title }}</h3>
             <p class="card-subtitle">{{ project.description }}</p>
             <div class="card-actions">
-              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalProjects(project.slug)">
+              <button class="btn-platform" (click)="goToPortalProjects(project.slug)">
                 MANAGE PROJECT
               </button>
-              <button class="btn-platform" [class.disabled]="!project.isActive" (click)="project.isActive && goToPortalPublic(project.slug, $event)">
+              <button class="btn-platform" (click)="goToPortalPublic(project.slug, $event)"
+                      [title]="project.isActive ? 'Open the public portal' : 'Inactive - only admins can open this portal'">
                 VIEW
               </button>
             </div>

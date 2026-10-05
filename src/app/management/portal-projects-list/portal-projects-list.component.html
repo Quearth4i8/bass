@@ -1,31 +1,7 @@
 <div class="admin-layout">
   <app-admin-navbar pageTitle="Portal Projects" (menuToggle)="toggleSidebar()"></app-admin-navbar>
 
-  <!-- Sidebar -->
-  <aside class="admin-sidebar" [class.collapsed]="!isSidebarVisible">
-    <nav class="sidebar-nav">
-      <a routerLink="/management" class="nav-item">
-        <i class='bx bx-arrow-back'></i>
-        <span>Management</span>
-      </a>
-      <a routerLink="/projectadmin" class="nav-item">
-        <i class='bx bx-home'></i>
-        <span>Projects</span>
-      </a>
-      <a routerLink="/docsadmin" class="nav-item">
-        <i class='bx bx-file'></i>
-        <span>Documents</span>
-      </a>
-      <a routerLink="/budget-charts" class="nav-item">
-        <i class='bx bx-pie-chart-alt-2'></i>
-        <span>Budget Charts</span>
-      </a>
-      <a routerLink="/management" class="nav-item active">
-        <i class='bx bx-cog'></i>
-        <span>Management</span>
-      </a>
-    </nav>
-  </aside>
+  <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
 
   <!-- Main Content -->
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
@@ -1167,72 +1143,6 @@
           <div class="team-empty" *ngIf="teamSections.length === 0">
             <i class='bx bx-group'></i>
             <p>No team sections yet. Click <b>Add Section</b> to start building the team.</p>
-          </div>
-        </div>
-
-        <!-- Participants -->
-        <div class="tab-content" *ngIf="activeTab === 'participants'">
-          <div class="content-header">
-            <div class="header-info">
-              <h3><i class='bx bx-user-voice'></i> Participants</h3>
-              <p>Manage project participants and their roles.</p>
-            </div>
-            <div class="header-actions">
-              <button class="header-btn secondary" type="button" (click)="addParticipant()">
-                <i class='bx bx-user-plus'></i>
-                <span>Add Participant</span>
-              </button>
-              <button class="header-btn primary" (click)="saveParticipants()">
-                <i class='bx bx-save'></i>
-                <span>Save Changes</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="participants-grid">
-            <div class="member-add-tile" (click)="addParticipant()">
-              <i class='bx bx-plus'></i>
-              <span>Add Participant</span>
-            </div>
-
-            <div class="member-item-card" *ngFor="let p of participants; let i = index">
-              <div class="member-card-banner"></div>
-              <div class="member-photo-box">
-                <img *ngIf="p.image" [src]="p.image" alt="Participant">
-                <div *ngIf="!p.image" class="member-photo-placeholder">
-                  <i class='bx bx-user'></i>
-                </div>
-                <label class="photo-edit-overlay" [for]="'participant-img-' + i">
-                  <i class='bx bx-camera'></i>
-                </label>
-                <input type="file" [id]="'participant-img-' + i" (change)="onParticipantImageSelected($event, i)" accept="image/*" hidden>
-              </div>
-
-              <div class="member-info-fields">
-                <input type="text" [(ngModel)]="p.name" placeholder="Name" class="member-name-input"
-                           [title]="p.name || ''">
-                <input type="text" [(ngModel)]="p.role" placeholder="Role" class="member-role-input">
-                <input type="text" [(ngModel)]="p.institute" placeholder="Institute" class="member-institute-input"
-                       [title]="p.institute || ''">
-              </div>
-
-              <div class="member-item-actions">
-                <button class="member-mini-btn" (click)="moveParticipant(i, 'up')" [disabled]="i === 0">
-                  <i class='bx bx-chevron-left'></i>
-                </button>
-                <button class="member-mini-btn danger" (click)="removeParticipant(i)">
-                  <i class='bx bx-x'></i>
-                </button>
-                <button class="member-mini-btn" (click)="moveParticipant(i, 'down')" [disabled]="i === participants.length - 1">
-                  <i class='bx bx-chevron-right'></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="team-empty" *ngIf="participants.length === 0">
-            <i class='bx bx-user-voice'></i>
-            <p>No participants yet. Click <b>Add Participant</b> to start.</p>
           </div>
         </div>
 

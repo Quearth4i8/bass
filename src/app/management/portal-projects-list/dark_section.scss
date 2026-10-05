@@ -124,8 +124,6 @@
   .member-mini-btn { background: $panel; color: $text-dim; box-shadow: none; &:hover:not(:disabled) { background: rgba(74,214,196,.1); color: $accent; } &.danger:hover { background: rgba(239,68,68,.1); color: $danger; } }
   .team-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
 
-  // ── Participants (same pattern as team) ──
-
   // ── Scientific merit / Objectives (rich text) ──
   .paragraph-card { background: $panel-2; border-color: $line; box-shadow: none; }
   .paragraph-header {

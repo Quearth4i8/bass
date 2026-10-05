@@ -466,6 +466,11 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .portal-card .card-content .btn-platform { background: #1a8f7f; color: white; }
   .portal-card .card-content .btn-platform + .btn-platform { background: transparent; border-color: #c5d8e6; color: #3d5a6e; &:hover:not(.disabled) { border-color: #1a8f7f; color: #1a8f7f; } }
   .portal-card .card-content .btn-platform.disabled { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
+  .portal-card .card-content .card-order-controls {
+    border-top-color: #e2e8f0;
+    .order-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover:not(:disabled) { border-color: #1a8f7f; color: #1a8f7f; background: #ffffff; } }
+    .order-pos { color: #64748b; }
+  }
   .portal-card .card-image-wrapper .inactive-badge { background: rgba(255,255,255,.9); color: #64748b; }
   .action-btn { background: rgba(255,255,255,.9); color: #64748b; &.edit:hover { background: #1a8f7f; color: white; } &.delete:hover { background: #ef4444; color: white; } }
   .status-toggle-row { background: #f8fafc; border-color: #e2e8f0; .field-label { color: #64748b; } }
@@ -473,6 +478,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .toggle-switch .switch-label { color: #0d2137; }
   .form-field label { color: #64748b; }
   .form-field input[type="text"] { background: #f8fafc; border-color: #c5d8e6; color: #0d2137; &:focus { border-color: #1a8f7f; } }
+  .form-field input[type="color"] { background: #f8fafc; border-color: #c5d8e6; }
+  .form-field.checkbox label { color: #0d2137; }
   .modal-footer { border-radius: 0 0 14px 14px; }
   .brand-dropdown-trigger {
     background: #f8fafc; border-color: #c5d8e6; color: #0d2137;
@@ -509,5 +516,6 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .modal-body p { color: #3d5a6e; }
   .modal-footer { background: #f8fafc; }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; } }
+  .btn-confirm.primary { background: #1a8f7f; color: white; }
 
 }

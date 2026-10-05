@@ -197,30 +197,44 @@
 @keyframes portal-boot-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ── Page transitions ───────────────────────────────────────────────────────
-   Every portal page rises a little as it fades in, so a navigation reads as a
-   move rather than a repaint. ::ng-deep because the router builds these hosts
-   itself: they never carry this component's scoping attribute, so an ordinary
-   rule here cannot reach them.
+   Every portal page fades in, and everything below its hero rises a little as
+   it does, so a navigation reads as a move rather than a repaint. The hero
+   itself (home carousel, inner-page banner) only fades: when it rose too, the
+   18px it started below its resting place showed as a white band under the
+   navbar for the length of the animation. ::ng-deep because the router builds
+   these hosts itself: they never carry this component's scoping attribute, so
+   an ordinary rule here cannot reach them.
 
    The transform is gone by the end (`transform: none` in the last keyframe and
-   `both` to hold it), which matters: a lingering transform would make this
+   `both` to hold it), which matters: a lingering transform would make the
    element the containing block for the gallery's fixed-position lightbox. */
 :host ::ng-deep .portal-content > :not(router-outlet) {
   /* Deliberately the landing pages' own reveal, to the millisecond: .7s ease
      over an 18px rise, as set by `.fade-up` in projects-landing. A portal page
      that arrived in half that time felt hurried next to everything else in the
      site. Keep the two in step if either is ever retuned. */
-  animation: portal-page-enter 0.7s ease both;
+  animation: portal-page-fade 0.7s ease both;
 }
 
-@keyframes portal-page-enter {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: none; }
+:host ::ng-deep .portal-content > :not(router-outlet)
+  > :not(.hero-container):not(app-portal-page-hero):not(.page-loader):not(.lightbox-overlay) {
+  animation: portal-page-rise 0.7s ease both;
+}
+
+@keyframes portal-page-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes portal-page-rise {
+  from { transform: translateY(18px); }
+  to   { transform: none; }
 }
 
 /* Taking someone at their word when they ask for less movement. */
 @media (prefers-reduced-motion: reduce) {
   :host ::ng-deep .portal-content > :not(router-outlet) { animation: none; }
+  :host ::ng-deep .portal-content > :not(router-outlet) > * { animation: none; }
   .portal-boot { animation-delay: 0ms; }
   .portal-boot-spinner { animation-duration: 1.6s; }
 }

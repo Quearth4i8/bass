@@ -22,7 +22,10 @@ export class PortalPageHomeComponent implements OnInit, OnDestroy, AfterViewInit
   project: PortalProject | null = null;
   loading = true;
   activeSlide = 0;
+
   private carouselInterval: ReturnType<typeof setInterval> | null = null;
+  /** Pointer is over the thumbnail strip - hold the current slide. */
+  private thumbsHovered = false;
   private intersectionObserver: IntersectionObserver | null = null;
 
   @ViewChildren('contentWrapper') contentWrappers!: QueryList<ElementRef>;
@@ -90,6 +93,7 @@ export class PortalPageHomeComponent implements OnInit, OnDestroy, AfterViewInit
 
   private startCarousel(): void {
     this.stopCarousel();
+    if (this.thumbsHovered || (this.project?.content.home.carousel?.length ?? 0) < 2) return;
     this.carouselInterval = setInterval(() => this.nextSlide(), 5000);
   }
 
@@ -98,6 +102,11 @@ export class PortalPageHomeComponent implements OnInit, OnDestroy, AfterViewInit
       clearInterval(this.carouselInterval);
       this.carouselInterval = null;
     }
+  }
+
+  setThumbsHovered(hovered: boolean): void {
+    this.thumbsHovered = hovered;
+    this.startCarousel();
   }
 
   nextSlide(): void {

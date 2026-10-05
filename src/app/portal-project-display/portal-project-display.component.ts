@@ -52,7 +52,6 @@ export class PortalProjectDisplayComponent
     { path: 'funders',  label: 'Funders',  icon: 'bx-coin-stack' },
     { path: 'team', label: 'Team', icon: 'bx-group' },
     { path: 'events', label: 'Events', icon: 'bx-calendar' },
-    { path: 'participants', label: 'Participants', icon: 'bx-user-voice' },
     { path: 'gallery', label: 'Gallery', icon: 'bx-images' },
     { path: 'outputs', label: 'Outputs', icon: 'bx-video' },
   ];

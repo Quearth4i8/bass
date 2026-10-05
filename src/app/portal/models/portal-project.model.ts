@@ -124,9 +124,6 @@ export interface PortalProjectContent {
   team: {
     sections: PortalTeamSection[];
   };
-  participants: {
-    participants: PortalPerson[];
-  };
   outputs: {
     outputs: PortalOutput[];
   };

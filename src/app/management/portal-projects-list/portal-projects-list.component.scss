@@ -2117,12 +2117,9 @@
   }
 }
 
-// Team sections and Participants render the same card, so they share one grid
-// rather than drifting apart (they were 280px vs 220px, which is why names
-// truncated far worse on Participants). 330px is the width at which the longest
-// real names fit the input beside a photo.
-.section-members-grid,
-.participants-grid {
+// 330px is the width at which the longest real names fit the input beside a
+// photo.
+.section-members-grid {
   padding: 24px;
   display: grid;
   // auto-FILL, not auto-fit. auto-fit collapses the empty tracks, so in a
@@ -3688,8 +3685,6 @@
   .member-drag-handle:hover:not(:disabled) { background: rgba(74,214,196,.1); color: $accent; }
   .team-empty { background: $bg-2; border-color: $line; color: $text-dim; i { color: $text-faint; } }
 
-  // ── Participants (same pattern as team) ──
-
   // ── Scientific merit / Objectives (rich text) ──
   .paragraph-card { background: $panel-2; border-color: $line; box-shadow: none; }
   .paragraph-header {
@@ -3780,6 +3775,27 @@
     .section-header { border-bottom-color: #f1f5f9; }
     .section-title { h4 { color: #1e293b; } p { color: #64748b; } }
     .section-btn { background: #1a8f7f; border-color: #1a8f7f; color: white; }
+    // Add Images / Add Event / Add Section etc. - otherwise the dark block's navy panel shows through.
+    .header-btn.secondary { background: white; border-color: #1a8f7f; color: #1a8f7f; &:hover { background: rgba(26,143,127,.06); border-color: #1a8f7f; color: #0d6b5f; } }
+
+    // Everything else the dark block restyles - each needs its light value
+    // restated here, or the dark one shows through in light mode.
+    .list-bottom-actions { border-top-color: #e2e8f0; }
+    .pf-logo-actions { border-top-color: #f1f5f9; }
+    .mini-btn.output-heart-toggle { &:hover:not(:disabled) { border-color: #f87171; color: #f87171; } &.hearted { border-color: rgba(248,113,113,.4); color: #f87171; background: rgba(239,68,68,.06); } }
+    .gallery-viewer-overlay { background: rgba(15,23,42,.75); }
+    .gallery-viewer { background: rgba(255,255,255,.96); border-color: rgba(226,232,240,.9); }
+    .viewer-topbar { background: rgba(248,250,252,.9); border-bottom-color: #e2e8f0; }
+    .viewer-title { color: #0f172a; .viewer-name { color: #64748b; } }
+    .viewer-btn { background: #ffffff; border-color: #e2e8f0; color: #334155; &:hover:not(:disabled) { border-color: #1a8f7f; color: #1a8f7f; background: #f0f9ff; } &.danger { border-color: #fee2e2; color: #ef4444; &:hover { background: #fef2f2; border-color: #ef4444; } } }
+    .viewer-hint { background: rgba(248,250,252,.9); border-top-color: #e2e8f0; color: #64748b; kbd { background: #ffffff; border-color: #e2e8f0; color: #334155; } }
+    .delete-confirm-overlay { background: rgba(15,23,42,.75); }
+    .delete-confirm-box { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+    .delete-confirm-icon { background: rgba(239,68,68,.1); }
+    .delete-confirm-title { color: #0f172a; }
+    .delete-confirm-text { color: #64748b; }
+    .section-members-grid.cdk-drop-list-receiving { outline-color: rgba(26,143,127,.45); background: rgba(26,143,127,.04); }
+    .member-drag-handle:hover:not(:disabled) { background: #e8f3f8; color: #1a8f7f; }
     .form-group { label { color: #475569; } input, textarea { background: white; border-color: #e2e8f0; color: #1e293b; &:focus { border-color: #1a8f7f; box-shadow: 0 0 0 3px rgba(26,143,127,.1); } &::placeholder { color: #94a3b8; } } }
     .home-image-card {
       background: white; border-color: #e2e8f0;

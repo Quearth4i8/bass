@@ -14,7 +14,7 @@
               </div>
           </div>
       </div>
-      <div class="thumbnail">
+      <div class="thumbnail" (mouseenter)="setThumbsHovered(true)" (mouseleave)="setThumbsHovered(false)">
           <div class="item" *ngFor="let item of project.content.home.carousel; let i = index" [class.active]="i === activeSlide" (click)="setSlide(i)">
               <img [src]="item.url" alt="" loading="lazy" decoding="async">
           </div>

@@ -3,9 +3,7 @@ import { Component, Input } from '@angular/core';
 import { PortalPerson } from '../../../portal/models/portal-project.model';
 
 /**
- * One person, on the Team and Participants pages alike. Both used to carry
- * their own copy of this card's markup and styles, which is why they had drifted
- * apart; the pages now own only their grid.
+ * One person on the Team page; the page owns only the grid.
  *
  * Reads three lines in a fixed order - name, role, institute - and prints only
  * the ones that are filled in, so a person with no institute simply ends after

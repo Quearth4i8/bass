@@ -32,7 +32,7 @@
         <img [src]="project.image" [alt]="project.title">
         <span class="project-status-badge" [class.badge-active]="project.isActive" [class.badge-soon]="!project.isActive">
           <span *ngIf="project.isActive" class="status-dot"></span>
-          {{ project.isActive ? 'ACTIVE' : 'COMING SOON' }}
+          {{ project.isActive ? 'ACTIVE' : 'UNAVAILABLE' }}
         </span>
       </div>
 
@@ -44,7 +44,7 @@
             Enter Platform <span class="btn-arrow">→</span>
           </button>
           <button *ngIf="!project.isActive" class="enter-btn" disabled>
-            Coming Soon
+            Unavailable
           </button>
         </div>
       </div>
