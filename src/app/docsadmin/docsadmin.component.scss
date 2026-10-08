@@ -861,7 +861,66 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 .folder-summary { font-family: $font-mono; font-size: 11px; color: $text-faint; }
 
-.explorer .bulk-actions-bar { margin: 0 16px 12px; }
+// Selection bar --------------------------------------------------------------
+.sel-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 16px 12px; padding: 8px 8px 8px 12px;
+  border-radius: 12px;
+  background: rgba(74,214,196,0.08);
+  border: 1px solid rgba(74,214,196,0.22);
+  animation: sel-in .18s ease;
+}
+@keyframes sel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.sel-info {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 13px; font-weight: 600; color: $text;
+}
+
+.sel-count {
+  min-width: 26px; height: 26px; padding: 0 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 13px;
+  background: var(--project-accent); color: #fff;
+  font-family: $font-mono; font-size: 12px; font-weight: 700;
+}
+
+.sel-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 400; color: $text-faint;
+  i { font-size: 14px; }
+}
+
+.sel-actions { display: flex; align-items: center; gap: 4px; }
+
+.sel-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 12px;
+  border: none; border-radius: 8px; background: transparent;
+  color: $text-dim; font-family: $font-sans; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background .15s, color .15s;
+  i { font-size: 16px; }
+  &:hover { background: rgba(255,255,255,0.06); color: $text; }
+  &.accent { color: var(--project-accent); &:hover { background: rgba(74,214,196,0.12); } }
+  &.danger { color: #f87171; &:hover { background: rgba(239,68,68,0.12); color: #ef4444; } }
+}
+
+.sel-divider { width: 1px; height: 20px; margin: 0 4px; background: rgba(127,127,127,0.25); }
+
+.sel-close {
+  width: 34px; height: 34px; margin-left: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 8px; background: transparent;
+  color: $text-faint; font-size: 20px; cursor: pointer;
+  &:hover { background: rgba(255,255,255,0.06); color: $text; }
+}
+
+.row-chevron {
+  font-size: 18px; color: $text-faint; margin-left: 2px;
+  transition: transform .15s, color .15s;
+}
+.folder-row:hover .row-chevron { transform: translateX(2px); color: var(--project-accent); }
 
 // Listing -------------------------------------------------------------------
 .listing { padding: 0 8px 10px; }
@@ -960,18 +1019,22 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // Icon-only, revealed on hover so a long listing is not a wall of buttons.
 .explorer .action-btn {
-  width: 30px; height: 30px; padding: 0;
+  width: 32px; height: 32px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid transparent; border-radius: 7px; background: transparent;
-  color: $text-faint; font-size: 16px;
-  opacity: .55; transition: all .15s;
+  border: none; border-radius: 8px; background: transparent;
+  color: $text-faint; font-size: 17px;
+  opacity: 0; transition: all .15s;
   &:hover { border-color: $line-2; color: $accent; background: rgba(74,214,196,0.06); opacity: 1; }
   &.delete-btn:hover { border-color: rgba(239,68,68,.35); color: $danger; background: rgba(239,68,68,.08); }
 }
 .listing-row:hover .action-btn, .listing-row.selected .action-btn { opacity: 1; }
 
 // Sharing: the toggle stays visible while on, so shared files read at a glance.
-.explorer .action-btn.share-toggle.on { opacity: 1; color: var(--project-accent); }
+.explorer .action-btn.share-toggle.on {
+  opacity: 1; color: var(--project-accent); background: rgba(74,214,196,0.12);
+}
+// Keyboard users must still reach the buttons the hover reveal hides.
+.explorer .action-btn:focus-visible { opacity: 1; outline: 2px solid var(--project-accent); outline-offset: 1px; }
 
 .shared-badge {
   flex-shrink: 0;
@@ -1132,6 +1195,14 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .item-name { color: #0d2137; }
   .col-size, .col-date { color: #6b8a9a; }
   .col-check input { accent-color: #1a8f7f; }
-  .action-btn { color: #64748b; &:hover { border-color: #c5d8e6; color: #1a8f7f; background: #f0f7fb; } &.delete-btn:hover { border-color: #fecaca; color: #ef4444; background: #fef2f2; } }
+  .action-btn { border: none; color: #64748b; &:hover { color: #1a8f7f; background: #e8f3f8; } &.delete-btn:hover { color: #ef4444; background: #fef2f2; } }
+  .action-btn.share-toggle.on { background: rgba(26,143,127,.1); }
+  .sel-bar { background: rgba(26,143,127,.06); border-color: rgba(26,143,127,.2); }
+  .sel-info { color: #0d2137; }
+  .sel-hint { color: #6b8a9a; }
+  .sel-btn { color: #3d5a6e; &:hover { background: rgba(13,33,55,.05); color: #0d2137; } &.accent { color: #1a8f7f; &:hover { background: rgba(26,143,127,.1); } } &.danger { color: #dc2626; &:hover { background: #fef2f2; } } }
+  .sel-close { color: #94a3b8; &:hover { background: rgba(13,33,55,.05); color: #0d2137; } }
+  .row-chevron { color: #94a3b8; }
+  .listing-row.selected { background: rgba(26,143,127,.07); }
   .drop-overlay { background: rgba(240,247,251,.9); color: #0d2137; }
 }

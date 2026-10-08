@@ -289,6 +289,58 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     return Math.ceil(this.projects.length / this.pageSize);
   }
 
+  setPageSize(size: number): void {
+    this.pageSize = Number(size);
+    this.updatePage(0);
+  }
+
+  get rangeStart(): number {
+    return this.projects.length ? this.pageIndex * this.pageSize + 1 : 0;
+  }
+
+  get rangeEnd(): number {
+    return Math.min(this.projects.length, (this.pageIndex + 1) * this.pageSize);
+  }
+
+  /** Project count per group ("SUBMITTED PROJECTS" ...), largest first. */
+  get groupStats(): { name: string; count: number }[] {
+    const counts = new Map<string, number>();
+    for (const p of this.projects) {
+      if (p.title) counts.set(p.title, (counts.get(p.title) || 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  get totalBudget(): number {
+    return this.projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+  }
+
+  /** "SUBMITTED PROJECTS" -> "Submitted". */
+  groupLabel(title: string): string {
+    const word = (title || '').replace(/\s*PROJECTS?\s*$/i, '').trim().toLowerCase();
+    return word ? word.charAt(0).toUpperCase() + word.slice(1) : title;
+  }
+
+  /** Colour family for a group's pill and stat icon. */
+  groupTone(title: string): string {
+    const t = (title || '').toUpperCase();
+    if (t.includes('ONGOING')) return 'blue';
+    if (t.includes('ACHIEVED')) return 'green';
+    if (t.includes('SUBMITTED')) return 'amber';
+    return 'grey';
+  }
+
+  groupIcon(title: string): string {
+    switch (this.groupTone(title)) {
+      case 'blue':  return 'bx-time-five';
+      case 'green': return 'bx-badge-check';
+      case 'amber': return 'bx-send';
+      default:      return 'bx-folder';
+    }
+  }
+
   pagedProjectsIndex(index: number): number {
     return index + this.pageIndex * this.pageSize;
   }

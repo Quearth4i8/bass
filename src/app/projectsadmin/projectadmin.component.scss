@@ -287,12 +287,36 @@ a.header-btn { text-decoration: none; }
   i { font-size: 16px; }
 }
 
+/* Opens to its real height: a grid row going 0fr -> 1fr animates to the
+   content's own size. The old max-height: 0 -> 300px spent most of its time
+   on height the panel never had (so closing seemed to stall), and its margin,
+   padding and border snapped in un-animated. All spacing now lives inside the
+   clipped inner box, so it travels with the content. */
 .advanced-filters {
-  max-height: 0; overflow: hidden; transition: all 0.3s ease; opacity: 0;
-  &.show { max-height: 300px; opacity: 1; margin-top: 16px; padding-top: 16px; border-top: 1px solid $line; }
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows .26s cubic-bezier(.2, .8, .2, 1),
+              opacity .2s ease,
+              visibility 0s linear .26s;
+  &.show {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition: grid-template-rows .26s cubic-bezier(.2, .8, .2, 1),
+                opacity .2s ease .04s,
+                visibility 0s;
+  }
 }
 
-.filter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.advanced-inner { min-height: 0; overflow: hidden; }
+
+.filter-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  margin-top: 16px; padding: 16px 2px 2px;
+  border-top: 1px solid $line;
+}
 
 .filter-field {
   display: flex; flex-direction: column; gap: 6px;
@@ -617,7 +641,7 @@ a.header-btn { text-decoration: none; }
     background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e;
     &.active { background: rgba(26,143,127,.1); border-color: #1a8f7f; color: #1a8f7f; }
   }
-  .advanced-filters.show { border-top-color: #c5d8e6; }
+  .filter-grid { border-top-color: #c5d8e6; }
   .filter-field {
     label { color: #64748b; i { color: #1a8f7f; } }
     input { background: #f1f5f9; border-color: #c5d8e6; color: #0d2137; &:focus { border-color: #1a8f7f; } &::placeholder { color: #9fb3bf; } }
@@ -656,4 +680,113 @@ a.header-btn { text-decoration: none; }
   .modal-body p { color: #3d5a6e; }
   .modal-footer { background: #f8fafc; }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; border-color: #a0b8c8; } }
+}
+
+// ── Page head / redesign (2026-10) ─────────────────────────────────────────
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-heading { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: $text; }
+.page-sub { margin: 4px 0 0; font-size: 13px; color: $text-dim; }
+.page-actions { display: flex; gap: 10px; }
+
+.btn-ghost, .btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 16px; border-radius: $radius;
+  font-family: $font-sans; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+  i { font-size: 18px; }
+}
+.btn-ghost {
+  background: transparent; border: 1px solid $line-2; color: $text-dim;
+  &:hover { border-color: $accent; color: $accent; }
+}
+.btn-primary {
+  background: $accent; border: 1px solid $accent; color: $bg;
+  box-shadow: 0 4px 14px rgba(74,214,196,.18);
+  &:hover { filter: brightness(1.06); transform: translateY(-1px); }
+}
+
+.stats-row { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
+.stat-info h2 small { font-size: 14px; font-weight: 600; margin-left: 2px; opacity: .75; }
+.stat-icon.tone-blue  { background: rgba(59,130,246,.12) !important; border-color: rgba(59,130,246,.25) !important; color: #60a5fa !important; }
+.stat-icon.tone-green { background: rgba(34,197,94,.12) !important;  border-color: rgba(34,197,94,.25) !important;  color: #4ade80 !important; }
+.stat-icon.tone-amber { background: rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.25) !important; color: #fbbf24 !important; }
+.stat-icon.tone-grey  { background: rgba(148,163,184,.12) !important; border-color: rgba(148,163,184,.25) !important; color: #94a3b8 !important; }
+
+// Table cells
+.clamp-2 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.45;
+}
+.col-title { min-width: 280px !important; max-width: 380px !important; }
+.col-coordinator { min-width: 160px; }
+.col-programme { min-width: 150px; max-width: 220px; }
+.col-thematic { min-width: 180px; max-width: 260px; }
+.col-period { min-width: 110px; white-space: nowrap; font-family: $font-mono; font-size: 12.5px; }
+.col-group { min-width: 120px; }
+.col-actions { min-width: 90px !important; }
+
+.cell-title { font-weight: 600; color: $text; }
+.acronym-badge {
+  display: inline-block; margin-top: 6px;
+  padding: 2px 8px; border-radius: 5px;
+  font-family: $font-mono; font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+  color: $accent; background: rgba(74,214,196,.1);
+}
+.cell-strong { display: block; font-weight: 500; color: $text; }
+.cell-muted { display: block; margin-top: 2px; font-size: 12px; color: $text-faint; text-transform: capitalize; }
+
+.group-pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  &.tone-blue  { color: #60a5fa; background: rgba(59,130,246,.12); }
+  &.tone-green { color: #4ade80; background: rgba(34,197,94,.12); }
+  &.tone-amber { color: #fbbf24; background: rgba(245,158,11,.12); }
+  &.tone-grey  { color: #94a3b8; background: rgba(148,163,184,.12); }
+}
+
+// Pagination
+.pagination-bar { justify-content: space-between !important; gap: 16px; flex-wrap: wrap; }
+.page-size {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: $text-dim;
+  select {
+    height: 32px; padding: 0 8px; border-radius: 8px;
+    border: 1px solid $line; background: $bg-2; color: $text;
+    font-family: $font-sans; cursor: pointer;
+  }
+}
+.page-nav { display: inline-flex; align-items: center; gap: 8px; }
+.page-current { font-family: $font-mono; font-size: 12.5px; color: $text-dim; min-width: 52px; text-align: center; }
+
+@media (max-width: 768px) {
+  .page-actions { width: 100%; }
+  .btn-ghost, .btn-primary { flex: 1; justify-content: center; }
+}
+
+// ── Redesign, light ─────────────────────────────────────────────────────────
+.admin-layout.theme-light {
+  .page-heading { color: #0d2137; }
+  .page-sub { color: #64748b; }
+  .btn-ghost { border-color: #c5d8e6; color: #3d5a6e; background: #ffffff; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
+  .btn-primary { background: #1a8f7f; border-color: #1a8f7f; color: #ffffff; box-shadow: 0 4px 14px rgba(26,143,127,.2); }
+  .stat-icon.tone-blue  { color: #2563eb !important; }
+  .stat-icon.tone-green { color: #16a34a !important; }
+  .stat-icon.tone-amber { color: #d97706 !important; }
+  .stat-icon.tone-grey  { color: #64748b !important; }
+  .cell-title, .cell-strong { color: #0d2137; }
+  .cell-muted { color: #64748b; }
+  .acronym-badge { color: #1a8f7f; background: rgba(26,143,127,.08); }
+  .group-pill {
+    &.tone-blue  { color: #2563eb; background: #eff6ff; }
+    &.tone-green { color: #16a34a; background: #f0fdf4; }
+    &.tone-amber { color: #b45309; background: #fffbeb; }
+    &.tone-grey  { color: #475569; background: #f1f5f9; }
+  }
+  .page-size { color: #64748b; select { background: #ffffff; border-color: #c5d8e6; color: #0d2137; } }
+  .page-current { color: #64748b; }
 }

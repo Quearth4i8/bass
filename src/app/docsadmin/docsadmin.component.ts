@@ -69,9 +69,6 @@ export class DocsadminComponent implements OnInit {
 
   selectedDocIds = new Set<number>();
   selectedFolderIds = new Set<number>();
-  moveModalOpen = false;
-  movingDocIds: number[] = [];
-  movingFolders: ProjectFolder[] = [];
 
   // Folder state
   folders: ProjectFolder[] = [];
@@ -787,41 +784,6 @@ export class DocsadminComponent implements OnInit {
   }
 
   // ── Move to folder ─────────────────────────────────────────────────────────
-
-  /** Single file, from its row's Move button. */
-  openMoveModal(ids: number[]): void {
-    if (!this.selectedProject || ids.length === 0) return;
-    this.movingDocIds = ids;
-    this.movingFolders = [];
-    this.moveModalOpen = true;
-    this.loadAllFolders();
-  }
-
-  /** Everything checked, from the selection bar. */
-  openMoveSelection(): void {
-    if (!this.selectedProject || this.selectionCount === 0) return;
-    const { docIds, folders } = this.currentSelection();
-    this.movingDocIds = docIds;
-    this.movingFolders = folders;
-    this.moveModalOpen = true;
-    this.loadAllFolders();
-  }
-
-  cancelMove(): void {
-    this.moveModalOpen = false;
-    this.movingDocIds = [];
-    this.movingFolders = [];
-  }
-
-  executeMoveTo(subfolder: string): void {
-    if (!this.isValidDestination(subfolder, this.movingFolders)) return;
-    const docIds = this.movingDocIds;
-    const folders = this.movingFolders;
-    this.moveModalOpen = false;
-    this.movingDocIds = [];
-    this.movingFolders = [];
-    this.moveItems(docIds, folders, subfolder);
-  }
 
   /** Moves files and folders into `target` one at a time, then one summary message. */
   private async moveItems(docIds: number[], folders: ProjectFolder[], target: string): Promise<void> {

@@ -129,7 +129,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 // ── Stats ──────────────────────────────────────────────────────────────────
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 
 .stat-box {
   background: $panel; border: 1px solid $line; border-radius: $radius;
@@ -413,4 +413,43 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .modal-body p { color: #3d5a6e; }
   .modal-footer { background: #f8fafc; }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; } }
+}
+
+// ── Page head (matches the Projects admin page) ────────────────────────────
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-heading { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: $text; }
+.page-sub { margin: 4px 0 0; font-size: 13px; color: $text-dim; }
+.page-actions { display: flex; gap: 10px; }
+
+.btn-ghost, .btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 16px; border-radius: $radius;
+  font-family: $font-sans; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+  i { font-size: 18px; }
+}
+.btn-ghost {
+  background: transparent; border: 1px solid $line-2; color: $text-dim;
+  &:hover { border-color: $accent; color: $accent; }
+}
+.btn-primary {
+  background: $accent; border: 1px solid $accent; color: $bg;
+  box-shadow: 0 4px 14px rgba(74,214,196,.18);
+  &:hover { filter: brightness(1.06); transform: translateY(-1px); }
+}
+
+@media (max-width: 768px) {
+  .page-actions { width: 100%; }
+  .btn-ghost, .btn-primary { flex: 1; justify-content: center; }
+}
+
+.admin-layout.theme-light {
+  .page-heading { color: #0d2137; }
+  .page-sub { color: #64748b; }
+  .btn-ghost { border-color: #c5d8e6; color: #3d5a6e; background: #ffffff; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
+  .btn-primary { background: #1a8f7f; border-color: #1a8f7f; color: #ffffff; box-shadow: 0 4px 14px rgba(26,143,127,.2); }
 }

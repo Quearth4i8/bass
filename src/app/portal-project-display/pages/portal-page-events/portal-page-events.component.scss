@@ -68,7 +68,8 @@
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
-    width: 164px;
+    /* One width for every card, single day or range, so the card bodies line up. */
+    width: 184px;
     /* One hue only - the accent, shaded down towards the bottom. A second
        colour in here reads as a gradient demo rather than a date tile. */
     background: linear-gradient(160deg,
@@ -103,7 +104,8 @@
     }
 
     /* Everything sits above the sheen. */
-    .date-icon, .event-weekday, .event-daynum, .event-monthyear, .event-range {
+    .date-icon, .event-weekday, .event-daynum, .event-monthyear,
+    .range-pair, .range-year, .range-length {
       position: relative;
       z-index: 1;
     }
@@ -120,12 +122,52 @@
       color: rgba(255,255,255,0.88);
     }
 
-    .event-range {
+    /* Multi-day: both ends carry equal weight, so "29 JUN -> 1 JUL" reads in
+       one glance instead of a big start date and a footnote for the end. */
+    &.is-range { padding: 22px 10px; }
+    &.is-range .date-icon { margin-bottom: 12px; }
+
+    .range-pair {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    .range-end {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 54px;
+    }
+
+    .range-label {
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em;
+      text-transform: uppercase; color: rgba(255,255,255,0.7);
+    }
+
+    .range-day {
+      font-size: 34px; font-weight: 800; line-height: 1.05;
+      margin: 2px 0 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .range-month {
+      font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .range-arrow {
+      font-size: 20px; color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+    }
+
+    .range-year {
       margin-top: 12px; padding-top: 10px;
       border-top: 1px solid rgba(255,255,255,0.22);
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      .range-to { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 800; opacity: 0.7; }
-      .range-date { font-size: 11px; font-weight: 600; }
+      font-size: 12px; font-weight: 700; letter-spacing: 0.14em;
+    }
+
+    .range-length {
+      margin-top: 6px;
+      padding: 2px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
     }
   }
 
@@ -315,10 +357,14 @@
       flex-direction: row; align-items: baseline; justify-content: flex-start;
       gap: 10px; padding: 14px 20px;
       .event-daynum { font-size: 26px; margin: 0; }
-      .event-range {
-        margin-top: 0; padding-top: 0; border-top: none;
-        flex-direction: row; align-items: baseline; gap: 6px; margin-left: auto;
-      }
+      &.is-range { width: 100%; padding: 14px 20px; align-items: center; }
+      .date-icon { margin-bottom: 0; }
+      .range-day { font-size: 24px; }
+      .range-label { display: none; }
+      .range-end { flex-direction: row; align-items: baseline; gap: 5px; min-width: 0; }
+      .range-arrow { margin-top: 0; }
+      .range-year { margin: 0 0 0 auto; padding: 0; border-top: none; }
+      .range-length { margin-top: 0; }
     }
     .event-body { padding: 20px; }
   }

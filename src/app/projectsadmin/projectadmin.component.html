@@ -1,14 +1,5 @@
 <div class="admin-layout" [class.theme-light]="themeService.isLight">
-  <app-admin-navbar pageTitle="Admin Dashboard" (menuToggle)="toggleSidebar()">
-    <button header-actions class="header-btn" (click)="showDialog2()">
-      <i class='bx bx-folder-plus'></i>
-      <span>Add Group</span>
-    </button>
-    <button header-actions class="header-btn primary" (click)="showDialog()">
-      <i class='bx bx-plus'></i>
-      <span>Add Project</span>
-    </button>
-  </app-admin-navbar>
+  <app-admin-navbar pageTitle="Projects" (menuToggle)="toggleSidebar()"></app-admin-navbar>
 
   <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
 
@@ -19,43 +10,43 @@
       <p-messages></p-messages>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Page header: what this page is, and what you can do on it -->
+    <div class="page-head">
+      <div>
+        <h1 class="page-heading">Projects</h1>
+        <p class="page-sub">INSTM research projects listed on the public site</p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn-ghost" (click)="showDialog2()">
+          <i class='bx bx-folder-plus'></i><span>New group</span>
+        </button>
+        <button type="button" class="btn-primary" (click)="showDialog()">
+          <i class='bx bx-plus'></i><span>New project</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats: totals that mean something, rather than the paging state -->
     <div class="stats-row">
       <div class="stat-box">
-        <div class="stat-icon green">
-          <i class='bx bx-briefcase'></i>
-        </div>
+        <div class="stat-icon green"><i class='bx bx-briefcase'></i></div>
         <div class="stat-info">
           <h2>{{ projects.length }}</h2>
-          <p>Total Projects</p>
+          <p>Projects</p>
         </div>
       </div>
-      <div class="stat-box clickable" (click)="togglePageDropdown()">
-        <div class="stat-icon green">
-          <i class='bx bx-file-blank'></i>
-        </div>
+      <div class="stat-box" *ngFor="let g of groupStats">
+        <div class="stat-icon" [ngClass]="'tone-' + groupTone(g.name)"><i class='bx' [ngClass]="groupIcon(g.name)"></i></div>
         <div class="stat-info">
-          <h2>{{ pageIndex + 1 }}</h2>
-          <p>of {{ totalPages }} Pages</p>
-        </div>
-        <div class="page-dropdown" *ngIf="pageDropdownOpen">
-          <div class="dropdown-option" *ngFor="let pageNum of getPageNumbers()" (click)="goToPage($event, pageNum)" [class.selected]="pageIndex === pageNum - 1">
-            Page {{ pageNum }}
-          </div>
+          <h2>{{ g.count }}</h2>
+          <p>{{ groupLabel(g.name) }}</p>
         </div>
       </div>
-      <div class="stat-box clickable" (click)="togglePageSizeDropdown()">
-        <div class="stat-icon green">
-          <i class='bx bx-list-check'></i>
-        </div>
+      <div class="stat-box">
+        <div class="stat-icon green"><i class='bx bx-euro'></i></div>
         <div class="stat-info">
-          <h2>{{ pageSize }}</h2>
-          <p>Per Page</p>
-        </div>
-        <div class="page-size-dropdown" *ngIf="pageSizeDropdownOpen">
-          <div class="dropdown-option" *ngFor="let size of pageSizeOptions" (click)="changePageSize($event, size)" [class.selected]="pageSize === size">
-            {{ size }}
-          </div>
+          <h2>{{ totalBudget / 1000000 | number:'1.1-1' }}<small>M€</small></h2>
+          <p>Total budget</p>
         </div>
       </div>
     </div>
@@ -75,6 +66,7 @@
       
       <!-- Advanced Filters (Collapsible) -->
       <div class="advanced-filters" [class.show]="showAdvancedFilters">
+        <div class="advanced-inner">
         <div class="filter-grid">
           <div class="filter-field">
             <label><i class='bx bx-user'></i> Coordinator</label>
@@ -97,6 +89,7 @@
             <input type="text" placeholder="Search group..." (input)="searchProjects1($event)">
           </div>
         </div>
+        </div>
       </div>
     </div>
 
@@ -108,42 +101,43 @@
           <thead>
             <tr>
               <th class="col-id">#</th>
+              <th class="col-title">Project</th>
               <th class="col-coordinator">Coordinator</th>
-              <th class="col-partner">Role</th>
-              <th class="col-thematic">Thematic</th>
               <th class="col-programme">Program</th>
-              <th class="col-title">Project Title</th>
-              <th class="col-acronym">Acronym</th>
-              <th class="col-year">Start</th>
-              <th class="col-year">End</th>
+              <th class="col-thematic">Thematic</th>
+              <th class="col-period">Period</th>
               <th class="col-budget">Budget</th>
               <th class="col-group">Group</th>
-              <th class="col-actions">Actions</th>
+              <th class="col-actions"></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let project of pagedProjects; let i = index">
               <td class="col-id">{{ pagedProjectsIndex(i) + 1 }}</td>
-              <td class="col-coordinator">{{ project.responsable || 'NA' }}</td>
-              <td class="col-partner">{{ project.partenaire || 'NA' }}</td>
-              <td class="col-thematic">{{ project.thematique || 'NA' }}</td>
-              <td class="col-programme">{{ project.programme || 'NA' }}</td>
-              <td class="col-title">{{ project.titreproj || 'NA' }}</td>
-              <td class="col-acronym">{{ project.acronyme || 'NA' }}</td>
-              <td class="col-year">{{ project.startyear || 'NA' }}</td>
-              <td class="col-year">{{ project.endyear || 'NA' }}</td>
-              <td class="col-budget">{{ project.budget ? ('€' + (project.budget | number:'1.0-0')) : 'NA' }}</td>
-              <td class="col-group">{{ project.title || 'NA' }}</td>
+              <td class="col-title">
+                <span class="cell-title clamp-2" [title]="project.titreproj || ''">{{ project.titreproj || 'Untitled project' }}</span>
+                <span class="acronym-badge" *ngIf="project.acronyme">{{ project.acronyme }}</span>
+              </td>
+              <td class="col-coordinator">
+                <span class="cell-strong">{{ project.responsable || '—' }}</span>
+                <span class="cell-muted" *ngIf="project.partenaire">{{ project.partenaire }}</span>
+              </td>
+              <td class="col-programme"><span class="clamp-2" [title]="project.programme || ''">{{ project.programme || '—' }}</span></td>
+              <td class="col-thematic"><span class="clamp-2" [title]="project.thematique || ''">{{ project.thematique || '—' }}</span></td>
+              <td class="col-period">
+                <span *ngIf="project.startyear || project.endyear">{{ project.startyear || '?' }} – {{ project.endyear || '?' }}</span>
+                <span *ngIf="!project.startyear && !project.endyear" class="cell-muted">—</span>
+              </td>
+              <td class="col-budget">{{ project.budget ? ('€' + (project.budget | number:'1.0-0')) : '—' }}</td>
+              <td class="col-group">
+                <span class="group-pill" *ngIf="project.title" [ngClass]="'tone-' + groupTone(project.title)">{{ groupLabel(project.title) }}</span>
+              </td>
               <td class="col-actions">
                 <div class="action-btns">
-                  <button class="btn-icon edit" 
-                          (click)="showDialog(project)"
-                          title="Edit">
+                  <button class="btn-icon edit" (click)="showDialog(project)" title="Edit">
                     <i class='bx bx-pencil'></i>
                   </button>
-                  <button class="btn-icon delete" 
-                          (click)="confirmDelete(project.id)"
-                          title="Delete">
+                  <button class="btn-icon delete" (click)="confirmDelete(project.id)" title="Delete">
                     <i class='bx bx-trash'></i>
                   </button>
                 </div>
@@ -157,13 +151,22 @@
 
     <!-- Pagination -->
     <div class="pagination-bar">
-      <button class="page-btn" (click)="prevPage()" [disabled]="pageIndex === 0">
-        <i class='bx bx-chevron-left'></i>
-      </button>
-      <span class="page-info">Page {{ pageIndex + 1 }} of {{ totalPages }}</span>
-      <button class="page-btn" (click)="nextPage()" [disabled]="pageIndex === totalPages - 1">
-        <i class='bx bx-chevron-right'></i>
-      </button>
+      <label class="page-size">
+        <span>Rows per page</span>
+        <select [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
+      </label>
+      <span class="page-info">{{ rangeStart }}–{{ rangeEnd }} of {{ projects.length }}</span>
+      <div class="page-nav">
+        <button class="page-btn" (click)="prevPage()" [disabled]="pageIndex === 0" title="Previous page">
+          <i class='bx bx-chevron-left'></i>
+        </button>
+        <span class="page-current">{{ pageIndex + 1 }} / {{ totalPages || 1 }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="pageIndex >= totalPages - 1" title="Next page">
+          <i class='bx bx-chevron-right'></i>
+        </button>
+      </div>
     </div>
   </main>
 

@@ -1,14 +1,21 @@
 <div class="admin-layout">
-  <app-admin-navbar pageTitle="Management" (menuToggle)="toggleSidebar()">
-    <button header-actions class="header-btn primary" (click)="showAddProjectDialog()">
-      <i class='bx bx-plus'></i>
-      <span>Add New Portal Project</span>
-    </button>
-  </app-admin-navbar>
+  <app-admin-navbar pageTitle="Management" (menuToggle)="toggleSidebar()"></app-admin-navbar>
 
   <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
 
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <div class="page-head">
+      <div>
+        <h1 class="page-heading">Portal projects</h1>
+        <p class="page-sub">Each project's public portal - edit its content, reorder, or switch it on and off</p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn-primary" (click)="showAddProjectDialog()">
+          <i class='bx bx-plus'></i><span>New portal project</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="stats-row">
       <div class="stat-box">
@@ -31,19 +38,12 @@
       </div>
       <div class="stat-box">
         <div class="stat-icon orange">
-          <i class='bx bx-time-five'></i>
+          <i class='bx bx-hide'></i>
         </div>
         <div class="stat-info">
-          <h2>0</h2>
-          <p>Pending Actions</p>
+          <h2>{{ projects.length - activeProjectsCount }}</h2>
+          <p>Inactive Projects</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Breadcrumb below cards -->
-    <div class="breadcrumb-container">
-      <div class="breadcrumb">
-        <span>Management</span>
       </div>
     </div>
 

@@ -18,15 +18,34 @@
     <div class="event-card" *ngFor="let event of filteredEvents">
 
       <!-- Calendar tile: weekday, day number, month + year. -->
-      <div class="event-date-col">
+      <!-- Calendar tile. One day: weekday / day / month year. Several days:
+           both ends at the same size, side by side, then year and length. -->
+      <div class="event-date-col" *ngIf="getDateRange(event) as r" [class.is-range]="!r.single">
         <i class='bx bx-calendar date-icon'></i>
-        <span class="event-weekday">{{ getEventDay(event.startDate) }}</span>
-        <span class="event-daynum">{{ getEventDayNumber(event.startDate) }}</span>
-        <span class="event-monthyear">{{ getEventMonthYear(event.startDate) }}</span>
-        <div class="event-range" *ngIf="event.endDate && event.endDate !== event.startDate">
-          <span class="range-to">until</span>
-          <span class="range-date">{{ formatEventDate(event.endDate) }}</span>
-        </div>
+
+        <ng-container *ngIf="r.single">
+          <span class="event-weekday">{{ r.from.weekday }}</span>
+          <span class="event-daynum">{{ r.from.day }}</span>
+          <span class="event-monthyear">{{ r.from.month }} {{ r.year }}</span>
+        </ng-container>
+
+        <ng-container *ngIf="!r.single">
+          <div class="range-pair">
+            <div class="range-end">
+              <span class="range-label">From</span>
+              <span class="range-day">{{ r.from.day }}</span>
+              <span class="range-month">{{ r.from.month }}</span>
+            </div>
+            <i class='bx bx-right-arrow-alt range-arrow'></i>
+            <div class="range-end">
+              <span class="range-label">To</span>
+              <span class="range-day">{{ r.to.day }}</span>
+              <span class="range-month">{{ r.to.month }}</span>
+            </div>
+          </div>
+          <span class="range-year">{{ r.year }}</span>
+          <span class="range-length">{{ r.days }} days</span>
+        </ng-container>
       </div>
 
       <div class="event-body">

@@ -259,28 +259,28 @@
           </div>
 
           <!-- Bulk actions -->
-          <div class="bulk-actions-bar" *ngIf="selectionCount > 0">
-            <div class="bulk-info">
-              <i class='bx bx-check-square'></i>
+          <!-- Selection bar. Moving is done by dragging the selection onto a folder. -->
+          <div class="sel-bar" *ngIf="selectionCount > 0">
+            <div class="sel-info">
+              <span class="sel-count">{{ selectionCount }}</span>
               <span>{{ describeItems(selectedDocIds.size, selectedFolderIds.size) }} selected</span>
+              <span class="sel-hint"><i class='bx bx-move'></i> drag onto a folder to move</span>
             </div>
-            <div class="bulk-actions">
-              <button type="button" class="bulk-btn move-btn" (click)="openMoveSelection()">
-                <i class='bx bx-folder-open'></i><span>Move to Folder</span>
-              </button>
+            <div class="sel-actions">
               <ng-container *ngIf="selectedDocIds.size">
-                <button type="button" class="bulk-btn share-btn" (click)="setSelectionShared(true)">
+                <button type="button" class="sel-btn accent" (click)="setSelectionShared(true)" title="Show on the project's public Shared page">
                   <i class='bx bx-globe'></i><span>Share</span>
                 </button>
-                <button type="button" class="bulk-btn" (click)="setSelectionShared(false)">
-                  <i class='bx bx-lock-alt'></i><span>Unshare</span>
+                <button type="button" class="sel-btn" (click)="setSelectionShared(false)" title="Remove from the Shared page">
+                  <i class='bx bx-hide'></i><span>Unshare</span>
                 </button>
+                <span class="sel-divider"></span>
               </ng-container>
-              <button type="button" class="bulk-btn delete-btn" (click)="confirmBulkDelete()">
+              <button type="button" class="sel-btn danger" (click)="confirmBulkDelete()">
                 <i class='bx bx-trash'></i><span>Delete</span>
               </button>
-              <button type="button" class="bulk-btn clear-btn" (click)="clearDocSelection()">
-                <i class='bx bx-x'></i><span>Clear</span>
+              <button type="button" class="sel-close" (click)="clearDocSelection()" title="Clear selection">
+                <i class='bx bx-x'></i>
               </button>
             </div>
           </div>
@@ -345,6 +345,7 @@
                   <button type="button" class="action-btn delete-btn" (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
                     <i class='bx bx-trash'></i>
                   </button>
+                  <i class='bx bx-chevron-right row-chevron'></i>
                 </span>
               </div>
 
@@ -380,11 +381,10 @@
                 <span class="col-actions">
                   <button type="button" class="action-btn share-toggle" [class.on]="doc.shared" (click)="toggleShared(doc)"
                           [title]="doc.shared ? 'Stop sharing on the portal' : 'Share on the project portal'">
-                    <i class='bx' [ngClass]="doc.shared ? 'bx-globe' : 'bx-lock-alt'"></i>
+                    <i class='bx bx-globe'></i>
                   </button>
                   <button type="button" class="action-btn" (click)="viewFile(doc)" title="Preview"><i class='bx bx-show'></i></button>
                   <button type="button" class="action-btn" (click)="downloadFile(doc)" title="Download"><i class='bx bx-download'></i></button>
-                  <button type="button" class="action-btn" (click)="openMoveModal([doc.id])" title="Move to folder"><i class='bx bx-transfer-alt'></i></button>
                   <button type="button" class="action-btn delete-btn" (click)="confirmDelete(doc)" title="Delete"><i class='bx bx-trash'></i></button>
                 </span>
               </div>
@@ -563,40 +563,6 @@
         <button type="button" class="btn-delete" (click)="executeBulkDelete()">
           <i class='bx bx-trash'></i> Delete
         </button>
-      </div>
-    </div>
-  </ng-container>
-
-  <!-- Move to Folder Modal -->
-  <ng-container *ngIf="moveModalOpen">
-    <div class="modal-backdrop" (click)="cancelMove()"></div>
-    <div class="modal-dialog move-modal">
-      <div class="modal-header">
-        <div class="modal-icon-wrap">
-          <i class='bx bx-folder-open'></i>
-        </div>
-        <h3>Move {{ describeItems(movingDocIds.length, movingFolders.length) }}</h3>
-      </div>
-      <div class="modal-body">
-        <p class="move-modal-hint">Choose a destination folder</p>
-        <div class="move-folder-list">
-          <button type="button" class="move-folder-option" (click)="executeMoveTo('')"
-                  [disabled]="!isValidDestination('', movingFolders)">
-            <i class='bx bxs-folder-open'></i>
-            <span>Root (no folder)</span>
-          </button>
-          <button type="button" class="move-folder-option" *ngFor="let folder of allFolders"
-                  [style.padding-left.px]="14 + folder.depth * 18"
-                  [disabled]="!isValidDestination(folder.path, movingFolders)"
-                  (click)="executeMoveTo(folder.path)">
-            <i class='bx bxs-folder'></i>
-            <span>{{ folder.name }}</span>
-          </button>
-          <p class="move-no-folders" *ngIf="allFolders.length === 0">No folders yet — create one first, or move to root.</p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="cancelMove()">Cancel</button>
       </div>
     </div>
   </ng-container>

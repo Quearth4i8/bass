@@ -30,11 +30,6 @@ export class PortalPageEventsComponent implements OnInit {
       });
   }
 
-  getEventDay(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-  }
-
   /**
    * Backdrop for the page hero. Reuses the project's first home-carousel slide
    * rather than introducing a per-page banner field; falls back to the accent
@@ -44,23 +39,36 @@ export class PortalPageEventsComponent implements OnInit {
     return this.project?.content?.home?.carousel?.[0]?.url ?? '';
   }
 
-  /** Day number alone, for the big figure in the date tile. */
-  getEventDayNumber(dateStr: string): string {
-    if (!dateStr) return '';
-    return String(new Date(dateStr + 'T00:00:00').getDate());
-  }
-
-  /** "DEC 2020", the line under the day number. */
-  getEventMonthYear(dateStr: string): string {
-    if (!dateStr) return '';
-    const d = new Date(dateStr + 'T00:00:00');
-    return `${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${d.getFullYear()}`;
-  }
-
-  formatEventDate(dateStr: string): string {
-    if (!dateStr) return '';
-    const d = new Date(dateStr + 'T00:00:00');
-    return `${d.getDate()} ${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${d.getFullYear()}`;
+  /**
+   * Everything the date tile shows, in one place. `single` covers events with
+   * no end date or an end on the same day. The year reads "2021 – 2022" only
+   * when the event spans New Year; `days` counts both ends (29 Jun – 1 Jul = 3).
+   */
+  getDateRange(event: { startDate: string; endDate: string }): {
+    single: boolean;
+    from: { day: string; month: string; weekday: string };
+    to: { day: string; month: string; weekday: string };
+    year: string;
+    days: number;
+  } | null {
+    if (!event?.startDate) return null;
+    const start = new Date(event.startDate + 'T00:00:00');
+    const end = event.endDate ? new Date(event.endDate + 'T00:00:00') : start;
+    const part = (d: Date) => ({
+      day: String(d.getDate()),
+      month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+      weekday: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+    });
+    const days = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+    return {
+      single: days <= 1,
+      from: part(start),
+      to: part(end),
+      year: start.getFullYear() === end.getFullYear()
+        ? String(start.getFullYear())
+        : `${start.getFullYear()} – ${end.getFullYear()}`,
+      days,
+    };
   }
 
   getStatusClass(status: string): string {
