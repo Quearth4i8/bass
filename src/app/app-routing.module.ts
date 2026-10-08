@@ -19,6 +19,7 @@ import { PortalPagePartnersComponent } from './portal-project-display/pages/port
 import { PortalPageFundersComponent } from './portal-project-display/pages/portal-page-funders/portal-page-funders.component';
 import { PortalPageGalleryComponent } from './portal-project-display/pages/portal-page-gallery/portal-page-gallery.component';
 import { PortalPageEventsComponent } from './portal-project-display/pages/portal-page-events/portal-page-events.component';
+import { PortalPageSharedComponent } from './portal-project-display/pages/portal-page-shared/portal-page-shared.component';
 import { PortalPageTeamComponent } from './portal-project-display/pages/portal-page-team/portal-page-team.component';
 import { PortalPageOutputsComponent } from './portal-project-display/pages/portal-page-outputs/portal-page-outputs.component';
 
@@ -32,7 +33,8 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
 const routes: Routes = [
   // Specific routes matched before the shell catch-all
   { path: 'projectadmin', component: ProjectAdminComponent, canActivate: [AdminGuard] },
-  { path: 'docsadmin', component: DocsadminComponent, canActivate: [AdminGuard] },
+  { path: 'shared-folder', component: DocsadminComponent, canActivate: [AdminGuard] },
+  { path: 'docsadmin', redirectTo: 'shared-folder', pathMatch: 'full' },
   { path: 'budget-charts', component: BudgetChartsComponent },
   { path: 'management', component: ManagementComponent, canActivate: [AdminGuard] },
   { path: 'wikiadmin', component: WikiadminComponent, canActivate: [AdminGuard] },
@@ -52,6 +54,7 @@ const routes: Routes = [
       { path: 'team',             component: PortalPageTeamComponent },
       { path: 'participants',     redirectTo: 'team' },
       { path: 'outputs',          component: PortalPageOutputsComponent },
+      { path: 'shared',           component: PortalPageSharedComponent },
     ]
   },
   // Landing shell — catches root and all landing sub-pages

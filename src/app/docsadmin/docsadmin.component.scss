@@ -715,6 +715,287 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .doc-nav-bar { flex-wrap: wrap; }
 }
 
+// ── File explorer (project documents view) ────────────────────────────────
+// Folder tree on the left, the current folder as one table on the right.
+// Scoped under .explorer so the shared class names reused here (path-bar,
+// bc-item, filter-chip, action-btn ...) can be restyled without touching the
+// projects view that still uses them.
+.explorer {
+  --project-accent: #{$accent};
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// Tree ----------------------------------------------------------------------
+.tree-panel {
+  position: sticky; top: 92px;
+  max-height: calc(100vh - 120px);
+  display: flex; flex-direction: column;
+  background: $panel; border: 1px solid $line; border-radius: 14px;
+  overflow: hidden;
+
+  @media (max-width: 900px) { position: static; max-height: 320px; }
+}
+
+.tree-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 14px 10px;
+}
+
+.tree-back {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid $line; border-radius: 8px; background: $bg-2;
+  color: $text-dim; font-size: 17px; cursor: pointer; transition: all .2s;
+  &:hover { border-color: $accent; color: $accent; }
+}
+
+.tree-title {
+  font-size: 14px; font-weight: 700; color: $text;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.tree-summary {
+  display: flex; gap: 14px; padding: 0 14px 12px;
+  border-bottom: 1px solid $line;
+  font-family: $font-mono; font-size: 11px; color: $text-faint;
+  span { display: inline-flex; align-items: center; gap: 5px; }
+  i { font-size: 13px; color: var(--project-accent); }
+}
+
+.tree {
+  flex: 1; overflow-y: auto; padding: 8px;
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-thumb { background: $line-2; border-radius: 4px; }
+}
+
+.tree-row {
+  width: 100%;
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; min-height: 34px;
+  border: none; border-radius: 8px; background: transparent;
+  color: $text-dim; font-family: $font-sans; font-size: 13px; text-align: left;
+  cursor: pointer; transition: background .15s, color .15s;
+
+  &:hover { background: rgba(255,255,255,0.04); color: $text; }
+  &.current {
+    background: rgba(74,214,196,0.1); color: $text; font-weight: 600;
+    .tree-folder-icon { color: var(--project-accent); }
+  }
+}
+
+.tree-toggle, .tree-toggle-spacer { width: 20px; height: 20px; flex-shrink: 0; }
+.tree-toggle {
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; border-radius: 5px; padding: 0;
+  color: $text-faint; font-size: 16px; cursor: pointer;
+  &:hover { background: rgba(255,255,255,0.08); color: $text; }
+}
+
+.tree-folder-icon { font-size: 17px; color: #e0a526; flex-shrink: 0; }
+.tree-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tree-count {
+  font-family: $font-mono; font-size: 10px; color: $text-faint;
+  background: rgba(255,255,255,0.05); border-radius: 10px; padding: 1px 7px;
+}
+.tree-empty { margin: 10px 12px; font-size: 12px; color: $text-faint; }
+
+// Contents ------------------------------------------------------------------
+.content-panel {
+  position: relative;
+  min-height: 420px;
+  background: $panel; border: 1px solid $line; border-radius: 14px;
+  transition: border-color .2s;
+  &.drag-over { border-color: var(--project-accent); }
+}
+
+.content-toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px; border-bottom: 1px solid $line;
+}
+
+.explorer .path-bar {
+  flex: 1 1 260px; background: transparent; border: none; padding: 0;
+}
+
+.explorer .bc-item {
+  padding: 5px 8px; color: $text-dim; font-size: 14px;
+  i { color: #e0a526; }
+  &:hover:not(:disabled) { background: rgba(255,255,255,0.05); color: $text; }
+  &.bc-current, &:disabled { color: $text; cursor: default; opacity: 1; }
+}
+
+.toolbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.explorer .search-wrapper input { width: 220px; }
+
+.tool-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 14px; border-radius: $radius;
+  border: 1px solid $line; background: $bg-2; color: $text-dim;
+  font-family: $font-sans; font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all .2s;
+  i { font-size: 17px; }
+  &:hover { border-color: $accent; color: $accent; }
+  &.primary {
+    background: $accent; border-color: $accent; color: $bg;
+    &:hover { filter: brightness(1.08); color: $bg; }
+  }
+}
+
+.content-subbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+
+.explorer .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.explorer .filter-chip.active {
+  border-color: var(--project-accent); color: var(--project-accent);
+  background: rgba(74,214,196,0.08);
+}
+
+.folder-summary { font-family: $font-mono; font-size: 11px; color: $text-faint; }
+
+.explorer .bulk-actions-bar { margin: 0 16px 12px; }
+
+// Listing -------------------------------------------------------------------
+.listing { padding: 0 8px 10px; }
+
+.listing-head, .listing-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 90px 100px 120px 184px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 36px minmax(0, 1fr) 90px 184px;
+    .col-size, .col-date { display: none; }
+  }
+}
+
+.listing-head {
+  height: 38px;
+  border-bottom: 1px solid $line;
+  font-family: $font-mono; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: $text-faint;
+}
+
+.listing-row {
+  min-height: 50px;
+  border-bottom: 1px solid rgba($line, 0.7);
+  border-radius: 8px;
+  font-size: 13px; color: $text-dim;
+  transition: background .15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: rgba(255,255,255,0.03); }
+  &.selected { background: rgba(74,214,196,0.07); }
+  &.folder-row { cursor: pointer; .item-name { color: $text; font-weight: 600; } }
+}
+
+.col-check { display: flex; align-items: center; justify-content: center; }
+.col-check input { width: 15px; height: 15px; accent-color: $accent; cursor: pointer; }
+.col-name { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.col-size, .col-date { font-family: $font-mono; font-size: 12px; color: $text-faint; }
+.col-actions { display: flex; justify-content: flex-end; gap: 4px; }
+
+.item-icon {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  &.folder { background: rgba(224,165,38,0.12); color: #e0a526; }
+}
+
+.item-name {
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: $text; font-size: 13.5px;
+  &.link {
+    border: none; background: none; padding: 0; text-align: left; cursor: pointer;
+    font-family: $font-sans;
+    &:hover { color: var(--project-accent); text-decoration: underline; text-underline-offset: 3px; }
+  }
+}
+
+.type-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 5px;
+  font-family: $font-mono; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+}
+
+// Drag to move ---------------------------------------------------------------
+.listing-row[draggable="true"] { cursor: grab; }
+.listing-row.folder-row[draggable="true"] { cursor: pointer; }
+.listing-row.dragging { opacity: .4; }
+// Destinations a move cannot go to: where the items already are, or inside a folder being moved.
+.move-folder-option:disabled { opacity: .35; cursor: not-allowed; }
+
+// Any folder that will accept the item being dragged, wherever it is drawn.
+.explorer .drop-target {
+  background: rgba(74,214,196,0.14) !important;
+  box-shadow: inset 0 0 0 2px var(--project-accent);
+  border-radius: 8px;
+}
+
+.tool-btn:disabled { opacity: .5; cursor: progress; }
+
+.upload-progress {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: $font-mono; font-size: 11px; color: var(--project-accent);
+}
+.upload-progress-bar {
+  width: 120px; height: 5px; border-radius: 3px; overflow: hidden;
+  background: rgba(127,127,127,.2);
+  span { display: block; height: 100%; background: var(--project-accent); transition: width .2s; }
+}
+
+.drag-hint {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--project-accent);
+  i { font-size: 15px; }
+}
+
+// Icon-only, revealed on hover so a long listing is not a wall of buttons.
+.explorer .action-btn {
+  width: 30px; height: 30px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; border-radius: 7px; background: transparent;
+  color: $text-faint; font-size: 16px;
+  opacity: .55; transition: all .15s;
+  &:hover { border-color: $line-2; color: $accent; background: rgba(74,214,196,0.06); opacity: 1; }
+  &.delete-btn:hover { border-color: rgba(239,68,68,.35); color: $danger; background: rgba(239,68,68,.08); }
+}
+.listing-row:hover .action-btn, .listing-row.selected .action-btn { opacity: 1; }
+
+// Sharing: the toggle stays visible while on, so shared files read at a glance.
+.explorer .action-btn.share-toggle.on { opacity: 1; color: var(--project-accent); }
+
+.shared-badge {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  color: var(--project-accent);
+  background: rgba(74,214,196,0.12);
+  i { font-size: 12px; }
+}
+
+.explorer .empty-state { padding: 60px 20px; }
+
+.drop-overlay {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border-radius: 14px;
+  background: rgba(3, 20, 32, 0.82);
+  border: 2px dashed var(--project-accent);
+  color: $text; pointer-events: none;
+  i { font-size: 44px; color: var(--project-accent); }
+  p { margin: 0; font-size: 14px; }
+}
+
 // ── Light theme ────────────────────────────────────────────────────────────
 .admin-wrapper.theme-light {
   color-scheme: light;
@@ -821,4 +1102,36 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
     &:hover { border-color: #1a8f7f; background: rgba(26,143,127,.06); color: #1a8f7f; i { color: #1a8f7f; } }
   }
   .move-no-folders { color: #94a3b8 !important; }
+}
+
+// ── File explorer, light ──────────────────────────────────────────────────
+.admin-wrapper.theme-light .explorer {
+  .tree-panel, .content-panel { background: #ffffff; border-color: #c5d8e6; box-shadow: 0 1px 3px rgba(13,33,55,.04); }
+  .tree-back { background: #f1f5f9; border-color: #c5d8e6; color: #4a7590; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
+  .tree-title { color: #0d2137; }
+  .tree-summary { border-bottom-color: #e2eff6; color: #6b8a9a; }
+  .tree-row { color: #3d5a6e; &:hover { background: #f0f7fb; color: #0d2137; } &.current { background: rgba(26,143,127,.09); color: #0d2137; } }
+  .tree-toggle { color: #94a3b8; &:hover { background: #e4eff6; color: #0d2137; } }
+  .tree-count { background: #f1f5f9; color: #6b8a9a; }
+  .tree-empty { color: #94a3b8; }
+  .tree::-webkit-scrollbar-thumb { background: #c5d8e6; }
+
+  .content-toolbar { border-bottom-color: #e2eff6; }
+  .bc-item { color: #3d5a6e; &:hover:not(:disabled) { background: #f0f7fb; color: #0d2137; } &.bc-current, &:disabled { color: #0d2137; background: transparent; } }
+  .tool-btn { background: #f8fafc; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #1a8f7f; color: #1a8f7f; } &.primary { background: #1a8f7f; border-color: #1a8f7f; color: #ffffff; } }
+  .filter-chip { background: #f8fafc; border-color: #e2eff6; color: #3d5a6e; &.active { background: rgba(26,143,127,.08); } }
+  .folder-summary { color: #6b8a9a; }
+
+  .listing-head { border-bottom-color: #e2eff6; color: #6b8a9a; }
+  .listing-row {
+    border-bottom-color: #eef4f8; color: #3d5a6e;
+    &:hover { background: #f5f9fc; }
+    &.selected { background: rgba(26,143,127,.06); }
+    &.folder-row .item-name { color: #0d2137; }
+  }
+  .item-name { color: #0d2137; }
+  .col-size, .col-date { color: #6b8a9a; }
+  .col-check input { accent-color: #1a8f7f; }
+  .action-btn { color: #64748b; &:hover { border-color: #c5d8e6; color: #1a8f7f; background: #f0f7fb; } &.delete-btn:hover { border-color: #fecaca; color: #ef4444; background: #fef2f2; } }
+  .drop-overlay { background: rgba(240,247,251,.9); color: #0d2137; }
 }

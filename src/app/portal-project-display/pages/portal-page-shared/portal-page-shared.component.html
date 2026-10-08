@@ -1,0 +1,60 @@
+<div *ngIf="loading" class="page-loader"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading && project">
+  <app-portal-page-hero title="Shared"></app-portal-page-hero>
+
+  <ng-container *ngIf="files.length">
+    <!-- Same search bar as the Events page. -->
+    <div class="shared-search-bar">
+      <div class="shared-search-box">
+        <i class='bx bx-search search-leading'></i>
+        <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Search shared documents by name or type...">
+        <button class="shared-search-clear" type="button" *ngIf="searchTerm" (click)="onSearchChange('')" title="Clear search">
+          <i class='bx bx-x'></i>
+        </button>
+        <span class="search-action" aria-hidden="true"><i class='bx bx-search'></i></span>
+      </div>
+    </div>
+
+    <div class="type-filters" *ngIf="visibleTypeFilters.length > 2">
+      <button type="button" class="type-chip" *ngFor="let f of visibleTypeFilters"
+              [class.active]="activeType === f.key" (click)="setType(f.key)">
+        <i class='bx' [ngClass]="f.icon"></i>
+        <span>{{ f.label }}</span>
+        <em>{{ count(f.key) }}</em>
+      </button>
+    </div>
+
+    <div class="shared-wrapper">
+      <div class="file-list" *ngIf="filtered.length">
+        <div class="file-row" *ngFor="let doc of filtered">
+          <span class="file-icon" [style.color]="color(doc)" [style.background]="color(doc) + '14'">
+            <i class='bx' [ngClass]="icon(doc)"></i>
+          </span>
+          <div class="file-info">
+            <span class="file-name" [title]="doc.originalName">{{ doc.originalName }}</span>
+            <span class="file-meta">{{ doc.fileType.toUpperCase() }} · {{ size(doc.fileSize) }}</span>
+          </div>
+          <div class="file-actions">
+            <a *ngIf="canPreview(doc)" class="file-btn" [href]="previewUrl(doc)" target="_blank" rel="noopener">
+              <i class='bx bx-show'></i><span>Open</span>
+            </a>
+            <a class="file-btn primary" [href]="downloadUrl(doc)" [attr.download]="doc.originalName">
+              <i class='bx bx-download'></i><span>Download</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-match" *ngIf="!filtered.length">
+        <i class='bx bx-search-alt'></i>
+        <p>No documents match your search.</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="empty-state" *ngIf="!files.length">
+    <i class='bx bx-folder-open'></i>
+    <p>There is no data.</p>
+  </div>
+</ng-container>

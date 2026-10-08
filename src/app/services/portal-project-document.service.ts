@@ -12,6 +12,8 @@ export interface ProjectDocument {
   uploadDate: string;
   category: 'pdf' | 'word' | 'excel' | 'image' | 'other';
   subfolder: string | null;
+  /** Listed on the project portal's public "Shared" page. */
+  shared?: boolean;
 }
 
 export interface ProjectStats {
@@ -43,6 +45,16 @@ export class PortalProjectDocumentService {
   }
 
   // ── Documents ──────────────────────────────────────────────────────────────
+
+  /** Public: the files the admin has shared, for the portal's Shared page. */
+  listShared(slug: string): Observable<ProjectDocument[]> {
+    return this.http.get<ProjectDocument[]>(`${this.base(slug)}/shared`);
+  }
+
+  setShared(slug: string, id: number, value: boolean): Observable<ProjectDocument> {
+    const params = new HttpParams().set('value', String(value));
+    return this.http.put<ProjectDocument>(`${this.base(slug)}/${id}/shared`, null, { params });
+  }
 
   upload(slug: string, file: File, subfolder?: string): Observable<ProjectDocument> {
     const fd = new FormData();
@@ -110,6 +122,13 @@ export class PortalProjectDocumentService {
 
   createFolder(slug: string, name: string, parentPath: string = ''): Observable<ProjectFolder> {
     return this.http.post<ProjectFolder>(this.folderBase(slug), { name, parentPath });
+  }
+
+  /** Moves a folder and everything in it under `parentPath` ('' = project root). */
+  moveFolder(slug: string, id: number, parentPath: string): Observable<ProjectFolder> {
+    let params = new HttpParams();
+    if (parentPath) params = params.set('parentPath', parentPath);
+    return this.http.put<ProjectFolder>(`${this.folderBase(slug)}/${id}/move`, null, { params });
   }
 
   deleteFolder(slug: string, id: number): Observable<void> {

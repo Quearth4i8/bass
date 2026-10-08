@@ -7,7 +7,7 @@ import { SidebarService } from '../services/sidebarservice';
 import { AuthService } from '../services/AuthService';
 import { MessageService } from 'primeng/api';
 import { PortalProjectDocumentService, ProjectDocument, ProjectFolder } from '../services/portal-project-document.service';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 interface PortalProject {
@@ -17,6 +17,19 @@ interface PortalProject {
   image: string;
   isActive: boolean;
   accentColor: string;
+}
+
+interface TreeRow {
+  folder: ProjectFolder;
+  depth: number;
+  hasChildren: boolean;
+  expanded: boolean;
+}
+
+/** One file to upload, and the folder it goes in relative to where it was dropped. */
+interface PendingUpload {
+  file: File;
+  relDir: string;
 }
 
 interface ProjectWithStats extends PortalProject {
@@ -55,8 +68,10 @@ export class DocsadminComponent implements OnInit {
   bulkDeleteConfirmOpen = false;
 
   selectedDocIds = new Set<number>();
+  selectedFolderIds = new Set<number>();
   moveModalOpen = false;
   movingDocIds: number[] = [];
+  movingFolders: ProjectFolder[] = [];
 
   // Folder state
   folders: ProjectFolder[] = [];
@@ -66,6 +81,20 @@ export class DocsadminComponent implements OnInit {
   newFolderName = '';
   folderNameError = '';
   deleteFolderConfirm: ProjectFolder | null = null;
+
+  /** Folder tree, flattened in display order with collapsed branches left out. */
+  treeRows: TreeRow[] = [];
+  private expandedPaths = new Set<string>();
+
+  /**
+   * What is being dragged inside the explorer (null for files dragged in from
+   * the desktop, which are uploads). Drop targets are folder paths, '' = root.
+   */
+  dragItem: { docIds: number[]; folders: ProjectFolder[] } | null = null;
+  dropTargetPath: string | null = null;
+
+  /** Batch upload progress, shown in the toolbar while a drop/selection is processed. */
+  uploadProgress: { done: number; total: number; failed: number } | null = null;
 
   previewDoc: ProjectDocument | null = null;
   previewLoading = false;
@@ -147,6 +176,10 @@ export class DocsadminComponent implements OnInit {
   openProject(project: ProjectWithStats): void {
     this.selectedProject = { ...project };
     this.view = 'documents';
+    this.allFolders = [];
+    this.expandedPaths.clear();
+    this.treeRows = [];
+    this.loadAllFolders();
     this.navigateToPath(null);
   }
 
@@ -158,7 +191,7 @@ export class DocsadminComponent implements OnInit {
     this.filteredDocuments = [];
     this.folders = [];
     this.allFolders = [];
-    this.selectedDocIds.clear();
+    this.clearDocSelection();
     this.loadProjects();
   }
 
@@ -178,9 +211,15 @@ export class DocsadminComponent implements OnInit {
 
   navigateToPath(path: string | null): void {
     this.currentSubfolder = path && path.length > 0 ? path : null;
+    // Opening a folder from anywhere reveals it in the tree.
+    if (this.currentSubfolder) {
+      const parts = this.currentSubfolder.split('/');
+      for (let i = 1; i < parts.length; i++) this.expandedPaths.add(parts.slice(0, i).join('/'));
+      this.rebuildTree();
+    }
     this.activeFilter = 'all';
     this.docSearch = '';
-    this.selectedDocIds.clear();
+    this.clearDocSelection();
     this.loadFolders();
     this.loadDocuments();
   }
@@ -206,9 +245,57 @@ export class DocsadminComponent implements OnInit {
   loadAllFolders(): void {
     if (!this.selectedProject) return;
     this.docService.listAllFolders(this.selectedProject.slug).subscribe({
-      next: (f) => { this.allFolders = f; },
+      next: (f) => { this.allFolders = f; this.rebuildTree(); },
       error: () => {}
     });
+  }
+
+  toggleTreeNode(path: string, event: Event): void {
+    event.stopPropagation();
+    if (this.expandedPaths.has(path)) this.expandedPaths.delete(path);
+    else this.expandedPaths.add(path);
+    this.rebuildTree();
+  }
+
+  /** Depth-first walk of allFolders (a flat list with parentPath links). */
+  private rebuildTree(): void {
+    const byParent = new Map<string, ProjectFolder[]>();
+    for (const f of this.allFolders) {
+      const parent = f.parentPath || '';
+      if (!byParent.has(parent)) byParent.set(parent, []);
+      byParent.get(parent)!.push(f);
+    }
+    byParent.forEach(list => list.sort((a, b) => a.name.localeCompare(b.name)));
+
+    const rows: TreeRow[] = [];
+    const walk = (parent: string, depth: number) => {
+      for (const folder of byParent.get(parent) ?? []) {
+        const hasChildren = byParent.has(folder.path);
+        const expanded = hasChildren && this.expandedPaths.has(folder.path);
+        rows.push({ folder, depth, hasChildren, expanded });
+        if (expanded) walk(folder.path, depth + 1);
+      }
+    };
+    walk('', 0);
+    this.treeRows = rows;
+  }
+
+  /** Sub-folders of the current level, narrowed by the search box; hidden while a file-type filter is on. */
+  get visibleFolders(): ProjectFolder[] {
+    if (this.activeFilter !== 'all') return [];
+    const q = this.docSearch.trim().toLowerCase();
+    return q ? this.folders.filter(f => f.name.toLowerCase().includes(q)) : this.folders;
+  }
+
+  /** Destination of the ".." row: the current folder's parent ('' = root). */
+  get parentOfCurrent(): string {
+    if (!this.currentSubfolder) return '';
+    const idx = this.currentSubfolder.lastIndexOf('/');
+    return idx >= 0 ? this.currentSubfolder.slice(0, idx) : '';
+  }
+
+  get currentFolderSize(): number {
+    return this.documents.reduce((sum, d) => sum + (d.fileSize || 0), 0);
   }
 
   loadDocuments(): void {
@@ -324,28 +411,233 @@ export class DocsadminComponent implements OnInit {
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
-    this.isDragOver = true;
+    // A row being moved is not an upload: no upload overlay for it.
+    if (!this.dragItem) this.isDragOver = true;
   }
 
-  onDragLeave(): void {
+  // ── Drag to move ───────────────────────────────────────────────────────────
+
+  onFileDragStart(event: DragEvent, doc: ProjectDocument): void {
+    this.startDrag(event, this.selectedDocIds.has(doc.id), { docIds: [doc.id], folders: [] }, doc.originalName);
+  }
+
+  onFolderDragStart(event: DragEvent, folder: ProjectFolder): void {
+    this.startDrag(event, this.selectedFolderIds.has(folder.id), { docIds: [], folders: [folder] }, folder.name);
+  }
+
+  /** Grabbing a checked row carries the whole selection; an unchecked one goes alone. */
+  private startDrag(event: DragEvent, partOfSelection: boolean,
+                    single: { docIds: number[]; folders: ProjectFolder[] }, label: string): void {
+    this.dragItem = partOfSelection && this.selectionCount > 1 ? this.currentSelection() : single;
+    const n = this.dragItem.docIds.length + this.dragItem.folders.length;
+    if (!event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    // Firefox will not start a drag without some data set.
+    event.dataTransfer.setData('text/plain', n > 1 ? `${n} items` : label);
+  }
+
+  onDragEnd(): void {
+    this.dragItem = null;
+    this.dropTargetPath = null;
+  }
+
+  isDragging(kind: 'doc' | 'folder', id: number): boolean {
+    if (!this.dragItem) return false;
+    return kind === 'doc' ? this.dragItem.docIds.includes(id) : this.dragItem.folders.some(f => f.id === id);
+  }
+
+  /** Whether the current drag may land in `path`. */
+  canDropInto(path: string): boolean {
+    return !!this.dragItem && this.isValidDestination(path, this.dragItem.folders);
+  }
+
+  /**
+   * Everything that can be dragged or selected sits in the current folder, so
+   * that is never a destination; nor is any folder being moved, or anything
+   * inside one.
+   */
+  isValidDestination(path: string, folders: ProjectFolder[]): boolean {
+    if (path === (this.currentSubfolder ?? '')) return false;
+    return !folders.some(f => path === f.path || path.startsWith(f.path + '/'));
+  }
+
+  onTargetDragOver(event: DragEvent, path: string): void {
+    if (!this.canDropInto(path)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.dropTargetPath = path;
+  }
+
+  onTargetDragLeave(event: DragEvent, path: string): void {
+    const next = event.relatedTarget as Node | null;
+    if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+    if (this.dropTargetPath === path) this.dropTargetPath = null;
+  }
+
+  onTargetDrop(event: DragEvent, path: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const item = this.dragItem;
+    this.onDragEnd();
+    if (item) this.moveItems(item.docIds, item.folders, path);
+  }
+
+  onDragLeave(event?: DragEvent): void {
+    // dragleave also fires when the pointer moves onto a child element; only a
+    // real exit from the pane should drop the overlay, or it flickers.
+    const next = event?.relatedTarget as Node | null;
+    const pane = event?.currentTarget as HTMLElement | null;
+    if (next && pane && pane.contains(next)) return;
     this.isDragOver = false;
   }
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver = false;
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      Array.from(files).forEach(f => this.uploadFile(f));
+    // A row released over empty space: not an upload, nothing to do.
+    if (this.dragItem) { this.onDragEnd(); return; }
+
+    // Entries must be taken synchronously - the DataTransfer is emptied as soon
+    // as this handler returns. Folders only show up as entries; in `files` they
+    // appear as empty pseudo-files, which is what made the server reject them.
+    const items = Array.from(event.dataTransfer?.items ?? []);
+    const entries = items
+      .filter(i => i.kind === 'file')
+      .map(i => (i as any).webkitGetAsEntry?.() as any)
+      .filter(Boolean);
+
+    if (entries.length) {
+      Promise.all(entries.map(e => this.collectEntry(e, ''))).then(lists => {
+        const dirs = new Set<string>();
+        const uploads: PendingUpload[] = [];
+        for (const l of lists) { l.dirs.forEach(d => dirs.add(d)); uploads.push(...l.files); }
+        this.uploadBatch(uploads, Array.from(dirs));
+      });
+      return;
     }
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    this.uploadBatch(files.map(file => ({ file, relDir: '' })), []);
+  }
+
+  /** Recursively lists a dropped entry: every file with its folder, and every folder (even empty ones). */
+  private async collectEntry(entry: any, parent: string): Promise<{ dirs: string[]; files: PendingUpload[] }> {
+    if (entry.isFile) {
+      const file: File = await new Promise((res, rej) => entry.file(res, rej));
+      return { dirs: [], files: [{ file, relDir: parent }] };
+    }
+    const dirPath = parent ? `${parent}/${this.safeFolderName(entry.name)}` : this.safeFolderName(entry.name);
+    const reader = entry.createReader();
+    const children: any[] = [];
+    // readEntries hands back at most ~100 entries per call; keep reading until empty.
+    for (;;) {
+      const batch: any[] = await new Promise((res, rej) => reader.readEntries(res, rej));
+      if (!batch.length) break;
+      children.push(...batch);
+    }
+    const result = { dirs: [dirPath], files: [] as PendingUpload[] };
+    for (const child of children) {
+      const sub = await this.collectEntry(child, dirPath);
+      result.dirs.push(...sub.dirs);
+      result.files.push(...sub.files);
+    }
+    return result;
+  }
+
+  /** The backend accepts letters, digits, _, spaces, - and . in folder names. */
+  private safeFolderName(name: string): string {
+    const cleaned = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s\-.]/g, '-').trim();
+    return cleaned || 'folder';
+  }
+
+  onFolderSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    const dirs = new Set<string>();
+    const uploads: PendingUpload[] = files.map(file => {
+      // "Top/Sub/file.pdf" -> folder "Top/Sub"
+      const parts = ((file as any).webkitRelativePath || file.name).split('/').slice(0, -1).map((p: string) => this.safeFolderName(p));
+      for (let i = 1; i <= parts.length; i++) dirs.add(parts.slice(0, i).join('/'));
+      return { file, relDir: parts.join('/') };
+    });
+    this.uploadBatch(uploads, Array.from(dirs));
   }
 
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      Array.from(input.files).forEach(f => this.uploadFile(f));
-    }
+    const files = Array.from(input.files ?? []);
     input.value = '';
+    this.uploadBatch(files.map(file => ({ file, relDir: '' })), []);
+  }
+
+  /**
+   * Creates `dirs` (relative to the current folder) parent-first, then uploads
+   * the files a few at a time, with one summary message at the end instead of
+   * a toast per file.
+   */
+  private uploadBatch(uploads: PendingUpload[], dirs: string[]): void {
+    if (!this.selectedProject) return;
+    const slug = this.selectedProject.slug;
+    const base = this.currentSubfolder ?? '';
+    const abs = (rel: string) => [base, rel].filter(Boolean).join('/');
+
+    const valid = uploads.filter(u => u.file.size > 0);
+    const skipped = uploads.length - valid.length;
+    if (!valid.length && !dirs.length) {
+      if (skipped) this.messageService.add({ severity: 'warn', summary: 'Nothing uploaded', detail: 'Empty files cannot be uploaded' });
+      return;
+    }
+
+    this.uploadProgress = { done: 0, total: valid.length, failed: 0 };
+    const orderedDirs = [...dirs].sort((a, b) => a.split('/').length - b.split('/').length);
+
+    const createDirs = (i: number): Promise<void> => {
+      if (i >= orderedDirs.length) return Promise.resolve();
+      const rel = orderedDirs[i];
+      const idx = rel.lastIndexOf('/');
+      const name = idx >= 0 ? rel.slice(idx + 1) : rel;
+      const parent = abs(idx >= 0 ? rel.slice(0, idx) : '');
+      // "Folder already exists" is fine - the files just go into it.
+      return new Promise<void>(res => this.docService.createFolder(slug, name, parent).subscribe({ next: () => res(), error: () => res() }))
+        .then(() => createDirs(i + 1));
+    };
+
+    createDirs(0).then(() => {
+      let next = 0;
+      const worker = (): Promise<void> => {
+        if (next >= valid.length) return Promise.resolve();
+        const u = valid[next++];
+        return new Promise<void>(res => this.docService.upload(slug, u.file, abs(u.relDir) || undefined).subscribe({
+          next: (doc) => {
+            if (this.selectedProject) {
+              this.selectedProject.fileCount++;
+              this.selectedProject.totalSize += doc.fileSize;
+            }
+            this.uploadProgress!.done++;
+            res();
+          },
+          error: () => { this.uploadProgress!.done++; this.uploadProgress!.failed++; res(); },
+        })).then(worker);
+      };
+      return Promise.all([worker(), worker(), worker()]);
+    }).then(() => {
+      const p = this.uploadProgress!;
+      this.uploadProgress = null;
+      this.loadFolders();
+      this.loadAllFolders();
+      this.loadDocuments();
+      const ok = p.total - p.failed;
+      const parts = [`${ok} ${ok === 1 ? 'file' : 'files'} uploaded`];
+      if (dirs.length) parts.push(`${dirs.length} ${dirs.length === 1 ? 'folder' : 'folders'}`);
+      if (p.failed) parts.push(`${p.failed} failed`);
+      if (skipped) parts.push(`${skipped} empty skipped`);
+      this.messageService.add({
+        severity: p.failed ? (ok ? 'warn' : 'error') : 'success',
+        summary: p.failed ? 'Upload finished with errors' : 'Upload complete',
+        detail: parts.join(' · '),
+      });
+    });
   }
 
   uploadFile(file: File): void {
@@ -354,6 +646,7 @@ export class DocsadminComponent implements OnInit {
       next: (doc) => {
         this.documents.unshift(doc);
         this.applyFilters();
+        if (this.currentSubfolder) this.loadAllFolders(); // tree file counts
         if (this.selectedProject) {
           this.selectedProject.fileCount++;
           this.selectedProject.totalSize += doc.fileSize;
@@ -399,7 +692,7 @@ export class DocsadminComponent implements OnInit {
     });
   }
 
-  // ── Bulk select ────────────────────────────────────────────────────────────
+  // ── Bulk select (files and folders) ───────────────────────────────────────
 
   isDocSelected(id: number): boolean {
     return this.selectedDocIds.has(id);
@@ -410,30 +703,57 @@ export class DocsadminComponent implements OnInit {
     else this.selectedDocIds.add(id);
   }
 
-  get allDocsSelected(): boolean {
-    return this.filteredDocuments.length > 0 && this.filteredDocuments.every(d => this.selectedDocIds.has(d.id));
+  isFolderSelected(id: number): boolean {
+    return this.selectedFolderIds.has(id);
   }
 
-  toggleSelectAllDocs(): void {
-    if (this.allDocsSelected) {
-      this.filteredDocuments.forEach(d => this.selectedDocIds.delete(d.id));
-    } else {
-      this.filteredDocuments.forEach(d => this.selectedDocIds.add(d.id));
-    }
+  toggleFolderSelection(id: number): void {
+    if (this.selectedFolderIds.has(id)) this.selectedFolderIds.delete(id);
+    else this.selectedFolderIds.add(id);
+  }
+
+  get selectionCount(): number {
+    return this.selectedDocIds.size + this.selectedFolderIds.size;
+  }
+
+  /** "2 folders, 3 files" - for the selection bar and the dialogs. */
+  describeItems(docs: number, folders: number): string {
+    const parts: string[] = [];
+    if (folders) parts.push(`${folders} ${folders === 1 ? 'folder' : 'folders'}`);
+    if (docs) parts.push(`${docs} ${docs === 1 ? 'file' : 'files'}`);
+    return parts.join(', ');
+  }
+
+  get allItemsSelected(): boolean {
+    const folders = this.visibleFolders;
+    const docs = this.filteredDocuments;
+    return folders.length + docs.length > 0
+      && folders.every(f => this.selectedFolderIds.has(f.id))
+      && docs.every(d => this.selectedDocIds.has(d.id));
+  }
+
+  toggleSelectAll(): void {
+    const select = !this.allItemsSelected;
+    for (const f of this.visibleFolders) select ? this.selectedFolderIds.add(f.id) : this.selectedFolderIds.delete(f.id);
+    for (const d of this.filteredDocuments) select ? this.selectedDocIds.add(d.id) : this.selectedDocIds.delete(d.id);
   }
 
   clearDocSelection(): void {
     this.selectedDocIds.clear();
+    this.selectedFolderIds.clear();
   }
 
-  getSelectedDocIds(): number[] {
-    return Array.from(this.selectedDocIds);
+  private currentSelection(): { docIds: number[]; folders: ProjectFolder[] } {
+    return {
+      docIds: Array.from(this.selectedDocIds),
+      folders: this.folders.filter(f => this.selectedFolderIds.has(f.id)),
+    };
   }
 
   // ── Bulk delete ────────────────────────────────────────────────────────────
 
   confirmBulkDelete(): void {
-    if (this.selectedDocIds.size === 0) return;
+    if (this.selectionCount === 0) return;
     this.bulkDeleteConfirmOpen = true;
   }
 
@@ -443,43 +763,46 @@ export class DocsadminComponent implements OnInit {
 
   executeBulkDelete(): void {
     this.bulkDeleteConfirmOpen = false;
-    this.deleteDocsSequentially(Array.from(this.selectedDocIds), []);
+    const { docIds, folders } = this.currentSelection();
+    this.deleteItems(docIds, folders);
   }
 
-  private deleteDocsSequentially(ids: number[], failed: number[]): void {
+  /** Files first, then folders (each taking its whole contents with it), one at a time. */
+  private async deleteItems(docIds: number[], folders: ProjectFolder[]): Promise<void> {
     if (!this.selectedProject) return;
-
-    if (ids.length === 0) {
-      this.selectedDocIds.clear();
-      if (failed.length > 0) {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: `${failed.length} file(s) could not be deleted` });
-      } else {
-        this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Selected files deleted' });
-      }
-      return;
+    const slug = this.selectedProject.slug;
+    let failed = 0;
+    for (const id of docIds) {
+      if (!(await this.settle(this.docService.delete(slug, id)))) failed++;
     }
-
-    const [id, ...rest] = ids;
-    const doc = this.documents.find(d => d.id === id);
-    this.docService.delete(this.selectedProject.slug, id).subscribe({
-      next: () => {
-        this.documents = this.documents.filter(d => d.id !== id);
-        this.applyFilters();
-        if (this.selectedProject && doc) {
-          this.selectedProject.fileCount = Math.max(0, this.selectedProject.fileCount - 1);
-          this.selectedProject.totalSize = Math.max(0, this.selectedProject.totalSize - doc.fileSize);
-        }
-        this.deleteDocsSequentially(rest, failed);
-      },
-      error: () => this.deleteDocsSequentially(rest, [...failed, id])
-    });
+    for (const f of folders) {
+      if (!(await this.settle(this.docService.deleteFolder(slug, f.id)))) failed++;
+    }
+    this.clearDocSelection();
+    this.refreshAfterChange();
+    const total = docIds.length + folders.length;
+    this.messageService.add(failed
+      ? { severity: 'error', summary: 'Delete incomplete', detail: `${failed} of ${total} item(s) could not be deleted` }
+      : { severity: 'success', summary: 'Deleted', detail: this.describeItems(docIds.length, folders.length) + ' deleted' });
   }
 
   // ── Move to folder ─────────────────────────────────────────────────────────
 
+  /** Single file, from its row's Move button. */
   openMoveModal(ids: number[]): void {
     if (!this.selectedProject || ids.length === 0) return;
     this.movingDocIds = ids;
+    this.movingFolders = [];
+    this.moveModalOpen = true;
+    this.loadAllFolders();
+  }
+
+  /** Everything checked, from the selection bar. */
+  openMoveSelection(): void {
+    if (!this.selectedProject || this.selectionCount === 0) return;
+    const { docIds, folders } = this.currentSelection();
+    this.movingDocIds = docIds;
+    this.movingFolders = folders;
     this.moveModalOpen = true;
     this.loadAllFolders();
   }
@@ -487,37 +810,60 @@ export class DocsadminComponent implements OnInit {
   cancelMove(): void {
     this.moveModalOpen = false;
     this.movingDocIds = [];
+    this.movingFolders = [];
   }
 
   executeMoveTo(subfolder: string): void {
-    if (!this.selectedProject) return;
-    const ids = this.movingDocIds;
+    if (!this.isValidDestination(subfolder, this.movingFolders)) return;
+    const docIds = this.movingDocIds;
+    const folders = this.movingFolders;
     this.moveModalOpen = false;
-    this.moveDocsSequentially(ids, subfolder, []);
+    this.movingDocIds = [];
+    this.movingFolders = [];
+    this.moveItems(docIds, folders, subfolder);
   }
 
-  private moveDocsSequentially(ids: number[], subfolder: string, failed: number[]): void {
+  /** Moves files and folders into `target` one at a time, then one summary message. */
+  private async moveItems(docIds: number[], folders: ProjectFolder[], target: string): Promise<void> {
     if (!this.selectedProject) return;
-
-    if (ids.length === 0) {
-      this.movingDocIds = [];
-      this.selectedDocIds.clear();
-      this.loadFolders();
-      this.loadAllFolders();
-      this.loadDocuments();
-      if (failed.length > 0) {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: `${failed.length} file(s) could not be moved` });
-      } else {
-        this.messageService.add({ severity: 'success', summary: 'Moved', detail: subfolder ? `Moved to "${subfolder}"` : 'Moved to root' });
-      }
-      return;
+    const slug = this.selectedProject.slug;
+    let failed = 0;
+    let reason = '';
+    for (const id of docIds) {
+      if (!(await this.settle(this.docService.move(slug, id, target)))) failed++;
     }
+    for (const f of folders) {
+      const err = await this.settleWithError(this.docService.moveFolder(slug, f.id, target));
+      if (err !== null) { failed++; reason = reason || err; }
+    }
+    this.clearDocSelection();
+    this.refreshAfterChange();
+    const where = target ? `"${target}"` : 'the top level';
+    const total = docIds.length + folders.length;
+    this.messageService.add(failed
+      ? { severity: 'error', summary: 'Move incomplete', detail: `${failed} of ${total} item(s) could not be moved${reason ? ': ' + reason : ''}` }
+      : { severity: 'success', summary: 'Moved', detail: `${this.describeItems(docIds.length, folders.length)} moved to ${where}` });
+  }
 
-    const [id, ...rest] = ids;
-    this.docService.move(this.selectedProject.slug, id, subfolder).subscribe({
-      next: () => this.moveDocsSequentially(rest, subfolder, failed),
-      error: () => this.moveDocsSequentially(rest, subfolder, [...failed, id])
-    });
+  private refreshAfterChange(): void {
+    this.loadFolders();
+    this.loadAllFolders();
+    this.loadDocuments();
+    this.refreshProjectStats();
+  }
+
+  /** Resolves true on success, false on error - never rejects. */
+  private settle(obs: Observable<unknown>): Promise<boolean> {
+    return this.settleWithError(obs).then(err => err === null);
+  }
+
+  /** Resolves null on success, or the server's message on error. */
+  private settleWithError(obs: Observable<unknown>): Promise<string | null> {
+    return new Promise(resolve => obs.subscribe({
+      next: () => {},
+      complete: () => resolve(null),
+      error: (e) => resolve(typeof e?.error === 'string' ? e.error : 'request failed'),
+    }));
   }
 
   viewFile(doc: ProjectDocument): void {
@@ -620,15 +966,58 @@ export class DocsadminComponent implements OnInit {
     });
   }
 
+  /**
+   * Fetched with the admin's token rather than a plain link: only shared files
+   * can be downloaded without logging in, and an <a href> never sends the token.
+   */
   downloadFile(doc: ProjectDocument): void {
     if (!this.selectedProject) return;
-    const url = this.docService.downloadUrl(this.selectedProject.slug, doc.id);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = doc.originalName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    this.docService.previewBlob(this.selectedProject.slug, doc.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Download failed', detail: doc.originalName }),
+    });
+  }
+
+  // ── Sharing (the portal's public "Shared" page) ───────────────────────────
+
+  toggleShared(doc: ProjectDocument): void {
+    if (!this.selectedProject) return;
+    const value = !doc.shared;
+    this.docService.setShared(this.selectedProject.slug, doc.id, value).subscribe({
+      next: () => {
+        doc.shared = value;
+        this.messageService.add({
+          severity: 'success', summary: value ? 'Shared' : 'No longer shared',
+          detail: value ? `${doc.originalName} is now on the project's Shared page` : doc.originalName,
+        });
+      },
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not change sharing' }),
+    });
+  }
+
+  /** Shares or unshares every checked file (folders are not shareable themselves). */
+  async setSelectionShared(value: boolean): Promise<void> {
+    if (!this.selectedProject) return;
+    const slug = this.selectedProject.slug;
+    const docs = this.documents.filter(d => this.selectedDocIds.has(d.id) && !!d.shared !== value);
+    let failed = 0;
+    for (const d of docs) {
+      if (await this.settle(this.docService.setShared(slug, d.id, value))) d.shared = value;
+      else failed++;
+    }
+    this.messageService.add(failed
+      ? { severity: 'error', summary: 'Error', detail: `${failed} file(s) could not be changed` }
+      : { severity: 'success', summary: value ? 'Shared' : 'Unshared',
+          detail: `${docs.length} ${docs.length === 1 ? 'file' : 'files'} ${value ? 'shared' : 'unshared'}` });
   }
 
   formatSize(bytes: number): string {

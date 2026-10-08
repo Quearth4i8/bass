@@ -2,7 +2,7 @@
 
   <app-admin-navbar (menuToggle)="toggleSidebar()">
     <div header-title class="header-breadcrumb">
-      <h1>Documents</h1>
+      <h1>Shared Folder</h1>
       <ng-container *ngIf="view === 'documents' && selectedProject">
         <i class='bx bx-chevron-right breadcrumb-sep'></i>
         <span class="breadcrumb-project" [style.color]="selectedProject.accentColor">
@@ -113,196 +113,303 @@
     </ng-container>
 
     <!-- =================== DOCUMENTS VIEW =================== -->
+    <!-- File-explorer layout: the whole folder tree on the left, the current
+         folder's contents as one table on the right. -->
     <ng-container *ngIf="view === 'documents' && selectedProject">
 
-      <!-- Back + Breadcrumb bar -->
-      <div class="doc-nav-bar">
-        <button class="back-btn" (click)="backToProjects()" title="All Projects">
-          <i class='bx bx-arrow-back'></i>
-          All Projects
-        </button>
-        <div class="path-bar">
-          <button type="button" class="bc-item bc-project" [class.bc-current]="!currentSubfolder"
-                  [style.color]="selectedProject.accentColor"
-                  [style.background]="!currentSubfolder ? (selectedProject.accentColor + '14') : ''"
-                  (click)="backToRoot()">
-            <i class='bx bxs-folder'></i>
-            <span>{{ selectedProject.title }}</span>
-          </button>
-          <ng-container *ngFor="let seg of breadcrumbSegments; let last = last">
-            <i class='bx bx-chevron-right bc-sep'></i>
-            <button type="button" class="bc-item bc-folder" [class.bc-current]="last"
-                    [disabled]="last" (click)="navigateToPath(seg.path)">
-              <i class='bx' [ngClass]="last ? 'bxs-folder-open' : 'bxs-folder'"></i>
-              <span>{{ seg.name }}</span>
-            </button>
-          </ng-container>
-        </div>
-        <button type="button" class="new-folder-btn" (click)="openCreateFolderModal()">
-          <i class='bx bx-folder-plus'></i>
-          New Folder
-        </button>
-      </div>
+      <div class="explorer" [style.--project-accent]="selectedProject.accentColor">
 
-      <!-- Upload Zone -->
-      <div class="upload-zone"
-           [class.drag-over]="isDragOver"
-           [style.border-color]="isDragOver ? selectedProject.accentColor : ''"
-           (dragover)="onDragOver($event)"
-           (dragleave)="onDragLeave()"
-           (drop)="onDrop($event)"
-           (click)="fileInput.click()">
-        <input #fileInput type="file" multiple style="display:none"
-               accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.odt,.rtf,.ods"
-               (change)="onFileSelect($event)" />
-        <div class="upload-icon-wrap" [style.background]="selectedProject.accentColor + '15'" [style.color]="selectedProject.accentColor">
-          <i class='bx bx-cloud-upload'></i>
-        </div>
-        <p class="upload-title">Drop files here or <span [style.color]="selectedProject.accentColor">click to browse</span></p>
-        <p class="upload-sub">PDF, Word, Excel, Images, and more</p>
-      </div>
-
-      <!-- Folders Grid (subfolders of the current level) -->
-      <div class="folders-block" *ngIf="folders.length > 0">
-        <div class="block-label">
-          <i class='bx bxs-folder'></i>
-          <span>Folders</span>
-          <em class="block-label-count">{{ folders.length }}</em>
-        </div>
-        <div class="folders-section">
-          <div class="folder-card" *ngFor="let folder of folders" (click)="openFolder(folder)">
-            <button type="button" class="folder-delete-btn"
-                    (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
-              <i class='bx bx-trash'></i>
+        <!-- ── Folder tree ─────────────────────────────────────────────── -->
+        <aside class="tree-panel">
+          <div class="tree-head">
+            <button type="button" class="tree-back" (click)="backToProjects()" title="All projects">
+              <i class='bx bx-arrow-back'></i>
             </button>
-            <div class="folder-icon-wrap">
-              <i class='bx bxs-folder'></i>
-            </div>
-            <div class="folder-info">
-              <span class="folder-name" [title]="folder.name">{{ folder.name }}</span>
-              <span class="folder-count">{{ folder.fileCount }} {{ folder.fileCount === 1 ? 'file' : 'files' }}</span>
-            </div>
-            <i class='bx bx-chevron-right folder-enter-hint'></i>
+            <span class="tree-title" [title]="selectedProject.title">{{ selectedProject.title }}</span>
           </div>
-        </div>
-      </div>
 
-      <!-- Filter + Search Bar -->
-      <div class="filter-search-bar">
-        <div class="filter-chips">
-          <button *ngFor="let f of filters"
-                  class="filter-chip"
-                  [class.active]="activeFilter === f.key"
-                  [style.--chip-color]="activeFilter === f.key ? selectedProject.accentColor : ''"
-                  (click)="setFilter(f.key)">
-            <i class='bx' [ngClass]="f.icon"></i>
-            <span>{{ f.label }}</span>
-            <em class="chip-count">{{ getCategoryCount(f.key) }}</em>
-          </button>
-        </div>
-        <div class="search-wrapper">
-          <i class='bx bx-search'></i>
-          <input type="text" placeholder="Search files..."
-                 [(ngModel)]="docSearch"
-                 (input)="onDocSearchChange()"
-                 class="search-input" />
-        </div>
-      </div>
-
-      <div class="block-label files-block-label" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
-        <i class='bx bx-file'></i>
-        <span>Files</span>
-        <em class="block-label-count">{{ filteredDocuments.length }}</em>
-      </div>
-
-      <!-- Document List -->
-      <div class="documents-container">
-
-        <!-- Loading -->
-        <div class="loading-state" *ngIf="isLoadingDocs">
-          <div class="spinner"></div>
-          <p>Loading documents...</p>
-        </div>
-
-        <!-- Empty -->
-        <div class="empty-state" *ngIf="!isLoadingDocs && filteredDocuments.length === 0">
-          <i class='bx bx-folder-open'></i>
-          <p *ngIf="activeFilter === 'all' && !docSearch">No documents uploaded yet</p>
-          <p *ngIf="activeFilter !== 'all' || docSearch">No matching files found</p>
-          <span *ngIf="activeFilter === 'all' && !docSearch">Upload files using the zone above</span>
-          <span *ngIf="activeFilter !== 'all' || docSearch">Try a different filter or search term</span>
-        </div>
-
-        <!-- Bulk selection header -->
-        <div class="files-list-header" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
-          <label class="select-all-checkbox">
-            <input type="checkbox" [checked]="allDocsSelected" (change)="toggleSelectAllDocs()">
-            <span>Select all</span>
-          </label>
-        </div>
-
-        <!-- Bulk actions bar -->
-        <div class="bulk-actions-bar" *ngIf="selectedDocIds.size > 0">
-          <div class="bulk-info">
-            <i class='bx bx-check-square'></i>
-            <span>{{ selectedDocIds.size }} selected</span>
+          <div class="tree-summary">
+            <span><i class='bx bx-file'></i>{{ selectedProject.fileCount }} files</span>
+            <span><i class='bx bx-hdd'></i>{{ formatSize(selectedProject.totalSize) }}</span>
           </div>
-          <div class="bulk-actions">
-            <button type="button" class="bulk-btn move-btn" (click)="openMoveModal(getSelectedDocIds())">
-              <i class='bx bx-folder-open'></i>
-              <span>Move to Folder</span>
-            </button>
-            <button type="button" class="bulk-btn delete-btn" (click)="confirmBulkDelete()">
-              <i class='bx bx-trash'></i>
-              <span>Delete</span>
-            </button>
-            <button type="button" class="bulk-btn clear-btn" (click)="clearDocSelection()">
-              <i class='bx bx-x'></i>
-              <span>Clear</span>
-            </button>
-          </div>
-        </div>
 
-        <!-- Files List -->
-        <div class="files-list" *ngIf="!isLoadingDocs && filteredDocuments.length > 0">
-          <div class="file-row" *ngFor="let doc of filteredDocuments" [class.selected]="isDocSelected(doc.id)">
-            <label class="file-select" (click)="$event.stopPropagation()">
-              <input type="checkbox" [checked]="isDocSelected(doc.id)" (change)="toggleDocSelection(doc.id)">
-            </label>
-            <div class="file-icon-box"
-                 [style.background]="getFileColor(doc.category) + '15'"
-                 [style.color]="getFileColor(doc.category)">
-              <i class='bx' [ngClass]="getFileIcon(doc.category)"></i>
-            </div>
-            <div class="file-info">
-              <span class="file-name" [title]="doc.originalName">{{ doc.originalName }}</span>
-              <div class="file-meta-row">
-                <span class="file-type-badge"
-                      [style.background]="getFileColor(doc.category) + '18'"
-                      [style.color]="getFileColor(doc.category)">
-                  {{ doc.fileType.toUpperCase() }}
-                </span>
-                <span class="file-meta-item">{{ formatSize(doc.fileSize) }}</span>
-                <span class="file-meta-item">{{ formatDate(doc.uploadDate) }}</span>
+          <nav class="tree" role="tree">
+            <button type="button" class="tree-row" role="treeitem"
+                    [class.current]="!currentSubfolder"
+                    [class.drop-target]="dropTargetPath === ''"
+                    (dragover)="onTargetDragOver($event, '')"
+                    (dragleave)="onTargetDragLeave($event, '')"
+                    (drop)="onTargetDrop($event, '')"
+                    (click)="backToRoot()">
+              <span class="tree-toggle-spacer"></span>
+              <i class='bx tree-folder-icon' [ngClass]="!currentSubfolder ? 'bxs-folder-open' : 'bxs-folder'"></i>
+              <span class="tree-name">All files</span>
+            </button>
+
+            <div class="tree-row-wrap" *ngFor="let row of treeRows">
+              <div class="tree-row" role="treeitem"
+                   [class.current]="currentSubfolder === row.folder.path"
+                   [style.padding-left.px]="10 + (row.depth + 1) * 16"
+                   [class.drop-target]="dropTargetPath === row.folder.path"
+                    (dragover)="onTargetDragOver($event, row.folder.path)"
+                    (dragleave)="onTargetDragLeave($event, row.folder.path)"
+                    (drop)="onTargetDrop($event, row.folder.path)"
+                   (click)="navigateToPath(row.folder.path)">
+                <button type="button" class="tree-toggle" *ngIf="row.hasChildren"
+                        (click)="toggleTreeNode(row.folder.path, $event)"
+                        [attr.aria-label]="row.expanded ? 'Collapse' : 'Expand'">
+                  <i class='bx' [ngClass]="row.expanded ? 'bx-chevron-down' : 'bx-chevron-right'"></i>
+                </button>
+                <span class="tree-toggle-spacer" *ngIf="!row.hasChildren"></span>
+                <i class='bx tree-folder-icon'
+                   [ngClass]="currentSubfolder === row.folder.path || row.expanded ? 'bxs-folder-open' : 'bxs-folder'"></i>
+                <span class="tree-name" [title]="row.folder.path">{{ row.folder.name }}</span>
+                <span class="tree-count" *ngIf="row.folder.fileCount">{{ row.folder.fileCount }}</span>
               </div>
             </div>
-            <div class="file-actions">
-              <button type="button" class="action-btn view-btn" (click)="viewFile(doc)" title="View">
-                <i class='bx bx-show'></i>
+
+            <p class="tree-empty" *ngIf="treeRows.length === 0">No folders yet</p>
+          </nav>
+        </aside>
+
+        <!-- ── Contents ────────────────────────────────────────────────── -->
+        <section class="content-panel"
+                 [class.drag-over]="isDragOver"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)"
+                 (drop)="onDrop($event)">
+
+          <input #folderInput type="file" hidden webkitdirectory multiple
+                 (change)="onFolderSelect($event)" />
+          <input #fileInput type="file" multiple hidden
+                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.odt,.rtf,.ods"
+                 (change)="onFileSelect($event)" />
+
+          <!-- Toolbar: where you are + what you can do here -->
+          <div class="content-toolbar">
+            <div class="path-bar">
+              <button type="button" class="bc-item" [class.bc-current]="!currentSubfolder" (click)="backToRoot()"
+                      [class.drop-target]="dropTargetPath === ''"
+                    (dragover)="onTargetDragOver($event, '')"
+                    (dragleave)="onTargetDragLeave($event, '')"
+                    (drop)="onTargetDrop($event, '')">
+                <i class='bx bxs-folder'></i>
+                <span>{{ selectedProject.title }}</span>
               </button>
-              <button type="button" class="action-btn download-btn" (click)="downloadFile(doc)" title="Download">
-                <i class='bx bx-download'></i>
+              <ng-container *ngFor="let seg of breadcrumbSegments; let last = last">
+                <i class='bx bx-chevron-right bc-sep'></i>
+                <button type="button" class="bc-item" [class.bc-current]="last"
+                        [disabled]="last" (click)="navigateToPath(seg.path)"
+                        [class.drop-target]="dropTargetPath === seg.path"
+                    (dragover)="onTargetDragOver($event, seg.path)"
+                    (dragleave)="onTargetDragLeave($event, seg.path)"
+                    (drop)="onTargetDrop($event, seg.path)">
+                  <span>{{ seg.name }}</span>
+                </button>
+              </ng-container>
+            </div>
+
+            <div class="toolbar-actions">
+              <div class="search-wrapper">
+                <i class='bx bx-search'></i>
+                <input type="text" placeholder="Search this folder..."
+                       [(ngModel)]="docSearch"
+                       (input)="onDocSearchChange()"
+                       class="search-input" />
+              </div>
+              <button type="button" class="tool-btn" (click)="openCreateFolderModal()">
+                <i class='bx bx-folder-plus'></i>
+                <span>New Folder</span>
               </button>
-              <button type="button" class="action-btn move-btn" (click)="openMoveModal([doc.id])" title="Move to folder">
+              <button type="button" class="tool-btn" (click)="folderInput.click()" [disabled]="!!uploadProgress">
                 <i class='bx bx-folder-open'></i>
+                <span>Upload Folder</span>
               </button>
-              <button type="button" class="action-btn delete-btn" (click)="confirmDelete(doc)" title="Delete">
-                <i class='bx bx-trash'></i>
+              <button type="button" class="tool-btn primary" (click)="fileInput.click()" [disabled]="!!uploadProgress">
+                <i class='bx bx-upload'></i>
+                <span>Upload Files</span>
               </button>
             </div>
           </div>
-        </div>
 
+          <!-- Type filter + folder summary -->
+          <div class="content-subbar">
+            <div class="filter-chips">
+              <button *ngFor="let f of filters"
+                      class="filter-chip"
+                      [class.active]="activeFilter === f.key"
+                      (click)="setFilter(f.key)">
+                <i class='bx' [ngClass]="f.icon"></i>
+                <span>{{ f.label }}</span>
+                <em class="chip-count">{{ getCategoryCount(f.key) }}</em>
+              </button>
+            </div>
+            <span class="upload-progress" *ngIf="uploadProgress">
+              <span class="upload-progress-bar"><span [style.width.%]="uploadProgress.total ? uploadProgress.done / uploadProgress.total * 100 : 100"></span></span>
+              Uploading {{ uploadProgress.done }} / {{ uploadProgress.total }}
+            </span>
+            <span class="drag-hint" *ngIf="dragItem">
+              <i class='bx bx-move'></i> Drop on a folder - in the list, the tree or the path - to move it there
+            </span>
+            <span class="folder-summary" *ngIf="!dragItem && !uploadProgress">
+              {{ folders.length }} {{ folders.length === 1 ? 'folder' : 'folders' }}
+              · {{ documents.length }} {{ documents.length === 1 ? 'file' : 'files' }}
+              · {{ formatSize(currentFolderSize) }}
+            </span>
+          </div>
+
+          <!-- Bulk actions -->
+          <div class="bulk-actions-bar" *ngIf="selectionCount > 0">
+            <div class="bulk-info">
+              <i class='bx bx-check-square'></i>
+              <span>{{ describeItems(selectedDocIds.size, selectedFolderIds.size) }} selected</span>
+            </div>
+            <div class="bulk-actions">
+              <button type="button" class="bulk-btn move-btn" (click)="openMoveSelection()">
+                <i class='bx bx-folder-open'></i><span>Move to Folder</span>
+              </button>
+              <ng-container *ngIf="selectedDocIds.size">
+                <button type="button" class="bulk-btn share-btn" (click)="setSelectionShared(true)">
+                  <i class='bx bx-globe'></i><span>Share</span>
+                </button>
+                <button type="button" class="bulk-btn" (click)="setSelectionShared(false)">
+                  <i class='bx bx-lock-alt'></i><span>Unshare</span>
+                </button>
+              </ng-container>
+              <button type="button" class="bulk-btn delete-btn" (click)="confirmBulkDelete()">
+                <i class='bx bx-trash'></i><span>Delete</span>
+              </button>
+              <button type="button" class="bulk-btn clear-btn" (click)="clearDocSelection()">
+                <i class='bx bx-x'></i><span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Listing -->
+          <div class="listing">
+            <div class="listing-head" *ngIf="visibleFolders.length || filteredDocuments.length">
+              <label class="col-check" (click)="$event.stopPropagation()">
+                <input type="checkbox" [checked]="allItemsSelected" (change)="toggleSelectAll()"
+                       [disabled]="!visibleFolders.length && !filteredDocuments.length" title="Select all">
+              </label>
+              <span class="col-name">Name</span>
+              <span class="col-type">Type</span>
+              <span class="col-size">Size</span>
+              <span class="col-date">Date</span>
+              <span class="col-actions"></span>
+            </div>
+
+            <div class="loading-state" *ngIf="isLoadingDocs">
+              <div class="spinner"></div>
+              <p>Loading...</p>
+            </div>
+
+            <ng-container *ngIf="!isLoadingDocs">
+              <!-- Up one level -->
+              <div class="listing-row folder-row up-row" *ngIf="currentSubfolder" (click)="goUpOneLevel()"
+                   [class.drop-target]="dropTargetPath === parentOfCurrent"
+                    (dragover)="onTargetDragOver($event, parentOfCurrent)"
+                    (dragleave)="onTargetDragLeave($event, parentOfCurrent)"
+                    (drop)="onTargetDrop($event, parentOfCurrent)">
+                <span class="col-check"></span>
+                <span class="col-name">
+                  <span class="item-icon folder"><i class='bx bx-arrow-back'></i></span>
+                  <span class="item-name">..</span>
+                </span>
+                <span class="col-type"></span><span class="col-size"></span><span class="col-date"></span>
+                <span class="col-actions"></span>
+              </div>
+
+              <!-- Folders -->
+              <div class="listing-row folder-row" *ngFor="let folder of visibleFolders" (click)="openFolder(folder)"
+                   draggable="true"
+                   (dragstart)="onFolderDragStart($event, folder)"
+                   (dragend)="onDragEnd()"
+                   [class.selected]="isFolderSelected(folder.id)"
+                   [class.dragging]="isDragging('folder', folder.id)"
+                   [class.drop-target]="dropTargetPath === folder.path"
+                    (dragover)="onTargetDragOver($event, folder.path)"
+                    (dragleave)="onTargetDragLeave($event, folder.path)"
+                    (drop)="onTargetDrop($event, folder.path)">
+                <label class="col-check" (click)="$event.stopPropagation()">
+                  <input type="checkbox" [checked]="isFolderSelected(folder.id)" (change)="toggleFolderSelection(folder.id)">
+                </label>
+                <span class="col-name">
+                  <span class="item-icon folder"><i class='bx bxs-folder'></i></span>
+                  <span class="item-name" [title]="folder.name">{{ folder.name }}</span>
+                </span>
+                <span class="col-type">Folder</span>
+                <span class="col-size">{{ folder.fileCount }} {{ folder.fileCount === 1 ? 'file' : 'files' }}</span>
+                <span class="col-date">{{ formatDate(folder.createdAt) }}</span>
+                <span class="col-actions">
+                  <button type="button" class="action-btn delete-btn" (click)="confirmDeleteFolder(folder, $event)" title="Delete folder">
+                    <i class='bx bx-trash'></i>
+                  </button>
+                </span>
+              </div>
+
+              <!-- Files -->
+              <div class="listing-row file-row" *ngFor="let doc of filteredDocuments"
+                   [class.selected]="isDocSelected(doc.id)"
+                   draggable="true"
+                   (dragstart)="onFileDragStart($event, doc)"
+                   (dragend)="onDragEnd()"
+                   [class.dragging]="isDragging('doc', doc.id)"
+                   (dblclick)="viewFile(doc)">
+                <label class="col-check" (click)="$event.stopPropagation()">
+                  <input type="checkbox" [checked]="isDocSelected(doc.id)" (change)="toggleDocSelection(doc.id)">
+                </label>
+                <span class="col-name">
+                  <span class="item-icon"
+                        [style.background]="getFileColor(doc.category) + '18'"
+                        [style.color]="getFileColor(doc.category)">
+                    <i class='bx' [ngClass]="getFileIcon(doc.category)"></i>
+                  </span>
+                  <button type="button" class="item-name link" [title]="doc.originalName" (click)="viewFile(doc)">{{ doc.originalName }}</button>
+                  <span class="shared-badge" *ngIf="doc.shared" title="Visible on the project's public Shared page">
+                    <i class='bx bx-globe'></i> Shared
+                  </span>
+                </span>
+                <span class="col-type">
+                  <span class="type-badge" [style.color]="getFileColor(doc.category)" [style.background]="getFileColor(doc.category) + '14'">
+                    {{ doc.fileType.toUpperCase() }}
+                  </span>
+                </span>
+                <span class="col-size">{{ formatSize(doc.fileSize) }}</span>
+                <span class="col-date">{{ formatDate(doc.uploadDate) }}</span>
+                <span class="col-actions">
+                  <button type="button" class="action-btn share-toggle" [class.on]="doc.shared" (click)="toggleShared(doc)"
+                          [title]="doc.shared ? 'Stop sharing on the portal' : 'Share on the project portal'">
+                    <i class='bx' [ngClass]="doc.shared ? 'bx-globe' : 'bx-lock-alt'"></i>
+                  </button>
+                  <button type="button" class="action-btn" (click)="viewFile(doc)" title="Preview"><i class='bx bx-show'></i></button>
+                  <button type="button" class="action-btn" (click)="downloadFile(doc)" title="Download"><i class='bx bx-download'></i></button>
+                  <button type="button" class="action-btn" (click)="openMoveModal([doc.id])" title="Move to folder"><i class='bx bx-transfer-alt'></i></button>
+                  <button type="button" class="action-btn delete-btn" (click)="confirmDelete(doc)" title="Delete"><i class='bx bx-trash'></i></button>
+                </span>
+              </div>
+
+              <!-- Empty -->
+              <div class="empty-state" *ngIf="!visibleFolders.length && !filteredDocuments.length">
+                <i class='bx bx-folder-open'></i>
+                <ng-container *ngIf="activeFilter === 'all' && !docSearch; else noMatch">
+                  <p>This folder is empty</p>
+                  <span>Drop files here, or use <b>Upload</b> / <b>New Folder</b> above</span>
+                </ng-container>
+                <ng-template #noMatch>
+                  <p>No matching items</p>
+                  <span>Try a different filter or search term</span>
+                </ng-template>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Drop target overlay: the whole pane accepts files -->
+          <div class="drop-overlay" *ngIf="isDragOver">
+            <i class='bx bx-cloud-upload'></i>
+            <p>Drop files or folders to upload into <b>{{ currentSubfolder || selectedProject.title }}</b></p>
+          </div>
+        </section>
       </div>
     </ng-container>
 
@@ -441,10 +548,14 @@
         <div class="modal-icon-wrap delete-icon">
           <i class='bx bx-trash'></i>
         </div>
-        <h3>Delete {{ selectedDocIds.size }} {{ selectedDocIds.size === 1 ? 'File' : 'Files' }}</h3>
+        <h3>Delete {{ describeItems(selectedDocIds.size, selectedFolderIds.size) }}</h3>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete the selected {{ selectedDocIds.size === 1 ? 'file' : 'files' }}?</p>
+        <p>Are you sure you want to delete the selected items?</p>
+        <p class="modal-warning" *ngIf="selectedFolderIds.size">
+          <i class='bx bx-error'></i>
+          Deleting a folder also deletes every file and sub-folder inside it.
+        </p>
         <p class="modal-warning"><i class='bx bx-info-circle'></i> This action cannot be undone.</p>
       </div>
       <div class="modal-footer">
@@ -464,17 +575,19 @@
         <div class="modal-icon-wrap">
           <i class='bx bx-folder-open'></i>
         </div>
-        <h3>Move {{ movingDocIds.length }} {{ movingDocIds.length === 1 ? 'File' : 'Files' }}</h3>
+        <h3>Move {{ describeItems(movingDocIds.length, movingFolders.length) }}</h3>
       </div>
       <div class="modal-body">
         <p class="move-modal-hint">Choose a destination folder</p>
         <div class="move-folder-list">
-          <button type="button" class="move-folder-option" (click)="executeMoveTo('')">
+          <button type="button" class="move-folder-option" (click)="executeMoveTo('')"
+                  [disabled]="!isValidDestination('', movingFolders)">
             <i class='bx bxs-folder-open'></i>
             <span>Root (no folder)</span>
           </button>
           <button type="button" class="move-folder-option" *ngFor="let folder of allFolders"
                   [style.padding-left.px]="14 + folder.depth * 18"
+                  [disabled]="!isValidDestination(folder.path, movingFolders)"
                   (click)="executeMoveTo(folder.path)">
             <i class='bx bxs-folder'></i>
             <span>{{ folder.name }}</span>

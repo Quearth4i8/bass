@@ -18,4 +18,5 @@ export const PORTAL_TOP_NAV_LINKS: PortalTopNavLink[] = [
   { path: 'events',           label: 'Events',           icon: 'bx-calendar-event' },
   { path: 'gallery',          label: 'Gallery',          icon: 'bx-images' },
   { path: 'outputs',          label: 'Outputs',          icon: 'bx-file' },
+  { path: 'shared',           label: 'Shared',           icon: 'bx-share-alt' },
 ];
