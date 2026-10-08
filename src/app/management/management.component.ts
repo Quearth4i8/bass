@@ -67,10 +67,10 @@ export class ManagementComponent implements OnInit {
   editingProject: any = null;
   editingProjectIndex: number = -1;
   
-  portalProjects: PortalProjectMeta[] = [];
+  projects: PortalProjectMeta[] = [];
 
   get activeProjectsCount(): number {
-    return this.portalProjects.filter(p => p.isActive).length;
+    return this.projects.filter(p => p.isActive).length;
   }
 
   constructor(
@@ -92,7 +92,7 @@ export class ManagementComponent implements OnInit {
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((projects) => {
-        this.portalProjects = [...projects].sort((a, b) => {
+        this.projects = [...projects].sort((a, b) => {
           const aO = a.order ?? Number.MAX_SAFE_INTEGER;
           const bO = b.order ?? Number.MAX_SAFE_INTEGER;
           return aO - bO;
@@ -107,11 +107,11 @@ export class ManagementComponent implements OnInit {
 
   moveProject(index: number, direction: 'up' | 'down'): void {
     const other = direction === 'up' ? index - 1 : index + 1;
-    if (other < 0 || other >= this.portalProjects.length) return;
-    const slugA = this.portalProjects[index].slug;
-    const slugB = this.portalProjects[other].slug;
+    if (other < 0 || other >= this.projects.length) return;
+    const slugA = this.projects[index].slug;
+    const slugB = this.projects[other].slug;
     // Update the store synchronously — the reactive subscription re-fires and
-    // re-sorts portalProjects automatically with the new order values.
+    // re-sorts projects automatically with the new order values.
     this.portalProjectsService.reorderInStore([
       { slug: slugA, order: other + 1 },
       { slug: slugB, order: index + 1 },
@@ -295,7 +295,7 @@ export class ManagementComponent implements OnInit {
 
   confirmDeleteProject(): void {
     if (this.editingProjectIndex < 0) return;
-    const project = this.portalProjects[this.editingProjectIndex];
+    const project = this.projects[this.editingProjectIndex];
     if (!project?.slug) return;
     this.portalProjectsService.delete(project.slug).subscribe({
       next: (deleted) => {

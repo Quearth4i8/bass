@@ -16,8 +16,8 @@
           <i class='bx bx-grid-alt'></i>
         </div>
         <div class="stat-info">
-          <h2>{{ portalProjects.length }}</h2>
-          <p>Portal Projects</p>
+          <h2>{{ projects.length }}</h2>
+          <p>Projects</p>
         </div>
       </div>
       <div class="stat-box">
@@ -49,7 +49,7 @@
 
     <div class="content-wrapper">
       <div class="portal-grid">
-        <div class="portal-card" *ngFor="let project of portalProjects; let i = index" [class.inactive]="!project.isActive">
+        <div class="portal-card" *ngFor="let project of projects; let i = index" [class.inactive]="!project.isActive">
           <div class="card-image-wrapper">
             <img [src]="project.image" [alt]="project.title" class="card-img">
             <div class="inactive-badge" *ngIf="!project.isActive">
@@ -84,7 +84,7 @@
                 <i class='bx bx-chevron-left'></i>
               </button>
               <span class="order-pos">{{ i + 1 }}</span>
-              <button class="order-btn" (click)="moveProject(i, 'down'); $event.stopPropagation()" [disabled]="i === portalProjects.length - 1" title="Move Right">
+              <button class="order-btn" (click)="moveProject(i, 'down'); $event.stopPropagation()" [disabled]="i === projects.length - 1" title="Move Right">
                 <i class='bx bx-chevron-right'></i>
               </button>
             </div>

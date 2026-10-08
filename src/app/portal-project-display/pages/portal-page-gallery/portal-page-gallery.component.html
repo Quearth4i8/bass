@@ -57,9 +57,10 @@
 
     <div class="lightbox-stage">
       <img
-        [src]="project.content.gallery.images[lightboxIndex].url"
+        [src]="fullUrl(project.content.gallery.images[lightboxIndex].url)"
         [alt]="project.content.gallery.images[lightboxIndex].name"
         class="lb-image"
+        (error)="onFullImageError(project.content.gallery.images[lightboxIndex].url)"
         (click)="$event.stopPropagation()"
       >
     </div>

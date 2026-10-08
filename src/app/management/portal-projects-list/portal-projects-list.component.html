@@ -1,5 +1,5 @@
 <div class="admin-layout">
-  <app-admin-navbar pageTitle="Portal Projects" (menuToggle)="toggleSidebar()"></app-admin-navbar>
+  <app-admin-navbar pageTitle="Projects" (menuToggle)="toggleSidebar()"></app-admin-navbar>
 
   <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
 
@@ -13,7 +13,7 @@
         </div>
         <div class="stat-info">
           <h2>{{ totalProjectsCount }}</h2>
-          <p>Portal Projects</p>
+          <p>Projects</p>
         </div>
       </div>
       <div class="stat-box">
@@ -777,7 +777,7 @@
                   [checked]="isGalleryImageSelected((galleryCurrentPage - 1) * galleryImagesPerPage + i)"
                   (change)="toggleGalleryImageSelection((galleryCurrentPage - 1) * galleryImagesPerPage + i)">
               </label>
-              <img [src]="img.url" [alt]="img.name || ('Gallery image ' + (i + 1))" loading="lazy" decoding="async"
+              <img [src]="galleryThumbUrl(img.url)" [alt]="img.name || ('Gallery image ' + (i + 1))" loading="lazy" decoding="async"
                 (click)="openGalleryViewer((galleryCurrentPage - 1) * galleryImagesPerPage + i)"
                 (error)="onImageError((galleryCurrentPage - 1) * galleryImagesPerPage + i)">
               <button class="gallery-delete" type="button" (click)="removeGalleryImage((galleryCurrentPage - 1) * galleryImagesPerPage + i); $event.stopPropagation()" title="Remove">
@@ -870,9 +870,10 @@
               <div class="viewer-stage" (wheel)="onGalleryViewerWheel($event)">
                 <img
                   class="viewer-image"
-                  [src]="galleryImages[galleryViewerIndex]?.url"
+                  [src]="galleryFullUrl(galleryImages[galleryViewerIndex]?.url)"
                   [alt]="galleryImages[galleryViewerIndex]?.name || 'Gallery image'"
                   [style.transform]="'scale(' + galleryZoom + ')'"
+                  (error)="onGalleryFullError(galleryImages[galleryViewerIndex]?.url)"
                 />
               </div>
 

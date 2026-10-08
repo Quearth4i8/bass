@@ -1,46 +1,47 @@
-<div class="proj-page">
+<!-- Lives inside the landing shell (see app-routing), so the site navbar,
+     footer, background and the .section / .stats-strip styles all come from
+     there - this page only adds the table and its controls. -->
+<section class="section proj-section">
 
-  <!-- Sticky top nav -->
-  <nav class="proj-nav">
-    <div class="proj-nav-inner">
-      <div class="proj-nav-brand">
-        <span class="label label-accent">// BASSIANA</span>
-        <span class="proj-nav-title">Research Projects</span>
-      </div>
+  <div class="section-head">
+    <h1 class="section-title">List of Projects</h1>
+    <span class="label">INSTM database</span>
+  </div>
 
-      <div class="proj-nav-actions">
-        <button class="theme-btn" (click)="themeService.toggle()" [title]="themeService.isLight ? 'Switch to dark' : 'Switch to light'">
-          <i class='bx' [class.bx-sun]="!themeService.isLight" [class.bx-moon]="themeService.isLight"></i>
-        </button>
-        <a routerLink="/" class="home-btn" title="Home">
-          <i class='bx bx-home'></i>
-        </a>
-      </div>
+  <div class="stats-strip proj-stats">
+    <div class="stat">
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="label stat-label">Projects</div>
+      <div class="stat-delta">{{ projectGroups.length }} categories</div>
     </div>
-  </nav>
-
-  <!-- Page header -->
-  <div class="proj-header">
-    <div class="proj-header-inner">
-      <div class="section-head">
-        <h1 class="section-title">Projects</h1>
-        <span class="label">INSTM database</span>
-      </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.programmes }}</div>
+      <div class="label stat-label">Funding Programmes</div>
+      <div class="stat-delta" *ngIf="stats.topProgrammes">{{ stats.topProgrammes }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.firstYear || '—' }}<span class="stat-unit" *ngIf="stats.lastYear"> – {{ stats.lastYear }}</span></div>
+      <div class="label stat-label">Years Covered</div>
+      <div class="stat-delta" *ngIf="stats.firstYear && stats.lastYear">{{ stats.lastYear - stats.firstYear }} years</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">{{ stats.budget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
+      <div class="label stat-label">Total Budget</div>
+      <div class="stat-delta">across all projects</div>
     </div>
   </div>
 
-  <!-- Main content -->
   <div class="proj-container">
 
     <!-- Tab navigation -->
-    <div class="tab-nav">
+    <div class="tab-nav" role="tablist">
       <button
         *ngFor="let projectGroup of projectGroups; let i = index"
         class="tab-btn"
         [class.active]="activeTab === i"
         (click)="setActiveTab(i)">
         <i class="bx" [class]="'bx ' + getTabIcon(projectGroup.title)"></i>
-        <span class="tab-title">{{ projectGroup.title }}</span>
+        <span class="tab-title">{{ tabLabel(projectGroup.title) }}</span>
         <span class="tab-count">{{ filteredProjectData[projectGroup.title]?.length || 0 }}</span>
       </button>
     </div>
@@ -173,7 +174,7 @@
     </div>
 
   </div>
-</div>
+</section>
 
 <!-- ── Project detail drawer ──────────────────────────────────────────────── -->
 <div class="detail-overlay" *ngIf="selectedProject" (click)="closeDetail()">

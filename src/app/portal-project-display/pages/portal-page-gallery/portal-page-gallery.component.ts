@@ -68,6 +68,32 @@ export class PortalPageGalleryComponent implements OnInit {
   }
 
   /**
+   * Images whose watermarked copy failed to load. They fall back to the plain
+   * URL, so a backend without the /wm/ route (not yet redeployed) still shows
+   * the picture. Once it is deployed the originals are closed to the public,
+   * so this fallback can never hand out an unmarked image.
+   */
+  private readonly watermarkUnavailable = new Set<string>();
+
+  onFullImageError(url: string): void {
+    if (url && !this.watermarkUnavailable.has(url)) {
+      this.watermarkUnavailable.add(url);
+    }
+  }
+
+  /**
+   * Full-size image for the lightbox, via the backend's watermarked route. The
+   * originals are not public: what a visitor sees - and can save - always
+   * carries the project's copyright mark. Same pass-through rule as thumbUrl.
+   */
+  fullUrl(url: string): string {
+    const marker = '/media/';
+    const i = url?.indexOf(marker) ?? -1;
+    if (i < 0 || this.watermarkUnavailable.has(url)) return url;
+    return `${url.slice(0, i + marker.length)}wm/${url.slice(i + marker.length)}`;
+  }
+
+  /**
    * Warm the next and previous full-size images so stepping through the
    * lightbox does not wait on a fresh download each time.
    */
@@ -80,7 +106,7 @@ export class PortalPageGalleryComponent implements OnInit {
       if (url) {
         const img = new Image();
         img.decoding = 'async';
-        img.src = url;
+        img.src = this.fullUrl(url);
       }
     }
   }

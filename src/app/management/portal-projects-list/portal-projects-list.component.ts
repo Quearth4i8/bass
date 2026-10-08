@@ -1029,6 +1029,35 @@ export class PortalProjectsListComponent implements OnInit {
     }
   }
 
+  /**
+   * Gallery originals are closed to anonymous GETs, and an <img> request never
+   * carries the bearer token - so the admin views go through the same public
+   * thumbnail / watermarked routes as the portal. The tiles in particular must:
+   * a failed tile load runs onImageError, which deletes the image.
+   */
+  galleryThumbUrl(url: string, width = 480): string {
+    return this.rewriteMediaUrl(url, `thumb/`, `?w=${width}`);
+  }
+
+  galleryFullUrl(url: string | undefined): string {
+    if (!url || this.galleryWatermarkUnavailable.has(url)) return url ?? '';
+    return this.rewriteMediaUrl(url, 'wm/', '');
+  }
+
+  /** Plain-URL fallback while the backend lacks the /wm/ route (see the portal gallery). */
+  private readonly galleryWatermarkUnavailable = new Set<string>();
+
+  onGalleryFullError(url: string | undefined): void {
+    if (url) this.galleryWatermarkUnavailable.add(url);
+  }
+
+  private rewriteMediaUrl(url: string, route: string, query: string): string {
+    const marker = '/media/';
+    const i = url?.indexOf(marker) ?? -1;
+    if (i < 0) return url;
+    return `${url.slice(0, i + marker.length)}${route}${url.slice(i + marker.length)}${query}`;
+  }
+
   get paginatedGalleryImages(): any[] {
     const start = (this.galleryCurrentPage - 1) * this.galleryImagesPerPage;
     const end = start + this.galleryImagesPerPage;

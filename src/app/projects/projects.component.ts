@@ -37,6 +37,9 @@ export class ProjectsComponent implements OnInit {
   columnFilters: any[] = [];
   panelOpenState = false;
 
+  /** Headline numbers for the stats strip, across every category. */
+  stats = { total: 0, programmes: 0, topProgrammes: '', firstYear: 0, lastYear: 0, budget: 0 };
+
   constructor(
     private authService: AuthService,
     private projectGroupService: ProjectGroupService,
@@ -86,7 +89,43 @@ export class ProjectsComponent implements OnInit {
     this.projectService.getProjectsByTitreproj(title).subscribe((data: any[]) => {
       this.projectData[title] = data;
       this.filteredProjectData[title] = [...data];
+      this.computeStats();
     });
+  }
+
+  /** Re-run as each category arrives; the strip fills in as the data does. */
+  private computeStats(): void {
+    const all = Object.values(this.projectData).flat();
+    const programmeCounts = new Map<string, number>();
+    const years: number[] = [];
+    let budget = 0;
+    for (const p of all) {
+      const prog = (p.programme || '').trim();
+      if (prog && prog.toUpperCase() !== 'NA') {
+        programmeCounts.set(prog, (programmeCounts.get(prog) || 0) + 1);
+      }
+      for (const y of [p.startyear, p.endyear]) {
+        const n = Number(y);
+        if (n > 1900 && n < 2200) years.push(n);
+      }
+      const b = Number(p.budget);
+      if (Number.isFinite(b)) budget += b;
+    }
+    const top = [...programmeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
+    this.stats = {
+      total: all.length,
+      programmes: programmeCounts.size,
+      topProgrammes: top.join(' · '),
+      firstYear: years.length ? Math.min(...years) : 0,
+      lastYear: years.length ? Math.max(...years) : 0,
+      budget: budget / 1_000_000,
+    };
+  }
+
+  /** "ACHIEVED PROJECTS" -> "Achieved": the heading already says Projects. */
+  tabLabel(title: string): string {
+    const word = (title || '').replace(/\s*PROJECTS?\s*$/i, '').trim().toLowerCase();
+    return word ? word.charAt(0).toUpperCase() + word.slice(1) : title;
   }
 
   toggleAdminLogin(): void {

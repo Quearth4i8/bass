@@ -31,7 +31,6 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
 
 const routes: Routes = [
   // Specific routes matched before the shell catch-all
-  { path: 'projects', component: ProjectsComponent },
   { path: 'projectadmin', component: ProjectAdminComponent, canActivate: [AdminGuard] },
   { path: 'docsadmin', component: DocsadminComponent, canActivate: [AdminGuard] },
   { path: 'budget-charts', component: BudgetChartsComponent },
@@ -67,7 +66,10 @@ const routes: Routes = [
       { path: 'about',       redirectTo: 'home',  pathMatch: 'full' },
       { path: 'overview',    redirectTo: 'index', pathMatch: 'full' },
       { path: 'geodatabase', redirectTo: 'home', pathMatch: 'full' },
-      { path: 'portals',     component: LandingPortalsComponent },
+      { path: 'our-projects', component: LandingPortalsComponent },
+      // The INSTM research-projects table ("List of Projects" on the home page).
+      { path: 'projects',    component: ProjectsComponent },
+      { path: 'portals',     redirectTo: 'our-projects', pathMatch: 'full' },
       { path: 'team',        component: LandingTeamComponent },
       { path: 'outputs',     component: LandingOutputsComponent },
     ]
