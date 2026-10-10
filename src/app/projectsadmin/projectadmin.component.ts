@@ -70,6 +70,10 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.ref = this.dialogService.open(DialogContentComponent, {
       dismissableMask: true,
       closable: true,
+      // The header is hidden globally (styles.css); with it rendered, PrimeNG's
+      // focusOnShow recurses forever when it finds nothing to focus.
+      showHeader: false,
+      focusOnShow: false,
       style: { width: '720px', 'max-width': '95vw' },
       data: project ? { project } : undefined
     });
@@ -103,6 +107,10 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
       dismissableMask: true,
       closable: true,
+      // The header is hidden globally (styles.css); with it rendered, PrimeNG's
+      // focusOnShow recurses forever when it finds nothing to focus.
+      showHeader: false,
+      focusOnShow: false,
       style: { width: '520px', 'max-width': '95vw' }
     });
 

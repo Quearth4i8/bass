@@ -47,6 +47,15 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "html2canvas",
+              "dompurify",
+              "mammoth"
+            ],
             "assets": [
               "src/INSTM_logo.ico",
               "src/assets",

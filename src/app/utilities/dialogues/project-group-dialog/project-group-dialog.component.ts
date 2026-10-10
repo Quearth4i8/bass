@@ -88,6 +88,10 @@ export class ProjectGroupDialogComponent implements OnInit {
         this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
           dismissableMask: true,
           closable: true,
+          // The header is hidden globally (styles.css); with it rendered, PrimeNG's
+          // focusOnShow recurses forever when it finds nothing to focus.
+          showHeader: false,
+          focusOnShow: false,
           style: { width: '520px', 'max-width': '95vw' }
         });
       }
@@ -102,6 +106,10 @@ export class ProjectGroupDialogComponent implements OnInit {
         this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
           dismissableMask: true,
           closable: true,
+          // The header is hidden globally (styles.css); with it rendered, PrimeNG's
+          // focusOnShow recurses forever when it finds nothing to focus.
+          showHeader: false,
+          focusOnShow: false,
           style: { width: '520px', 'max-width': '95vw' }
         });
       },
