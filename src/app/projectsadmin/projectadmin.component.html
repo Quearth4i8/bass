@@ -17,6 +17,23 @@
         <p class="page-sub">INSTM research projects listed on the public site</p>
       </div>
       <div class="page-actions">
+        <div class="export-menu" [class.open]="exportMenuOpen">
+          <button type="button" class="btn-ghost" (click)="exportMenuOpen = !exportMenuOpen"
+                  [disabled]="!projects.length" title="Download the projects currently shown">
+            <i class='bx bx-download'></i><span>Download</span><i class='bx bx-chevron-down export-caret'></i>
+          </button>
+          <div class="export-panel" *ngIf="exportMenuOpen">
+            <div class="export-head">
+              <strong>{{ projects.length }} project{{ projects.length === 1 ? '' : 's' }}</strong>
+              <span>{{ activeFilter || 'All projects (no filter)' }}</span>
+            </div>
+            <button type="button" class="export-option" *ngFor="let f of exportFormats"
+                    [disabled]="!!exporting" (click)="exportProjects(f.format)">
+              <i class='bx' [ngClass]="exporting === f.format ? 'bx-loader-alt bx-spin' : f.icon"></i>
+              <span>{{ f.label }}</span>
+            </button>
+          </div>
+        </div>
         <button type="button" class="btn-ghost" (click)="showDialog2()">
           <i class='bx bx-folder-plus'></i><span>New group</span>
         </button>
@@ -58,6 +75,10 @@
           <i class='bx bx-search'></i>
         </div>
         <input type="text" class="search-input" placeholder="Search projects by keyword..." [(ngModel)]="globalSearchTerm" (input)="onGlobalSearch($event)">
+        <button class="filter-toggle-btn reset-filters-btn" (click)="resetFilters()" [disabled]="!hasFilters"
+                title="Reset filters" aria-label="Reset filters">
+          <i class='bx bx-reset'></i>
+        </button>
         <button class="filter-toggle-btn" (click)="showAdvancedFilters = !showAdvancedFilters" [class.active]="showAdvancedFilters">
           <i class='bx bx-filter-alt'></i>
           <span>Filters</span>
@@ -70,23 +91,23 @@
         <div class="filter-grid">
           <div class="filter-field">
             <label><i class='bx bx-user'></i> Coordinator</label>
-            <input type="text" placeholder="Search coordinator..." (input)="searchProjects2($event)">
+            <input type="text" placeholder="Search coordinator..." [(ngModel)]="filterValues.coordinator" (input)="searchProjects2($event)">
           </div>
           <div class="filter-field">
             <label><i class='bx bx-buildings'></i> Partner</label>
-            <input type="text" placeholder="Search partner..." (input)="searchProjects3($event)">
+            <input type="text" placeholder="Search partner..." [(ngModel)]="filterValues.partner" (input)="searchProjects3($event)">
           </div>
           <div class="filter-field">
             <label><i class='bx bx-collection'></i> Program</label>
-            <input type="text" placeholder="Search program..." (input)="searchProjects4($event)">
+            <input type="text" placeholder="Search program..." [(ngModel)]="filterValues.program" (input)="searchProjects4($event)">
           </div>
           <div class="filter-field">
             <label><i class='bx bx-font'></i> Acronym</label>
-            <input type="text" placeholder="Search acronym..." (input)="searchProjects($event)">
+            <input type="text" placeholder="Search acronym..." [(ngModel)]="filterValues.acronym" (input)="searchProjects($event)">
           </div>
           <div class="filter-field">
             <label><i class='bx bx-folder'></i> Project Group</label>
-            <input type="text" placeholder="Search group..." (input)="searchProjects1($event)">
+            <input type="text" placeholder="Search group..." [(ngModel)]="filterValues.group" (input)="searchProjects1($event)">
           </div>
         </div>
         </div>

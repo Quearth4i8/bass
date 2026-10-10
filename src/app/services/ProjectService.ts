@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { AuthService } from './AuthService';
+import { matchesSearch } from '../shared/utils/text-search';
 
 @Injectable({
   providedIn: 'root'
@@ -28,31 +29,31 @@ export class ProjectService {
   getProjectsByTitreproj(title: string): Observable<any[]> {
     const params = new HttpParams().set('title_like', title);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
-      map(projects => projects.filter(project => project.title.toLowerCase().includes(title.toLowerCase())))
+      map(projects => projects.filter(project => matchesSearch(project.title, title)))
     );
   }
   getProjectsByResponsable(responsable: string): Observable<any[]> {
     const params = new HttpParams().set('responsable_like', responsable);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
-      map(projects => projects.filter(project => project.responsable.toLowerCase().includes(responsable.toLowerCase())))
+      map(projects => projects.filter(project => matchesSearch(project.responsable, responsable)))
     );
   }
   getProjectsByPartenaire(partenaire: string): Observable<any[]> {
     const params = new HttpParams().set('partenaire_like', partenaire);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
-      map(projects => projects.filter(project => project.partenaire.toLowerCase().includes(partenaire.toLowerCase())))
+      map(projects => projects.filter(project => matchesSearch(project.partenaire, partenaire)))
     );
   }
   getProjectsByAcronyme(acronyme: string): Observable<any[]>{
     const params = new HttpParams().set('acronyme_like', acronyme);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
-      map(projects => projects.filter(project => project.acronyme.toLowerCase().includes(acronyme.toLowerCase())))
+      map(projects => projects.filter(project => matchesSearch(project.acronyme, acronyme)))
     );
   }
   getProjectsByProgram(programme: string): Observable<any[]>{
     const params = new HttpParams().set('programme_like', programme);
     return this.http.get<any[]>(`${this.baseUrl}/projects`, { params }).pipe(
-      map(projects => projects.filter(project => project.programme.toLowerCase().includes(programme.toLowerCase())))
+      map(projects => projects.filter(project => matchesSearch(project.programme, programme)))
     );
   }
   getAllProjects(): Observable<any[]> {

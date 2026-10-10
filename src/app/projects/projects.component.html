@@ -42,7 +42,7 @@
         (click)="setActiveTab(i)">
         <i class="bx" [class]="'bx ' + getTabIcon(projectGroup.title)"></i>
         <span class="tab-title">{{ tabLabel(projectGroup.title) }}</span>
-        <span class="tab-count">{{ filteredProjectData[projectGroup.title]?.length || 0 }}</span>
+        <span class="tab-count">{{ (filteredProjectData[projectGroup.title] || []).length }}</span>
       </button>
     </div>
 

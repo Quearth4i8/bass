@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
+import { ThemeService } from 'src/app/services/ThemeService';
 import { ConfirmDeleteGroupDialogComponent } from '../confirm-delete-group-dialog/confirm-delete-group-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from 'primeng/api';
@@ -23,6 +24,7 @@ export class ProjectGroupDialogComponent implements OnInit {
     public dialogService: DialogService,
     public dialog: MatDialog,
     private messageService: MessageService,
+    public themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
@@ -84,7 +86,9 @@ export class ProjectGroupDialogComponent implements OnInit {
         this.deleteItem(title);
       } else {
         this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
-          width: '50%'
+          dismissableMask: true,
+          closable: true,
+          style: { width: '520px', 'max-width': '95vw' }
         });
       }
     });
@@ -96,7 +100,9 @@ export class ProjectGroupDialogComponent implements OnInit {
         console.log(`Deleted project group: ${title}`);
         this.projectGroupTitles = this.projectGroupTitles.filter(groupTitle => groupTitle !== title);
         this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
-          width: '50%'
+          dismissableMask: true,
+          closable: true,
+          style: { width: '520px', 'max-width': '95vw' }
         });
       },
     );

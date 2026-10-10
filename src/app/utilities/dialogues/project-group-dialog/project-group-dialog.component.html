@@ -1,34 +1,42 @@
-<div class="custom-dialog">
-    <div class="dialog-header">
-        <h2>Add Project Group</h2>
+<div class="admin-dialog" [class.theme-light]="themeService.isLight">
+    <div class="ad-header">
+        <div class="ad-icon"><i class='bx bx-folder-plus'></i></div>
+        <div class="ad-titles">
+            <h2 class="ad-title">New group</h2>
+            <p class="ad-sub">Groups organise projects into tabs on the public projects page</p>
+        </div>
+        <button type="button" class="ad-close" (click)="ref.close()" title="Close" aria-label="Close"><i class='bx bx-x'></i></button>
     </div>
+
     <form #projectForm="ngForm" (ngSubmit)="onSubmit(projectForm)">
-        <div class="dialog-body">
-            <div class="form-group">
-                <label for="group">New Project Group Name <span>*</span></label>
-                <input type="text" id="group" name="group" [(ngModel)]="projectFormData.title" placeholder="Enter group name" required>
-                <div *ngIf="projectForm.submitted && !projectForm.controls['group']?.valid" class="error">
-                    Project group name is required.
+        <div class="ad-body">
+            <section class="ad-section">
+                <div class="ad-field">
+                    <label for="group">Group name <span class="req">*</span></label>
+                    <input type="text" id="group" name="group" [(ngModel)]="projectFormData.title" placeholder="e.g. ONGOING PROJECTS" required>
+                    <span class="ad-error" *ngIf="projectForm.submitted && !projectForm.controls['group']?.valid">
+                        <i class='bx bx-error-circle'></i> Group name is required.
+                    </span>
                 </div>
-            </div>
-            
-            <div class="existing-groups" *ngIf="projectGroupTitles.length > 0">
-                <label>Existing Project Groups</label>
-                <ul class="groups-list">
-                    <li *ngFor="let title of projectGroupTitles" class="group-item">
-                        <span class="group-name">{{ title }}</span>
-                        <div class="group-actions">
-                            <button type="button" (click)="onDelete(title)" class="btn-icon delete" title="Delete">
-                                <i class='bx bx-trash'></i>
-                            </button>
-                        </div>
+            </section>
+
+            <section class="ad-section">
+                <h3 class="ad-section-title"><i class='bx bx-folder'></i> Existing groups · {{ projectGroupTitles.length }}</h3>
+                <ul class="ad-list" *ngIf="projectGroupTitles.length > 0; else noGroups">
+                    <li *ngFor="let title of projectGroupTitles" class="ad-row">
+                        <span class="ad-row-name" [title]="title">{{ title }}</span>
+                        <button type="button" (click)="onDelete(title)" class="ad-icon-btn delete" title="Delete group" aria-label="Delete group">
+                            <i class='bx bx-trash'></i>
+                        </button>
                     </li>
                 </ul>
-            </div>
+                <ng-template #noGroups><p class="ad-empty">No groups yet.</p></ng-template>
+            </section>
         </div>
-        <div class="dialog-footer">
-            <button type="button" class="btn-cancel" (click)="ref.close()">Cancel</button>
-            <button type="submit" class="btn-save">Save Group</button>
+
+        <div class="ad-footer">
+            <button type="button" class="ad-btn ghost" (click)="ref.close()">Cancel</button>
+            <button type="submit" class="ad-btn primary"><i class='bx bx-plus'></i><span>Create group</span></button>
         </div>
     </form>
 </div>

@@ -286,6 +286,12 @@ a.header-btn { text-decoration: none; }
   &.active { background: rgba(74,214,196,.08); border-color: $accent; color: $accent; }
   i { font-size: 16px; }
 }
+.reset-filters-btn {
+  width: 40px; height: 40px; padding: 0; justify-content: center;
+  i { font-size: 18px; }
+  &:hover:not(:disabled) { border-color: #f87171; color: #f87171; }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+}
 
 /* Opens to its real height: a grid row going 0fr -> 1fr animates to the
    content's own size. The old max-height: 0 -> 300px spent most of its time
@@ -597,6 +603,8 @@ a.header-btn { text-decoration: none; }
   .search-main { flex-wrap: wrap; }
   .search-input { width: 100%; order: 2; }
   .filter-toggle-btn { order: 3; width: 100%; justify-content: center; }
+  .reset-filters-btn { order: 3; flex: 0 0 40px; }
+  .reset-filters-btn + .filter-toggle-btn { width: auto; flex: 1; }
 }
 
 // ── Light theme ────────────────────────────────────────────────────────────
@@ -641,6 +649,7 @@ a.header-btn { text-decoration: none; }
     background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e;
     &.active { background: rgba(26,143,127,.1); border-color: #1a8f7f; color: #1a8f7f; }
   }
+  .reset-filters-btn:hover:not(:disabled) { border-color: #dc2626; color: #dc2626; }
   .filter-grid { border-top-color: #c5d8e6; }
   .filter-field {
     label { color: #64748b; i { color: #1a8f7f; } }
@@ -789,4 +798,42 @@ a.header-btn { text-decoration: none; }
   }
   .page-size { color: #64748b; select { background: #ffffff; border-color: #c5d8e6; color: #0d2137; } }
   .page-current { color: #64748b; }
+}
+
+// ── Download (export) menu ─────────────────────────────────────────────────
+.export-menu {
+  position: relative;
+  .btn-ghost:disabled { opacity: .5; cursor: not-allowed; }
+  .export-caret { font-size: 16px !important; margin-left: -2px; transition: transform .2s; }
+  &.open .export-caret { transform: rotate(180deg); }
+}
+.export-panel {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 10001;
+  min-width: 240px; padding: 6px;
+  background: $panel-2; border: 1px solid $line-2; border-radius: $radius;
+  box-shadow: 0 12px 32px rgba(0,0,0,.45);
+  animation: dropdownSlide 0.15s ease;
+}
+.export-head {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px 10px; margin-bottom: 4px; border-bottom: 1px solid $line;
+  strong { font-size: 13px; color: $text; }
+  span { font-size: 12px; color: $text-dim; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+}
+.export-option {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 10px; border: none; border-radius: 8px; background: transparent;
+  font-family: $font-sans; font-size: 13px; color: $text-dim; text-align: left; cursor: pointer;
+  transition: background .15s, color .15s;
+  i { font-size: 18px; color: $accent; }
+  &:hover:not(:disabled) { background: $panel; color: $text; }
+  &:disabled { cursor: wait; opacity: .7; }
+}
+@media (max-width: 768px) {
+  .export-menu { flex: 1; .btn-ghost { width: 100%; } }
+}
+.admin-layout.theme-light {
+  .export-panel { background: #ffffff; border-color: #c5d8e6; box-shadow: 0 12px 32px rgba(13,33,55,.12); }
+  .export-head { border-bottom-color: #e2edf4; strong { color: #0d2137; } span { color: #64748b; } }
+  .export-option { color: #3d5a6e; i { color: #1a8f7f; } &:hover:not(:disabled) { background: #f0f7fb; color: #0d2137; } }
 }

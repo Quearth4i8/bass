@@ -4,6 +4,7 @@ import { AuthService } from '../services/AuthService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { ProjectService } from '../services/ProjectService';
 import { ThemeService } from '../services/ThemeService';
+import { matchesSearch, normalizeSearch } from '../shared/utils/text-search';
 
 @Component({
   selector: 'app-projects',
@@ -179,31 +180,24 @@ export class ProjectsComponent implements OnInit {
 
     this.filteredProjectData[groupTitle] = this.projectData[groupTitle].filter((project: any) => {
       // General search across all fields
-      if (filters.general) {
-        const searchTerm = filters.general.toLowerCase();
-        const matchesGeneral =
-          project.responsable?.toLowerCase().includes(searchTerm) ||
-          project.partenaire?.toLowerCase().includes(searchTerm) ||
-          project.thematique?.toLowerCase().includes(searchTerm) ||
-          project.programme?.toLowerCase().includes(searchTerm) ||
-          project.titreproj?.toLowerCase().includes(searchTerm) ||
-          project.acronyme?.toLowerCase().includes(searchTerm) ||
-          project.startyear?.toString().includes(searchTerm) ||
-          project.endyear?.toString().includes(searchTerm) ||
-          project.budget?.toString().includes(searchTerm);
+      if (normalizeSearch(filters.general)) {
+        const matchesGeneral = [
+          project.responsable, project.partenaire, project.thematique, project.programme,
+          project.titreproj, project.acronyme, project.startyear, project.endyear, project.budget,
+        ].some(value => matchesSearch(value, filters.general));
         if (!matchesGeneral) return false;
       }
 
       return (
-        (!filters.responsable || project.responsable?.toLowerCase().includes(filters.responsable.toLowerCase())) &&
+        matchesSearch(project.responsable, filters.responsable) &&
         (!filters.partenaire || project.partenaire === filters.partenaire) &&
-        (!filters.thematique || project.thematique?.toLowerCase().includes(filters.thematique.toLowerCase())) &&
+        matchesSearch(project.thematique, filters.thematique) &&
         (!filters.programme || project.programme === filters.programme) &&
-        (!filters.titreproj || project.titreproj?.toLowerCase().includes(filters.titreproj.toLowerCase())) &&
-        (!filters.acronyme || project.acronyme?.toLowerCase().includes(filters.acronyme.toLowerCase())) &&
-        (!filters.startyear || project.startyear?.toString().includes(filters.startyear)) &&
-        (!filters.endyear || project.endyear?.toString().includes(filters.endyear)) &&
-        (!filters.budget || project.budget?.toString().includes(filters.budget))
+        matchesSearch(project.titreproj, filters.titreproj) &&
+        matchesSearch(project.acronyme, filters.acronyme) &&
+        matchesSearch(project.startyear, filters.startyear) &&
+        matchesSearch(project.endyear, filters.endyear) &&
+        matchesSearch(project.budget, filters.budget)
       );
     });
   }

@@ -11,6 +11,8 @@ import { MessageService } from 'primeng/api';
 import { ProjectGroupDialogComponent } from '../utilities/dialogues/project-group-dialog/project-group-dialog.component';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { AuthService } from '../services/AuthService';
+import { matchesSearch } from '../shared/utils/text-search';
+import { ProjectExportService, ProjectExportFormat } from '../services/ProjectExportService';
 
 @Component({
   selector: 'projectadmin',
@@ -42,6 +44,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     public themeService: ThemeService,
+    private projectExportService: ProjectExportService,
   ) { }
 
   @HostListener('document:click', ['$event'])
@@ -52,6 +55,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     if (!clickedOnPageDropdown) {
       this.pageSizeDropdownOpen = false;
       this.pageDropdownOpen = false;
+    }
+    if (!target.closest('.export-menu')) {
+      this.exportMenuOpen = false;
     }
   }
 
@@ -64,7 +70,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.ref = this.dialogService.open(DialogContentComponent, {
       dismissableMask: true,
       closable: true,
-      style: { 'min-width': '600px' },
+      style: { width: '720px', 'max-width': '95vw' },
       data: project ? { project } : undefined
     });
 
@@ -97,7 +103,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
       dismissableMask: true,
       closable: true,
-      style: { 'min-width': '450px' }
+      style: { width: '520px', 'max-width': '95vw' }
     });
 
     if (this.ref) {
@@ -274,6 +280,46 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   showAdvancedFilters = false;
   globalSearchTerm = '';
+  /** Describes the filter that produced `projects`, e.g. 'Search: "bechir"'; '' when unfiltered. */
+  activeFilter = '';
+  filterValues = { coordinator: '', partner: '', program: '', acronym: '', group: '' };
+
+  get hasFilters(): boolean {
+    return !!(this.activeFilter || this.globalSearchTerm.trim() ||
+      Object.values(this.filterValues).some(v => v.trim()));
+  }
+
+  /** Clears the search box and every advanced filter, and reloads all projects. */
+  resetFilters(): void {
+    this.globalSearchTerm = '';
+    this.filterValues = { coordinator: '', partner: '', program: '', acronym: '', group: '' };
+    this.activeFilter = '';
+    this.fetchProjects();
+  }
+
+  exportMenuOpen = false;
+  exporting: ProjectExportFormat | null = null;
+  exportFormats: { format: ProjectExportFormat; label: string; icon: string }[] = [
+    { format: 'xlsx', label: 'Excel (.xlsx)', icon: 'bxs-file' },
+    { format: 'docx', label: 'Word (.docx)',  icon: 'bxs-file-doc' },
+    { format: 'pdf',  label: 'PDF (.pdf)',    icon: 'bxs-file-pdf' },
+    { format: 'txt',  label: 'Text (.txt)',   icon: 'bxs-file-txt' },
+  ];
+
+  /** Downloads exactly what the table currently shows (all pages of the filtered results). */
+  async exportProjects(format: ProjectExportFormat): Promise<void> {
+    if (this.exporting || !this.projects.length) return;
+    this.exporting = format;
+    try {
+      await this.projectExportService.export(this.projects, format, this.activeFilter);
+      this.exportMenuOpen = false;
+    } catch (error) {
+      console.error('Error exporting projects:', error);
+      this.messageService.add({ severity: 'error', summary: 'Export failed', detail: 'The file could not be generated.' });
+    } finally {
+      this.exporting = null;
+    }
+  }
 
   toggleSidebar(): void {
     this.isSidebarVisible = !this.isSidebarVisible;
@@ -348,6 +394,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   searchProjects(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Acronym: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       this.projectService.getProjectsByAcronyme(searchKeyword).subscribe(
@@ -367,6 +414,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   searchProjects1(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Group: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       this.projectService.getProjectsByTitreproj(searchKeyword).subscribe(
@@ -386,6 +434,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   searchProjects2(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Coordinator: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       this.projectService.getProjectsByResponsable(searchKeyword).subscribe(
@@ -405,6 +454,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   searchProjects3(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Partner: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       this.projectService.getProjectsByPartenaire(searchKeyword).subscribe(
@@ -424,6 +474,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   searchProjects4(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Program: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       this.projectService.getProjectsByProgram(searchKeyword).subscribe(
@@ -443,18 +494,16 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   onGlobalSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     const searchKeyword = input.value.trim();
+    this.activeFilter = searchKeyword ? `Search: "${searchKeyword}"` : '';
 
     if (searchKeyword) {
       // Search across all fields - you can implement a general search API
       // For now, we'll filter the existing projects
       this.projectService.getAllProjects().subscribe(
         (data: any[]) => {
-          this.projects = data.filter(project => 
-            (project.responsable && project.responsable.toLowerCase().includes(searchKeyword.toLowerCase())) ||
-            (project.partenaire && project.partenaire.toLowerCase().includes(searchKeyword.toLowerCase())) ||
-            (project.programme && project.programme.toLowerCase().includes(searchKeyword.toLowerCase())) ||
-            (project.acronyme && project.acronyme.toLowerCase().includes(searchKeyword.toLowerCase())) ||
-            (project.titreproj && project.titreproj.toLowerCase().includes(searchKeyword.toLowerCase()))
+          this.projects = data.filter(project =>
+            [project.responsable, project.partenaire, project.programme, project.acronyme, project.titreproj]
+              .some(value => matchesSearch(value, searchKeyword))
           ).sort((a, b) => a.id - b.id);
           this.updatePage(0);
         },

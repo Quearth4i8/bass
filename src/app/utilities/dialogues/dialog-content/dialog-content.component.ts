@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { DynamicDialogRef, DialogService, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
+import { ThemeService } from 'src/app/services/ThemeService';
 import { ProjectService } from 'src/app/services/ProjectService';
 
 @Component({
@@ -36,6 +37,7 @@ export class DialogContentComponent implements OnInit {
     private projectService: ProjectService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
+    public themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {

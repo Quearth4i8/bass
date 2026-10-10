@@ -54,7 +54,7 @@ export class PortalProjectDisplayComponent
     { path: 'events', label: 'Events', icon: 'bx-calendar' },
     { path: 'gallery', label: 'Gallery', icon: 'bx-images' },
     { path: 'outputs', label: 'Outputs', icon: 'bx-video' },
-    { path: 'shared', label: 'Shared', icon: 'bx-share-alt' },
+    { path: 'shared', label: 'Shared Points', icon: 'bx-share-alt' },
   ];
 
   constructor(
