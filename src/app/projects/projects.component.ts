@@ -1,4 +1,4 @@
-import { isRejectedStatus, roleLabel } from '../utilities/project-labels';
+import { isRejectedStatus, roleLabel, statusLabel } from '../utilities/project-labels';
 import { Component, OnInit, HostBinding, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
@@ -6,6 +6,18 @@ import { ProjectGroupService } from '../services/ProjectGroupService';
 import { ProjectService } from '../services/ProjectService';
 import { ThemeService } from '../services/ThemeService';
 import { matchesSearch, normalizeSearch } from '../shared/utils/text-search';
+
+/** Key of the synthetic first tab that lists every category together. */
+const TOTAL_KEY = 'TOTAL PROJECTS';
+
+/** Tab order after Total; any status not listed here goes last. */
+const STATUS_ORDER = ['SUBMITTED', 'REJECTED', 'ONGOING', 'ACHIEVED'];
+
+function statusRank(title: string): number {
+  const t = (title || '').toUpperCase();
+  const i = STATUS_ORDER.findIndex(s => t.includes(s));
+  return i === -1 ? STATUS_ORDER.length : i;
+}
 
 @Component({
   selector: 'app-projects',
@@ -65,8 +77,8 @@ export class ProjectsComponent implements OnInit {
 
   loadProjectGroups() {
     this.projectGroupService.getProjectGroups().subscribe((data: any[]) => {
-      // Rejected projects stay in the admin only.
-      this.projectGroups = data.filter((g: any) => !isRejectedStatus(g.title));
+      const groups = [...data].sort((a: any, b: any) => statusRank(a.title) - statusRank(b.title));
+      this.projectGroups = [{ title: TOTAL_KEY }, ...groups];
       this.columnFilters = new Array(this.projectGroups.length).fill(null).map(() => ({
         responsable: '',
         applicant: '',
@@ -84,7 +96,7 @@ export class ProjectsComponent implements OnInit {
       this.partnerDropdownOpen = new Array(this.projectGroups.length).fill(false);
       this.programmeDropdownOpen = new Array(this.projectGroups.length).fill(false);
       this.showFilters = new Array(this.projectGroups.length).fill(false);
-      this.projectGroups.forEach(group => {
+      groups.forEach((group: any) => {
         this.loadProjects(group.title);
       });
     });
@@ -94,17 +106,34 @@ export class ProjectsComponent implements OnInit {
     this.projectService.getProjectsByTitreproj(title).subscribe((data: any[]) => {
       this.projectData[title] = data;
       this.filteredProjectData[title] = [...data];
+      this.rebuildTotal();
       this.computeStats();
     });
   }
 
-  /** Re-run as each category arrives; the strip fills in as the data does. */
+  /** The Total tab is every category's rows together, refreshed as each one arrives. */
+  private rebuildTotal(): void {
+    this.projectData[TOTAL_KEY] = this.projectGroups
+      .filter(g => g.title !== TOTAL_KEY)
+      .flatMap(g => this.projectData[g.title] || []);
+    this.filterProjects(TOTAL_KEY, 0);
+  }
+
+  /**
+   * Stats for the selected tab. Re-run as each category arrives (the strip
+   * fills in as the data does) and whenever the tab changes.
+   */
   private computeStats(): void {
-    const all = Object.values(this.projectData).flat();
+    const title = this.activeGroupTitle;
+    const all = this.projectData[title] || [];
+    // On Total, Rejected projects count as projects but never ran, so they add
+    // no years or budget. Their own tab shows their figures as they are.
+    const skipRejected = this.isTotalTab(title);
     const years: number[] = [];
     let totalBudget = 0;
     let budget = 0;
     for (const p of all) {
+      if (skipRejected && isRejectedStatus(p.title)) continue;
       for (const y of [p.startyear, p.endyear]) {
         const n = Number(y);
         if (n > 1900 && n < 2200) years.push(n);
@@ -124,6 +153,9 @@ export class ProjectsComponent implements OnInit {
   }
 
   readonly roleLabel = roleLabel;
+  readonly statusLabel = statusLabel;
+
+  isTotalTab(title: string): boolean { return title === TOTAL_KEY; }
 
   /** "ACHIEVED PROJECTS" -> "Achieved": the heading already says Projects. */
   tabLabel(title: string): string {
@@ -225,13 +257,20 @@ export class ProjectsComponent implements OnInit {
 
   setActiveTab(index: number): void {
     this.activeTab = index;
+    this.computeStats();
+  }
+
+  get activeGroupTitle(): string {
+    return this.projectGroups[this.activeTab]?.title ?? TOTAL_KEY;
   }
 
   getTabIcon(title: string): string {
     const icons: { [key: string]: string } = {
       'ACHIEVED PROJECTS':  'bx-badge-check',
       'SUBMITTED PROJECTS': 'bx-send',
+      'REJECTED PROJECTS':  'bx-x-circle',
       'ONGOING PROJECTS':   'bx-time-five',
+      [TOTAL_KEY]:          'bx-layer',
     };
     return icons[title] || 'bx-folder';
   }

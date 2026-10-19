@@ -330,6 +330,7 @@ app-projects-landing {
 .stat-value { font-family: $font-mono; font-size: 30px; font-weight: 500; letter-spacing: -0.02em; color: $text; }
 .stat-unit  { font-family: $font-mono; font-size: 14px; color: $text-faint; margin-left: 2px; }
 .stat-label { margin-top: 4px; display: block; }
+.stat-label-accent { color: $accent; }
 .stat-delta { margin-top: 6px; font-family: $font-mono; font-size: 10px; color: $accent; }
 .stat-loading { color: $text-faint; }
 
@@ -2028,6 +2029,7 @@ app-projects-landing.theme-light {
   .stat-value   { color: #0d2137; }
   .stat-label   { color: #6b8a9a; }
   .stat-delta   { color: #1a8f7f; }
+  .stat-label-accent { color: #1a8f7f; }
   .stat-loading { color: #9bb0bc; }
 
   // Hero budget panel

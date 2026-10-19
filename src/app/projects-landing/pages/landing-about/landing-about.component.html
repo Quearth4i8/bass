@@ -42,7 +42,7 @@
       </div>
       <div class="budget-cell partner">
         <div class="budget-cell-value">{{ totalPartnersBudget ? compactEuro(totalPartnersBudget) : '—' }}</div>
-        <div class="label budget-cell-label">Total partners' budget</div>
+        <div class="label budget-cell-label">Total INSTM projects' budget</div>
       </div>
     </aside>
   </div>
@@ -54,21 +54,21 @@
         <span *ngIf="totalResearchProjects !== null">{{ totalResearchProjects }}</span>
         <span *ngIf="totalResearchProjects === null" class="stat-loading">—</span>
       </div>
-      <div class="label stat-label">Research Projects</div>
-      <div class="stat-delta">INSTM database</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">2020</div>
-      <div class="label stat-label">Programme Launch</div>
-      <div class="stat-delta">5y running</div>
+      <div class="label stat-label stat-label-accent">Total Research Projects</div>
     </div>
     <div class="stat">
       <div class="stat-value">
-        <span *ngIf="activePortalProjects !== null">{{ activePortalProjects }}</span>
-        <span *ngIf="activePortalProjects === null" class="stat-loading">—</span>
+        <span *ngIf="ongoingResearchProjects !== null">{{ ongoingResearchProjects }}</span>
+        <span *ngIf="ongoingResearchProjects === null" class="stat-loading">—</span>
       </div>
-      <div class="label stat-label">Active Projects</div>
-      <div class="stat-delta" *ngIf="totalPortalProjects !== null">{{ totalPortalProjects }} total</div>
+      <div class="label stat-label stat-label-accent">Ongoing Projects</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">
+        <span *ngIf="achievedResearchProjects !== null">{{ achievedResearchProjects }}</span>
+        <span *ngIf="achievedResearchProjects === null" class="stat-loading">—</span>
+      </div>
+      <div class="label stat-label stat-label-accent">Achieved Projects</div>
     </div>
   </div>
 

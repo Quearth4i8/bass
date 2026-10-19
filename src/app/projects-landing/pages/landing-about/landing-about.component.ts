@@ -1,7 +1,6 @@
 import { Component, AfterViewInit, DestroyRef, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { PortalProjectsService } from '../../../portal/services/portal-projects.service';
 import { ProjectService } from '../../../services/ProjectService';
 import { isRejectedStatus } from '../../../utilities/project-labels';
 
@@ -13,42 +12,39 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
   // Backing values for the hero stats strip, which moved here from the
   // Overview page along with the rest of the hero.
   totalResearchProjects: number | null = null;
-  totalPortalProjects: number | null = null;
-  activePortalProjects: number | null = null;
+  ongoingResearchProjects: number | null = null;
+  achievedResearchProjects: number | null = null;
 
-  // Budget panel, over the same projects the public List of Projects shows
-  // (everything but Rejected).
+  // Budget panel, over the List of Projects' projects minus Rejected.
   totalProjectsBudget: number | null = null;
   totalPartnersBudget: number | null = null;
 
   private io?: IntersectionObserver;
 
   constructor(
-    private portalProjectsService: PortalProjectsService,
     private projectService: ProjectService,
     private destroyRef: DestroyRef,
     private el: ElementRef,
   ) {}
 
   ngOnInit(): void {
-    this.portalProjectsService.list()
+    this.projectService.getAllProjects()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(projects => {
-        this.totalPortalProjects = projects.length;
-        this.activePortalProjects = projects.filter(p => p.isActive).length;
+      .subscribe({
+        next: p => {
+          // Same set as the List of Projects' Total tab: every project with a status.
+          const listed = p.filter(x => (x.title || '').trim());
+          this.totalResearchProjects = listed.length;
+          this.ongoingResearchProjects = listed.filter(x => /ONGOING/i.test(x.title)).length;
+          this.achievedResearchProjects = listed.filter(x => /ACHIEVED/i.test(x.title)).length;
+          // Rejected projects never ran, so they add nothing to the budgets.
+          this.computeBudgets(listed.filter(x => !isRejectedStatus(x.title)));
+        },
+        error: () => {}
       });
-
-    this.projectService.getAllProjects().subscribe({
-      next: p => {
-        this.totalResearchProjects = p.length;
-        this.computeBudgets(p);
-      },
-      error: () => {}
-    });
   }
 
-  private computeBudgets(projects: any[]): void {
-    const visible = projects.filter(p => !isRejectedStatus(p.title));
+  private computeBudgets(visible: any[]): void {
     this.totalProjectsBudget = visible.reduce((sum, p) => sum + (Number(p.totalBudget) || 0), 0);
     this.totalPartnersBudget = visible.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
   }

@@ -35,7 +35,7 @@ export function statusLabel(groupTitle: string | null | undefined): string {
   return word ? word.charAt(0).toUpperCase() + word.slice(1) : (groupTitle || '');
 }
 
-/** Rejected projects are kept for the admin's records but never shown publicly. */
+/** Rejected projects are listed publicly but left out of budget and year totals. */
 export function isRejectedStatus(groupTitle: string | null | undefined): boolean {
   return /REJECTED/i.test(groupTitle || '');
 }

@@ -11,23 +11,19 @@
   <div class="stats-strip proj-stats">
     <div class="stat">
       <div class="stat-value">{{ stats.total }}</div>
-      <div class="label stat-label">Projects</div>
-      <div class="stat-delta">{{ projectGroups.length }} categories</div>
+      <div class="label stat-label stat-label-accent">Projects</div>
     </div>
     <div class="stat">
       <div class="stat-value">{{ stats.firstYear || '—' }}<span class="stat-unit" *ngIf="stats.lastYear"> – {{ stats.lastYear }}</span></div>
-      <div class="label stat-label">Years Covered</div>
-      <div class="stat-delta" *ngIf="stats.firstYear && stats.lastYear">{{ stats.lastYear - stats.firstYear }} years</div>
+      <div class="label stat-label stat-label-accent">Years Covered</div>
     </div>
     <div class="stat">
       <div class="stat-value">{{ stats.totalBudget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
-      <div class="label stat-label">Total Projects' Budget</div>
-      <div class="stat-delta">across all projects</div>
+      <div class="label stat-label stat-label-accent">Total Projects' Budget</div>
     </div>
     <div class="stat">
       <div class="stat-value">{{ stats.budget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
-      <div class="label stat-label">Total Partners' Budget</div>
-      <div class="stat-delta">across all projects</div>
+      <div class="label stat-label stat-label-accent">Total INSTM Projects' Budget</div>
     </div>
   </div>
 
@@ -73,6 +69,7 @@
 
         <!-- Advanced filters -->
         <div class="advanced-filters" [class.show]="showFilters[i]">
+          <div class="advanced-filters-inner">
           <div class="filter-grid">
             <div class="filter-field">
               <label>Coordinator</label>
@@ -86,7 +83,7 @@
               <label>Role</label>
               <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'partner')">
                 <div class="dropdown-trigger" (click)="toggleDropdown(i, 'partner', $event)">
-                  <span>{{ columnFilters[i].partenaire ? roleLabel(columnFilters[i].partenaire) : 'All' }}</span>
+                  <span class="dropdown-value">{{ columnFilters[i].partenaire ? roleLabel(columnFilters[i].partenaire) : 'All' }}</span>
                   <i class='bx bx-chevron-down'></i>
                 </div>
                 <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'partner')" [class.show]="isDropdownOpen(i, 'partner')" [ngStyle]="partnerMenuStyle[i]">
@@ -99,7 +96,7 @@
               <label>Acronym</label>
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].acronyme" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
-            <div class="filter-field">
+            <div class="filter-field filter-field-wide">
               <label>Title</label>
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].titreproj" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
@@ -107,7 +104,7 @@
               <label>Program</label>
               <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'programme')">
                 <div class="dropdown-trigger" (click)="toggleDropdown(i, 'programme', $event)">
-                  <span>{{ columnFilters[i].programme || 'All' }}</span>
+                  <span class="dropdown-value" [title]="columnFilters[i].programme || 'All'">{{ columnFilters[i].programme || 'All' }}</span>
                   <i class='bx bx-chevron-down'></i>
                 </div>
                 <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'programme')" [class.show]="isDropdownOpen(i, 'programme')" [ngStyle]="programmeMenuStyle[i]">
@@ -137,11 +134,12 @@
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].budget" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Table -->
         <div class="table-wrapper" *ngIf="projectData[projectGroup.title]">
-          <table class="modern-table">
+          <table class="modern-table" [class.with-status]="isTotalTab(projectGroup.title)">
             <thead>
               <tr>
                 <th>Project Coordinator</th>
@@ -156,6 +154,7 @@
                 <th>End Date</th>
                 <th>Total Budget (€)</th>
                 <th>Partner Budget (€)</th>
+                <th *ngIf="isTotalTab(projectGroup.title)">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -174,6 +173,7 @@
                 <td class="year-cell">{{ project.endyear || 'NA' }}</td>
                 <td class="budget-cell">{{ project.totalBudget ? (project.totalBudget | number:'1.2-2') : 'NA' }}</td>
                 <td class="budget-cell">{{ project.budget ? (project.budget | number:'1.2-2') : 'NA' }}</td>
+                <td *ngIf="isTotalTab(projectGroup.title)">{{ statusLabel(project.title) || 'NA' }}</td>
               </tr>
             </tbody>
           </table>

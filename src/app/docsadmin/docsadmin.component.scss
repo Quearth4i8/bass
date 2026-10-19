@@ -132,6 +132,15 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   &:not(.sidebar-open) { margin-left: 0; }
 }
 
+// ── Page header (same as Projects, Budget Charts, Management) ──────────────
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-heading { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: $text; }
+.page-sub { margin: 4px 0 0; font-size: 13px; color: $text-dim; }
+
 // ── Stats ──────────────────────────────────────────────────────────────────
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
 
@@ -1066,6 +1075,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
   .admin-header  { background: #ffffff; border-bottom-color: #c5d8e6; }
   .header-breadcrumb h1 { color: #0d2137; }
+  .page-heading { color: #0d2137; }
+  .page-sub { color: #64748b; }
   .breadcrumb-sep { color: #c5d8e6; }
   .menu-toggle, .theme-btn { background: #f1f5f9; border-color: #c5d8e6; color: #4a7590; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
   .header-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #1a8f7f; color: #0d2137; } }
