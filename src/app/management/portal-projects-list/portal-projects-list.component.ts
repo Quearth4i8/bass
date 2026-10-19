@@ -11,6 +11,7 @@ import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { PortalProjectsService } from '../../portal/services/portal-projects.service';
 import { PortalMediaService } from '../../portal/services/portal-media.service';
 import { PortalProjectContent } from '../../portal/models/portal-project.model';
+import { WATERMARK_VERSION } from '../../utilities/watermark';
 
 @Component({
   selector: 'app-portal-projects-list',
@@ -1036,12 +1037,12 @@ export class PortalProjectsListComponent implements OnInit {
    * a failed tile load runs onImageError, which deletes the image.
    */
   galleryThumbUrl(url: string, width = 480): string {
-    return this.rewriteMediaUrl(url, `thumb/`, `?w=${width}`);
+    return this.rewriteMediaUrl(url, `thumb/`, `?w=${width}&wm=${WATERMARK_VERSION}`);
   }
 
   galleryFullUrl(url: string | undefined): string {
     if (!url || this.galleryWatermarkUnavailable.has(url)) return url ?? '';
-    return this.rewriteMediaUrl(url, 'wm/', '');
+    return this.rewriteMediaUrl(url, 'wm/', `?wm=${WATERMARK_VERSION}`);
   }
 
   /** Plain-URL fallback while the backend lacks the /wm/ route (see the portal gallery). */

@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PortalProjectContextService } from '../../../portal/services/portal-project-context.service';
 import { PortalProject } from '../../../portal/models/portal-project.model';
+import { WATERMARK_VERSION } from '../../../utilities/watermark';
 
 @Component({
   selector: 'app-portal-page-gallery',
@@ -64,7 +65,7 @@ export class PortalPageGalleryComponent implements OnInit {
     const marker = '/media/';
     const i = url?.indexOf(marker) ?? -1;
     if (i < 0) return url;
-    return `${url.slice(0, i + marker.length)}thumb/${url.slice(i + marker.length)}?w=${width}`;
+    return `${url.slice(0, i + marker.length)}thumb/${url.slice(i + marker.length)}?w=${width}&wm=${WATERMARK_VERSION}`;
   }
 
   /**
@@ -90,7 +91,7 @@ export class PortalPageGalleryComponent implements OnInit {
     const marker = '/media/';
     const i = url?.indexOf(marker) ?? -1;
     if (i < 0 || this.watermarkUnavailable.has(url)) return url;
-    return `${url.slice(0, i + marker.length)}wm/${url.slice(i + marker.length)}`;
+    return `${url.slice(0, i + marker.length)}wm/${url.slice(i + marker.length)}?wm=${WATERMARK_VERSION}`;
   }
 
   /**
