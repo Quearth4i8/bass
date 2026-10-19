@@ -69,6 +69,7 @@ import { PortalPageOutputsComponent } from './portal-project-display/pages/porta
 import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
 import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.component';
+import { DatePickerComponent } from './shared/components/date-picker/date-picker.component';
 
 // Landing pages
 import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
@@ -152,6 +153,7 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     ToastModule,
     AdminNavbarComponent,
     AdminSidebarComponent,
+    DatePickerComponent,
   ],
   providers: [
     DialogService,

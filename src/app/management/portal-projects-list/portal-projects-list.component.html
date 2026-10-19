@@ -958,11 +958,11 @@
                   <div class="form-row">
                     <div class="event-field">
                       <label>Start Date</label>
-                      <input type="date" [(ngModel)]="item.ev.startDate" class="event-input">
+                      <app-date-picker [(ngModel)]="item.ev.startDate" placeholder="Start date"></app-date-picker>
                     </div>
                     <div class="event-field">
                       <label>End Date</label>
-                      <input type="date" [(ngModel)]="item.ev.endDate" class="event-input">
+                      <app-date-picker [(ngModel)]="item.ev.endDate" placeholder="End date"></app-date-picker>
                     </div>
                   </div>
 

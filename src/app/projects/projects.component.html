@@ -15,18 +15,18 @@
       <div class="stat-delta">{{ projectGroups.length }} categories</div>
     </div>
     <div class="stat">
-      <div class="stat-value">{{ stats.programmes }}</div>
-      <div class="label stat-label">Funding Programmes</div>
-      <div class="stat-delta" *ngIf="stats.topProgrammes">{{ stats.topProgrammes }}</div>
-    </div>
-    <div class="stat">
       <div class="stat-value">{{ stats.firstYear || '—' }}<span class="stat-unit" *ngIf="stats.lastYear"> – {{ stats.lastYear }}</span></div>
       <div class="label stat-label">Years Covered</div>
       <div class="stat-delta" *ngIf="stats.firstYear && stats.lastYear">{{ stats.lastYear - stats.firstYear }} years</div>
     </div>
     <div class="stat">
+      <div class="stat-value">{{ stats.totalBudget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
+      <div class="label stat-label">Total Projects' Budget</div>
+      <div class="stat-delta">across all projects</div>
+    </div>
+    <div class="stat">
       <div class="stat-value">{{ stats.budget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
-      <div class="label stat-label">Total Budget</div>
+      <div class="label stat-label">Total Partners' Budget</div>
       <div class="stat-delta">across all projects</div>
     </div>
   </div>
@@ -79,21 +79,29 @@
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].responsable" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
-              <label>Partner</label>
+              <label>Applicant</label>
+              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].applicant" (ngModelChange)="filterProjects(projectGroup.title, i)">
+            </div>
+            <div class="filter-field">
+              <label>Role</label>
               <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'partner')">
                 <div class="dropdown-trigger" (click)="toggleDropdown(i, 'partner', $event)">
-                  <span>{{ columnFilters[i].partenaire || 'All' }}</span>
+                  <span>{{ columnFilters[i].partenaire ? roleLabel(columnFilters[i].partenaire) : 'All' }}</span>
                   <i class='bx bx-chevron-down'></i>
                 </div>
                 <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'partner')" [class.show]="isDropdownOpen(i, 'partner')" [ngStyle]="partnerMenuStyle[i]">
                   <div class="dropdown-item" [class.selected]="!columnFilters[i].partenaire" (click)="selectOption(i, 'partenaire', '', projectGroup.title)">All</div>
-                  <div class="dropdown-item" *ngFor="let partner of getUniquePartners(projectGroup.title)" [class.selected]="columnFilters[i].partenaire === partner" (click)="selectOption(i, 'partenaire', partner, projectGroup.title)">{{ partner }}</div>
+                  <div class="dropdown-item" *ngFor="let partner of getUniquePartners(projectGroup.title)" [class.selected]="columnFilters[i].partenaire === partner" (click)="selectOption(i, 'partenaire', partner, projectGroup.title)">{{ roleLabel(partner) }}</div>
                 </div>
               </div>
             </div>
             <div class="filter-field">
-              <label>Thematic</label>
-              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].thematique" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <label>Acronym</label>
+              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].acronyme" (ngModelChange)="filterProjects(projectGroup.title, i)">
+            </div>
+            <div class="filter-field">
+              <label>Title</label>
+              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].titreproj" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
               <label>Program</label>
@@ -109,23 +117,23 @@
               </div>
             </div>
             <div class="filter-field">
-              <label>Title</label>
-              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].titreproj" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <label>Thematic</label>
+              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].thematique" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
-              <label>Acronym</label>
-              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].acronyme" (ngModelChange)="filterProjects(projectGroup.title, i)">
-            </div>
-            <div class="filter-field">
-              <label>Start Year</label>
+              <label>Start Date</label>
               <input type="text" placeholder="e.g. 2020" [(ngModel)]="columnFilters[i].startyear" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
-              <label>End Year</label>
+              <label>End Date</label>
               <input type="text" placeholder="e.g. 2024" [(ngModel)]="columnFilters[i].endyear" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
-              <label>Budget</label>
+              <label>Total Budget</label>
+              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].totalBudget" (ngModelChange)="filterProjects(projectGroup.title, i)">
+            </div>
+            <div class="filter-field">
+              <label>Partner Budget</label>
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].budget" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
           </div>
@@ -137,14 +145,17 @@
             <thead>
               <tr>
                 <th>Project Coordinator</th>
-                <th>Beneficiary / Partner</th>
-                <th>Thematic</th>
-                <th>Program</th>
-                <th>Project Title</th>
+                <th>Applicant</th>
+                <th>Role</th>
                 <th>Acronym</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Budget (€)</th>
+                <th>Project Title</th>
+                <th>Program</th>
+                <th>Thematic</th>
+                <th>Submission Date</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total Budget (€)</th>
+                <th>Partner Budget (€)</th>
               </tr>
             </thead>
             <tbody>
@@ -152,13 +163,16 @@
                   class="clickable-row"
                   (click)="openDetail(project)">
                 <td [title]="project.responsable || 'NA'">{{ project.responsable || 'NA' }}</td>
-                <td [title]="project.partenaire || 'NA'">{{ project.partenaire || 'NA' }}</td>
-                <td [title]="project.thematique || 'NA'">{{ project.thematique || 'NA' }}</td>
-                <td [title]="project.programme || 'NA'"><span class="program-badge">{{ project.programme || 'NA' }}</span></td>
-                <td [title]="project.titreproj || 'NA'">{{ project.titreproj || 'NA' }}</td>
+                <td [title]="project.applicant || 'NA'">{{ project.applicant || 'NA' }}</td>
+                <td [title]="roleLabel(project.partenaire) || 'NA'">{{ roleLabel(project.partenaire) || 'NA' }}</td>
                 <td [title]="project.acronyme || 'NA'"><span class="acronym-tag">{{ project.acronyme || 'NA' }}</span></td>
+                <td [title]="project.titreproj || 'NA'">{{ project.titreproj || 'NA' }}</td>
+                <td [title]="project.programme || 'NA'"><span class="program-badge">{{ project.programme || 'NA' }}</span></td>
+                <td [title]="project.thematique || 'NA'">{{ project.thematique || 'NA' }}</td>
+                <td class="year-cell">{{ project.submissionDate ? (project.submissionDate | date:'d MMM y') : 'NA' }}</td>
                 <td class="year-cell">{{ project.startyear || 'NA' }}</td>
                 <td class="year-cell">{{ project.endyear || 'NA' }}</td>
+                <td class="budget-cell">{{ project.totalBudget ? (project.totalBudget | number:'1.2-2') : 'NA' }}</td>
                 <td class="budget-cell">{{ project.budget ? (project.budget | number:'1.2-2') : 'NA' }}</td>
               </tr>
             </tbody>
@@ -188,44 +202,54 @@
       </button>
     </div>
 
-    <!-- Fields in table column order -->
+    <!-- Fields in table column order; every field is shown, empty ones say so -->
     <div class="detail-fields">
 
-      <div class="detail-field" *ngIf="selectedProject.responsable">
+      <div class="detail-field">
         <div class="detail-field-label"><i class='bx bx-user'></i> Project Coordinator</div>
-        <div class="detail-field-value">{{ selectedProject.responsable }}</div>
+        <div class="detail-field-value" *ngIf="selectedProject.responsable; else notSpecified">{{ selectedProject.responsable }}</div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.partenaire">
-        <div class="detail-field-label"><i class='bx bx-buildings'></i> Beneficiary / Partner</div>
-        <div class="detail-field-value partner-value">{{ selectedProject.partenaire }}</div>
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-id-card'></i> Applicant</div>
+        <div class="detail-field-value" *ngIf="selectedProject.applicant; else notSpecified">{{ selectedProject.applicant }}</div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.thematique">
-        <div class="detail-field-label"><i class='bx bx-category'></i> Thematic</div>
-        <div class="detail-field-value thematic-value">{{ selectedProject.thematique }}</div>
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-buildings'></i> Role</div>
+        <div class="detail-field-value partner-value" *ngIf="selectedProject.partenaire; else notSpecified">{{ roleLabel(selectedProject.partenaire) }}</div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.programme">
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-purchase-tag'></i> Acronym</div>
+        <div class="detail-field-value" *ngIf="selectedProject.acronyme; else notSpecified"><span class="acronym-tag">{{ selectedProject.acronyme }}</span></div>
+      </div>
+
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-file-blank'></i> Project Title</div>
+        <div class="detail-field-value detail-title-value" *ngIf="selectedProject.titreproj; else notSpecified">{{ selectedProject.titreproj }}</div>
+      </div>
+
+      <div class="detail-field">
         <div class="detail-field-label"><i class='bx bx-grid-alt'></i> Program</div>
-        <div class="detail-field-value">
+        <div class="detail-field-value" *ngIf="selectedProject.programme; else notSpecified">
           <span class="program-badge program-badge-full">{{ selectedProject.programme }}</span>
         </div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.titreproj">
-        <div class="detail-field-label"><i class='bx bx-file-blank'></i> Project Title</div>
-        <div class="detail-field-value detail-title-value">{{ selectedProject.titreproj }}</div>
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-category'></i> Thematic</div>
+        <div class="detail-field-value thematic-value" *ngIf="selectedProject.thematique; else notSpecified">{{ selectedProject.thematique }}</div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.acronyme">
-        <div class="detail-field-label"><i class='bx bx-purchase-tag'></i> Acronym</div>
-        <div class="detail-field-value"><span class="acronym-tag">{{ selectedProject.acronyme }}</span></div>
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-calendar-check'></i> Submission Date</div>
+        <div class="detail-field-value" *ngIf="selectedProject.submissionDate; else notSpecified">{{ selectedProject.submissionDate | date:'d MMMM y' }}</div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.startyear || selectedProject.endyear">
+      <div class="detail-field">
         <div class="detail-field-label"><i class='bx bx-calendar'></i> Timeline</div>
-        <div class="detail-field-value">
+        <div class="detail-field-value" *ngIf="selectedProject.startyear || selectedProject.endyear; else notSpecified">
           <div class="detail-timeline">
             <div class="tl-endpoint">
               <span class="tl-label">From</span>
@@ -242,15 +266,27 @@
         </div>
       </div>
 
-      <div class="detail-field" *ngIf="selectedProject.budget">
-        <div class="detail-field-label"><i class='bx bx-euro'></i> Budget</div>
-        <div class="detail-field-value">
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-wallet'></i> Total Budget</div>
+        <div class="detail-field-value" *ngIf="selectedProject.totalBudget; else notSpecified">
+          <span class="budget-amount">{{ selectedProject.totalBudget | number:'1.2-2' }}</span>
+          <span class="budget-currency"> €</span>
+        </div>
+      </div>
+
+      <div class="detail-field">
+        <div class="detail-field-label"><i class='bx bx-euro'></i> Partner Budget</div>
+        <div class="detail-field-value" *ngIf="selectedProject.budget; else notSpecified">
           <span class="budget-amount">{{ selectedProject.budget | number:'1.2-2' }}</span>
           <span class="budget-currency"> €</span>
         </div>
       </div>
 
     </div>
+
+    <ng-template #notSpecified>
+      <div class="detail-field-value detail-empty">Not specified</div>
+    </ng-template>
 
   </aside>
 </div>

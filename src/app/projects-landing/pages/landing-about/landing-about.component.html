@@ -33,10 +33,22 @@
         ecosystems respond to change.
       </p>
     </div>
+
+    <!-- Budget overview: whole-project budgets vs. our partner share -->
+    <aside class="budget-panel fade-up" style="transition-delay:200ms">
+      <div class="budget-cell">
+        <div class="budget-cell-value">{{ totalProjectsBudget ? compactEuro(totalProjectsBudget) : '—' }}</div>
+        <div class="label budget-cell-label">Total projects' budget</div>
+      </div>
+      <div class="budget-cell partner">
+        <div class="budget-cell-value">{{ totalPartnersBudget ? compactEuro(totalPartnersBudget) : '—' }}</div>
+        <div class="label budget-cell-label">Total partners' budget</div>
+      </div>
+    </aside>
   </div>
 
   <!-- Stats strip -->
-  <div class="stats-strip fade-up" style="transition-delay:240ms">
+  <div class="stats-strip stats-strip-3 fade-up" style="transition-delay:240ms">
     <div class="stat">
       <div class="stat-value">
         <span *ngIf="totalResearchProjects !== null">{{ totalResearchProjects }}</span>
@@ -49,11 +61,6 @@
       <div class="stat-value">2020</div>
       <div class="label stat-label">Programme Launch</div>
       <div class="stat-delta">5y running</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">4</div>
-      <div class="label stat-label">Ecosystem Categories</div>
-      <div class="stat-delta">marine · coastal · lagoon · river</div>
     </div>
     <div class="stat">
       <div class="stat-value">

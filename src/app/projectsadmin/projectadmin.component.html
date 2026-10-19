@@ -60,10 +60,19 @@
         </div>
       </div>
       <div class="stat-box">
-        <div class="stat-icon green"><i class='bx bx-euro'></i></div>
+        <div class="stat-icon tone-blue"><i class='bx bx-euro'></i></div>
         <div class="stat-info">
-          <h2>{{ totalBudget / 1000000 | number:'1.1-1' }}<small>M€</small></h2>
-          <p>Total budget</p>
+          <h2>{{ compactEuro(ongoingTotalBudget) }}</h2>
+          <p>Total project budget</p>
+          <span class="stat-sub">Ongoing projects</span>
+        </div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon tone-amber"><i class='bx bx-group'></i></div>
+        <div class="stat-info">
+          <h2>{{ compactEuro(ongoingPartnerBudget) }}</h2>
+          <p>Partner project budget</p>
+          <span class="stat-sub">Ongoing projects</span>
         </div>
       </div>
     </div>
@@ -94,8 +103,8 @@
             <input type="text" placeholder="Search coordinator..." [(ngModel)]="filterValues.coordinator" (input)="searchProjects2($event)">
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-buildings'></i> Partner</label>
-            <input type="text" placeholder="Search partner..." [(ngModel)]="filterValues.partner" (input)="searchProjects3($event)">
+            <label><i class='bx bx-buildings'></i> Role</label>
+            <input type="text" placeholder="Search role..." [(ngModel)]="filterValues.partner" (input)="searchProjects3($event)">
           </div>
           <div class="filter-field">
             <label><i class='bx bx-collection'></i> Program</label>
@@ -106,8 +115,8 @@
             <input type="text" placeholder="Search acronym..." [(ngModel)]="filterValues.acronym" (input)="searchProjects($event)">
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-folder'></i> Project Group</label>
-            <input type="text" placeholder="Search group..." [(ngModel)]="filterValues.group" (input)="searchProjects1($event)">
+            <label><i class='bx bx-folder'></i> Status</label>
+            <input type="text" placeholder="Search status..." [(ngModel)]="filterValues.group" (input)="searchProjects1($event)">
           </div>
         </div>
         </div>
@@ -122,33 +131,36 @@
           <thead>
             <tr>
               <th class="col-id">#</th>
-              <th class="col-title">Project</th>
               <th class="col-coordinator">Coordinator</th>
+              <th class="col-applicant">Applicant</th>
+              <th class="col-role">Role</th>
+              <th class="col-acronym">Acronym</th>
+              <th class="col-title">Project title</th>
               <th class="col-programme">Program</th>
               <th class="col-thematic">Thematic</th>
-              <th class="col-period">Period</th>
-              <th class="col-budget">Budget</th>
-              <th class="col-group">Group</th>
+              <th class="col-date">Submission date</th>
+              <th class="col-year">Start date</th>
+              <th class="col-year">End date</th>
+              <th class="col-budget">Total budget</th>
+              <th class="col-budget">Partner budget</th>
+              <th class="col-group">Status</th>
               <th class="col-actions"></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let project of pagedProjects; let i = index">
               <td class="col-id">{{ pagedProjectsIndex(i) + 1 }}</td>
-              <td class="col-title">
-                <span class="cell-title clamp-2" [title]="project.titreproj || ''">{{ project.titreproj || 'Untitled project' }}</span>
-                <span class="acronym-badge" *ngIf="project.acronyme">{{ project.acronyme }}</span>
-              </td>
-              <td class="col-coordinator">
-                <span class="cell-strong">{{ project.responsable || '—' }}</span>
-                <span class="cell-muted" *ngIf="project.partenaire">{{ project.partenaire }}</span>
-              </td>
+              <td class="col-coordinator"><span class="cell-strong">{{ project.responsable || '—' }}</span></td>
+              <td class="col-applicant"><span class="clamp-2" [title]="project.applicant || ''">{{ project.applicant || '—' }}</span></td>
+              <td class="col-role">{{ roleLabel(project.partenaire) || '—' }}</td>
+              <td class="col-acronym"><span class="acronym-badge" *ngIf="project.acronyme">{{ project.acronyme }}</span></td>
+              <td class="col-title"><span class="cell-title clamp-2" [title]="project.titreproj || ''">{{ project.titreproj || '—' }}</span></td>
               <td class="col-programme"><span class="clamp-2" [title]="project.programme || ''">{{ project.programme || '—' }}</span></td>
               <td class="col-thematic"><span class="clamp-2" [title]="project.thematique || ''">{{ project.thematique || '—' }}</span></td>
-              <td class="col-period">
-                <span *ngIf="project.startyear || project.endyear">{{ project.startyear || '?' }} – {{ project.endyear || '?' }}</span>
-                <span *ngIf="!project.startyear && !project.endyear" class="cell-muted">—</span>
-              </td>
+              <td class="col-date">{{ project.submissionDate ? (project.submissionDate | date:'d MMM y') : '—' }}</td>
+              <td class="col-year">{{ project.startyear || '—' }}</td>
+              <td class="col-year">{{ project.endyear || '—' }}</td>
+              <td class="col-budget">{{ project.totalBudget ? ('€' + (project.totalBudget | number:'1.0-0')) : '—' }}</td>
               <td class="col-budget">{{ project.budget ? ('€' + (project.budget | number:'1.0-0')) : '—' }}</td>
               <td class="col-group">
                 <span class="group-pill" *ngIf="project.title" [ngClass]="'tone-' + groupTone(project.title)">{{ groupLabel(project.title) }}</span>
@@ -172,12 +184,22 @@
 
     <!-- Pagination -->
     <div class="pagination-bar">
-      <label class="page-size">
+      <div class="page-size">
         <span>Rows per page</span>
-        <select [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
-          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
-        </select>
-      </label>
+        <div class="ps-picker" [class.open]="pageSizeMenuOpen">
+          <button type="button" class="ps-trigger" (click)="pageSizeMenuOpen = !pageSizeMenuOpen; $event.stopPropagation()"
+                  aria-haspopup="listbox" [attr.aria-expanded]="pageSizeMenuOpen">
+            <span>{{ pageSize }}</span><i class='bx bx-chevron-up'></i>
+          </button>
+          <div class="ps-menu" role="listbox" *ngIf="pageSizeMenuOpen">
+            <button type="button" class="ps-option" role="option" *ngFor="let size of pageSizeOptions"
+                    [class.selected]="pageSize === size" [attr.aria-selected]="pageSize === size"
+                    (click)="setPageSize(size); pageSizeMenuOpen = false; $event.stopPropagation()">
+              <span>{{ size }}</span><i class='bx bx-check' *ngIf="pageSize === size"></i>
+            </button>
+          </div>
+        </div>
+      </div>
       <span class="page-info">{{ rangeStart }}–{{ rangeEnd }} of {{ projects.length }}</span>
       <div class="page-nav">
         <button class="page-btn" (click)="prevPage()" [disabled]="pageIndex === 0" title="Previous page">

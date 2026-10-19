@@ -1,0 +1,38 @@
+<button type="button" class="dp-trigger" [id]="inputId || null" [class.open]="open" [class.empty]="!value"
+        [disabled]="disabled" (click)="toggle($event)" aria-haspopup="dialog" [attr.aria-expanded]="open">
+  <i class='bx bx-calendar dp-icon'></i>
+  <span class="dp-value">{{ value ? label : placeholder }}</span>
+</button>
+
+<div class="dp-popover" *ngIf="open" [ngStyle]="popoverStyle" role="dialog" aria-label="Choose a date" (click)="$event.stopPropagation()">
+  <div class="dp-head">
+    <span class="dp-month">{{ monthTitle }}</span>
+    <div class="dp-nav">
+      <button type="button" (click)="shiftMonth(-1, $event)" aria-label="Previous month"><i class='bx bx-chevron-left'></i></button>
+      <button type="button" (click)="shiftMonth(1, $event)" aria-label="Next month"><i class='bx bx-chevron-right'></i></button>
+    </div>
+  </div>
+
+  <div class="dp-grid">
+    <span class="dp-weekday" *ngFor="let w of weekdays">{{ w }}</span>
+    <button type="button" class="dp-day" *ngFor="let c of cells"
+            [class.outside]="c.outside" [class.today]="c.today" [class.selected]="c.selected"
+            (click)="pick(c, $event)">{{ c.day }}</button>
+  </div>
+
+  <div class="dp-time" *ngIf="withTime">
+    <span class="dp-time-label"><i class='bx bx-time-five'></i> Time</span>
+    <div class="dp-time-fields">
+      <input type="text" inputmode="numeric" maxlength="2" [value]="hours" (change)="setTime('h', $any($event.target).value)" aria-label="Hours">
+      <span>:</span>
+      <input type="text" inputmode="numeric" maxlength="2" [value]="minutes" (change)="setTime('m', $any($event.target).value)" aria-label="Minutes">
+    </div>
+  </div>
+
+  <div class="dp-foot">
+    <button type="button" class="dp-link muted" *ngIf="value" (click)="clear($event)">Clear</button>
+    <span class="dp-spacer"></span>
+    <button type="button" class="dp-link" (click)="today($event)">{{ withTime ? 'Now' : 'Today' }}</button>
+    <button type="button" class="dp-ok" (click)="confirm($event)">OK</button>
+  </div>
+</div>

@@ -837,3 +837,93 @@ a.header-btn { text-decoration: none; }
   .export-head { border-bottom-color: #e2edf4; strong { color: #0d2137; } span { color: #64748b; } }
   .export-option { color: #3d5a6e; i { color: #1a8f7f; } &:hover:not(:disabled) { background: #f0f7fb; color: #0d2137; } }
 }
+
+// ── Projects brief (2026-10): 13 columns, readable headers ─────────────────
+// Headers in normal case ("Partner budget", not "PARTNER BUDGET").
+.data-table th { text-transform: none !important; letter-spacing: 0 !important; font-family: $font-sans !important; font-size: 12px !important; font-weight: 600 !important; }
+.col-applicant { min-width: 160px; max-width: 220px; }
+.col-role { min-width: 120px; white-space: nowrap; }
+.col-acronym { min-width: 110px; }
+.col-title { min-width: 240px !important; max-width: 320px !important; }
+.col-date, .col-year { white-space: nowrap; font-family: $font-mono; font-size: 12.5px; }
+.col-date { min-width: 120px; }
+.col-budget { white-space: nowrap; }
+.acronym-badge { margin-top: 0; }
+.stat-note { font-weight: 400; opacity: .7; }
+
+.stat-icon.tone-red { background: rgba(239,68,68,.12) !important; border-color: rgba(239,68,68,.25) !important; color: #f87171 !important; }
+.group-pill.tone-red { color: #f87171; background: rgba(239,68,68,.12); }
+
+.admin-layout.theme-light {
+  .stat-icon.tone-red { color: #dc2626 !important; }
+  .group-pill.tone-red { color: #dc2626; background: #fef2f2; }
+}
+
+// ── Fit & scroll (2026-10) ──────────────────────────────────────────────────
+// No forced height: the card ends with its last row, no blank band below.
+.content-wrapper { min-height: 0 !important; flex: none !important; }
+.table-container { flex: none !important; }
+
+// Thirteen columns cannot all fit, so the table scrolls sideways. Only the
+// row's actions are pinned (right), so edit/delete never scroll out of reach.
+.data-table {
+  min-width: 1500px !important;
+  th, td { padding: 10px 12px !important; }
+  .col-actions { position: sticky; right: 0; z-index: 1; background: $panel; box-shadow: -1px 0 0 $line; }
+  thead .col-actions { background: $panel-2; z-index: 2; }
+  .col-coordinator { min-width: 150px; }
+  tbody tr:hover td { background: $panel-2; }
+}
+
+// Budget cards: label on one line, what it covers on a quieter second line.
+.stat-info p { white-space: nowrap; }
+.stat-sub { display: block; margin-top: 2px; font-size: 11.5px; color: $text-faint; }
+
+.admin-layout.theme-light {
+  .data-table {
+    .col-actions { background: #ffffff; box-shadow: -1px 0 0 #e2e8f0; }
+    thead .col-actions { background: #f5f9fc; }
+    tbody tr:hover td { background: #f5f9fc; }
+  }
+  .stat-sub { color: #94a3b8; }
+}
+
+// ── Rows-per-page picker (replaces the native <select>) ────────────────────
+.ps-picker { position: relative; }
+.ps-trigger {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-width: 64px; height: 32px; padding: 0 10px 0 12px;
+  border: 1px solid $line; border-radius: 8px; background: $bg-2; color: $text;
+  font-family: $font-mono; font-size: 12.5px; cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+  i { font-size: 16px; color: $accent; transition: transform .2s; }
+  &:hover { border-color: $line-2; }
+}
+.ps-picker.open .ps-trigger {
+  border-color: $accent; box-shadow: 0 0 0 3px rgba(74,214,196,.12);
+  i { transform: rotate(180deg); }
+}
+// Opens upward: it sits in the bar at the bottom of the page.
+.ps-menu {
+  position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 50;
+  min-width: 100%; padding: 4px;
+  background: $panel-2; border: 1px solid $line-2; border-radius: $radius;
+  box-shadow: 0 12px 32px rgba(0,0,0,.45);
+  animation: psUp .15s ease;
+}
+@keyframes psUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ps-option {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 7px 10px; border: none; border-radius: 6px; background: transparent;
+  font-family: $font-mono; font-size: 12.5px; color: $text-dim; text-align: left; cursor: pointer;
+  i { font-size: 15px; }
+  &:hover { background: $panel; color: $text; }
+  &.selected { background: rgba(74,214,196,.1); color: $accent; font-weight: 600; }
+}
+
+.admin-layout.theme-light {
+  .ps-trigger { background: #ffffff; border-color: #c5d8e6; color: #0d2137; i { color: #1a8f7f; } &:hover { border-color: #9fbfd2; } }
+  .ps-picker.open .ps-trigger { border-color: #1a8f7f; box-shadow: 0 0 0 3px rgba(26,143,127,.12); }
+  .ps-menu { background: #ffffff; border-color: #c5d8e6; box-shadow: 0 12px 32px rgba(13,33,55,.14); }
+  .ps-option { color: #3d5a6e; &:hover { background: #f0f7fb; color: #0d2137; } &.selected { background: rgba(26,143,127,.08); color: #1a8f7f; } }
+}

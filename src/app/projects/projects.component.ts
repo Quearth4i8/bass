@@ -1,3 +1,4 @@
+import { isRejectedStatus, roleLabel } from '../utilities/project-labels';
 import { Component, OnInit, HostBinding, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
@@ -39,7 +40,7 @@ export class ProjectsComponent implements OnInit {
   panelOpenState = false;
 
   /** Headline numbers for the stats strip, across every category. */
-  stats = { total: 0, programmes: 0, topProgrammes: '', firstYear: 0, lastYear: 0, budget: 0 };
+  stats = { total: 0, firstYear: 0, lastYear: 0, totalBudget: 0, budget: 0 };
 
   constructor(
     private authService: AuthService,
@@ -64,9 +65,11 @@ export class ProjectsComponent implements OnInit {
 
   loadProjectGroups() {
     this.projectGroupService.getProjectGroups().subscribe((data: any[]) => {
-      this.projectGroups = data;
+      // Rejected projects stay in the admin only.
+      this.projectGroups = data.filter((g: any) => !isRejectedStatus(g.title));
       this.columnFilters = new Array(this.projectGroups.length).fill(null).map(() => ({
         responsable: '',
+        applicant: '',
         partenaire: '',
         thematique: '',
         programme: '',
@@ -74,6 +77,7 @@ export class ProjectsComponent implements OnInit {
         acronyme: '',
         startyear: '',
         endyear: '',
+        totalBudget: '',
         budget: ''
       }));
       // Initialize dropdown state arrays
@@ -97,31 +101,29 @@ export class ProjectsComponent implements OnInit {
   /** Re-run as each category arrives; the strip fills in as the data does. */
   private computeStats(): void {
     const all = Object.values(this.projectData).flat();
-    const programmeCounts = new Map<string, number>();
     const years: number[] = [];
+    let totalBudget = 0;
     let budget = 0;
     for (const p of all) {
-      const prog = (p.programme || '').trim();
-      if (prog && prog.toUpperCase() !== 'NA') {
-        programmeCounts.set(prog, (programmeCounts.get(prog) || 0) + 1);
-      }
       for (const y of [p.startyear, p.endyear]) {
         const n = Number(y);
         if (n > 1900 && n < 2200) years.push(n);
       }
+      const t = Number(p.totalBudget);
+      if (Number.isFinite(t)) totalBudget += t;
       const b = Number(p.budget);
       if (Number.isFinite(b)) budget += b;
     }
-    const top = [...programmeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
     this.stats = {
       total: all.length,
-      programmes: programmeCounts.size,
-      topProgrammes: top.join(' · '),
       firstYear: years.length ? Math.min(...years) : 0,
       lastYear: years.length ? Math.max(...years) : 0,
+      totalBudget: totalBudget / 1_000_000,
       budget: budget / 1_000_000,
     };
   }
+
+  readonly roleLabel = roleLabel;
 
   /** "ACHIEVED PROJECTS" -> "Achieved": the heading already says Projects. */
   tabLabel(title: string): string {
@@ -182,14 +184,16 @@ export class ProjectsComponent implements OnInit {
       // General search across all fields
       if (normalizeSearch(filters.general)) {
         const matchesGeneral = [
-          project.responsable, project.partenaire, project.thematique, project.programme,
-          project.titreproj, project.acronyme, project.startyear, project.endyear, project.budget,
+          project.responsable, project.applicant, project.partenaire, project.thematique, project.programme,
+          project.titreproj, project.acronyme, project.startyear, project.endyear,
+          project.totalBudget, project.budget,
         ].some(value => matchesSearch(value, filters.general));
         if (!matchesGeneral) return false;
       }
 
       return (
         matchesSearch(project.responsable, filters.responsable) &&
+        matchesSearch(project.applicant, filters.applicant) &&
         (!filters.partenaire || project.partenaire === filters.partenaire) &&
         matchesSearch(project.thematique, filters.thematique) &&
         (!filters.programme || project.programme === filters.programme) &&
@@ -197,6 +201,7 @@ export class ProjectsComponent implements OnInit {
         matchesSearch(project.acronyme, filters.acronyme) &&
         matchesSearch(project.startyear, filters.startyear) &&
         matchesSearch(project.endyear, filters.endyear) &&
+        matchesSearch(project.totalBudget, filters.totalBudget) &&
         matchesSearch(project.budget, filters.budget)
       );
     });
@@ -234,6 +239,7 @@ export class ProjectsComponent implements OnInit {
   resetFilters(index: number, title: string): void {
     this.columnFilters[index] = {
       responsable: '',
+      applicant: '',
       partenaire: '',
       thematique: '',
       programme: '',
@@ -241,6 +247,7 @@ export class ProjectsComponent implements OnInit {
       acronyme: '',
       startyear: '',
       endyear: '',
+      totalBudget: '',
       budget: ''
     };
     this.filterProjects(title, index);

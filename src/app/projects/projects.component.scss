@@ -322,22 +322,25 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 .modern-table {
   width: 100%;
-  min-width: 1080px;
+  min-width: 1560px;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
   font-family: $font-sans;
 
-  // Column widths
-  th:nth-child(1) { width: 140px; } // Coordinator
-  th:nth-child(2) { width: 100px; } // Partner
-  th:nth-child(3) { width: 190px; } // Thematic
-  th:nth-child(4) { width: 140px; } // Program
-  th:nth-child(5) { width: 200px; } // Title
-  th:nth-child(6) { width: 100px; } // Acronym
-  th:nth-child(7) { width: 62px;  } // Start
-  th:nth-child(8) { width: 62px;  } // End
-  th:nth-child(9) { width: 86px;  } // Budget
+  // Column widths (same order as the admin table)
+  th:nth-child(1)  { width: 150px; } // Coordinator
+  th:nth-child(2)  { width: 170px; } // Applicant
+  th:nth-child(3)  { width: 100px; } // Role
+  th:nth-child(4)  { width: 110px; } // Acronym
+  th:nth-child(5)  { width: 220px; } // Title
+  th:nth-child(6)  { width: 140px; } // Program
+  th:nth-child(7)  { width: 190px; } // Thematic
+  th:nth-child(8)  { width: 120px; } // Submission date
+  th:nth-child(9)  { width: 80px;  } // Start
+  th:nth-child(10) { width: 80px;  } // End
+  th:nth-child(11) { width: 130px; } // Total budget
+  th:nth-child(12) { width: 130px; } // Partner budget
 
   thead {
     background: rgba(255,255,255,0.025);
@@ -657,6 +660,13 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   line-height: 1.6;
 }
 
+// Placeholder for fields the project doesn't have yet
+.detail-field-value.detail-empty {
+  font-size: 13px;
+  font-style: italic;
+  color: $text-faint;
+}
+
 .program-badge-full {
   white-space: normal;
   word-break: break-word;
@@ -768,6 +778,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   .detail-field { border-bottom-color: rgba(197,216,230,0.6); }
   .detail-field-label { color: #6b8a9a; i { color: #2a8b9c; } }
   .detail-field-value { color: #2c4a5e; }
+  .detail-field-value.detail-empty { color: #9bb0bc; }
 
   .partner-value { background: rgba(26,143,127,0.07); border-color: rgba(26,143,127,0.25); color: #1a8f7f; }
 

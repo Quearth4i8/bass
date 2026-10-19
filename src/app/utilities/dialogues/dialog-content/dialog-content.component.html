@@ -10,87 +10,86 @@
 
     <form (ngSubmit)="onSubmit()">
         <div class="ad-body" (scroll)="onDialogBodyScroll()">
-
-            <section class="ad-section">
-                <h3 class="ad-section-title"><i class='bx bx-file'></i> Project</h3>
-                <div class="ad-grid">
-                    <div class="ad-field full">
-                        <label for="titreproj">Project title <span class="req">*</span></label>
-                        <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Full project title" required>
-                    </div>
-                    <div class="ad-field">
-                        <label for="acronym">Acronym <span class="req">*</span></label>
-                        <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" placeholder="e.g. BLUEMED" required>
-                    </div>
-                    <div class="ad-field">
-                        <label for="title">Project group <span class="req">*</span></label>
-                        <div class="custom-dropdown" [class.open]="groupDropdownOpen">
-                            <div class="dropdown-trigger" (click)="toggleGroupDropdown($event)">
-                                <span [class.is-placeholder]="!projectFormData.title">{{ projectFormData.title || 'Select group' }}</span>
-                                <i class='bx bx-chevron-down'></i>
-                            </div>
-                            <div class="dropdown-menu" *ngIf="groupDropdownOpen" [ngStyle]="groupMenuStyle" [class.opens-up]="groupOpensUp">
-                                <div class="dropdown-item muted" (click)="selectGroup('')" [class.selected]="projectFormData.title === ''">Select group</div>
-                                <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title">{{ title }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ad-field full">
-                        <label for="thematique">Thematic <span class="req">*</span></label>
-                        <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Research theme" required>
-                    </div>
+            <!-- One column, in the same order as the projects table. -->
+            <div class="ad-stack">
+                <div class="ad-field">
+                    <label for="responsable">Coordinator <span class="req">*</span></label>
+                    <input type="text" id="responsable" name="responsable" [(ngModel)]="projectFormData.responsable" placeholder="Coordinator name" required>
                 </div>
-            </section>
-
-            <section class="ad-section">
-                <h3 class="ad-section-title"><i class='bx bx-user'></i> Coordination</h3>
-                <div class="ad-grid">
-                    <div class="ad-field">
-                        <label for="responsable">Coordinator <span class="req">*</span></label>
-                        <input type="text" id="responsable" name="responsable" [(ngModel)]="projectFormData.responsable" placeholder="Coordinator name" required>
-                    </div>
-                    <div class="ad-field">
-                        <label for="partenaire">Role <span class="req">*</span></label>
-                        <div class="custom-dropdown" [class.open]="partenaireDropdownOpen">
-                            <div class="dropdown-trigger" (click)="togglePartenaireDropdown($event)">
-                                <span [class.is-placeholder]="!projectFormData.partenaire">{{ projectFormData.partenaire ? getPartenaireLabel(projectFormData.partenaire) : 'Select role' }}</span>
-                                <i class='bx bx-chevron-down'></i>
-                            </div>
-                            <div class="dropdown-menu" *ngIf="partenaireDropdownOpen" [ngStyle]="partenaireMenuStyle" [class.opens-up]="partenaireOpensUp">
-                                <div class="dropdown-item muted" (click)="selectPartenaire('')" [class.selected]="projectFormData.partenaire === ''">Select role</div>
-                                <div class="dropdown-item" (click)="selectPartenaire('beneficiary')" [class.selected]="projectFormData.partenaire === 'beneficiary'">Beneficiary</div>
-                                <div class="dropdown-item" (click)="selectPartenaire('partner')" [class.selected]="projectFormData.partenaire === 'partner'">Partner</div>
-                                <div class="dropdown-item" (click)="selectPartenaire('principal')" [class.selected]="projectFormData.partenaire === 'principal'">Principal Investigator</div>
+                <div class="ad-field">
+                    <label for="applicant">Applicant</label>
+                    <input type="text" id="applicant" name="applicant" [(ngModel)]="projectFormData.applicant" placeholder="Applicant institution or person">
+                </div>
+                <div class="ad-field">
+                    <label>Role <span class="req">*</span></label>
+                    <div class="custom-dropdown" [class.open]="partenaireDropdownOpen">
+                        <div class="dropdown-trigger" (click)="togglePartenaireDropdown($event)">
+                            <span [class.is-placeholder]="!projectFormData.partenaire">{{ projectFormData.partenaire ? getPartenaireLabel(projectFormData.partenaire) : 'Select role' }}</span>
+                            <i class='bx bx-chevron-down'></i>
+                        </div>
+                        <div class="dropdown-menu" *ngIf="partenaireDropdownOpen" [ngStyle]="partenaireMenuStyle" [class.opens-up]="partenaireOpensUp">
+                            <div class="dropdown-item" *ngFor="let role of roles" (click)="selectPartenaire(role.value)" [class.selected]="projectFormData.partenaire === role.value">
+                                <span class="di-label">{{ role.label }}</span>
+                                <i class='bx bx-check di-check' *ngIf="projectFormData.partenaire === role.value"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <section class="ad-section">
-                <h3 class="ad-section-title"><i class='bx bx-euro'></i> Funding &amp; timeline</h3>
-                <div class="ad-grid">
-                    <div class="ad-field full">
-                        <label for="programme">Program <span class="req">*</span></label>
-                        <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Funding program, e.g. PRIMA, H2020" required>
+                <div class="ad-field">
+                    <label for="acronym">Acronym <span class="req">*</span></label>
+                    <input type="text" id="acronym" name="acronym" [(ngModel)]="projectFormData.acronyme" placeholder="e.g. BLUEMED" required>
+                </div>
+                <div class="ad-field">
+                    <label for="titreproj">Project title <span class="req">*</span></label>
+                    <input type="text" id="titreproj" name="titreproj" [(ngModel)]="projectFormData.titreproj" placeholder="Full project title" required>
+                </div>
+                <div class="ad-field">
+                    <label for="programme">Program <span class="req">*</span></label>
+                    <input type="text" id="programme" name="programme" [(ngModel)]="projectFormData.programme" placeholder="Funding program, e.g. PRIMA, H2020" required>
+                </div>
+                <div class="ad-field">
+                    <label for="thematique">Thematic <span class="req">*</span></label>
+                    <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Research theme" required>
+                </div>
+                <div class="ad-field">
+                    <label for="submissionDate">Submission date</label>
+                    <app-date-picker inputId="submissionDate" name="submissionDate" [(ngModel)]="projectFormData.submissionDate" placeholder="Select submission date"></app-date-picker>
+                </div>
+                <div class="ad-field">
+                    <label for="startyear">Start date <span class="req">*</span></label>
+                    <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="Year, e.g. 2024" required>
+                </div>
+                <div class="ad-field">
+                    <label for="endyear">End date <span class="req">*</span></label>
+                    <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="Year, e.g. 2027" required>
+                </div>
+                <div class="ad-field">
+                    <label for="totalBudget">Total budget (€)</label>
+                    <input type="number" id="totalBudget" name="totalBudget" [(ngModel)]="projectFormData.totalBudget" placeholder="Whole project, all partners">
+                </div>
+                <div class="ad-field">
+                    <label for="budget">Partner budget (€) <span class="req">*</span></label>
+                    <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="INSTM share" required>
+                </div>
+                <div class="ad-field">
+                    <label>Status <span class="req">*</span></label>
+                    <div class="custom-dropdown" [class.open]="groupDropdownOpen">
+                        <div class="dropdown-trigger" (click)="toggleGroupDropdown($event)">
+                            <span [class.is-placeholder]="!projectFormData.title" class="dt-value">
+                                <span class="status-dot" *ngIf="projectFormData.title" [ngClass]="'tone-' + statusTone(projectFormData.title)"></span>
+                                {{ projectFormData.title ? statusLabel(projectFormData.title) : 'Select status' }}
+                            </span>
+                            <i class='bx bx-chevron-down'></i>
+                        </div>
+                        <div class="dropdown-menu" *ngIf="groupDropdownOpen" [ngStyle]="groupMenuStyle" [class.opens-up]="groupOpensUp">
+                            <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title">
+                                <span class="di-label"><span class="status-dot" [ngClass]="'tone-' + statusTone(title)"></span>{{ statusLabel(title) }}</span>
+                                <i class='bx bx-check di-check' *ngIf="projectFormData.title === title"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="ad-grid cols-3">
-                    <div class="ad-field">
-                        <label for="startyear">Start year <span class="req">*</span></label>
-                        <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="2024" required>
-                    </div>
-                    <div class="ad-field">
-                        <label for="endyear">End year <span class="req">*</span></label>
-                        <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="2027" required>
-                    </div>
-                    <div class="ad-field">
-                        <label for="budget">Budget (€) <span class="req">*</span></label>
-                        <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="0" required>
-                    </div>
-                </div>
-            </section>
-
+            </div>
         </div>
 
         <div class="ad-footer">

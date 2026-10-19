@@ -1,3 +1,4 @@
+import { roleLabel, statusLabel } from '../utilities/project-labels';
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
@@ -25,7 +26,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   pagedProjects: any[] = [];
   editMode: boolean[] = [];
   pageIndex: number = 0;
-  pageSize: number = 5;
+  pageSize: number = 10;
   isSidebarVisible = true;
   projectGroupTitles: any[] = [];
   dropdownOpenState: boolean[] = [];
@@ -33,6 +34,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   pageSizeDropdownOpen: boolean = false;
   pageDropdownOpen: boolean = false;
   pageSizeOptions: number[] = [5, 10, 25, 50, 100];
+  pageSizeMenuOpen = false;
 
   constructor(
     private projectService: ProjectService,
@@ -55,6 +57,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     if (!clickedOnPageDropdown) {
       this.pageSizeDropdownOpen = false;
       this.pageDropdownOpen = false;
+    }
+    if (!target.closest('.ps-picker')) {
+      this.pageSizeMenuOpen = false;
     }
     if (!target.closest('.export-menu')) {
       this.exportMenuOpen = false;
@@ -367,14 +372,35 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       .sort((a, b) => b.count - a.count);
   }
 
-  get totalBudget(): number {
-    return this.projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+  readonly roleLabel = roleLabel;
+
+  /** First budget card: the whole-project (all partners) budget of every Ongoing project. */
+  get ongoingTotalBudget(): number {
+    return this.sumBudget('ONGOING', 'totalBudget');
+  }
+
+  /** Second budget card: our partner share of every Ongoing project. */
+  get ongoingPartnerBudget(): number {
+    return this.sumBudget('ONGOING', 'budget');
+  }
+
+  private sumBudget(status: string, field: 'totalBudget' | 'budget'): number {
+    return this.projects
+      .filter(p => (p.title || '').toUpperCase().includes(status))
+      .reduce((sum, p) => sum + (Number(p[field]) || 0), 0);
+  }
+
+  /** 0 -> "€0", 850 000 -> "€850K", 1 250 000 -> "€1.25M". */
+  compactEuro(value: number): string {
+    if (!value) return '€0';
+    if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (value >= 1_000) return '€' + Math.round(value / 1_000) + 'K';
+    return '€' + Math.round(value);
   }
 
   /** "SUBMITTED PROJECTS" -> "Submitted". */
   groupLabel(title: string): string {
-    const word = (title || '').replace(/\s*PROJECTS?\s*$/i, '').trim().toLowerCase();
-    return word ? word.charAt(0).toUpperCase() + word.slice(1) : title;
+    return statusLabel(title);
   }
 
   /** Colour family for a group's pill and stat icon. */
@@ -383,6 +409,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     if (t.includes('ONGOING')) return 'blue';
     if (t.includes('ACHIEVED')) return 'green';
     if (t.includes('SUBMITTED')) return 'amber';
+    if (t.includes('REJECTED')) return 'red';
     return 'grey';
   }
 
@@ -391,6 +418,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       case 'blue':  return 'bx-time-five';
       case 'green': return 'bx-badge-check';
       case 'amber': return 'bx-send';
+      case 'red':   return 'bx-x-circle';
       default:      return 'bx-folder';
     }
   }

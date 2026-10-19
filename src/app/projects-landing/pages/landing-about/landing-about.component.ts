@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PortalProjectsService } from '../../../portal/services/portal-projects.service';
 import { ProjectService } from '../../../services/ProjectService';
+import { isRejectedStatus } from '../../../utilities/project-labels';
 
 @Component({
   selector: 'app-landing-about',
@@ -14,6 +15,11 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
   totalResearchProjects: number | null = null;
   totalPortalProjects: number | null = null;
   activePortalProjects: number | null = null;
+
+  // Budget panel, over the same projects the public List of Projects shows
+  // (everything but Rejected).
+  totalProjectsBudget: number | null = null;
+  totalPartnersBudget: number | null = null;
 
   private io?: IntersectionObserver;
 
@@ -33,9 +39,26 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
     this.projectService.getAllProjects().subscribe({
-      next: p => { this.totalResearchProjects = p.length; },
+      next: p => {
+        this.totalResearchProjects = p.length;
+        this.computeBudgets(p);
+      },
       error: () => {}
     });
+  }
+
+  private computeBudgets(projects: any[]): void {
+    const visible = projects.filter(p => !isRejectedStatus(p.title));
+    this.totalProjectsBudget = visible.reduce((sum, p) => sum + (Number(p.totalBudget) || 0), 0);
+    this.totalPartnersBudget = visible.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+  }
+
+  /** 0 -> "€0", 850 000 -> "€850K", 1 250 000 -> "€1.25M". */
+  compactEuro(value: number): string {
+    if (!value) return '€0';
+    if (value >= 1_000_000) return '€' + (value / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (value >= 1_000) return '€' + Math.round(value / 1_000) + 'K';
+    return '€' + Math.round(value);
   }
 
   ngAfterViewInit(): void {

@@ -317,6 +317,10 @@ app-projects-landing {
   border-top: 1px solid $line; border-bottom: 1px solid $line; margin-top: 48px;
   @media (max-width: 700px) { grid-template-columns: repeat(2, 1fr); }
 }
+.stats-strip-3 {
+  grid-template-columns: repeat(3, 1fr);
+  @media (max-width: 700px) { grid-template-columns: 1fr; .stat { border-right: 0; border-bottom: 1px solid $line; &:last-child { border-bottom: 0; } } }
+}
 
 .stat {
   padding: 24px 20px; border-right: 1px solid $line; position: relative;
@@ -374,7 +378,43 @@ app-projects-landing {
 }
 
 // ── Hero body ─────────────────────────────────────────────────────────────
-.hero-body { margin-bottom: 32px; }
+.hero-body {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+
+  .hero-left { flex: 1 1 auto; }
+
+  @media (max-width: 1280px) { flex-direction: column; align-items: stretch; gap: 28px; }
+}
+
+// ── Hero budget panel: two numbers, nothing else ──────────────────────────
+.budget-panel {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto auto;
+  border: 1px solid $line;
+  border-radius: $radius;
+  background: linear-gradient(180deg, rgba(8,42,61,0.55) 0%, rgba(6,31,46,0.65) 100%);
+
+  @media (max-width: 1280px) { align-self: flex-start; }
+  @media (max-width: 480px)  { grid-template-columns: 1fr; align-self: stretch; }
+}
+
+.budget-cell {
+  padding: 22px 32px 20px;
+
+  & + & { border-left: 1px solid $line; }
+
+  @media (max-width: 480px) { & + & { border-left: 0; border-top: 1px solid $line; } }
+}
+
+.budget-cell-value {
+  font-family: $font-mono; font-size: 34px; font-weight: 500; line-height: 1.1;
+  letter-spacing: -0.02em; color: $text;
+}
+.budget-cell-label { display: block; margin-top: 8px; white-space: nowrap; }
 
 .hero-left {
   display: flex;
@@ -1989,6 +2029,11 @@ app-projects-landing.theme-light {
   .stat-label   { color: #6b8a9a; }
   .stat-delta   { color: #1a8f7f; }
   .stat-loading { color: #9bb0bc; }
+
+  // Hero budget panel
+  .budget-panel        { background: #fff; border-color: #c5d8e6; box-shadow: 0 6px 24px rgba(13,33,55,0.05); }
+  .budget-cell + .budget-cell { border-color: #c5d8e6; }
+  .budget-cell-value   { color: #0d2137; }
 
   // Divider & section headings
   .section-divider { background: #c5d8e6; }

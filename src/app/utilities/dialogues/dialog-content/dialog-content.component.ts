@@ -3,6 +3,7 @@ import { DynamicDialogRef, DialogService, DynamicDialogConfig } from 'primeng/dy
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
 import { ThemeService } from 'src/app/services/ThemeService';
 import { ProjectService } from 'src/app/services/ProjectService';
+import { PROJECT_ROLES, roleLabel, statusLabel, statusTone } from 'src/app/utilities/project-labels';
 
 @Component({
   selector: 'app-dialog-content',
@@ -11,6 +12,9 @@ import { ProjectService } from 'src/app/services/ProjectService';
 })
 export class DialogContentComponent implements OnInit {
   projectGroupTitles: string[] = [];
+  readonly roles = PROJECT_ROLES;
+  readonly statusLabel = statusLabel;
+  readonly statusTone = statusTone;
   partenaireDropdownOpen: boolean = false;
   groupDropdownOpen: boolean = false;
   partenaireMenuStyle: { [key: string]: string } = {};
@@ -29,7 +33,10 @@ export class DialogContentComponent implements OnInit {
     startyear: '',
     endyear:'',
     budget: '',
-    title: ''
+    title: '',
+    applicant: '',
+    submissionDate: '',
+    totalBudget: '',
   };
 
   constructor(
@@ -51,8 +58,14 @@ export class DialogContentComponent implements OnInit {
   }
 
   getProjectGroupTitles(): void {
+    // In the brief's order: Ongoing, Achieved, Submitted, Rejected (others last).
+    const rank = ['ONGOING', 'ACHIEVED', 'SUBMITTED', 'REJECTED'];
+    const pos = (t: string) => {
+      const i = rank.findIndex(r => (t || '').toUpperCase().includes(r));
+      return i < 0 ? rank.length : i;
+    };
     this.projectGroupService.getProjectGroupTitles().subscribe((titles) => {
-      this.projectGroupTitles = titles;
+      this.projectGroupTitles = [...titles].sort((a, b) => pos(a) - pos(b));
     });
   }
 
@@ -70,6 +83,9 @@ export class DialogContentComponent implements OnInit {
         title: this.projectFormData.title,
         startyear: this.projectFormData.startyear,
         endyear: this.projectFormData.endyear,
+        applicant: this.projectFormData.applicant || null,
+        submissionDate: this.projectFormData.submissionDate || null,
+        totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
       };
       this.projectService.updateProject(this.projectId, updatedProject).subscribe(
         (response) => {
@@ -82,7 +98,15 @@ export class DialogContentComponent implements OnInit {
       );
     } else {
       // Create new project
-      this.projectService.createProject(this.projectFormData).subscribe(
+      // Optional fields left empty go up as null, not '' - the backend cannot
+      // read an empty string as a date or a number.
+      const created = {
+        ...this.projectFormData,
+        applicant: this.projectFormData.applicant || null,
+        submissionDate: this.projectFormData.submissionDate || null,
+        totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
+      };
+      this.projectService.createProject(created).subscribe(
         (response) => {
           console.log('Project created successfully:', response);
           this.ref.close('success');
@@ -130,17 +154,30 @@ export class DialogContentComponent implements OnInit {
 
     const desiredMenuHeight = Math.min(menuMaxHeight, 44 * 5); // up to 5 items visible before scrolling
     const shouldOpenUp = spaceBelow < Math.min(desiredMenuHeight, 140) && spaceAbove > spaceBelow;
-    const top = shouldOpenUp
-      ? Math.max(0, triggerRect.top - baseTop - desiredMenuHeight - 4)
-      : triggerRect.bottom - baseTop + 4;
+    // Opening upward, anchor the menu's bottom edge to the trigger's top rather
+    // than placing its top at an assumed height: the real menu is usually
+    // shorter than that guess, which left a gap and covered the fields above.
+    if (shouldOpenUp) {
+      const containerHeight = isDialogTransformed && dialogRect ? dialogRect.height : window.innerHeight;
+      const bottom = containerHeight - (triggerRect.top - baseTop) + 4;
+      return {
+        style: {
+          top: 'auto',
+          bottom: `${bottom}px`,
+          left: `${left}px`,
+          width: `${triggerRect.width}px`,
+        },
+        opensUp: true
+      };
+    }
 
     return {
       style: {
-        top: `${top}px`,
+        top: `${triggerRect.bottom - baseTop + 4}px`,
         left: `${left}px`,
         width: `${triggerRect.width}px`,
       },
-      opensUp: shouldOpenUp
+      opensUp: false
     };
   }
 
@@ -165,12 +202,11 @@ export class DialogContentComponent implements OnInit {
   }
 
   getPartenaireLabel(value: string): string {
-    const labels: any = {
-      'beneficiary': 'Beneficiary',
-      'partner': 'Partner',
-      'principal': 'Principal Investigator'
-    };
-    return labels[value] || value;
+    return roleLabel(value);
+  }
+
+  private emptyToNull(v: any): any {
+    return v === '' || v === undefined ? null : v;
   }
 
   toggleGroupDropdown(event: MouseEvent): void {

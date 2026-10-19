@@ -1,3 +1,4 @@
+import { roleLabel } from '../utilities/project-labels';
 import { Injectable } from '@angular/core';
 
 export type ProjectExportFormat = 'xlsx' | 'docx' | 'pdf' | 'txt';
@@ -17,17 +18,21 @@ interface ExportColumn {
 })
 export class ProjectExportService {
 
+  // Same columns, order and wording as the admin projects table.
   private readonly columns: ExportColumn[] = [
-    { header: 'Project',     value: p => p.titreproj || '' },
-    { header: 'Acronym',     value: p => p.acronyme || '' },
-    { header: 'Coordinator', value: p => p.responsable || '' },
-    { header: 'Partner',     value: p => p.partenaire || '' },
-    { header: 'Program',     value: p => p.programme || '' },
-    { header: 'Thematic',    value: p => p.thematique || '' },
-    { header: 'Start year',  value: p => p.startyear || '' },
-    { header: 'End year',    value: p => p.endyear || '' },
-    { header: 'Budget (€)',  value: p => (p.budget || p.budget === 0) ? Number(p.budget) : '' },
-    { header: 'Group',       value: p => this.groupLabel(p.title) },
+    { header: 'Coordinator',     value: p => p.responsable || '' },
+    { header: 'Applicant',       value: p => p.applicant || '' },
+    { header: 'Role',            value: p => roleLabel(p.partenaire) },
+    { header: 'Acronym',         value: p => p.acronyme || '' },
+    { header: 'Project title',   value: p => p.titreproj || '' },
+    { header: 'Program',         value: p => p.programme || '' },
+    { header: 'Thematic',        value: p => p.thematique || '' },
+    { header: 'Submission date', value: p => p.submissionDate || '' },
+    { header: 'Start date',      value: p => p.startyear || '' },
+    { header: 'End date',        value: p => p.endyear || '' },
+    { header: 'Total budget (€)',   value: p => (p.totalBudget || p.totalBudget === 0) ? Number(p.totalBudget) : '' },
+    { header: 'Partner budget (€)', value: p => (p.budget || p.budget === 0) ? Number(p.budget) : '' },
+    { header: 'Status',          value: p => this.groupLabel(p.title) },
   ];
 
   /** @param filterLabel human-readable description of the active filter, '' for none. */
@@ -125,7 +130,7 @@ export class ProjectExportService {
   /** Cell text for Word/PDF/TXT, where the budget reads better formatted. */
   private display(column: ExportColumn, project: any): string {
     const value = column.value(project);
-    if (column.header.startsWith('Budget') && typeof value === 'number') {
+    if (column.header.includes('budget') && typeof value === 'number') {
       return '€ ' + value.toLocaleString('fr-FR').replace(/ | /g, ' ');
     }
     return String(value);
