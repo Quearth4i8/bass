@@ -57,11 +57,11 @@
                 </div>
                 <div class="ad-field">
                     <label for="startyear">Start date <span class="req">*</span></label>
-                    <input type="number" id="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="Year, e.g. 2024" required>
+                    <app-date-picker mode="year" inputId="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="Select start year" required></app-date-picker>
                 </div>
                 <div class="ad-field">
                     <label for="endyear">End date <span class="req">*</span></label>
-                    <input type="number" id="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="Year, e.g. 2027" required>
+                    <app-date-picker mode="year" inputId="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="Select end year" required></app-date-picker>
                 </div>
                 <div class="ad-field">
                     <label for="totalBudget">Total budget (€)</label>

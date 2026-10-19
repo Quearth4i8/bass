@@ -178,6 +178,8 @@ export class DocsadminComponent implements OnInit {
     this.treeRows = [];
     this.loadAllFolders();
     this.navigateToPath(null);
+    // The project grid is usually scrolled; start the explorer at the top.
+    window.scrollTo({ top: 0 });
   }
 
   backToProjects(): void {
@@ -190,6 +192,7 @@ export class DocsadminComponent implements OnInit {
     this.allFolders = [];
     this.clearDocSelection();
     this.loadProjects();
+    window.scrollTo({ top: 0 });
   }
 
   openFolder(folder: ProjectFolder): void {

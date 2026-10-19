@@ -2,7 +2,6 @@ import { Component, AfterViewInit, DestroyRef, ElementRef, OnDestroy, OnInit } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ProjectService } from '../../../services/ProjectService';
-import { isRejectedStatus } from '../../../utilities/project-labels';
 
 @Component({
   selector: 'app-landing-about',
@@ -15,7 +14,7 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
   ongoingResearchProjects: number | null = null;
   achievedResearchProjects: number | null = null;
 
-  // Budget panel, over the List of Projects' projects minus Rejected.
+  // Budget panel, over Ongoing projects only.
   totalProjectsBudget: number | null = null;
   totalPartnersBudget: number | null = null;
 
@@ -35,18 +34,18 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
           // Same set as the List of Projects' Total tab: every project with a status.
           const listed = p.filter(x => (x.title || '').trim());
           this.totalResearchProjects = listed.length;
-          this.ongoingResearchProjects = listed.filter(x => /ONGOING/i.test(x.title)).length;
+          const ongoing = listed.filter(x => /ONGOING/i.test(x.title));
+          this.ongoingResearchProjects = ongoing.length;
           this.achievedResearchProjects = listed.filter(x => /ACHIEVED/i.test(x.title)).length;
-          // Rejected projects never ran, so they add nothing to the budgets.
-          this.computeBudgets(listed.filter(x => !isRejectedStatus(x.title)));
+          this.computeBudgets(ongoing);
         },
         error: () => {}
       });
   }
 
-  private computeBudgets(visible: any[]): void {
-    this.totalProjectsBudget = visible.reduce((sum, p) => sum + (Number(p.totalBudget) || 0), 0);
-    this.totalPartnersBudget = visible.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+  private computeBudgets(projects: any[]): void {
+    this.totalProjectsBudget = projects.reduce((sum, p) => sum + (Number(p.totalBudget) || 0), 0);
+    this.totalPartnersBudget = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
   }
 
   /** 0 -> "€0", 850 000 -> "€850K", 1 250 000 -> "€1.25M". */

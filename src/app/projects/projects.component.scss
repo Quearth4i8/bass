@@ -18,7 +18,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 // Rendered inside the landing shell, which owns the navbar, footer, page
 // background and the global .section / .section-head / .stats-strip / .label
 // styles. Nothing here repaints those, so this page cannot drift from the rest.
-:host { display: block; }
+:host { display: block; --portal-accent: #1a8f7f; }  // teal for the shared back-to-top button
 
 .proj-stats {
   margin: 0 0 36px;

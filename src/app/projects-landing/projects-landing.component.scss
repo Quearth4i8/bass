@@ -91,7 +91,10 @@ app-projects-landing {
   width: 100%;
   padding: 0 40px;
   box-sizing: border-box;
+  gap: 12px;
   @media (max-width: 768px) { padding: 0 16px; }
+  /* Links hidden: two columns, or the buttons land in the empty middle one. */
+  @media (max-width: 680px) { grid-template-columns: minmax(0, 1fr) auto; }
 }
 
 /* brand stays left, links centered by grid, meta pushed to far right */
@@ -102,7 +105,9 @@ app-projects-landing {
 .brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  min-width: 0;
+  > div { min-width: 0; }
 }
 
 .brand-mark {
@@ -112,6 +117,7 @@ app-projects-landing {
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.92);
   padding: 4px;
+  @media (max-width: 680px) { width: 34px; height: 34px; }   // desktop look untouched
 }
 
 .brand-name {
@@ -122,6 +128,8 @@ app-projects-landing {
 .brand-sub {
   font-family: $font-mono; font-size: 10px;
   color: $text-faint; letter-spacing: 0.12em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  @media (max-width: 420px) { display: none; }
 }
 
 .nav-links {
@@ -141,8 +149,45 @@ app-projects-landing {
 
 .nav-meta {
   display: flex; align-items: center; gap: 16px;
+  @media (max-width: 680px) { gap: 8px; }
   font-family: $font-mono; font-size: 11px; color: $text-faint;
   white-space: nowrap;
+}
+
+/* Doubled class: .theme-btn (declared further down) sets display: flex and
+   would otherwise show this on desktop too. */
+.nav-menu-btn.nav-menu-btn {
+  display: none;
+  order: 10;   // menu button sits at the far right, where phones expect it
+  @media (max-width: 680px) { display: flex; }
+}
+
+/* Drop-down list of the nav links, phones only (see .nav-menu-btn). Hangs
+   below the sticky bar and overlays the page instead of pushing it down. */
+.nav-mobile {
+  display: none;
+  @media (max-width: 680px) {
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+    position: absolute; top: 100%; left: 0; right: 0;
+    box-sizing: border-box;
+    padding: 8px 16px 14px;
+    background: $bg-2;
+    border-top: 1px solid $line;
+    border-bottom: 1px solid $line-2;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.45);
+    animation: navDrop .18s ease;
+    // Whole row is the tap target, not just the word.
+    .nav-link {
+      display: block; width: 100%; box-sizing: border-box;
+      text-align: left; padding: 14px 16px; border-radius: 8px;
+    }
+    .nav-link.active { background: rgba(74,214,196,0.08); }
+  }
+}
+
+@keyframes navDrop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
 }
 
 .nav-clock {
@@ -259,6 +304,12 @@ app-projects-landing {
 .hero-tag {
   display: flex; align-items: center; gap: 12px;
   flex: 1; min-width: 0;
+  .label { white-space: nowrap; }
+
+  /* Phones: keep just "// BASSIANA Portal" on one line. */
+  @media (max-width: 600px) {
+    .hero-tag-line, .label:not(:first-child) { display: none; }
+  }
 }
 
 .hero-tag-line {
@@ -331,6 +382,8 @@ app-projects-landing {
 .stat-unit  { font-family: $font-mono; font-size: 14px; color: $text-faint; margin-left: 2px; }
 .stat-label { margin-top: 4px; display: block; }
 .stat-label-accent { color: $accent; }
+/* "(ongoing)" after a budget label: which projects the figure covers. */
+.scope-tag { color: $accent; font-weight: 700; white-space: nowrap; }
 .stat-delta { margin-top: 6px; font-family: $font-mono; font-size: 10px; color: $accent; }
 .stat-loading { color: $text-faint; }
 
@@ -400,11 +453,15 @@ app-projects-landing {
   background: linear-gradient(180deg, rgba(8,42,61,0.55) 0%, rgba(6,31,46,0.65) 100%);
 
   @media (max-width: 1280px) { align-self: flex-start; }
-  @media (max-width: 480px)  { grid-template-columns: 1fr; align-self: stretch; }
+  /* Phones: full width, two equal halves whose labels may wrap, then stacked. */
+  @media (max-width: 700px)  { grid-template-columns: 1fr 1fr; align-self: stretch; }
+  @media (max-width: 480px)  { grid-template-columns: 1fr; }
 }
 
 .budget-cell {
   padding: 22px 32px 20px;
+  min-width: 0;
+  @media (max-width: 700px) { padding: 18px 20px 16px; }
 
   & + & { border-left: 1px solid $line; }
 
@@ -415,7 +472,10 @@ app-projects-landing {
   font-family: $font-mono; font-size: 34px; font-weight: 500; line-height: 1.1;
   letter-spacing: -0.02em; color: $text;
 }
-.budget-cell-label { display: block; margin-top: 8px; white-space: nowrap; }
+.budget-cell-label {
+  display: block; margin-top: 8px; white-space: nowrap;
+  @media (max-width: 700px) { white-space: normal; line-height: 1.6; }
+}
 
 .hero-left {
   display: flex;
@@ -1881,9 +1941,11 @@ app-projects-landing.theme-light {
 
 .outputs-video-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   width: 100%;
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 560px)  { grid-template-columns: 1fr; gap: 14px; }
 }
 
 // ── Output card ───────────────────────────────────────────────────────────
@@ -1940,10 +2002,12 @@ app-projects-landing.theme-light {
   border-radius: 4px;
   background: rgba(74,214,196,0.07);
   align-self: flex-start;
+  white-space: nowrap;   // "CO-EVOLVE4BG" was breaking at the hyphen
 }
 
 .output-title {
   font-size: 13px;
+  @media (max-width: 560px) { font-size: 15px; }
   font-weight: 600;
   color: $text;
   line-height: 1.45;
@@ -1993,6 +2057,7 @@ app-projects-landing.theme-light {
 
   // Nav
   .nav { background: rgba(255,255,255,0.97); border-bottom-color: #a8c5d8; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .nav-mobile { background: #fff; border-color: #c5d8e6; box-shadow: 0 16px 32px rgba(13,33,55,0.12); }
   .brand-name  { color: #0d2137; }
   .brand-sub   { color: #4a7590; }
   .nav-link    { color: #3d5a6e; &:hover { color: #0d2137; background: rgba(0,0,0,0.04); } &.active { color: #1a8f7f; } }
@@ -2030,6 +2095,7 @@ app-projects-landing.theme-light {
   .stat-label   { color: #6b8a9a; }
   .stat-delta   { color: #1a8f7f; }
   .stat-label-accent { color: #1a8f7f; }
+  .scope-tag         { color: #1a8f7f; }
   .stat-loading { color: #9bb0bc; }
 
   // Hero budget panel

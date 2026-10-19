@@ -22,6 +22,12 @@
       <div class="nav-meta">
         <span class="nav-clock">{{ currentTime }}</span>
 
+        <!-- Phones: the links above are hidden, this opens them as a list. -->
+        <button class="theme-btn nav-menu-btn" (click)="mobileMenuOpen = !mobileMenuOpen"
+                [attr.aria-expanded]="mobileMenuOpen" [title]="mobileMenuOpen ? 'Close menu' : 'Menu'">
+          <i class='bx' [class.bx-menu]="!mobileMenuOpen" [class.bx-x]="mobileMenuOpen"></i>
+        </button>
+
         <button class="theme-btn" (click)="themeService.toggle()" [title]="themeService.isLight ? 'Switch to dark' : 'Switch to light'">
           <i class='bx' [class.bx-sun]="!themeService.isLight" [class.bx-moon]="themeService.isLight"></i>
         </button>
@@ -67,6 +73,14 @@
           <span>BASSIANA DB</span>
         </a>
       </div>
+    </div>
+
+    <div class="nav-mobile" *ngIf="mobileMenuOpen">
+      <button class="nav-link" routerLink="/home" routerLinkActive="active" (click)="mobileMenuOpen = false">Home</button>
+      <button class="nav-link" routerLink="/index" routerLinkActive="active" (click)="mobileMenuOpen = false">Index</button>
+      <button class="nav-link" routerLink="/our-projects" routerLinkActive="active" (click)="mobileMenuOpen = false">Projects</button>
+      <button class="nav-link" routerLink="/team" routerLinkActive="active" (click)="mobileMenuOpen = false">Team</button>
+      <button class="nav-link" routerLink="/outputs" routerLinkActive="active" (click)="mobileMenuOpen = false">Relevant Outputs</button>
     </div>
   </nav>
 

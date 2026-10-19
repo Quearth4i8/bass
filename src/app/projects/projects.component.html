@@ -19,11 +19,11 @@
     </div>
     <div class="stat">
       <div class="stat-value">{{ stats.totalBudget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
-      <div class="label stat-label stat-label-accent">Total Projects' Budget</div>
+      <div class="label stat-label stat-label-accent">Total Projects' Budget <span class="scope-tag" *ngIf="isTotalTab(activeGroupTitle)">(ongoing)</span></div>
     </div>
     <div class="stat">
       <div class="stat-value">{{ stats.budget | number:'1.0-1' }}<span class="stat-unit">M€</span></div>
-      <div class="label stat-label stat-label-accent">Total INSTM Projects' Budget</div>
+      <div class="label stat-label stat-label-accent">Total INSTM Projects' Budget <span class="scope-tag" *ngIf="isTotalTab(activeGroupTitle)">(ongoing)</span></div>
     </div>
   </div>
 
@@ -290,3 +290,5 @@
 
   </aside>
 </div>
+
+<app-upbutton></app-upbutton>

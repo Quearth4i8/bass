@@ -127,6 +127,9 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 // ── Main ───────────────────────────────────────────────────────────────────
 .admin-main {
   margin-left: 220px; margin-top: 64px; padding: 28px;
+  // border-box: with the padding outside the min-height the page was always
+  // 56px taller than the window, so it could scroll the explorer under the header.
+  box-sizing: border-box;
   min-height: calc(100vh - 64px);
   transition: margin-left 0.3s;
   &:not(.sidebar-open) { margin-left: 0; }

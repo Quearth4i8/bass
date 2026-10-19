@@ -8,12 +8,18 @@
   <div class="dp-head">
     <span class="dp-month">{{ monthTitle }}</span>
     <div class="dp-nav">
-      <button type="button" (click)="shiftMonth(-1, $event)" aria-label="Previous month"><i class='bx bx-chevron-left'></i></button>
-      <button type="button" (click)="shiftMonth(1, $event)" aria-label="Next month"><i class='bx bx-chevron-right'></i></button>
+      <button type="button" (click)="shiftMonth(-1, $event)" [attr.aria-label]="isYear ? 'Previous years' : 'Previous month'"><i class='bx bx-chevron-left'></i></button>
+      <button type="button" (click)="shiftMonth(1, $event)" [attr.aria-label]="isYear ? 'Next years' : 'Next month'"><i class='bx bx-chevron-right'></i></button>
     </div>
   </div>
 
-  <div class="dp-grid">
+  <div class="dp-grid dp-years" *ngIf="isYear">
+    <button type="button" class="dp-day" *ngFor="let c of yearCells"
+            [class.today]="c.current" [class.selected]="c.selected"
+            (click)="pickYear(c, $event)">{{ c.year }}</button>
+  </div>
+
+  <div class="dp-grid" *ngIf="!isYear">
     <span class="dp-weekday" *ngFor="let w of weekdays">{{ w }}</span>
     <button type="button" class="dp-day" *ngFor="let c of cells"
             [class.outside]="c.outside" [class.today]="c.today" [class.selected]="c.selected"
@@ -32,7 +38,7 @@
   <div class="dp-foot">
     <button type="button" class="dp-link muted" *ngIf="value" (click)="clear($event)">Clear</button>
     <span class="dp-spacer"></span>
-    <button type="button" class="dp-link" (click)="today($event)">{{ withTime ? 'Now' : 'Today' }}</button>
+    <button type="button" class="dp-link" (click)="today($event)">{{ isYear ? 'This year' : withTime ? 'Now' : 'Today' }}</button>
     <button type="button" class="dp-ok" (click)="confirm($event)">OK</button>
   </div>
 </div>

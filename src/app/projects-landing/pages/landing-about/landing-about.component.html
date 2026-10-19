@@ -34,15 +34,15 @@
       </p>
     </div>
 
-    <!-- Budget overview: whole-project budgets vs. our partner share -->
+    <!-- Budget overview for ongoing projects: whole-project budgets vs. our partner share -->
     <aside class="budget-panel fade-up" style="transition-delay:200ms">
       <div class="budget-cell">
         <div class="budget-cell-value">{{ totalProjectsBudget ? compactEuro(totalProjectsBudget) : '—' }}</div>
-        <div class="label budget-cell-label">Total projects' budget</div>
+        <div class="label budget-cell-label">Total projects' budget <span class="scope-tag">(ongoing)</span></div>
       </div>
       <div class="budget-cell partner">
         <div class="budget-cell-value">{{ totalPartnersBudget ? compactEuro(totalPartnersBudget) : '—' }}</div>
-        <div class="label budget-cell-label">Total INSTM projects' budget</div>
+        <div class="label budget-cell-label">Total INSTM projects' budget <span class="scope-tag">(ongoing)</span></div>
       </div>
     </aside>
   </div>

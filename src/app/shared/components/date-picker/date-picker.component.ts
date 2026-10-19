@@ -12,6 +12,12 @@ interface DayCell {
   selected: boolean;
 }
 
+interface YearCell {
+  year: number;
+  current: boolean;
+  selected: boolean;
+}
+
 /**
  * Drop-in replacement for <input type="date">: same value format
  * ("YYYY-MM-DD", or "YYYY-MM-DDTHH:mm" with [withTime]), works with ngModel,
@@ -21,6 +27,9 @@ interface DayCell {
  * not clipped by scrolling dialog bodies. Inside a transformed ancestor (the
  * PrimeNG dialog) fixed positioning is relative to that ancestor, which
  * `place()` accounts for.
+ *
+ * With mode="year" it picks a year instead: the value is a plain number
+ * (2024), and the popover pages through twelve years at a time.
  */
 @Component({
   selector: 'app-date-picker',
@@ -35,6 +44,9 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   @Input() placeholder = 'Select a date';
   @Input() withTime = false;
   @Input() inputId?: string;
+  @Input() mode: 'date' | 'year' = 'date';
+
+  get isYear(): boolean { return this.mode === 'year'; }
 
   open = false;
   disabled = false;
@@ -48,15 +60,15 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
 
   readonly weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-  private onChange: (v: string | null) => void = () => {};
+  private onChange: (v: any) => void = () => {};
   private onTouched: () => void = () => {};
 
   constructor(private host: ElementRef<HTMLElement>, private cdr: ChangeDetectorRef) {}
 
   // ── ControlValueAccessor ────────────────────────────────────────────────────
 
-  writeValue(v: string | null): void {
-    this.value = DatePickerComponent.parse(v);
+  writeValue(v: string | number | null): void {
+    this.value = this.isYear ? DatePickerComponent.parseYear(v) : DatePickerComponent.parse(v as string | null);
     if (this.value) {
       this.view = DatePickerComponent.firstOfMonth(this.value);
       this.hours = DatePickerComponent.pad(this.value.getHours());
@@ -64,7 +76,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     }
     this.cdr.markForCheck();
   }
-  registerOnChange(fn: (v: string | null) => void): void { this.onChange = fn; }
+  registerOnChange(fn: (v: any) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(d: boolean): void { this.disabled = d; this.cdr.markForCheck(); }
 
@@ -72,6 +84,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
 
   get label(): string {
     if (!this.value) return '';
+    if (this.isYear) return String(this.value.getFullYear());
     const date = this.value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     return this.withTime
       ? `${date} · ${DatePickerComponent.pad(this.value.getHours())}:${DatePickerComponent.pad(this.value.getMinutes())}`
@@ -79,6 +92,10 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   }
 
   get monthTitle(): string {
+    if (this.isYear) {
+      const start = this.pageStart;
+      return `${start} – ${start + 11}`;
+    }
     return this.view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
   }
 
@@ -98,6 +115,22 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
         selected: !!this.value && DatePickerComponent.sameDay(d, this.value),
       };
     });
+  }
+
+  /** First year of the twelve on screen (2016, 2028, ...). */
+  private get pageStart(): number {
+    return Math.floor(this.view.getFullYear() / 12) * 12;
+  }
+
+  get yearCells(): YearCell[] {
+    const start = this.pageStart;
+    const now = new Date().getFullYear();
+    const picked = this.value?.getFullYear();
+    return Array.from({ length: 12 }, (_, i) => ({
+      year: start + i,
+      current: start + i === now,
+      selected: start + i === picked,
+    }));
   }
 
   // ── Interaction ─────────────────────────────────────────────────────────────
@@ -132,7 +165,15 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
 
   shiftMonth(delta: number, event: Event): void {
     event.stopPropagation();
-    this.view = new Date(this.view.getFullYear(), this.view.getMonth() + delta, 1);
+    this.view = this.isYear
+      ? new Date(this.view.getFullYear() + delta * 12, 0, 1)
+      : new Date(this.view.getFullYear(), this.view.getMonth() + delta, 1);
+  }
+
+  pickYear(cell: YearCell, event: Event): void {
+    event.stopPropagation();
+    this.commit(new Date(cell.year, 0, 1));
+    this.close();
   }
 
   pick(cell: DayCell, event: Event): void {
@@ -181,7 +222,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
 
   private commit(d: Date): void {
     this.value = d;
-    this.onChange(DatePickerComponent.format(d, this.withTime));
+    this.onChange(this.isYear ? d.getFullYear() : DatePickerComponent.format(d, this.withTime));
     this.cdr.markForCheck();
   }
 
@@ -202,7 +243,7 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     const trigger = this.host.nativeElement.querySelector('.dp-trigger') as HTMLElement | null;
     if (!trigger) return;
     const r = trigger.getBoundingClientRect();
-    const height = this.withTime ? 420 : 372;
+    const height = this.isYear ? 250 : this.withTime ? 420 : 372;
     const width = 300;
 
     // Fixed positioning is relative to the nearest transformed ancestor, if any.
@@ -231,6 +272,12 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   private static pad(n: number): string { return String(n).padStart(2, '0'); }
   private static sameDay(a: Date, b: Date): boolean {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  /** 2024 or "2024" -> 1 Jan 2024; anything else -> null. */
+  private static parseYear(v: string | number | null | undefined): Date | null {
+    const y = Number(v);
+    return v !== null && v !== '' && Number.isInteger(y) && y > 0 ? new Date(y, 0, 1) : null;
   }
 
   /** "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm", read as local time (not UTC). */

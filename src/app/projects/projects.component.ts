@@ -127,17 +127,19 @@ export class ProjectsComponent implements OnInit {
     const title = this.activeGroupTitle;
     const all = this.projectData[title] || [];
     // On Total, Rejected projects count as projects but never ran, so they add
-    // no years or budget. Their own tab shows their figures as they are.
-    const skipRejected = this.isTotalTab(title);
+    // no years; and the budgets are Ongoing projects' only, as on the home page.
+    // Each status tab shows its own figures as they are.
+    const isTotal = this.isTotalTab(title);
     const years: number[] = [];
     let totalBudget = 0;
     let budget = 0;
     for (const p of all) {
-      if (skipRejected && isRejectedStatus(p.title)) continue;
+      if (isTotal && isRejectedStatus(p.title)) continue;
       for (const y of [p.startyear, p.endyear]) {
         const n = Number(y);
         if (n > 1900 && n < 2200) years.push(n);
       }
+      if (isTotal && !/ONGOING/i.test(p.title)) continue;
       const t = Number(p.totalBudget);
       if (Number.isFinite(t)) totalBudget += t;
       const b = Number(p.budget);

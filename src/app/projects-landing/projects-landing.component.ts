@@ -23,6 +23,7 @@ export class ProjectsLandingComponent implements OnInit, OnDestroy {
   showPassword = false;
   isAdminLoggedIn = false;
   currentTime = '';
+  mobileMenuOpen = false;
 
   private clockInterval?: ReturnType<typeof setInterval>;
 
@@ -98,5 +99,13 @@ export class ProjectsLandingComponent implements OnInit, OnDestroy {
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.admin-area')) this.showAdminLogin = false;
+    if (!target.closest('.nav')) this.mobileMenuOpen = false;
   }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.mobileMenuOpen = false; }
+
+  /* Rotating a phone to landscape can show the full links again. */
+  @HostListener('window:resize')
+  onResize(): void { if (window.innerWidth > 680) this.mobileMenuOpen = false; }
 }
