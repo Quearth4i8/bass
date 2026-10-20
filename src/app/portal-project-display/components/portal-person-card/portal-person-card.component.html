@@ -10,6 +10,8 @@
 
     <p class="person-role" *ngIf="role">{{ role }}</p>
 
+    <app-cv-link *ngIf="cvScope" [scope]="cvScope" [name]="person.name"></app-cv-link>
+
     <!-- Pushed to the foot of the card, under a rule, so that a row of cards
          lines up on this line however long the roles above it run. -->
     <p class="person-institute" *ngIf="institute">

@@ -1,0 +1,337 @@
+:host {
+  --bg: #031420;
+  --paper: #061f2e;
+  --panel-2: #0a3142;
+  --line: #103a4f;
+  --line-2: #1b5573;
+  --text: #e8f1f5;
+  --text-dim: #9fb3bf;
+  --text-faint: #5d7785;
+  --accent: #4ad6c4;
+  --accent-ink: #032019;
+  --accent-soft: rgba(74, 214, 196, 0.1);
+  // Heading colors, one per level, set apart from the body text (as in the Word CV).
+  --h-part: #8ccbff;
+  --h-sec: #62aef0;
+  --h-sub: #93bfdf;
+  --font-sans: 'Geist', 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+  display: block;
+}
+
+:host(.theme-light) {
+  --bg: #f0f7fb;
+  --paper: #ffffff;
+  --panel-2: #f5f9fb;
+  --line: #e2eff6;
+  --line-2: #c5d8e6;
+  --text: #0d2137;
+  --text-dim: #4a7590;
+  --text-faint: #8aa3b3;
+  --accent: #1a8f7f;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(26, 143, 127, 0.08);
+  --h-part: #0d2b57;
+  --h-sec: #1a5fa6;
+  --h-sub: #3b7fbf;
+}
+
+* { box-sizing: border-box; }
+
+.cv-page {
+  min-height: 100vh; background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); -webkit-font-smoothing: antialiased;
+}
+
+// ── Top bar ───────────────────────────────────────────────────────────────
+.cv-bar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 16px; padding: 12px 24px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.bar-brand {
+  font: 600 11px var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); text-decoration: none;
+  &:hover { color: var(--accent); }
+}
+.bar-right { margin-left: auto; display: flex; gap: 8px; }
+.bar-btn {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid var(--line-2); background: transparent; color: var(--text);
+  font: 600 13px var(--font-sans); cursor: pointer; text-decoration: none;
+  i { font-size: 17px; }
+  &:hover { border-color: var(--accent); color: var(--accent); }
+}
+.bar-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); &:hover { color: var(--accent-ink); filter: brightness(1.08); } }
+
+.cv-state {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  padding: 120px 16px; color: var(--text-dim);
+  > i { font-size: 44px; color: var(--accent); }
+  h2 { margin: 0; color: var(--text); font-size: 20px; }
+  p { margin: 0 0 12px; }
+}
+
+// ── Layout ────────────────────────────────────────────────────────────────
+.cv-shell {
+  max-width: 1100px; margin: 0 auto; padding: 32px 32px 64px;
+  // With contents, the page spans the screen: wide sidebar, document fills the rest.
+  &.has-toc {
+    max-width: 1760px; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 28px; align-items: start;
+  }
+}
+
+.cv-toc {
+  position: sticky; top: 84px; max-height: calc(100vh - 110px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px; padding: 16px 12px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; }
+
+  button {
+    display: flex; align-items: baseline;
+    width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; cursor: pointer;
+    font-family: var(--font-sans); line-height: 1.4; padding: 6px 10px; color: var(--text-dim);
+    transition: background .15s, color .15s;
+    &:hover { color: var(--text); background: var(--accent-soft); }
+    &.active { color: var(--accent); background: var(--accent-soft); }
+  }
+}
+.toc-label {
+  font: 600 10px var(--font-mono); letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-faint); padding: 0 10px 8px;
+}
+.toc-group {
+  padding: 4px 0; border-bottom: 1px solid var(--line);
+  &:last-child { border-bottom: 0; }
+}
+// The clamp sits on the text, not the padded button, so no half line peeks through.
+.toc-text {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; min-width: 0;
+}
+.toc-part { font-size: 13px; font-weight: 700; color: var(--text) !important; }
+.toc-group.current .toc-part { color: var(--accent) !important; }
+.toc-sec {
+  font-size: 12px; padding-left: 20px !important;
+  .toc-n { flex-shrink: 0; font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); margin-right: 8px; }
+}
+
+.cv-doc {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  padding: 44px 52px 32px; min-width: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.cv-hero { display: flex; align-items: center; gap: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.hero-photo {
+  flex-shrink: 0; width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
+  border: 3px solid var(--accent); background: var(--panel-2);
+  display: flex; align-items: center; justify-content: center;
+  font: 700 34px var(--font-mono); color: var(--accent);
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+.hero-kicker { font: 600 11px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.hero-text h1 { margin: 6px 0 0; font-size: 34px; line-height: 1.15; font-weight: 800; letter-spacing: -0.025em; }
+.hero-title { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--text-dim); max-width: 860px; }
+
+.cv-fields {
+  margin: 0; padding: 22px 0; border-bottom: 1px solid var(--line);
+  // Two per row, each "label | value", so every item gets the same wide slot.
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px;
+}
+.cv-field {
+  min-width: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: baseline;
+  padding: 9px 0; border-bottom: 1px dashed var(--line);
+  dt { font: 600 10px/1.6 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-faint); }
+  dd { margin: 0; font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
+}
+
+.cv-summary {
+  padding: 22px 0 6px; display: grid; gap: 14px;
+  h3 { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+  p { margin: 0; font-size: 14px; line-height: 1.65; text-align: justify; text-justify: inter-word; }
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────
+.cv-sec { scroll-margin-top: 80px; }
+.sec-h { display: flex; align-items: baseline; gap: 10px; }
+// Numbers take their heading's color, slightly softer.
+.sec-n { font-family: var(--font-mono); color: inherit; opacity: .75; font-weight: 700; flex-shrink: 0; }
+
+.lvl-0 {
+  margin-top: 36px;
+  > .sec-h {
+    margin: 0 0 16px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);
+    font-size: 26px; font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase; color: var(--h-part);
+  }
+}
+.lvl-1 {
+  margin-top: 22px;
+  > .sec-h { margin: 0 0 12px; font-size: 20px; font-weight: 700; color: var(--h-sec); .sec-n { font-size: 17px; } }
+}
+.lvl-2 {
+  margin-top: 16px;
+  > .sec-h { margin: 0 0 10px; font-size: 16.5px; font-weight: 700; color: var(--h-sub); .sec-n { font-size: 14px; } }
+}
+.lvl-0 > .lvl-1:first-of-type, .lvl-1 > .lvl-2:first-of-type { margin-top: 0; }
+
+.entries {
+  margin: 0; padding: 0; list-style: none;
+  li { position: relative; font-size: 13.5px; line-height: 1.6; padding: 5px 0 5px 18px; overflow-wrap: anywhere; }
+  li + li { border-top: 1px dashed var(--line); }
+  li::before { content: ''; position: absolute; left: 2px; top: 14px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  &.with-periods li:not(.e-heading) { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+  .e-period { font-weight: 700; font-size: 12.5px; color: var(--text); }
+  // Multi-line items (a project and its role / funding / duration lines).
+  // Justified like the Word CV; lines that end in a line break stay left-aligned.
+  // A block so justify applies in every list: inline text ignores text-align.
+  .e-text { display: block; white-space: pre-line; text-align: justify; text-justify: inter-word; }
+  .e-inline { font-weight: 700; }
+
+  // Stacked entry: label on its own line / text / details side by side / description.
+  li.e-stacked { padding-top: 9px; padding-bottom: 9px; }
+  .e-title { font-weight: 500; }
+  .e-label-row { display: block; margin-bottom: 4px; line-height: 1.4; }
+  .e-label {
+    display: inline-block; padding: 1px 8px; border-radius: 5px;
+    font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    color: var(--h-sec); background: color-mix(in srgb, var(--h-sec) 10%, transparent);
+  }
+  .e-meta {
+    display: flex; flex-wrap: wrap; gap: 2px 22px; margin: 4px 0 2px;
+    font-size: 12.5px; color: var(--text-dim);
+  }
+  .e-meta-item { display: inline-flex; gap: 5px; min-width: 0; }
+  .e-meta-k { color: var(--text-faint); white-space: nowrap; &::after { content: ':'; } }
+  .e-body { margin-top: 4px; }
+  strong, a.b { font-weight: 700; }
+
+  // A small title grouping the items below it.
+  li.e-heading {
+    counter-reset: cv; border-top: 0;
+    margin-top: 14px; padding: 6px 0 6px 0;
+    font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent);
+    &::before { content: none; }
+    &:first-child { margin-top: 0; }
+  }
+  li.e-heading + li { border-top: 0; }
+}
+
+.paras {
+  .e-heading { margin: 16px 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  p { white-space: pre-line; text-align: justify; text-justify: inter-word; }
+}
+.entries.numbered {
+  counter-reset: cv;
+  li { counter-increment: cv; padding-left: 42px; }
+  li::before {
+    content: counter(cv) '.'; width: 34px; height: auto; border-radius: 0; background: none;
+    top: 5px; left: 0; text-align: right; font: 600 11.5px/1.9 var(--font-mono); color: var(--accent);
+  }
+}
+
+// Headings restart the numbering and don't take a number themselves.
+.entries.numbered li.e-heading {
+  counter-increment: none; padding-left: 0;
+  &::before { content: none; }
+}
+
+.paras p { margin: 0 0 10px; font-size: 14px; line-height: 1.7; }
+
+// Full grid (row + column lines), a header in the section-title blue, zebra rows.
+.cv-table {
+  --grid: color-mix(in srgb, var(--h-sec) 22%, var(--line-2));
+  margin: 10px 0 4px; overflow-x: auto; border: 1px solid var(--grid); border-radius: 10px;
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    text-align: left; background: var(--h-sec); color: #fff;
+    font: 700 11px var(--font-sans); letter-spacing: .05em; text-transform: uppercase;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  th, td { padding: 9px 12px; vertical-align: top; line-height: 1.5; border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid); }
+  th { border-right-color: color-mix(in srgb, #fff 25%, var(--h-sec)); }
+  th:last-child, td:last-child { border-right: 0; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--h-sec) 5%, transparent); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--h-sec) 10%, transparent); }
+}
+:host:not(.theme-light) .cv-table th { color: #04182a; }
+
+a { color: var(--accent); text-decoration: none; overflow-wrap: anywhere; &:hover { text-decoration: underline; } }
+
+.cv-foot {
+  margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line);
+  font: 500 11px var(--font-mono); color: var(--text-faint); text-align: center;
+}
+
+// ── Small screens ─────────────────────────────────────────────────────────
+@media (max-width: 860px) {
+  .cv-fields { grid-template-columns: 1fr; }
+}
+@media (max-width: 1100px) {
+  .cv-shell.has-toc { grid-template-columns: 1fr; }
+  .cv-toc { display: none; }
+}
+@media (max-width: 640px) {
+  .cv-bar { padding: 10px 16px; gap: 10px; }
+  .bar-brand { display: none; }
+  .bar-btn span { display: none; }
+  .bar-btn { padding: 0 10px; }
+  .cv-shell { padding: 16px 16px 40px; }
+  .cv-doc { padding: 24px 18px; border-radius: 12px; }
+  .cv-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .hero-photo { width: 92px; height: 92px; font-size: 26px; }
+  .cv-field { grid-template-columns: 1fr; gap: 2px; }
+  .hero-text h1 { font-size: 26px; }
+  .lvl-0 > .sec-h { font-size: 20px; }
+  .lvl-1 > .sec-h { font-size: 17px; }
+  .lvl-2 > .sec-h { font-size: 15px; }
+  .entries.with-periods li { grid-template-columns: 1fr; gap: 2px; }
+  // Narrow lines justify into wide gaps: left-align on phones.
+  .entries .e-text, .paras p, .cv-summary p { text-align: left; }
+}
+
+// ── Print: a clean paper CV ──────────────────────────────────────────────
+@media print {
+  :host {
+    --bg: #fff; --paper: #fff; --panel-2: #f3f6f8; --line: #dde5ea; --line-2: #c5d3dc;
+    --text: #111; --text-dim: #444; --text-faint: #777; --accent: #137266;
+    --h-part: #0d2b57; --h-sec: #1a5fa6; --h-sub: #3b7fbf;
+  }
+  .cv-bar, .cv-toc { display: none !important; }
+  .cv-shell, .cv-shell.has-toc { display: block; max-width: none; padding: 0; }
+  .cv-doc { border: 0; border-radius: 0; padding: 0; }
+  .cv-sec h2, .cv-sec h3, .cv-sec h4 { break-after: avoid; }
+  .entries li, .cv-table tr { break-inside: avoid; }
+  // Browsers drop backgrounds when printing: keep the date/label tag's fill
+  // (else its padding reads as a stray indent) and the bullet dots.
+  .e-label, .entries li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  // Print always uses the dark-blue header, whatever the screen theme.
+  :host .cv-table th { color: #fff !important; }
+  .cv-table thead { display: table-header-group; }
+
+  // A4 is narrow: a slimmer label column leaves the text room to justify evenly.
+  .entries.with-periods li:not(.e-heading) { grid-template-columns: 30mm minmax(0, 1fr); gap: 5mm; }
+  .entries li { padding-left: 4mm; }
+  .entries li::before { left: 0; }
+  .entries.numbered li { padding-left: 9mm; }
+  .entries.numbered li::before { width: 7mm; }
+
+  // Breathing room between parts, sections and their content on paper.
+  .lvl-0 { margin-top: 10mm; }
+  .lvl-0 > .sec-h { margin-bottom: 5mm; }
+  .lvl-1 { margin-top: 6mm; }
+  .lvl-2 { margin-top: 4mm; }
+  .cv-hero { padding-bottom: 6mm; }
+
+  // Heading scale on paper: each level clearly above the one below, all above the 10pt text.
+  .entries li, .paras p, .cv-summary p { font-size: 10pt; }
+  .lvl-0 > .sec-h { font-size: 17pt; }
+  .lvl-1 > .sec-h { font-size: 14pt; .sec-n { font-size: 12pt; } }
+  .lvl-2 > .sec-h { font-size: 12pt; .sec-n { font-size: 10.5pt; } }
+  a { color: inherit; }
+}

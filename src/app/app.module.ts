@@ -70,6 +70,7 @@ import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
 import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.component';
 import { DatePickerComponent } from './shared/components/date-picker/date-picker.component';
+import { CvLinkComponent } from './shared/components/cv-link/cv-link.component';
 
 // Landing pages
 import { LandingOverviewComponent } from './projects-landing/pages/landing-overview/landing-overview.component';
@@ -97,7 +98,6 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     DialogContentComponent,
     ProjectGroupDialogComponent,
     ConfirmDeleteGroupDialogComponent,
-    UpbuttonComponent,
     ProjectsLandingComponent,
     ManagementComponent,
     WikiadminComponent,
@@ -154,6 +154,8 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     AdminNavbarComponent,
     AdminSidebarComponent,
     DatePickerComponent,
+    CvLinkComponent,
+    UpbuttonComponent,
   ],
   providers: [
     DialogService,

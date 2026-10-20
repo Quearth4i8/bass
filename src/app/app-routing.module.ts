@@ -9,6 +9,8 @@ import { ManagementComponent } from './management/management.component';
 import { WikiadminComponent } from './wikiadmin/wikiadmin.component';
 import { PortalProjectsListComponent } from './management/portal-projects-list/portal-projects-list.component';
 import { AdminGuard } from './auth/admin.guard';
+import { CrewcvsadminComponent } from './crewcvsadmin/crewcvsadmin.component';
+import { CvViewComponent } from './cv-view/cv-view.component';
 
 // Portal public display
 import { PortalProjectDisplayComponent } from './portal-project-display/portal-project-display.component';
@@ -38,6 +40,9 @@ const routes: Routes = [
   { path: 'budget-charts', component: BudgetChartsComponent },
   { path: 'management', component: ManagementComponent, canActivate: [AdminGuard] },
   { path: 'wikiadmin', component: WikiadminComponent, canActivate: [AdminGuard] },
+  { path: 'crew-cvs', component: CrewcvsadminComponent, canActivate: [AdminGuard] },
+  // Public web CV of a crew member; unpublished ones resolve only for admins.
+  { path: 'cv/:slug', component: CvViewComponent },
   { path: 'management/portal-projects/:slug', component: PortalProjectsListComponent, canActivate: [AdminGuard] },
   {
     path: 'portal/:slug',

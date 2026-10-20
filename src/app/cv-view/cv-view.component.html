@@ -1,0 +1,144 @@
+<div class="cv-page">
+  <header class="cv-bar">
+    <button class="bar-btn" (click)="back()"><i class='bx bx-arrow-back'></i><span>Back</span></button>
+    <a class="bar-brand" routerLink="/team">BASSIANA · Team</a>
+    <div class="bar-right">
+      <button class="bar-btn" (click)="themeService.toggle()" [title]="isLight ? 'Dark mode' : 'Light mode'">
+        <i class='bx' [ngClass]="isLight ? 'bx-moon' : 'bx-sun'"></i>
+      </button>
+      <button class="bar-btn bar-primary" (click)="print()" *ngIf="member">
+        <i class='bx bx-printer'></i><span>Print</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="cv-state" *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i></div>
+
+  <div class="cv-state" *ngIf="!loading && notFound">
+    <i class='bx bx-file-blank'></i>
+    <h2>CV not available</h2>
+    <p>This CV does not exist or has not been published yet.</p>
+    <a class="bar-btn bar-primary" routerLink="/team">See the team</a>
+  </div>
+
+  <div class="cv-shell" *ngIf="!loading && member as m" [class.has-toc]="showToc">
+    <nav class="cv-toc" *ngIf="showToc" aria-label="CV contents">
+      <span class="toc-label">Contents</span>
+      <div class="toc-group" *ngFor="let p of sections" [class.current]="activePart === p.anchor">
+        <button class="toc-part" (click)="scrollTo(p.anchor)" [title]="p.title"
+                [class.active]="activeAnchor === p.anchor">
+          <span class="toc-n" *ngIf="p.num">{{ p.num }}</span><span class="toc-text">{{ p.title }}</span>
+        </button>
+        <button class="toc-sec" *ngFor="let c of p.children" (click)="scrollTo(c.anchor)" [title]="c.title"
+                [class.active]="activeAnchor === c.anchor">
+          <span class="toc-n" *ngIf="c.num">{{ c.num }}</span><span class="toc-text">{{ c.title }}</span>
+        </button>
+      </div>
+    </nav>
+
+    <article class="cv-doc">
+      <section class="cv-hero">
+        <div class="hero-photo">
+          <img *ngIf="m.photo" [src]="m.photo" [alt]="m.fullName">
+          <span *ngIf="!m.photo">{{ initials(m.fullName) }}</span>
+        </div>
+        <div class="hero-text">
+          <span class="hero-kicker">Curriculum Vitae<ng-container *ngIf="edition"> · {{ edition }}</ng-container></span>
+          <h1>{{ m.fullName }}</h1>
+          <p class="hero-title" *ngIf="m.title">{{ m.title }}</p>
+        </div>
+      </section>
+
+      <dl class="cv-fields" *ngIf="fields.length">
+        <div class="cv-field" *ngFor="let f of fields">
+          <dt>{{ f.label }}</dt>
+          <dd><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: f.segs }"></ng-container></dd>
+        </div>
+      </dl>
+
+      <section class="cv-summary" *ngIf="summary.length">
+        <div class="summary-block" *ngFor="let b of summary">
+          <h3 *ngIf="b.title">{{ b.title }}</h3>
+          <p><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: b.segs }"></ng-container></p>
+        </div>
+      </section>
+
+      <ng-container *ngFor="let s of sections">
+        <ng-container *ngTemplateOutlet="sectionTpl; context: { $implicit: s }"></ng-container>
+      </ng-container>
+
+      <footer class="cv-foot">
+        {{ m.fullName }} · Curriculum Vitae<ng-container *ngIf="edition"> · {{ edition }}</ng-container>
+      </footer>
+    </article>
+  </div>
+</div>
+
+<app-upbutton></app-upbutton>
+
+<ng-template #sectionTpl let-s>
+  <section class="cv-sec" [ngClass]="'lvl-' + s.depth" [id]="s.anchor">
+    <h2 *ngIf="s.depth === 0" class="sec-h"><span class="sec-n" *ngIf="s.num">{{ s.num }}</span>{{ s.title }}</h2>
+    <h3 *ngIf="s.depth === 1" class="sec-h"><span class="sec-n" *ngIf="s.num">{{ s.num }}</span>{{ s.title }}</h3>
+    <h4 *ngIf="s.depth >= 2" class="sec-h"><span class="sec-n" *ngIf="s.num">{{ s.num }}</span>{{ s.title }}</h4>
+
+    <ng-container *ngIf="s.entries.length">
+      <div class="paras" *ngIf="s.kind === 'paragraph'">
+        <ng-container *ngFor="let e of s.entries">
+          <h5 class="e-heading" *ngIf="e.heading">{{ e.segs[0]?.t }}</h5>
+          <p *ngIf="!e.heading">
+            <strong *ngIf="e.period">{{ e.period }}: </strong>
+            <ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: e.segs }"></ng-container>
+          </p>
+        </ng-container>
+      </div>
+
+      <ol class="entries numbered" *ngIf="s.kind === 'numbered'" [class.with-periods]="s.hasPeriods">
+        <ng-container *ngFor="let e of s.entries">
+          <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e, s: s }"></ng-container>
+        </ng-container>
+      </ol>
+
+      <ul class="entries" *ngIf="s.kind === 'list' || s.kind === 'table'" [class.with-periods]="s.hasPeriods">
+        <ng-container *ngFor="let e of s.entries">
+          <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e, s: s }"></ng-container>
+        </ng-container>
+      </ul>
+    </ng-container>
+
+    <div class="cv-table" *ngIf="s.table">
+      <table>
+        <thead><tr><th *ngFor="let c of s.table.columns">{{ c }}</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of s.table.rows">
+            <td *ngFor="let cell of r"><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: cell }"></ng-container></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-container *ngFor="let c of s.children">
+      <ng-container *ngTemplateOutlet="sectionTpl; context: { $implicit: c }"></ng-container>
+    </ng-container>
+  </section>
+</ng-template>
+
+<ng-template #entryTpl let-e let-s="s">
+  <li class="e-heading" *ngIf="e.heading">{{ e.segs[0]?.t }}</li>
+  <li *ngIf="!e.heading && s.stacked" class="e-stacked">
+    <span class="e-label-row" *ngIf="e.period"><strong class="e-label">{{ e.period }}</strong></span>
+    <span class="e-text e-title"><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: e.title }"></ng-container></span>
+    <span class="e-meta" *ngIf="e.meta?.length">
+      <span class="e-meta-item" *ngFor="let m of e.meta">
+        <span class="e-meta-k">{{ m.k }}</span><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: m.v }"></ng-container>
+      </span>
+    </span>
+    <span class="e-text e-body" *ngFor="let b of e.body"><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: b }"></ng-container></span>
+  </li>
+  <li *ngIf="!e.heading && !s.stacked">
+    <span class="e-period" *ngIf="s.hasPeriods">{{ e.period }}</span>
+    <span class="e-text"><strong class="e-inline" *ngIf="!s.hasPeriods && e.period">{{ e.period }}: </strong><ng-container *ngTemplateOutlet="segsTpl; context: { $implicit: e.segs }"></ng-container></span>
+  </li>
+</ng-template>
+
+<ng-template #segsTpl let-segs><ng-container *ngFor="let g of segs"><a *ngIf="g.href; else plain" [href]="g.href" target="_blank" rel="noopener" [class.b]="g.b">{{ g.t }}</a><ng-template #plain><strong *ngIf="g.b; else txt">{{ g.t }}</strong><ng-template #txt>{{ g.t }}</ng-template></ng-template></ng-container></ng-template>

@@ -61,6 +61,8 @@
   display: flex;
   flex-direction: column;
   padding: 15px 17px;
+  // Room between the View CV pill and the institute rule under it.
+  --cv-link-margin: 10px 0 14px;
 }
 
 .person-name {

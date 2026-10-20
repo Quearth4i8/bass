@@ -16,6 +16,8 @@ import { PortalPerson } from '../../../portal/models/portal-project.model';
 })
 export class PortalPersonCardComponent {
   @Input({ required: true }) person!: PortalPerson;
+  /** "portal:<project slug>": lets an admin-linked crew CV open from this card. */
+  @Input() cvScope = '';
 
   /**
    * Separators the existing entries use to pack a role and an institute into

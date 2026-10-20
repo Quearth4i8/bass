@@ -1,0 +1,462 @@
+<div class="admin-layout">
+  <app-admin-navbar pageTitle="Crew CVs" (menuToggle)="toggleSidebar()"></app-admin-navbar>
+
+  <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
+
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <div class="page-head">
+      <div>
+        <h1 class="page-heading">Crew CVs</h1>
+        <p class="page-sub">Crew members and their CVs, published as web CVs for visitors</p>
+      </div>
+      <button class="btn btn-primary" (click)="startNew()">
+        <i class='bx bx-user-plus'></i><span>Add member</span>
+      </button>
+    </div>
+
+    <div class="cv-workspace">
+      <!-- ── Member list ─────────────────────────────────────────────── -->
+      <aside class="member-panel">
+        <div class="member-toolbar">
+          <div class="member-search">
+            <i class='bx bx-search'></i>
+            <input type="text" [(ngModel)]="search" placeholder="Search crew…">
+          </div>
+          <span class="member-total" *ngIf="members.length">{{ members.length }} member{{ members.length === 1 ? '' : 's' }}</span>
+          <p class="member-hint" *ngIf="members.length > 1 && !search.trim()">Drag to set the order visitors see.</p>
+        </div>
+
+        <div class="member-empty" *ngIf="loading">Loading…</div>
+        <div class="member-empty" *ngIf="!loading && !members.length">
+          No crew members yet. Add one, then fill in or import their CV.
+        </div>
+        <div class="member-empty" *ngIf="!loading && members.length && !filteredMembers.length">
+          No one matches "{{ search }}".
+        </div>
+
+        <div class="member-list" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="onListDrop($event)"
+             *ngIf="filteredMembers.length">
+          <button *ngFor="let m of filteredMembers" type="button" class="member-row" cdkDrag
+                  [cdkDragDisabled]="!!search.trim()" cdkDragPreviewContainer="parent"
+                  [class.active]="m.slug === selected?.slug" (click)="select(m)">
+            <i class='bx bx-grid-vertical drag-handle' cdkDragHandle *ngIf="!search.trim()" title="Drag to reorder"></i>
+            <span class="avatar">
+              <img *ngIf="m.photo" [src]="m.photo" alt="">
+              <span *ngIf="!m.photo">{{ initials(m.fullName) }}</span>
+            </span>
+            <span class="member-text" [title]="m.title || ''">
+              <span class="member-name">{{ m.fullName }}</span>
+            </span>
+            <span class="chip" [class.chip-live]="m.published">{{ m.published ? 'Live' : 'Draft' }}</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ── Editor ──────────────────────────────────────────────────── -->
+      <section class="editor-panel">
+        <div class="editor-empty" *ngIf="!selected">
+          <i class='bx bx-id-card'></i>
+          <h3>Select a crew member</h3>
+          <p>Choose someone above, or add a member. You can type their CV section by section, or import it from a Word (.docx) file.</p>
+          <button class="btn btn-primary" (click)="startNew()"><i class='bx bx-user-plus'></i><span>Add member</span></button>
+        </div>
+
+        <ng-container *ngIf="selected as s"><ng-container *ngIf="s.cv as cv">
+          <header class="editor-head">
+            <span class="avatar avatar-lg">
+              <img *ngIf="s.photo" [src]="s.photo" alt="">
+              <span *ngIf="!s.photo">{{ initials(s.fullName) }}</span>
+            </span>
+            <div class="editor-id">
+              <h2>{{ s.fullName || 'New crew member' }}</h2>
+              <p>
+                <span class="chip" [class.chip-live]="s.published">{{ s.published ? 'Published' : 'Draft' }}</span>
+                <span class="slug" *ngIf="s.slug">/cv/{{ s.slug }}</span>
+                <span class="unsaved" *ngIf="dirty"><i class='bx bxs-circle'></i> Unsaved changes</span>
+              </p>
+            </div>
+            <div class="editor-actions">
+              <label class="btn btn-ghost" [class.is-busy]="importing" appCvHint="import-docx">
+                <i class='bx' [ngClass]="importing ? 'bx-loader-alt bx-spin' : 'bx-import'"></i>
+                <span>Import .docx</span>
+                <input #docxInput type="file" accept=".docx" hidden (change)="onDocxSelected(docxInput)" [disabled]="importing">
+              </label>
+              <button class="btn btn-ghost" (click)="preview()" appCvHint="preview">
+                <i class='bx bx-show'></i><span>Preview</span>
+              </button>
+              <button class="btn btn-ghost btn-danger-ghost" (click)="askDelete()" title="Delete this CV">
+                <i class='bx bx-trash'></i>
+              </button>
+              <button class="btn btn-primary" (click)="save()" [disabled]="saving || !dirty">
+                <i class='bx' [ngClass]="saving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+                <span>{{ saving ? 'Saving…' : 'Save' }}</span>
+              </button>
+            </div>
+          </header>
+
+          <nav class="editor-tabs">
+            <button [class.active]="tab === 'profile'" (click)="tab = 'profile'"><i class='bx bx-user'></i> Profile</button>
+            <button [class.active]="tab === 'details'" (click)="tab = 'details'">
+              <i class='bx bx-detail'></i> Personal details
+              <span class="tab-count">{{ cv.fields.length + cv.summary.length }}</span>
+            </button>
+            <button [class.active]="tab === 'sections'" (click)="tab = 'sections'">
+              <i class='bx bx-list-ul'></i> Sections
+              <span class="tab-count">{{ cv.sections.length }}</span>
+            </button>
+            <button [class.active]="tab === 'links'" (click)="tab = 'links'" appCvHint="linked-cards">
+              <i class='bx bx-link'></i> Linked cards
+              <span class="tab-count">{{ linkedCount }}</span>
+            </button>
+          </nav>
+
+          <div class="editor-body" (input)="markDirty()" (change)="markDirty()">
+
+            <!-- Profile -->
+            <div class="tab-pane" *ngIf="tab === 'profile'">
+              <div class="profile-grid">
+                <div class="photo-box" appCvHint="photo">
+                  <span class="avatar avatar-xl">
+                    <img *ngIf="s.photo" [src]="s.photo" alt="">
+                    <span *ngIf="!s.photo">{{ initials(s.fullName) }}</span>
+                  </span>
+                  <label class="btn btn-ghost btn-sm">
+                    <i class='bx bx-image-add'></i><span>{{ s.photo ? 'Change photo' : 'Add photo' }}</span>
+                    <input #photoInput type="file" accept="image/*" hidden (change)="$event.stopPropagation(); onPhotoSelected(photoInput)">
+                  </label>
+                  <button class="link-btn" *ngIf="s.photo" (click)="removePhoto()">Remove photo</button>
+                </div>
+
+                <div class="form-col">
+                  <label class="field">
+                    <span>Full name <em>*</em></span>
+                    <input type="text" [(ngModel)]="s.fullName" placeholder="e.g. Béchir Béjaoui">
+                  </label>
+                  <label class="field">
+                    <span>Position</span>
+                    <input type="text" [(ngModel)]="s.title" placeholder="e.g. Lecturer in Ocean Fluid Mechanics, INSTM">
+                  </label>
+                  <label class="field">
+                    <span appCvHint="edition">CV edition <small>shown on the CV, optional</small></span>
+                    <input type="text" [(ngModel)]="cv.edition" placeholder="e.g. July 2025">
+                  </label>
+
+                  <div class="switch-row" (click)="togglePublished()" appCvHint="published">
+                    <span class="switch" [class.on]="s.published"><span></span></span>
+                    <div>
+                      <strong>Published</strong>
+                      <p>Visitors can open this CV. Drafts are only visible to admins.</p>
+                    </div>
+                  </div>
+                  <div class="switch-row" (click)="cv.numbering = !cv.numbering; markDirty()" appCvHint="number-sections">
+                    <span class="switch" [class.on]="cv.numbering"><span></span></span>
+                    <div>
+                      <strong>Number sections</strong>
+                      <p>Sections as I., II. and subsections as II.1., like a detailed academic CV.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal details: editors on the left, live preview of the CV header on the right -->
+            <div class="tab-pane details-layout" *ngIf="tab === 'details'">
+              <div class="details-editors">
+                <div class="block">
+                  <div class="block-head">
+                    <div>
+                      <h4 appCvHint="fields">Personal information</h4>
+                      <p>Shown in the CV header, two per row, left to right. Drag <i class='bx bx-grid-vertical'></i> to reorder.</p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" (click)="addField()"><i class='bx bx-plus'></i><span>Field</span></button>
+                  </div>
+                  <div class="row-list" cdkDropList (cdkDropListDropped)="dropInto(cv.fields, $event)">
+                    <div class="kv-row" *ngFor="let f of cv.fields; let i = index; trackBy: trackByIndex"
+                         cdkDrag cdkDragLockAxis="y" cdkDragPreviewContainer="parent"
+                         [class.is-hover]="hoverField === i" (mouseenter)="hoverField = i" (mouseleave)="hoverField = null">
+                      <span class="drag-grip" cdkDragHandle appCvHint="drag"><i class='bx bx-grid-vertical'></i>{{ i + 1 }}</span>
+                      <input type="text" class="kv-label" [(ngModel)]="f.label" placeholder="Label">
+                      <input type="text" class="kv-value" [(ngModel)]="f.value" placeholder="Value">
+                      <div class="row-tools">
+                        <button (click)="move(cv.fields, i, -1)" [disabled]="i === 0" title="Move up"><i class='bx bx-chevron-up'></i></button>
+                        <button (click)="move(cv.fields, i, 1)" [disabled]="i === cv.fields.length - 1" title="Move down"><i class='bx bx-chevron-down'></i></button>
+                        <button class="danger" (click)="removeAt(cv.fields, i)" title="Remove"><i class='bx bx-x'></i></button>
+                      </div>
+                    </div>
+                    <p class="row-empty" *ngIf="!cv.fields.length">No fields. Add date of birth, nationality, email, phone, address…</p>
+                  </div>
+                </div>
+
+                <div class="block">
+                  <div class="block-head">
+                    <div>
+                      <h4 appCvHint="summary">Summary blocks</h4>
+                      <p>Short texts under the header, e.g. "Current position" or "Field skills".</p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" (click)="addSummary()"><i class='bx bx-plus'></i><span>Block</span></button>
+                  </div>
+                  <div class="row-list" cdkDropList (cdkDropListDropped)="dropInto(cv.summary, $event)">
+                    <div class="summary-row" *ngFor="let b of cv.summary; let i = index; trackBy: trackByIndex"
+                         cdkDrag cdkDragLockAxis="y" cdkDragPreviewContainer="parent">
+                      <span class="drag-grip" cdkDragHandle appCvHint="drag"><i class='bx bx-grid-vertical'></i></span>
+                      <div class="summary-fields">
+                        <input type="text" [(ngModel)]="b.title" placeholder="Title (optional)">
+                        <textarea [(ngModel)]="b.text" placeholder="Text" appAutosize [minRows]="2"></textarea>
+                      </div>
+                      <div class="row-tools">
+                        <button (click)="move(cv.summary, i, -1)" [disabled]="i === 0" title="Move up"><i class='bx bx-chevron-up'></i></button>
+                        <button (click)="move(cv.summary, i, 1)" [disabled]="i === cv.summary.length - 1" title="Move down"><i class='bx bx-chevron-down'></i></button>
+                        <button class="danger" (click)="removeAt(cv.summary, i)" title="Remove"><i class='bx bx-x'></i></button>
+                      </div>
+                    </div>
+                    <p class="row-empty" *ngIf="!cv.summary.length">No summary blocks.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mirrors the public CV header (cv-view): updates as you type, before saving. -->
+              <aside class="header-preview" aria-label="Preview of the CV header">
+                <div class="preview-label"><i class='bx bx-show'></i> Live preview <span>not saved yet</span></div>
+                <div class="pv-paper">
+                  <div class="pv-hero">
+                    <span class="avatar pv-photo">
+                      <img *ngIf="s.photo" [src]="s.photo" alt="">
+                      <span *ngIf="!s.photo">{{ initials(s.fullName) }}</span>
+                    </span>
+                    <div>
+                      <span class="pv-kicker">Curriculum Vitae<ng-container *ngIf="cv.edition"> · {{ cv.edition }}</ng-container></span>
+                      <h3>{{ s.fullName || 'Full name' }}</h3>
+                      <p *ngIf="s.title">{{ s.title }}</p>
+                    </div>
+                  </div>
+                  <dl class="pv-fields" *ngIf="cv.fields.length">
+                    <div class="pv-field" *ngFor="let f of cv.fields; let i = index"
+                         [class.is-hover]="hoverField === i" [class.is-empty]="!f.value.trim()"
+                         (mouseenter)="hoverField = i" (mouseleave)="hoverField = null">
+                      <dt><span class="pv-n">{{ i + 1 }}</span>{{ f.label || 'Label' }}</dt>
+                      <dd>{{ f.value || 'empty, hidden on the CV' }}</dd>
+                    </div>
+                  </dl>
+                  <div class="pv-summary" *ngFor="let b of cv.summary">
+                    <h5 *ngIf="b.title">{{ b.title }}</h5>
+                    <p>{{ b.text || '…' }}</p>
+                  </div>
+                </div>
+              </aside>
+            </div>
+
+            <!-- Sections -->
+            <!-- Linked cards -->
+            <div class="tab-pane" *ngIf="tab === 'links'">
+              <div class="sections-toolbar">
+                <p>
+                  Person cards across the site whose name looks like <strong>{{ s.fullName || 'this member' }}</strong>.
+                  Link the ones that are this person: those cards get a <em>View CV</em> button and open this CV when clicked.
+                  Links apply once you save, and only while the CV is published.
+                </p>
+                <label class="check" appCvHint="show-all-cards">
+                  <input type="checkbox" [(ngModel)]="showAllCards" (change)="$event.stopPropagation()" (input)="$event.stopPropagation()">
+                  Show all cards
+                </label>
+              </div>
+
+              <div class="row-empty" *ngIf="!cardRows.length">
+                No card with a similar name. Tick <em>Show all cards</em> to pick one by hand.
+              </div>
+
+              <div class="card-list">
+                <div class="card-row" *ngFor="let r of cardRows" [class.is-linked]="r.linked">
+                  <span class="avatar">
+                    <img *ngIf="r.card.image" [src]="r.card.image" alt="">
+                    <span *ngIf="!r.card.image">{{ initials(r.card.name) }}</span>
+                  </span>
+                  <div class="card-text">
+                    <span class="card-name">{{ r.card.name }}</span>
+                    <span class="card-meta">
+                      <span class="chip">{{ r.card.where }}</span>
+                      <span *ngIf="r.card.role">{{ r.card.role }}</span>
+                    </span>
+                    <span class="card-warn" *ngIf="r.linkedTo">
+                      <i class='bx bx-error'></i> Also linked to {{ r.linkedTo }}'s CV
+                    </span>
+                  </div>
+                  <span class="match" [class.match-high]="r.score >= 0.99" title="How close the names are">
+                    {{ (r.score * 100) | number:'1.0-0' }}% match
+                  </span>
+                  <button class="btn btn-sm" [ngClass]="r.linked ? 'btn-ghost btn-danger-ghost' : 'btn-primary'"
+                          (click)="toggleCardLink(r.card)" [appCvHint]="r.linked ? '' : 'link-card'">
+                    <i class='bx' [ngClass]="r.linked ? 'bx-unlink' : 'bx-link'"></i>
+                    <span>{{ r.linked ? 'Unlink' : 'Link' }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" *ngIf="tab === 'sections'">
+              <div class="sections-toolbar">
+                <p>Sections nest three levels deep: part › section › subsection. Hidden sections stay here but are left out of the public CV. Wrap words in <code appCvHint="bold">**double asterisks**</code> to make them bold.</p>
+                <div>
+                  <button class="link-btn" (click)="expandAll()">Expand all</button>
+                  <button class="link-btn" (click)="collapseAll()">Collapse all</button>
+                </div>
+              </div>
+
+              <div class="row-empty" *ngIf="!cv.sections.length">No sections yet. Add one below, or import a .docx.</div>
+
+              <ng-container *ngFor="let sec of cv.sections; let i = index; trackBy: trackById">
+                <ng-container *ngTemplateOutlet="sectionTpl; context: { $implicit: sec, list: cv.sections, i: i, depth: 0, pi: 0 }"></ng-container>
+              </ng-container>
+
+              <div class="add-section" (click)="$event.stopPropagation()">
+                <button class="btn btn-ghost" (click)="presetMenuFor = presetMenuFor === 'root' ? null : 'root'">
+                  <i class='bx bx-plus'></i><span>Add section</span><i class='bx bx-chevron-down'></i>
+                </button>
+                <div class="preset-menu" *ngIf="presetMenuFor === 'root'">
+                  <button *ngFor="let p of presets" (click)="addSection(cv.sections, p.title, p.kind)">{{ p.title }}</button>
+                  <button class="preset-custom" (click)="addSection(cv.sections)"><i class='bx bx-edit-alt'></i> Custom section</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container></ng-container>
+      </section>
+    </div>
+  </main>
+
+  <!-- ── Recursive section editor ────────────────────────────────────── -->
+  <ng-template #sectionTpl let-sec let-list="list" let-i="i" let-depth="depth" let-pi="pi">
+    <div class="sec" [ngClass]="'depth-' + depth" [class.is-hidden]="sec.hidden" [class.is-open]="expanded.has(sec.id)">
+      <div class="sec-head">
+        <button class="caret" (click)="toggle(sec)" [title]="expanded.has(sec.id) ? 'Collapse' : 'Expand'">
+          <i class='bx' [ngClass]="expanded.has(sec.id) ? 'bx-chevron-down' : 'bx-chevron-right'"></i>
+        </button>
+        <span class="sec-num" *ngIf="number(depth, i, pi)">{{ number(depth, i, pi) }}</span>
+        <input type="text" class="sec-title" [(ngModel)]="sec.title" [placeholder]="depthLabel(depth) + ' title'">
+        <span class="sec-count" [title]="countEntries(sec) + ' entries'">{{ countEntries(sec) }}</span>
+        <div class="row-tools">
+          <button (click)="move(list, i, -1)" [disabled]="i === 0" title="Move up"><i class='bx bx-chevron-up'></i></button>
+          <button (click)="move(list, i, 1)" [disabled]="i === list.length - 1" title="Move down"><i class='bx bx-chevron-down'></i></button>
+          <button (click)="toggleHidden(sec)" appCvHint="hide-section">
+            <i class='bx' [ngClass]="sec.hidden ? 'bx-hide' : 'bx-show'"></i>
+          </button>
+          <button class="danger" (click)="askRemoveSection(list, i)" title="Remove section"><i class='bx bx-trash'></i></button>
+        </div>
+      </div>
+
+      <div class="sec-body" *ngIf="expanded.has(sec.id)">
+        <div class="sec-settings">
+          <span class="sec-depth">{{ depthLabel(depth) }}</span>
+          <div class="kind-field">
+            <span>Display as</span>
+            <div class="kind-dropdown" (click)="$event.stopPropagation()">
+              <button type="button" class="kind-trigger" [class.open]="kindMenuFor === sec.id"
+                      (click)="kindMenuFor = kindMenuFor === sec.id ? null : sec.id">
+                <i class='bx' [ngClass]="kindOf(sec.kind).icon"></i>
+                <span>{{ kindOf(sec.kind).label }}</span>
+                <i class='bx bx-chevron-down kind-caret'></i>
+              </button>
+              <ul class="kind-menu" *ngIf="kindMenuFor === sec.id" role="listbox">
+                <li *ngFor="let k of kinds" role="option" [attr.aria-selected]="k.value === sec.kind" [appCvHint]="'kind-' + k.value"
+                    [class.active]="k.value === sec.kind" (click)="setKind(sec, k.value)">
+                  <i class='bx' [ngClass]="k.icon"></i>
+                  <span class="kind-text">
+                    <span class="kind-label">{{ k.label }}</span>
+                    <span class="kind-hint">{{ k.hint }}</span>
+                  </span>
+                  <i class='bx bx-check kind-check' *ngIf="k.value === sec.kind"></i>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="entry-list" *ngIf="sec.entries.length">
+          <div class="entry-row" *ngFor="let e of sec.entries; let j = index; trackBy: trackByIndex" [class.is-heading]="e.heading">
+            <span class="entry-mark">{{ e.heading ? '#' : '•' }}</span>
+            <input *ngIf="!e.heading" type="text" class="entry-period" [(ngModel)]="e.period" placeholder="Date / label" appCvHint="entry-period">
+            <textarea class="entry-text" [(ngModel)]="e.text" [placeholder]="e.heading ? 'Group title, e.g. National projects' : 'Entry text (Enter for a new line)'"
+                      appAutosize [minRows]="1"></textarea>
+            <div class="row-tools">
+              <button (click)="toggleHeading(e)" [class.on]="e.heading" appCvHint="entry-heading">
+                <i class='bx bx-heading'></i>
+              </button>
+              <button (click)="move(sec.entries, j, -1)" [disabled]="j === 0" title="Move up"><i class='bx bx-chevron-up'></i></button>
+              <button (click)="move(sec.entries, j, 1)" [disabled]="j === sec.entries.length - 1" title="Move down"><i class='bx bx-chevron-down'></i></button>
+              <button class="danger" (click)="removeAt(sec.entries, j)" title="Remove"><i class='bx bx-x'></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-editor" *ngIf="sec.table">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th *ngFor="let c of sec.table.columns; let j = index; trackBy: trackByIndex">
+                    <div class="th-cell">
+                      <input type="text" [(ngModel)]="sec.table.columns[j]" placeholder="Column">
+                      <button class="danger" (click)="removeColumn(sec, j)" [disabled]="sec.table.columns.length <= 1" title="Remove column"><i class='bx bx-x'></i></button>
+                    </div>
+                  </th>
+                  <th class="th-tools"><button (click)="addColumn(sec)" title="Add column"><i class='bx bx-plus'></i></button></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of sec.table.rows; let ri = index; trackBy: trackByIndex">
+                  <td *ngFor="let c of sec.table.columns; let j = index; trackBy: trackByIndex">
+                    <input type="text" [(ngModel)]="r[j]">
+                  </td>
+                  <td class="row-tools">
+                    <button (click)="move(sec.table.rows, ri, -1)" [disabled]="ri === 0" title="Move up"><i class='bx bx-chevron-up'></i></button>
+                    <button class="danger" (click)="removeAt(sec.table.rows, ri)" title="Remove row"><i class='bx bx-x'></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sec-actions">
+            <button class="link-btn" (click)="addRow(sec)"><i class='bx bx-plus'></i> Row</button>
+            <button class="link-btn danger" (click)="removeTable(sec)">Remove table</button>
+          </div>
+        </div>
+
+        <div class="paste-box" *ngIf="pasteFor === sec.id" (input)="$event.stopPropagation()">
+          <textarea [(ngModel)]="pasteText" appAutosize [minRows]="4"
+                    placeholder="One entry per line. A leading date or label with a colon becomes the entry's label, e.g.&#10;2013-2019: University Habilitation, ENIT"></textarea>
+          <div class="sec-actions">
+            <button class="btn btn-primary btn-sm" (click)="applyPaste(sec)" [disabled]="!pasteText.trim()">Add entries</button>
+            <button class="link-btn" (click)="pasteFor = null">Cancel</button>
+          </div>
+        </div>
+
+        <div class="sec-actions">
+          <button class="link-btn" (click)="addEntry(sec)"><i class='bx bx-plus'></i> Entry</button>
+          <button class="link-btn" (click)="openPaste(sec)" appCvHint="paste-lines"><i class='bx bx-paste'></i> Paste lines</button>
+          <button class="link-btn" *ngIf="!sec.table" (click)="ensureTable(sec); markDirty()" appCvHint="add-table"><i class='bx bx-table'></i> Table</button>
+          <button class="link-btn" *ngIf="depth < maxDepth - 1" (click)="addSection(sec.children)" appCvHint="add-subsection">
+            <i class='bx bx-subdirectory-right'></i> {{ depth === 0 ? 'Section' : 'Subsection' }}
+          </button>
+        </div>
+
+        <div class="sec-children" *ngIf="sec.children.length">
+          <ng-container *ngFor="let child of sec.children; let ci = index; trackBy: trackById">
+            <ng-container *ngTemplateOutlet="sectionTpl; context: { $implicit: child, list: sec.children, i: ci, depth: depth + 1, pi: i }"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ── Confirm dialog ──────────────────────────────────────────────── -->
+  <div class="modal-overlay" *ngIf="confirm" (mousedown)="confirm = null">
+    <div class="modal-card" (mousedown)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <h3>{{ confirm.title }}</h3>
+      <p>{{ confirm.message }}</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="confirm = null">Cancel</button>
+        <button class="btn" [ngClass]="confirm.danger ? 'btn-danger' : 'btn-primary'" (click)="runConfirm()">{{ confirm.confirmLabel }}</button>
+      </div>
+    </div>
+  </div>
+  <app-upbutton></app-upbutton>
+</div>

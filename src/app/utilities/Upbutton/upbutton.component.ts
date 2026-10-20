@@ -7,9 +7,13 @@ import {
   OnDestroy,
   SimpleChanges,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-upbutton',
+  // Standalone so standalone pages (Crew CVs, the CV view) can use it too.
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './upbutton.component.html',
   styleUrls: ['./upbutton.component.scss']
 })

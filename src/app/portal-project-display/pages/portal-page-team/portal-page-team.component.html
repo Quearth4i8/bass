@@ -12,7 +12,7 @@
       </div>
       <div class="members-grid">
         <app-portal-person-card *ngFor="let member of section.members"
-                                [person]="member"></app-portal-person-card>
+                                [person]="member" [cvScope]="'portal:' + project.slug"></app-portal-person-card>
       </div>
     </div>
   </div>
