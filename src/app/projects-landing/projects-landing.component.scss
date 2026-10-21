@@ -1599,6 +1599,34 @@ app-projects-landing {
 
 @keyframes pred-spin { to { transform: rotate(360deg); } }
 
+.trix-pred-generating {
+  flex-wrap: wrap;
+  small {
+    flex-basis: 100%;
+    text-align: center;
+    font-family: $font-mono;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    opacity: 0.8;
+  }
+}
+
+.trix-pred-updating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px dashed rgba(74,214,196,0.25);
+  border-radius: 6px;
+  color: $text-faint;
+  font-family: $font-mono;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+
+  i { font-size: 15px; color: $accent; animation: pred-spin 1.6s linear infinite; }
+}
+
 .trix-pred-box {
   border-style: dashed;
   border-color: rgba(74,214,196,0.18);

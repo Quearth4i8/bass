@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, Observable, of } from 'rxjs';
-import { map, catchError, switchMap } from 'rxjs/operators';
+import { concat, forkJoin, Observable, of, timer } from 'rxjs';
+import {
+  map, catchError, switchMap, shareReplay, takeWhile, take, filter, distinctUntilChanged, concatMap,
+} from 'rxjs/operators';
 import { TrixSeason, TrixResult } from './trix.service';
 
 const BASE       = 'http://41.229.139.17:8080/imasservice/api/imas';
@@ -165,6 +167,31 @@ export interface TrixPredRegion {
   seasons: Record<TrixSeason, TrixPredResult>;
 }
 
+// Forecast targets the predicted TRIX is built from.
+const FC_TARGETS = ['nh4', 'no3', 'no2', 'po4', 'chla', 'oxygen', 'temperature'] as const;
+type FcTarget = typeof FC_TARGETS[number];
+
+export const FC_TARGET_LABELS: Record<FcTarget, string> = {
+  nh4: 'NH₄', no3: 'NO₃', no2: 'NO₂', po4: 'PO₄', chla: 'Chl-a', oxygen: 'O₂', temperature: 'Temperature',
+};
+
+// Per-target state reported by the backend's /auto_forecast endpoints.
+interface FcStatus { state: string; points: number; }
+
+const POLL_MS   = 5000;
+const MAX_POLLS = 180; // stop polling after ~15 min; the backend keeps fitting regardless
+
+export interface TrixPredState {
+  // null while a forecast the TRIX depends on is still being generated
+  regions:    TrixPredRegion[] | null;
+  // targets whose forecast is being (re)generated right now
+  pending:    FcTarget[];
+  // true when regions are shown from older forecasts while new ones are fitted
+  updating:   boolean;
+}
+
+const isBusy = (st: FcStatus) => st.state === 'queued' || st.state === 'running';
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -178,10 +205,10 @@ export class TrixPredictionService {
     );
   }
 
-  private fetchAll(path: string): Observable<any[]> {
+  private fetchAll(path: string, extra: Record<string, string> = {}): Observable<any[]> {
     const size = 200;
     return this.http
-      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: String(size) } })
+      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: String(size), ...extra } })
       .pipe(
         catchError(() => of({ values: [], totalPages: 1 })),
         switchMap((first: any) => {
@@ -194,7 +221,7 @@ export class TrixPredictionService {
           return forkJoin(
             Array.from({ length: maxPages - 1 }, (_, i) =>
               this.http
-                .get<any>(`${BASE}/${path}`, { params: { page: String(i + 1), size: String(size) } })
+                .get<any>(`${BASE}/${path}`, { params: { page: String(i + 1), size: String(size), ...extra } })
                 .pipe(catchError(() => of({ values: [] })), map((r: any) => r?.values ?? []))
             )
           ).pipe(map(rest => [...firstVals, ...rest.flat()]));
@@ -202,7 +229,55 @@ export class TrixPredictionService {
       );
   }
 
-  getPredictions(): Observable<TrixPredRegion[]> {
+  /**
+   * Asks the backend to make sure every forecast exists and matches the
+   * current data (it fits missing or outdated ones in the background), then
+   * follows progress until they are done. Emits each time the picture changes.
+   */
+  getPredictions(): Observable<TrixPredState> {
+    const observed$ = forkJoin({
+      chem:  this.fetchAll('wat_chemical'),
+      phyto: this.fetchAll('wat_planphytoplankton', { chla_min: '0', chla_max: '1000000' }), // rows with a chla value
+    }).pipe(shareReplay(1));
+    const compute = () => this.computeRegions(observed$);
+
+    return this.http.post<any>(`${FLASK_BASE}/auto_forecast/ensure`, { targets: FC_TARGETS }).pipe(
+      map(r => (r?.targets ?? null) as Record<FcTarget, FcStatus> | null),
+      // Older backend without /auto_forecast: use whatever forecasts are saved.
+      catchError(() => of(null)),
+      switchMap(first => {
+        if (!first) {
+          return compute().pipe(map(regions => ({ regions, pending: [], updating: false })));
+        }
+        const anyBusy = (st: Record<FcTarget, FcStatus>) => FC_TARGETS.some(t => st[t] && isBusy(st[t]));
+        const statuses$ = concat(
+          of(first),
+          timer(POLL_MS, POLL_MS).pipe(
+            take(MAX_POLLS),
+            switchMap(() => this.http.get<any>(`${FLASK_BASE}/auto_forecast/status`, {
+              params: { targets: FC_TARGETS.join(',') },
+            }).pipe(map(r => r?.targets ?? null), catchError(() => of(null)))),
+            filter((st): st is Record<FcTarget, FcStatus> => !!st),
+          ),
+        ).pipe(takeWhile(anyBusy, true));
+
+        return statuses$.pipe(
+          map(st => {
+            const pending  = FC_TARGETS.filter(t => st[t] && isBusy(st[t]));
+            // Without any saved points for a busy target there is nothing to show yet.
+            const blocking = pending.some(t => !st[t].points);
+            return { pending, blocking };
+          }),
+          distinctUntilChanged((a, b) => a.blocking === b.blocking && a.pending.join() === b.pending.join()),
+          concatMap(({ pending, blocking }) => blocking
+            ? of<TrixPredState>({ regions: null, pending, updating: false })
+            : compute().pipe(map(regions => ({ regions, pending, updating: pending.length > 0 })))),
+        );
+      }),
+    );
+  }
+
+  private computeRegions(observed$: Observable<{ chem: any[]; phyto: any[] }>): Observable<TrixPredRegion[]> {
     const now = new Date();
     const cm  = now.getMonth() + 1;
     // Jan/Feb belong to the prior year's winter
@@ -211,8 +286,7 @@ export class TrixPredictionService {
       .find(s => SEASON_MONTHS[s].includes(cm)) ?? 'summer';
 
     return forkJoin({
-      chem:    this.fetchAll('wat_chemical'),
-      phyto:   this.fetchAll('wat_phytoplankton'),
+      observed: observed$,
       fcNh4:   this.fetchForecast('nh4'),
       fcNo3:   this.fetchForecast('no3'),
       fcNo2:   this.fetchForecast('no2'),
@@ -220,7 +294,7 @@ export class TrixPredictionService {
       fcChla:  this.fetchForecast('chla'),
       fcO2:    this.fetchForecast('oxygen'),
       fcT:     this.fetchForecast('temperature'),
-    }).pipe(map(({ chem, phyto, fcNh4, fcNo3, fcNo2, fcPo4, fcChla, fcO2, fcT }) => {
+    }).pipe(map(({ observed: { chem, phyto }, fcNh4, fcNo3, fcNo2, fcPo4, fcChla, fcO2, fcT }) => {
       const chemAll  = chem.filter((r: any) => r.date);
       const phytoAll = phyto.filter((r: any) => r.date);
 

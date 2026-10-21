@@ -184,7 +184,18 @@
 
       <div class="trix-pred-loading" *ngIf="predLoading && selectedCountryB.hasRegions">
         <i class='bx bx-loader-alt'></i>
-        <span>Training model on historical data…</span>
+        <span>Checking forecasts…</span>
+      </div>
+
+      <div class="trix-pred-loading trix-pred-generating" *ngIf="!predLoading && predGenerating && !predError && selectedCountryB.hasRegions">
+        <i class='bx bx-loader-alt'></i>
+        <span>Generating forecasts from the latest data…</span>
+        <small *ngIf="predPendingLabels.length">Training: {{ predPendingLabels.join(' · ') }} — this can take a few minutes</small>
+      </div>
+
+      <div class="trix-pred-updating" *ngIf="!predLoading && predUpdating && selectedCountryB.hasRegions">
+        <i class='bx bx-refresh'></i>
+        <span>Data changed — updating forecasts ({{ predPendingLabels.join(' · ') }}). Showing the previous forecast until then.</span>
       </div>
 
       <div class="trix-pred-error" *ngIf="!predLoading && predError && selectedCountryB.hasRegions">
@@ -192,12 +203,12 @@
         <span>Could not load prediction data. Check your connection and try refreshing.</span>
       </div>
 
-      <div class="trix-pred-error" *ngIf="!predLoading && !predError && predData.length === 0 && selectedCountryB.hasRegions">
+      <div class="trix-pred-error" *ngIf="!predLoading && !predGenerating && !predError && predData.length === 0 && selectedCountryB.hasRegions">
         <i class='bx bx-data'></i>
         <span>No prediction data available for the selected season.</span>
       </div>
 
-      <div class="trix-map-card-body" *ngIf="!selectedCountryB.hasRegions || (!predLoading && !predError && predData.length > 0)">
+      <div class="trix-map-card-body" *ngIf="!selectedCountryB.hasRegions || (!predLoading && !predGenerating && !predError && predData.length > 0)">
         <div class="trix-map-body">
 
           <!-- Coastline, projected from the selected country's GeoJSON -->

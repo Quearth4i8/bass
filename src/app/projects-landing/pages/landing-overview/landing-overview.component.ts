@@ -1,6 +1,6 @@
 import { Component, DestroyRef, HostListener, AfterViewInit, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { TrixService, TrixRegionData, TrixResult, TrixSeason, calcTrix, classify } from '../../../services/trix.service';
-import { TrixPredictionService, TrixPredRegion, TrixPredResult } from '../../../services/trix-prediction.service';
+import { TrixPredictionService, TrixPredRegion, TrixPredResult, FC_TARGET_LABELS } from '../../../services/trix-prediction.service';
 import { ThemeService } from '../../../services/ThemeService';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -146,6 +146,11 @@ export class LandingOverviewComponent implements OnInit, AfterViewInit, OnDestro
   predData: TrixPredRegion[] = [];
   predLoading = true;
   predError = false;
+  // Forecasts are being made for the first time: nothing to show yet.
+  predGenerating = false;
+  // Older forecasts are shown while new ones are fitted on changed data.
+  predUpdating = false;
+  predPendingLabels: string[] = [];
   selectedPredSeason: TrixSeason = detectCurrentSeason();
 
   readonly COUNTRIES = COUNTRY_DEFS;
@@ -212,8 +217,14 @@ export class LandingOverviewComponent implements OnInit, AfterViewInit, OnDestro
     this.trixPredService.getPredictions()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: data => { this.predData = this.sortByCanonicalOrder(data); this.predLoading = false; },
-        error: ()   => { this.predLoading = false; this.predError = true; }
+        next: state => {
+          this.predLoading       = false;
+          this.predGenerating    = state.regions === null;
+          this.predUpdating      = state.updating;
+          this.predPendingLabels = state.pending.map(t => FC_TARGET_LABELS[t]);
+          if (state.regions) this.predData = this.sortByCanonicalOrder(state.regions);
+        },
+        error: () => { this.predLoading = false; this.predGenerating = false; this.predError = true; }
       });
   }
 

@@ -31,9 +31,9 @@ export class EcoStatusService {
     return +parseFloat(hits[0][field]).toFixed(3);
   }
 
-  private fetch(path: string): Observable<any[]> {
+  private fetch(path: string, extra: Record<string, string> = {}): Observable<any[]> {
     return this.http
-      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: '200' } })
+      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: '200', ...extra } })
       .pipe(
         map(r => r?.values ?? []),
         catchError(() => of([]))
@@ -44,7 +44,7 @@ export class EcoStatusService {
     return forkJoin({
       chem:  this.fetch('wat_chemical'),
       phys:  this.fetch('wat_physico_chemical'),
-      phyto: this.fetch('wat_phytoplankton'),
+      phyto: this.fetch('wat_planphytoplankton', { chla_min: '0', chla_max: '1000000' }),
     }).pipe(
       map(({ chem, phys, phyto }) => ({
         nh4:  this.latestOf(chem,  'nh4'),

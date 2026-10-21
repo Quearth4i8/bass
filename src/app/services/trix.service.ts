@@ -44,7 +44,7 @@ const SEASON_MONTHS: Record<TrixSeason, number[]> = {
 };
 
 function matchRegionId(record: any): string | null {
-  const hay = `${record.name ?? ''} ${record.region ?? ''} ${record.locality ?? ''}`.toLowerCase();
+  const hay = `${record.name ?? record.systemName ?? ''} ${record.region ?? ''} ${record.locality ?? ''}`.toLowerCase();
   for (const r of REGIONS) {
     if ((r.keywords as readonly string[]).some(k => hay.includes(k))) return r.id;
   }
@@ -98,16 +98,16 @@ export function classify(t: number | null): Pick<TrixResult, 'eutrophication' | 
 export class TrixService {
   constructor(private http: HttpClient) {}
 
-  private fetchAll(path: string): Observable<any[]> {
+  private fetchAll(path: string, extra: Record<string, string> = {}): Observable<any[]> {
     return this.http
-      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: '200' } })
+      .get<any>(`${BASE}/${path}`, { params: { page: '0', size: '200', ...extra } })
       .pipe(map(r => r?.values ?? []), catchError(() => of([])));
   }
 
   getTrixData(): Observable<TrixRegionData[]> {
     return forkJoin({
       chem:  this.fetchAll('wat_chemical'),
-      phyto: this.fetchAll('wat_phytoplankton'),
+      phyto: this.fetchAll('wat_planphytoplankton', { chla_min: '0', chla_max: '1000000' }), // rows with a chla value
     }).pipe(map(({ chem, phyto }) => {
       const thisYear = currentSeasonYear();
       const prevYear = thisYear - 1;
