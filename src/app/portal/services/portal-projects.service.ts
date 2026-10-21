@@ -43,12 +43,36 @@ function normalizeBrandMode(value: string | undefined): PortalBrandMode {
   return BRAND_MODES.includes(value as PortalBrandMode) ? (value as PortalBrandMode) : 'title-id';
 }
 
-function normalizeProject(p: PortalProject): PortalProject {
+/**
+ * Uploaded media is saved as an absolute URL built from the API base of the
+ * page that uploaded it, so an upload made from a local dev build stored
+ * "http://localhost:8085/bassiana/media/..." and only loaded on that PC. Media
+ * URLs from any of our backends are pointed at the one this page talks to.
+ */
+const MEDIA_URL = /^https?:\/\/(?:localhost|127\.0\.0\.1|41\.229\.139\.17)(?::\d+)?(?:\/imasservice)?\/bassiana\/media\//;
+
+function rehostMediaUrls<T>(value: T, apiBase: string): T {
+  if (typeof value === 'string') {
+    return (MEDIA_URL.test(value) ? value.replace(MEDIA_URL, `${apiBase}/media/`) : value) as unknown as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => rehostMediaUrls(v, apiBase)) as unknown as T;
+  }
+  if (value && typeof value === 'object') {
+    const out: any = {};
+    for (const [k, v] of Object.entries(value)) out[k] = rehostMediaUrls(v, apiBase);
+    return out;
+  }
+  return value;
+}
+
+function normalizeProject(p: PortalProject, apiBase: string): PortalProject {
+  const project = rehostMediaUrls(p, apiBase);
   return {
-    ...p,
-    accentColor: normalizeHexColor(p.accentColor, DEFAULT_PORTAL_ACCENT),
-    logo: p.logo?.trim() || '',
-    brandMode: normalizeBrandMode(p.brandMode),
+    ...project,
+    accentColor: normalizeHexColor(project.accentColor, DEFAULT_PORTAL_ACCENT),
+    logo: project.logo?.trim() || '',
+    brandMode: normalizeBrandMode(project.brandMode),
   };
 }
 
@@ -91,10 +115,10 @@ export class PortalProjectsService {
   getBySlug(slug: PortalProjectSlug): Observable<PortalProject | null> {
     const existing = this.projects$.value.find((p) => p.slug === slug);
     if (existing?.content) {
-      return of(clone(normalizeProject(existing)));
+      return of(clone(normalizeProject(existing, this.baseUrl)));
     }
     return this.http.get<PortalProject>(`${this.baseUrl}/portal-projects/${encodeURIComponent(slug)}`).pipe(
-      map((p) => normalizeProject(p)),
+      map((p) => normalizeProject(p, this.baseUrl)),
       tap((p) => this.upsertInStore(p)),
       map((p) => clone(p)),
       catchError(() => of(null)),
@@ -103,7 +127,7 @@ export class PortalProjectsService {
 
   create(meta: Omit<PortalProjectMeta, 'slug'> & { slug?: string }): Observable<PortalProject> {
     return this.http.post<PortalProject>(`${this.baseUrl}/portal-projects`, meta).pipe(
-      map((p) => normalizeProject(p)),
+      map((p) => normalizeProject(p, this.baseUrl)),
       tap((p) => this.upsertInStore(p, { preferFront: true })),
       map((p) => clone(p)),
     );
@@ -111,7 +135,7 @@ export class PortalProjectsService {
 
   updateMeta(slug: PortalProjectSlug, patch: Partial<Omit<PortalProjectMeta, 'slug'>>): Observable<PortalProject | null> {
     return this.http.put<PortalProject>(`${this.baseUrl}/portal-projects/${encodeURIComponent(slug)}/meta`, patch).pipe(
-      map((p) => normalizeProject(p)),
+      map((p) => normalizeProject(p, this.baseUrl)),
       tap((p) => this.upsertInStore(p)),
       map((p) => clone(p)),
       catchError(() => of(null)),
@@ -120,7 +144,7 @@ export class PortalProjectsService {
 
   saveContent(slug: PortalProjectSlug, content: PortalProjectContent): Observable<PortalProject | null> {
     return this.http.put<PortalProject>(`${this.baseUrl}/portal-projects/${encodeURIComponent(slug)}/content`, content).pipe(
-      map((p) => normalizeProject(p)),
+      map((p) => normalizeProject(p, this.baseUrl)),
       tap((p) => this.upsertInStore(p)),
       map((p) => clone(p)),
       catchError(() => of(null)),
@@ -140,7 +164,7 @@ export class PortalProjectsService {
 
   private refresh(): Observable<PortalProject[]> {
     return this.http.get<PortalProject[]>(`${this.baseUrl}/portal-projects`).pipe(
-      map((projects) => projects.map((p) => normalizeProject(p))),
+      map((projects) => projects.map((p) => normalizeProject(p, this.baseUrl))),
       tap((projects) => {
         this.projects$.next(projects);
         this.loaded$$.next(true);
@@ -166,7 +190,7 @@ export class PortalProjectsService {
   }
 
   private upsertInStore(project: PortalProject, opts?: { preferFront?: boolean }): void {
-    const normalized = normalizeProject(project);
+    const normalized = normalizeProject(project, this.baseUrl);
     const current = this.projects$.value;
     const idx = current.findIndex((p) => p.slug === normalized.slug);
     if (idx < 0) {

@@ -4,6 +4,10 @@
 }
 
 .person-card {
+  /* Required by <app-cv-link>: its click overlay fills the nearest positioned
+     ancestor. Without this it covered the whole page until a hover transform
+     happened to contain it, so the cursor and hover flickered. */
+  position: relative;
   height: 100%;
   box-sizing: border-box;
   display: flex;

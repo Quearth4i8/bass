@@ -559,6 +559,9 @@ export class CrewcvsadminComponent implements OnInit {
 
   trackById = (_: number, s: CvSection) => s.id;
   trackByIndex = (i: number) => i;
+  // cardRows builds new row objects on every check; without this each check
+  // re-created the rows, so a Link button vanished between mousedown and click.
+  trackByCard = (_: number, r: { card: PersonCard }) => r.card.key;
 
   runConfirm(): void {
     const action = this.confirm?.action;

@@ -144,7 +144,13 @@
 
 .member-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .member-row .avatar { width: 54px; height: 54px; font-size: 16px; }
-.member-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+// Color and margin set explicitly: the public landing stylesheet is global
+// (ViewEncapsulation.None) and its own .member-name, near-white for its dark
+// Team page, applied here once a visitor page had been opened in the session.
+.member-name {
+  font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0; color: var(--text);
+}
 .member-title { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .member-empty { padding: 14px 2px 2px; font-size: 13px; color: var(--text-dim); line-height: 1.5; }
 .member-hint { margin: 0 0 0 auto; font-size: 11px; color: var(--text-faint); }

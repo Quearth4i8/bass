@@ -265,7 +265,7 @@
               </div>
 
               <div class="card-list">
-                <div class="card-row" *ngFor="let r of cardRows" [class.is-linked]="r.linked">
+                <div class="card-row" *ngFor="let r of cardRows; trackBy: trackByCard" [class.is-linked]="r.linked">
                   <span class="avatar">
                     <img *ngIf="r.card.image" [src]="r.card.image" alt="">
                     <span *ngIf="!r.card.image">{{ initials(r.card.name) }}</span>
