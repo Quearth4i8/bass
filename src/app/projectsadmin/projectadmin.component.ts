@@ -1,4 +1,5 @@
-import { roleLabel, statusLabel } from '../utilities/project-labels';
+import { matchesDate, projectDate, roleLabel, statusLabel, submissionDateText } from '../utilities/project-labels';
+import { describeDateFilter } from '../shared/components/date-filter/date-filter.component';
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
@@ -64,11 +65,15 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     if (!target.closest('.export-menu')) {
       this.exportMenuOpen = false;
     }
+    if (!target.closest('.filter-dropdown')) {
+      this.filterMenu = null;
+    }
   }
 
   onContentScroll(): void {
     this.pageSizeDropdownOpen = false;
     this.pageDropdownOpen = false;
+    this.filterMenu = null;
   }
 
   showDialog(project?: any) {
@@ -174,8 +179,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   fetchProjects(): void {
     this.projectService.getAllProjects().subscribe(
       (data: any[]) => {
-        this.projects = data.sort((a, b) => a.id - b.id);
-        this.updatePage(0);
+        this.allProjects = data.sort((a, b) => a.id - b.id);
+        this.applyFilters();
       },
       (error) => {
         console.error('Error fetching projects:', error);
@@ -284,6 +289,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   onWindowScroll(): void {
     this.pageSizeDropdownOpen = false;
     this.pageDropdownOpen = false;
+    this.filterMenu = null;
   }
 
   selectGroup(index: number, value: string): void {
@@ -293,21 +299,116 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   showAdvancedFilters = false;
   globalSearchTerm = '';
-  /** Describes the filter that produced `projects`, e.g. 'Search: "bechir"'; '' when unfiltered. */
+  /** Describes the filters that produced `projects`, e.g. 'Search: "bechir" · Role: Lead'; '' when unfiltered. */
   activeFilter = '';
-  filterValues = { coordinator: '', partner: '', program: '', acronym: '', group: '' };
+  filterValues: Record<string, string> = this.emptyFilters();
 
-  get hasFilters(): boolean {
-    return !!(this.activeFilter || this.globalSearchTerm.trim() ||
-      Object.values(this.filterValues).some(v => v.trim()));
+  /** Every project; `projects` is the part of it the filters let through. */
+  allProjects: any[] = [];
+
+  private emptyFilters(): Record<string, string> {
+    return {
+      coordinator: '', applicant: '', role: '', acronym: '', title: '', program: '', thematic: '',
+      status: '', submissionDate: '', startDate: '', endDate: '', totalBudget: '', budget: '',
+    };
   }
 
-  /** Clears the search box and every advanced filter, and reloads all projects. */
+  get hasFilters(): boolean {
+    return !!(this.globalSearchTerm.trim() || Object.values(this.filterValues).some(v => String(v ?? '').trim()));
+  }
+
+  /** Clears the search box and every advanced filter. */
   resetFilters(): void {
     this.globalSearchTerm = '';
-    this.filterValues = { coordinator: '', partner: '', program: '', acronym: '', group: '' };
-    this.activeFilter = '';
-    this.fetchProjects();
+    this.filterValues = this.emptyFilters();
+    this.applyFilters();
+  }
+
+  /**
+   * The search box and every advanced filter at once, over the full list, as
+   * on the public List of Projects page.
+   */
+  applyFilters(): void {
+    const f = this.filterValues;
+    const search = this.globalSearchTerm.trim();
+    this.projects = this.allProjects.filter(project =>
+      (!search || [
+        project.responsable, project.applicant, project.partenaire, roleLabel(project.partenaire),
+        project.thematique, project.programme, project.titreproj, project.acronyme,
+        submissionDateText(project.submissionDate), submissionDateText(project.startDate), submissionDateText(project.endDate),
+        project.startyear, project.endyear,
+        project.totalBudget, project.budget, statusLabel(project.title),
+      ].some(value => matchesSearch(value, search))) &&
+      matchesSearch(project.responsable, f['coordinator']) &&
+      matchesSearch(project.applicant, f['applicant']) &&
+      (!f['role'] || project.partenaire === f['role']) &&
+      matchesSearch(project.acronyme, f['acronym']) &&
+      matchesSearch(project.titreproj, f['title']) &&
+      (!f['program'] || project.programme === f['program']) &&
+      matchesSearch(project.thematique, f['thematic']) &&
+      (!f['status'] || project.title === f['status']) &&
+      matchesDate(project.submissionDate, null, f['submissionDate']) &&
+      matchesDate(project.startDate, project.startyear, f['startDate']) &&
+      matchesDate(project.endDate, project.endyear, f['endDate']) &&
+      matchesSearch(project.totalBudget, f['totalBudget']) &&
+      matchesSearch(project.budget, f['budget'])
+    );
+    this.activeFilter = this.describeFilters();
+    this.updatePage(0);
+  }
+
+  private describeFilters(): string {
+    const f = this.filterValues;
+    const text = (label: string, v: string) => (v?.trim() ? `${label}: "${v.trim()}"` : '');
+    return [
+      text('Search', this.globalSearchTerm),
+      text('Coordinator', f['coordinator']),
+      text('Applicant', f['applicant']),
+      f['role'] ? `Role: ${roleLabel(f['role'])}` : '',
+      text('Acronym', f['acronym']),
+      text('Title', f['title']),
+      f['program'] ? `Program: ${f['program']}` : '',
+      text('Thematic', f['thematic']),
+      f['status'] ? `Status: ${statusLabel(f['status'])}` : '',
+      f['submissionDate'] ? `Submitted: ${describeDateFilter(f['submissionDate'])}` : '',
+      f['startDate'] ? `Starts: ${describeDateFilter(f['startDate'])}` : '',
+      f['endDate'] ? `Ends: ${describeDateFilter(f['endDate'])}` : '',
+      text('Total budget', f['totalBudget']),
+      text('Partner budget', f['budget']),
+    ].filter(Boolean).join(' · ');
+  }
+
+  // Role / Program / Status dropdowns. The menus are position: fixed, as the
+  // filter panel clips anything that overflows it.
+  filterMenu: 'role' | 'program' | 'status' | null = null;
+  filterMenuStyle: Record<string, string> = {};
+
+  get roleOptions(): string[] { return this.distinct(p => p.partenaire); }
+  get programOptions(): string[] { return this.distinct(p => p.programme); }
+  get statusOptions(): string[] { return this.projectGroupTitles.map(g => g.value); }
+
+  private distinct(pick: (p: any) => string): string[] {
+    return Array.from(new Set(this.allProjects.map(pick).filter(Boolean))).sort();
+  }
+
+  toggleFilterMenu(menu: 'role' | 'program' | 'status', event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.filterMenu === menu) { this.filterMenu = null; return; }
+    const r = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const maxHeight = 280;
+    const up = window.innerHeight - r.bottom < maxHeight && r.top > window.innerHeight - r.bottom;
+    this.filterMenuStyle = {
+      top: `${up ? Math.max(0, r.top - maxHeight - 4) : r.bottom + 4}px`,
+      left: `${r.left}px`,
+      width: `${r.width}px`,
+    };
+    this.filterMenu = menu;
+  }
+
+  pickFilter(field: 'role' | 'program' | 'status', value: string): void {
+    this.filterValues[field] = value;
+    this.filterMenu = null;
+    this.applyFilters();
   }
 
   exportMenuOpen = false;
@@ -373,6 +474,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   readonly roleLabel = roleLabel;
+  readonly projectDate = projectDate;
 
   /** First budget card: the whole-project (all partners) budget of every Ongoing project. */
   get ongoingTotalBudget(): number {
@@ -425,131 +527,6 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   pagedProjectsIndex(index: number): number {
     return index + this.pageIndex * this.pageSize;
-  }
-
-  searchProjects(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Acronym: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      this.projectService.getProjectsByAcronyme(searchKeyword).subscribe(
-        (data: any[]) => {
-          this.projects = data.sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
-  }
-
-  searchProjects1(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Group: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      this.projectService.getProjectsByTitreproj(searchKeyword).subscribe(
-        (data: any[]) => {
-          this.projects = data.sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
-  }
-
-  searchProjects2(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Coordinator: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      this.projectService.getProjectsByResponsable(searchKeyword).subscribe(
-        (data: any[]) => {
-          this.projects = data.sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
-  }
-
-  searchProjects3(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Partner: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      this.projectService.getProjectsByPartenaire(searchKeyword).subscribe(
-        (data: any[]) => {
-          this.projects = data.sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
-  }
-
-  searchProjects4(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Program: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      this.projectService.getProjectsByProgram(searchKeyword).subscribe(
-        (data: any[]) => {
-          this.projects = data.sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects by programme:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
-  }
-
-  onGlobalSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const searchKeyword = input.value.trim();
-    this.activeFilter = searchKeyword ? `Search: "${searchKeyword}"` : '';
-
-    if (searchKeyword) {
-      // Search across all fields - you can implement a general search API
-      // For now, we'll filter the existing projects
-      this.projectService.getAllProjects().subscribe(
-        (data: any[]) => {
-          this.projects = data.filter(project =>
-            [project.responsable, project.partenaire, project.programme, project.acronyme, project.titreproj]
-              .some(value => matchesSearch(value, searchKeyword))
-          ).sort((a, b) => a.id - b.id);
-          this.updatePage(0);
-        },
-        (error) => {
-          console.error('Error searching projects:', error);
-        }
-      );
-    } else {
-      this.fetchProjects();
-    }
   }
 
   confirmDelete(projectId: number): void {

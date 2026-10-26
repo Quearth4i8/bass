@@ -32,6 +32,8 @@ export class DialogContentComponent implements OnInit {
     acronyme: '',
     startyear: '',
     endyear:'',
+    startDate: '',
+    endDate: '',
     budget: '',
     title: '',
     applicant: '',
@@ -81,8 +83,7 @@ export class DialogContentComponent implements OnInit {
         acronyme: this.projectFormData.acronyme,
         budget: this.projectFormData.budget,
         title: this.projectFormData.title,
-        startyear: this.projectFormData.startyear,
-        endyear: this.projectFormData.endyear,
+        ...this.datesPayload(),
         applicant: this.projectFormData.applicant || null,
         submissionDate: this.projectFormData.submissionDate || null,
         totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
@@ -102,6 +103,7 @@ export class DialogContentComponent implements OnInit {
       // read an empty string as a date or a number.
       const created = {
         ...this.projectFormData,
+        ...this.datesPayload(),
         applicant: this.projectFormData.applicant || null,
         submissionDate: this.projectFormData.submissionDate || null,
         totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
@@ -203,6 +205,17 @@ export class DialogContentComponent implements OnInit {
 
   getPartenaireLabel(value: string): string {
     return roleLabel(value);
+  }
+
+  /** Start/end as exact dates, with the year columns kept in step (older rows keep their year until a date is picked). */
+  private datesPayload(): Record<string, any> {
+    const yearOf = (date: string, year: any) => (date ? Number(String(date).slice(0, 4)) : this.emptyToNull(year));
+    return {
+      startDate: this.emptyToNull(this.projectFormData.startDate),
+      endDate: this.emptyToNull(this.projectFormData.endDate),
+      startyear: yearOf(this.projectFormData.startDate, this.projectFormData.startyear),
+      endyear: yearOf(this.projectFormData.endDate, this.projectFormData.endyear),
+    };
   }
 
   private emptyToNull(v: any): any {

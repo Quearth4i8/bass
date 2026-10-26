@@ -318,11 +318,17 @@ a.header-btn { text-decoration: none; }
 
 .advanced-inner { min-height: 0; overflow: hidden; }
 
+// Same layout as the public List of Projects: 13 fields on 14 slots (Title
+// spans two), so both rows are full; 4 per row, then 2, on narrower screens.
 .filter-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px;
   margin-top: 16px; padding: 16px 2px 2px;
   border-top: 1px solid $line;
 }
+.filter-field-wide { grid-column: span 2; }
+.filter-field .dropdown-trigger { height: 40px; padding: 0 12px; }
+.dropdown-value { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dropdown-menu.filter-menu { display: block; position: fixed; right: auto; margin-top: 0; animation: dropdownSlide 0.15s ease; }
 
 .filter-field {
   display: flex; flex-direction: column; gap: 6px;
@@ -333,9 +339,9 @@ a.header-btn { text-decoration: none; }
     i { font-size: 13px; color: $accent; }
   }
   input {
-    height: 36px; padding: 0 10px;
-    border: 1px solid $line; border-radius: 8px;
-    font-size: 13px; color: $text; background: $bg-2; font-family: $font-sans;
+    height: 40px; padding: 0 12px;
+    border: 1px solid #1b5573; border-radius: 8px;
+    font-size: 13px; color: $text; background: #061f2e; font-family: $font-sans;
     transition: border-color 0.2s;
     &:focus { outline: none; border-color: $accent; }
     &::placeholder { color: $text-faint; }
@@ -381,7 +387,7 @@ a.header-btn { text-decoration: none; }
 .col-programme { min-width: 140px; }
 .col-title { min-width: 200px; max-width: 300px; }
 .col-acronym { min-width: 100px; }
-.col-year { min-width: 70px; text-align: center; }
+.col-year { min-width: 120px; text-align: center; }
 .col-budget { min-width: 100px; text-align: right; font-weight: 600; color: $accent !important; }
 .col-group { min-width: 140px; }
 .col-actions { min-width: 120px; text-align: center; }
@@ -587,7 +593,7 @@ a.header-btn { text-decoration: none; }
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
-@media (max-width: 1200px) { .filter-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1200px) { .filter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 @media (max-width: 1024px) {
   .admin-sidebar { transform: translateX(-100%); }
@@ -653,7 +659,7 @@ a.header-btn { text-decoration: none; }
   .filter-grid { border-top-color: #c5d8e6; }
   .filter-field {
     label { color: #64748b; i { color: #1a8f7f; } }
-    input { background: #f1f5f9; border-color: #c5d8e6; color: #0d2137; &:focus { border-color: #1a8f7f; } &::placeholder { color: #9fb3bf; } }
+    input { background: #f6fafc; border-color: #c5d8e6; color: #0d2137; &:focus { border-color: #1a8f7f; } &::placeholder { color: #a3b4c0; } }
   }
   .table-container { background: white; border-color: #c5d8e6; }
   .data-table {

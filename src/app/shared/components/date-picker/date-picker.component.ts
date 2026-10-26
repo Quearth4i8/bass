@@ -141,7 +141,12 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
     this.open ? this.close() : this.openPicker();
   }
 
+  /** The picker whose popover is open: opening another one closes it (the trigger stops the click, so it never sees an outside click). */
+  private static current: DatePickerComponent | null = null;
+
   private openPicker(): void {
+    if (DatePickerComponent.current && DatePickerComponent.current !== this) DatePickerComponent.current.close();
+    DatePickerComponent.current = this;
     if (this.value) this.view = DatePickerComponent.firstOfMonth(this.value);
     this.open = true;
     this.place();
@@ -152,12 +157,14 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   private readonly reposition = () => { if (this.open) this.place(); };
 
   ngOnDestroy(): void {
+    if (DatePickerComponent.current === this) DatePickerComponent.current = null;
     window.removeEventListener('scroll', this.reposition, true);
   }
 
   close(): void {
     if (!this.open) return;
     this.open = false;
+    if (DatePickerComponent.current === this) DatePickerComponent.current = null;
     window.removeEventListener('scroll', this.reposition, true);
     this.onTouched();
     this.cdr.markForCheck();

@@ -83,7 +83,7 @@
         <div class="search-icon-wrapper">
           <i class='bx bx-search'></i>
         </div>
-        <input type="text" class="search-input" placeholder="Search projects by keyword..." [(ngModel)]="globalSearchTerm" (input)="onGlobalSearch($event)">
+        <input type="text" class="search-input" placeholder="Search all fields, status included..." [(ngModel)]="globalSearchTerm" (ngModelChange)="applyFilters()">
         <button class="filter-toggle-btn reset-filters-btn" (click)="resetFilters()" [disabled]="!hasFilters"
                 title="Reset filters" aria-label="Reset filters">
           <i class='bx bx-reset'></i>
@@ -99,24 +99,83 @@
         <div class="advanced-inner">
         <div class="filter-grid">
           <div class="filter-field">
-            <label><i class='bx bx-user'></i> Coordinator</label>
-            <input type="text" placeholder="Search coordinator..." [(ngModel)]="filterValues.coordinator" (input)="searchProjects2($event)">
+            <label>Coordinator</label>
+            <input type="text" placeholder="Search..." [(ngModel)]="filterValues['coordinator']" (ngModelChange)="applyFilters()">
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-buildings'></i> Role</label>
-            <input type="text" placeholder="Search role..." [(ngModel)]="filterValues.partner" (input)="searchProjects3($event)">
+            <label>Applicant</label>
+            <input type="text" placeholder="Search..." [(ngModel)]="filterValues['applicant']" (ngModelChange)="applyFilters()">
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-collection'></i> Program</label>
-            <input type="text" placeholder="Search program..." [(ngModel)]="filterValues.program" (input)="searchProjects4($event)">
+            <label>Role</label>
+            <div class="custom-dropdown filter-dropdown" [class.open]="filterMenu === 'role'">
+              <div class="dropdown-trigger" (click)="toggleFilterMenu('role', $event)">
+                <span class="dropdown-value">{{ filterValues['role'] ? roleLabel(filterValues['role']) : 'All' }}</span>
+                <i class='bx bx-chevron-down'></i>
+              </div>
+              <div class="dropdown-menu filter-menu" *ngIf="filterMenu === 'role'" [ngStyle]="filterMenuStyle">
+                <div class="dropdown-item" [class.selected]="!filterValues['role']" (click)="pickFilter('role', '')">All</div>
+                <div class="dropdown-item" *ngFor="let r of roleOptions" [class.selected]="filterValues['role'] === r" (click)="pickFilter('role', r)">{{ roleLabel(r) }}</div>
+              </div>
+            </div>
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-font'></i> Acronym</label>
-            <input type="text" placeholder="Search acronym..." [(ngModel)]="filterValues.acronym" (input)="searchProjects($event)">
+            <label>Acronym</label>
+            <input type="text" placeholder="Search..." [(ngModel)]="filterValues['acronym']" (ngModelChange)="applyFilters()">
+          </div>
+          <div class="filter-field filter-field-wide">
+            <label>Title</label>
+            <input type="text" placeholder="Search..." [(ngModel)]="filterValues['title']" (ngModelChange)="applyFilters()">
           </div>
           <div class="filter-field">
-            <label><i class='bx bx-folder'></i> Status</label>
-            <input type="text" placeholder="Search status..." [(ngModel)]="filterValues.group" (input)="searchProjects1($event)">
+            <label>Program</label>
+            <div class="custom-dropdown filter-dropdown" [class.open]="filterMenu === 'program'">
+              <div class="dropdown-trigger" (click)="toggleFilterMenu('program', $event)">
+                <span class="dropdown-value" [title]="filterValues['program'] || 'All'">{{ filterValues['program'] || 'All' }}</span>
+                <i class='bx bx-chevron-down'></i>
+              </div>
+              <div class="dropdown-menu filter-menu" *ngIf="filterMenu === 'program'" [ngStyle]="filterMenuStyle">
+                <div class="dropdown-item" [class.selected]="!filterValues['program']" (click)="pickFilter('program', '')">All</div>
+                <div class="dropdown-item" *ngFor="let prog of programOptions" [class.selected]="filterValues['program'] === prog" (click)="pickFilter('program', prog)">{{ prog }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-field">
+            <label>Thematic</label>
+            <input type="text" placeholder="Search..." [(ngModel)]="filterValues['thematic']" (ngModelChange)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label>Status</label>
+            <div class="custom-dropdown filter-dropdown" [class.open]="filterMenu === 'status'">
+              <div class="dropdown-trigger" (click)="toggleFilterMenu('status', $event)">
+                <span class="dropdown-value">{{ filterValues['status'] ? groupLabel(filterValues['status']) : 'All' }}</span>
+                <i class='bx bx-chevron-down'></i>
+              </div>
+              <div class="dropdown-menu filter-menu" *ngIf="filterMenu === 'status'" [ngStyle]="filterMenuStyle">
+                <div class="dropdown-item" [class.selected]="!filterValues['status']" (click)="pickFilter('status', '')">All</div>
+                <div class="dropdown-item" *ngFor="let st of statusOptions" [class.selected]="filterValues['status'] === st" (click)="pickFilter('status', st)">{{ groupLabel(st) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-field">
+            <label>Submission date</label>
+            <app-date-filter [(ngModel)]="filterValues['submissionDate']" (ngModelChange)="applyFilters()"></app-date-filter>
+          </div>
+          <div class="filter-field">
+            <label>Start date</label>
+            <app-date-filter [(ngModel)]="filterValues['startDate']" (ngModelChange)="applyFilters()"></app-date-filter>
+          </div>
+          <div class="filter-field">
+            <label>End date</label>
+            <app-date-filter [(ngModel)]="filterValues['endDate']" (ngModelChange)="applyFilters()"></app-date-filter>
+          </div>
+          <div class="filter-field">
+            <label>Total budget</label>
+            <input type="number" min="0" placeholder="e.g. 500000" [(ngModel)]="filterValues['totalBudget']" (ngModelChange)="applyFilters()">
+          </div>
+          <div class="filter-field">
+            <label>Partner budget</label>
+            <input type="number" min="0" placeholder="e.g. 500000" [(ngModel)]="filterValues['budget']" (ngModelChange)="applyFilters()">
           </div>
         </div>
         </div>
@@ -157,9 +216,9 @@
               <td class="col-title"><span class="cell-title clamp-2" [title]="project.titreproj || ''">{{ project.titreproj || '—' }}</span></td>
               <td class="col-programme"><span class="clamp-2" [title]="project.programme || ''">{{ project.programme || '—' }}</span></td>
               <td class="col-thematic"><span class="clamp-2" [title]="project.thematique || ''">{{ project.thematique || '—' }}</span></td>
-              <td class="col-date">{{ project.submissionDate ? (project.submissionDate | date:'d MMM y') : '—' }}</td>
-              <td class="col-year">{{ project.startyear || '—' }}</td>
-              <td class="col-year">{{ project.endyear || '—' }}</td>
+              <td class="col-date">{{ projectDate(project.submissionDate) || '—' }}</td>
+              <td class="col-year">{{ projectDate(project.startDate, project.startyear) || '—' }}</td>
+              <td class="col-year">{{ projectDate(project.endDate, project.endyear) || '—' }}</td>
               <td class="col-budget">{{ project.totalBudget ? ('€' + (project.totalBudget | number:'1.0-0')) : '—' }}</td>
               <td class="col-budget">{{ project.budget ? ('€' + (project.budget | number:'1.0-0')) : '—' }}</td>
               <td class="col-group">

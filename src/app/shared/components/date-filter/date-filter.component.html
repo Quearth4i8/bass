@@ -1,0 +1,56 @@
+<button type="button" class="df-trigger" [class.open]="open" [class.empty]="isEmpty"
+        [disabled]="disabled" (click)="toggle($event)" aria-haspopup="dialog" [attr.aria-expanded]="open">
+  <i class='bx bx-calendar df-icon'></i>
+  <span class="df-value">{{ isEmpty ? placeholder : label }}</span>
+  <i class='bx bx-x df-clear' *ngIf="!isEmpty" (click)="clear($event)" title="Clear"></i>
+</button>
+
+<div class="df-popover" *ngIf="open" [ngStyle]="popoverStyle" role="dialog" aria-label="Filter by date" (click)="$event.stopPropagation()">
+
+  <section class="df-section">
+    <div class="df-head">
+      <span class="df-title">Year</span>
+      <button type="button" class="df-any" [class.on]="!parts.year" (click)="set('year', null, $event)">Any</button>
+      <span class="df-spacer"></span>
+      <div class="df-nav">
+        <button type="button" (click)="shiftYears(-1, $event)" aria-label="Earlier years"><i class='bx bx-chevron-left'></i></button>
+        <button type="button" (click)="shiftYears(1, $event)" aria-label="Later years"><i class='bx bx-chevron-right'></i></button>
+      </div>
+    </div>
+    <div class="df-grid df-years">
+      <button type="button" class="df-cell" *ngFor="let y of years"
+              [class.current]="y === thisYear" [class.selected]="parts.year === y"
+              (click)="set('year', y, $event)">{{ y }}</button>
+    </div>
+  </section>
+
+  <section class="df-section">
+    <div class="df-head">
+      <span class="df-title">Month</span>
+      <button type="button" class="df-any" [class.on]="!parts.month" (click)="set('month', null, $event)">Any</button>
+    </div>
+    <div class="df-grid df-months">
+      <button type="button" class="df-cell" *ngFor="let m of months" [title]="m.name"
+              [class.selected]="parts.month === m.value"
+              (click)="set('month', m.value, $event)">{{ m.short }}</button>
+    </div>
+  </section>
+
+  <section class="df-section">
+    <div class="df-head">
+      <span class="df-title">Day</span>
+      <button type="button" class="df-any" [class.on]="!parts.day" (click)="set('day', null, $event)">Any</button>
+    </div>
+    <div class="df-grid df-days">
+      <button type="button" class="df-cell" *ngFor="let d of days"
+              [class.selected]="parts.day === d" [disabled]="dayDisabled(d)"
+              (click)="set('day', d, $event)">{{ d }}</button>
+    </div>
+  </section>
+
+  <div class="df-foot">
+    <span class="df-summary"><i class='bx bx-filter-alt'></i>{{ isEmpty ? 'Any date' : label }}</span>
+    <button type="button" class="df-link" *ngIf="!isEmpty" (click)="clear($event)">Clear</button>
+    <button type="button" class="df-ok" (click)="done($event)">Done</button>
+  </div>
+</div>

@@ -1,14 +1,31 @@
 <div class="cv-page">
   <header class="cv-bar">
     <button class="bar-btn" (click)="back()"><i class='bx bx-arrow-back'></i><span>Back</span></button>
-    <a class="bar-brand" routerLink="/team">BASSIANA · Team</a>
     <div class="bar-right">
+      <a class="bar-btn" routerLink="/" title="Home" aria-label="Home"><i class='bx bx-home-alt'></i></a>
       <button class="bar-btn" (click)="themeService.toggle()" [title]="isLight ? 'Dark mode' : 'Light mode'">
         <i class='bx' [ngClass]="isLight ? 'bx-moon' : 'bx-sun'"></i>
       </button>
-      <button class="bar-btn bar-primary" (click)="print()" *ngIf="member">
-        <i class='bx bx-printer'></i><span>Print</span>
-      </button>
+      <div class="dl-menu" *ngIf="member" [class.open]="downloadOpen">
+        <button class="bar-btn bar-primary" (click)="downloadOpen = !downloadOpen; $event.stopPropagation()"
+                aria-haspopup="menu" [attr.aria-expanded]="downloadOpen">
+          <i class='bx bx-download'></i><span>Download</span><i class='bx bx-chevron-down dl-caret'></i>
+        </button>
+        <div class="dl-panel" *ngIf="downloadOpen" role="menu" (click)="$event.stopPropagation()">
+          <button class="dl-option" role="menuitem" (click)="print()">
+            <i class='bx bx-printer'></i>
+            <span><strong>Print</strong><small>Or save as PDF from the print dialog</small></span>
+          </button>
+          <button class="dl-option" role="menuitem" [disabled]="!!exporting" (click)="download('docx')">
+            <i class='bx' [ngClass]="exporting === 'docx' ? 'bx-loader-alt bx-spin' : 'bxs-file-doc'"></i>
+            <span><strong>Word</strong><small>Editable .docx document</small></span>
+          </button>
+          <button class="dl-option" role="menuitem" [disabled]="!!exporting" (click)="download('pdf')">
+            <i class='bx' [ngClass]="exporting === 'pdf' ? 'bx-loader-alt bx-spin' : 'bxs-file-pdf'"></i>
+            <span><strong>PDF</strong><small>Ready-to-share .pdf file</small></span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 

@@ -10,7 +10,7 @@ import { PortalProjectDocumentService, ProjectDocument } from '../../../services
 type TypeFilter = 'all' | ProjectDocument['category'];
 
 /**
- * Files the admin marked as shared in the Shared Folder, as one flat list -
+ * Files the admin marked as shared in Shared Points, as one flat list -
  * visitors never see how the admin organised them into folders. Searchable,
  * and filterable by file type, like the Events page.
  */

@@ -70,6 +70,7 @@ import { SafeHtmlPipe } from './shared/safe-html.pipe';
 import { AdminNavbarComponent } from './utilities/admin-navbar/admin-navbar.component';
 import { AdminSidebarComponent } from './utilities/admin-sidebar/admin-sidebar.component';
 import { DatePickerComponent } from './shared/components/date-picker/date-picker.component';
+import { DateFilterComponent } from './shared/components/date-filter/date-filter.component';
 import { CvLinkComponent } from './shared/components/cv-link/cv-link.component';
 
 // Landing pages
@@ -154,6 +155,7 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     AdminNavbarComponent,
     AdminSidebarComponent,
     DatePickerComponent,
+    DateFilterComponent,
     CvLinkComponent,
     UpbuttonComponent,
   ],

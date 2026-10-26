@@ -1,10 +1,11 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ThemeService } from '../services/ThemeService';
 import { UpbuttonComponent } from '../utilities/Upbutton/upbutton.component';
 import { CrewCv, CrewCvService, CvSection, CvSectionKind, normalizeCv, sectionNumber } from '../services/CrewCvService';
+import { CvExportService } from '../services/CvExportService';
 
 /**
  * Text split into runs: plain, bold (**...** in the stored text) and links,
@@ -134,6 +135,7 @@ export class CvViewComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private router: Router,
     public themeService: ThemeService,
+    private cvExportService: CvExportService,
   ) {}
 
   ngOnInit(): void {
@@ -263,5 +265,32 @@ export class CvViewComponent implements OnInit, OnDestroy {
     else this.router.navigateByUrl('/team');
   }
 
-  print(): void { window.print(); }
+  print(): void {
+    this.downloadOpen = false;
+    // Let the menu close before the print dialog freezes the page.
+    setTimeout(() => window.print());
+  }
+
+  downloadOpen = false;
+  exporting: 'docx' | 'pdf' | null = null;
+
+  async download(format: 'docx' | 'pdf'): Promise<void> {
+    if (!this.member || this.exporting) return;
+    this.exporting = format;
+    try {
+      if (format === 'docx') await this.cvExportService.exportWord(this.member);
+      else await this.cvExportService.exportPdf(this.member);
+      this.downloadOpen = false;
+    } catch (error) {
+      console.error(`Error exporting the CV as ${format}:`, error);
+    } finally {
+      this.exporting = null;
+    }
+  }
+
+  @HostListener('document:click')
+  closeDownload(): void { this.downloadOpen = false; }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.downloadOpen = false; }
 }

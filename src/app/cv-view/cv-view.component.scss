@@ -50,11 +50,6 @@
   background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.bar-brand {
-  font: 600 11px var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
-  color: var(--text-dim); text-decoration: none;
-  &:hover { color: var(--accent); }
-}
 .bar-right { margin-left: auto; display: flex; gap: 8px; }
 .bar-btn {
   display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px;
@@ -64,6 +59,30 @@
   &:hover { border-color: var(--accent); color: var(--accent); }
 }
 .bar-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); &:hover { color: var(--accent-ink); filter: brightness(1.08); } }
+
+// Download menu: print, Word, PDF
+.dl-menu { position: relative; }
+.dl-caret { font-size: 16px; margin-left: -2px; transition: transform .2s; }
+.dl-menu.open .dl-caret { transform: rotate(180deg); }
+.dl-panel {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 50;
+  width: 270px; padding: 6px;
+  background: var(--paper); border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .28);
+  animation: dlIn .14s ease;
+}
+@keyframes dlIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.dl-option {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border: none; border-radius: 8px; background: transparent;
+  color: var(--text); font: inherit; text-align: left; cursor: pointer;
+  > i { font-size: 22px; color: var(--accent); flex-shrink: 0; }
+  span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  strong { font: 600 13.5px var(--font-sans); }
+  small { font-size: 11.5px; color: var(--text-dim); }
+  &:hover:not(:disabled) { background: var(--panel-2); }
+  &:disabled { opacity: .6; cursor: progress; }
+}
 
 .cv-state {
   display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
@@ -75,10 +94,11 @@
 
 // ── Layout ────────────────────────────────────────────────────────────────
 .cv-shell {
-  max-width: 1100px; margin: 0 auto; padding: 32px 32px 64px;
-  // With contents, the page spans the screen: wide sidebar, document fills the rest.
+  // Same side padding as .cv-bar, so the page lines up with the Back and Download buttons.
+  padding: 32px 24px 64px;
+  // With contents: wide sidebar, document fills the rest.
   &.has-toc {
-    max-width: 1760px; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 28px; align-items: start;
+    display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 28px; align-items: start;
   }
 }
 
@@ -277,7 +297,6 @@ a { color: var(--accent); text-decoration: none; overflow-wrap: anywhere; &:hove
 }
 @media (max-width: 640px) {
   .cv-bar { padding: 10px 16px; gap: 10px; }
-  .bar-brand { display: none; }
   .bar-btn span { display: none; }
   .bar-btn { padding: 0 10px; }
   .cv-shell { padding: 16px 16px 40px; }

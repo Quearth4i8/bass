@@ -52,7 +52,7 @@
             <i class='bx bx-search'></i>
             <input
               type="text"
-              placeholder="Search all fields..."
+              placeholder="Search all fields, status included..."
               [(ngModel)]="columnFilters[i].general"
               (ngModelChange)="filterProjects(projectGroup.title, i)">
           </div>
@@ -118,20 +118,37 @@
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].thematique" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
+              <label>Status</label>
+              <div class="custom-dropdown" [class.open]="isDropdownOpen(i, 'status')">
+                <div class="dropdown-trigger" (click)="toggleDropdown(i, 'status', $event)">
+                  <span class="dropdown-value">{{ columnFilters[i].status ? statusLabel(columnFilters[i].status) : 'All' }}</span>
+                  <i class='bx bx-chevron-down'></i>
+                </div>
+                <div class="dropdown-menu" [hidden]="!isDropdownOpen(i, 'status')" [class.show]="isDropdownOpen(i, 'status')" [ngStyle]="statusMenuStyle[i]">
+                  <div class="dropdown-item" [class.selected]="!columnFilters[i].status" (click)="selectOption(i, 'status', '', projectGroup.title)">All</div>
+                  <div class="dropdown-item" *ngFor="let st of getUniqueStatuses(projectGroup.title)" [class.selected]="columnFilters[i].status === st" (click)="selectOption(i, 'status', st, projectGroup.title)">{{ statusLabel(st) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-field">
+              <label>Submission Date</label>
+              <app-date-filter [(ngModel)]="columnFilters[i].submissionDate" (ngModelChange)="filterProjects(projectGroup.title, i)"></app-date-filter>
+            </div>
+            <div class="filter-field">
               <label>Start Date</label>
-              <input type="text" placeholder="e.g. 2020" [(ngModel)]="columnFilters[i].startyear" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <app-date-filter [(ngModel)]="columnFilters[i].startyear" (ngModelChange)="filterProjects(projectGroup.title, i)"></app-date-filter>
             </div>
             <div class="filter-field">
               <label>End Date</label>
-              <input type="text" placeholder="e.g. 2024" [(ngModel)]="columnFilters[i].endyear" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <app-date-filter [(ngModel)]="columnFilters[i].endyear" (ngModelChange)="filterProjects(projectGroup.title, i)"></app-date-filter>
             </div>
             <div class="filter-field">
               <label>Total Budget</label>
-              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].totalBudget" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <input type="number" min="0" placeholder="e.g. 500000" [(ngModel)]="columnFilters[i].totalBudget" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
             <div class="filter-field">
               <label>Partner Budget</label>
-              <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].budget" (ngModelChange)="filterProjects(projectGroup.title, i)">
+              <input type="number" min="0" placeholder="e.g. 500000" [(ngModel)]="columnFilters[i].budget" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
           </div>
           </div>
@@ -168,9 +185,9 @@
                 <td [title]="project.titreproj || 'NA'">{{ project.titreproj || 'NA' }}</td>
                 <td [title]="project.programme || 'NA'"><span class="program-badge">{{ project.programme || 'NA' }}</span></td>
                 <td [title]="project.thematique || 'NA'">{{ project.thematique || 'NA' }}</td>
-                <td class="year-cell">{{ project.submissionDate ? (project.submissionDate | date:'d MMM y') : 'NA' }}</td>
-                <td class="year-cell">{{ project.startyear || 'NA' }}</td>
-                <td class="year-cell">{{ project.endyear || 'NA' }}</td>
+                <td class="year-cell">{{ projectDate(project.submissionDate) || 'NA' }}</td>
+                <td class="year-cell">{{ projectDate(project.startDate, project.startyear) || 'NA' }}</td>
+                <td class="year-cell">{{ projectDate(project.endDate, project.endyear) || 'NA' }}</td>
                 <td class="budget-cell">{{ project.totalBudget ? (project.totalBudget | number:'1.2-2') : 'NA' }}</td>
                 <td class="budget-cell">{{ project.budget ? (project.budget | number:'1.2-2') : 'NA' }}</td>
                 <td *ngIf="isTotalTab(projectGroup.title)">{{ statusLabel(project.title) || 'NA' }}</td>
@@ -244,7 +261,7 @@
 
       <div class="detail-field">
         <div class="detail-field-label"><i class='bx bx-calendar-check'></i> Submission Date</div>
-        <div class="detail-field-value" *ngIf="selectedProject.submissionDate; else notSpecified">{{ selectedProject.submissionDate | date:'d MMMM y' }}</div>
+        <div class="detail-field-value" *ngIf="selectedProject.submissionDate; else notSpecified">{{ projectDate(selectedProject.submissionDate) }}</div>
       </div>
 
       <div class="detail-field">
@@ -253,14 +270,14 @@
           <div class="detail-timeline">
             <div class="tl-endpoint">
               <span class="tl-label">From</span>
-              <span class="tl-year">{{ selectedProject.startyear || '—' }}</span>
+              <span class="tl-year">{{ projectDate(selectedProject.startDate, selectedProject.startyear) || '—' }}</span>
             </div>
             <div class="tl-bar">
               <div class="tl-progress" [style.width.%]="getProgressPct(selectedProject.startyear, selectedProject.endyear)"></div>
             </div>
             <div class="tl-endpoint">
               <span class="tl-label">To</span>
-              <span class="tl-year">{{ selectedProject.endyear || '—' }}</span>
+              <span class="tl-year">{{ projectDate(selectedProject.endDate, selectedProject.endyear) || '—' }}</span>
             </div>
           </div>
         </div>

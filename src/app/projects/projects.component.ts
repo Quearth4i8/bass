@@ -1,4 +1,4 @@
-import { isRejectedStatus, roleLabel, statusLabel } from '../utilities/project-labels';
+import { isRejectedStatus, matchesDate, projectDate, roleLabel, statusLabel, submissionDateText } from '../utilities/project-labels';
 import { Component, OnInit, HostBinding, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
@@ -42,8 +42,10 @@ export class ProjectsComponent implements OnInit {
   showFilters: boolean[] = [];
   partnerDropdownOpen: boolean[] = [];
   programmeDropdownOpen: boolean[] = [];
+  statusDropdownOpen: boolean[] = [];
   partnerMenuStyle: { [key: string]: string }[] = [];
   programmeMenuStyle: { [key: string]: string }[] = [];
+  statusMenuStyle: { [key: string]: string }[] = [];
 
   projectGroups: any[] = [];
   projectData: { [key: string]: any[] } = {};
@@ -89,11 +91,14 @@ export class ProjectsComponent implements OnInit {
         acronyme: '',
         startyear: '',
         endyear: '',
+        submissionDate: '',
         totalBudget: '',
-        budget: ''
+        budget: '',
+        status: ''
       }));
       // Initialize dropdown state arrays
       this.partnerDropdownOpen = new Array(this.projectGroups.length).fill(false);
+      this.statusDropdownOpen = new Array(this.projectGroups.length).fill(false);
       this.programmeDropdownOpen = new Array(this.projectGroups.length).fill(false);
       this.showFilters = new Array(this.projectGroups.length).fill(false);
       groups.forEach((group: any) => {
@@ -156,6 +161,7 @@ export class ProjectsComponent implements OnInit {
 
   readonly roleLabel = roleLabel;
   readonly statusLabel = statusLabel;
+  readonly projectDate = projectDate;
 
   isTotalTab(title: string): boolean { return title === TOTAL_KEY; }
 
@@ -215,12 +221,14 @@ export class ProjectsComponent implements OnInit {
     const filters = this.columnFilters[index];
 
     this.filteredProjectData[groupTitle] = this.projectData[groupTitle].filter((project: any) => {
-      // General search across all fields
+      // General search across all fields, the status ("ongoing", "rejected"...) included
       if (normalizeSearch(filters.general)) {
         const matchesGeneral = [
-          project.responsable, project.applicant, project.partenaire, project.thematique, project.programme,
-          project.titreproj, project.acronyme, project.startyear, project.endyear,
-          project.totalBudget, project.budget,
+          project.responsable, project.applicant, project.partenaire, roleLabel(project.partenaire),
+          project.thematique, project.programme, project.titreproj, project.acronyme,
+          submissionDateText(project.submissionDate), submissionDateText(project.startDate), submissionDateText(project.endDate),
+          project.startyear, project.endyear,
+          project.totalBudget, project.budget, statusLabel(project.title),
         ].some(value => matchesSearch(value, filters.general));
         if (!matchesGeneral) return false;
       }
@@ -230,11 +238,13 @@ export class ProjectsComponent implements OnInit {
         matchesSearch(project.applicant, filters.applicant) &&
         (!filters.partenaire || project.partenaire === filters.partenaire) &&
         matchesSearch(project.thematique, filters.thematique) &&
+        (!filters.status || project.title === filters.status) &&
         (!filters.programme || project.programme === filters.programme) &&
         matchesSearch(project.titreproj, filters.titreproj) &&
         matchesSearch(project.acronyme, filters.acronyme) &&
-        matchesSearch(project.startyear, filters.startyear) &&
-        matchesSearch(project.endyear, filters.endyear) &&
+        matchesDate(project.startDate, project.startyear, filters.startyear) &&
+        matchesDate(project.endDate, project.endyear, filters.endyear) &&
+        matchesDate(project.submissionDate, null, filters.submissionDate) &&
         matchesSearch(project.totalBudget, filters.totalBudget) &&
         matchesSearch(project.budget, filters.budget)
       );
@@ -245,6 +255,13 @@ export class ProjectsComponent implements OnInit {
     if (!this.projectData[groupTitle]) return [];
     const programs = this.projectData[groupTitle].map(project => project.programme).filter(Boolean);
     return Array.from(new Set(programs)).sort();
+  }
+
+  /** Statuses present in a tab: all of them on Total, the tab's own one elsewhere. */
+  getUniqueStatuses(groupTitle: string): string[] {
+    if (!this.projectData[groupTitle]) return [];
+    const statuses = this.projectData[groupTitle].map(project => project.title).filter(Boolean);
+    return Array.from(new Set(statuses)).sort((a, b) => statusRank(a) - statusRank(b));
   }
 
   getUniquePartners(groupTitle: string): string[] {
@@ -288,8 +305,10 @@ export class ProjectsComponent implements OnInit {
       acronyme: '',
       startyear: '',
       endyear: '',
+      submissionDate: '',
       totalBudget: '',
-      budget: ''
+      budget: '',
+      status: ''
     };
     this.filterProjects(title, index);
   }
@@ -298,14 +317,23 @@ export class ProjectsComponent implements OnInit {
     if (field === 'partner') {
       this.partnerDropdownOpen[index] = !this.partnerDropdownOpen[index];
       this.programmeDropdownOpen[index] = false;
+      this.statusDropdownOpen[index] = false;
       if (this.partnerDropdownOpen[index] && event) {
         this.partnerMenuStyle[index] = this.computeMenuStyle(event);
       }
     } else if (field === 'programme') {
       this.programmeDropdownOpen[index] = !this.programmeDropdownOpen[index];
       this.partnerDropdownOpen[index] = false;
+      this.statusDropdownOpen[index] = false;
       if (this.programmeDropdownOpen[index] && event) {
         this.programmeMenuStyle[index] = this.computeMenuStyle(event);
+      }
+    } else if (field === 'status') {
+      this.statusDropdownOpen[index] = !this.statusDropdownOpen[index];
+      this.partnerDropdownOpen[index] = false;
+      this.programmeDropdownOpen[index] = false;
+      if (this.statusDropdownOpen[index] && event) {
+        this.statusMenuStyle[index] = this.computeMenuStyle(event);
       }
     }
   }
@@ -337,6 +365,8 @@ export class ProjectsComponent implements OnInit {
       return !!this.partnerDropdownOpen[index];
     } else if (field === 'programme') {
       return !!this.programmeDropdownOpen[index];
+    } else if (field === 'status') {
+      return !!this.statusDropdownOpen[index];
     }
     return false;
   }
@@ -347,6 +377,7 @@ export class ProjectsComponent implements OnInit {
     // Close all dropdowns
     this.partnerDropdownOpen[index] = false;
     this.programmeDropdownOpen[index] = false;
+    this.statusDropdownOpen[index] = false;
   }
 
   openDetail(project: any): void  { this.selectedProject = project; }
@@ -370,6 +401,7 @@ export class ProjectsComponent implements OnInit {
     if (!target.closest('.custom-dropdown')) {
       this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
       this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
+    this.statusDropdownOpen = this.statusDropdownOpen.map(() => false);
     }
     // Close admin login dropdown
     if (!target.closest('.admin-area')) {
@@ -382,5 +414,6 @@ export class ProjectsComponent implements OnInit {
     // Close all dropdowns on scroll
     this.partnerDropdownOpen = this.partnerDropdownOpen.map(() => false);
     this.programmeDropdownOpen = this.programmeDropdownOpen.map(() => false);
+    this.statusDropdownOpen = this.statusDropdownOpen.map(() => false);
   }
 }

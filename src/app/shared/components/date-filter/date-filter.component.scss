@@ -1,0 +1,124 @@
+// Same tokens as app-date-picker: dark by default, light under any
+// .theme-light ancestor.
+:host {
+  --df-bg: #0a3142;
+  --df-field: #061f2e;
+  --df-line: #1b5573;
+  --df-text: #e8f1f5;
+  --df-dim: #9fb3bf;
+  --df-faint: #5d7785;
+  --df-accent: #4ad6c4;
+  --df-accent-ink: #031420;
+  --df-hover: rgba(255, 255, 255, 0.06);
+  --df-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  display: block;
+  position: relative;
+}
+
+:host-context(.theme-light) {
+  --df-bg: #ffffff;
+  --df-field: #f6fafc;
+  --df-line: #c5d8e6;
+  --df-text: #0d2137;
+  --df-dim: #3d5a6e;
+  --df-faint: #a3b4c0;
+  --df-accent: #1a8f7f;
+  --df-accent-ink: #ffffff;
+  --df-hover: #f0f7fb;
+  --df-shadow: 0 16px 40px rgba(13, 33, 55, 0.16);
+}
+
+// ── Field ───────────────────────────────────────────────────────────────────
+.df-trigger {
+  width: 100%; height: 40px; padding: 0 10px 0 12px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--df-field); border: 1px solid var(--df-line); border-radius: 8px;
+  color: var(--df-text); font: inherit; font-size: 13.5px; text-align: left;
+  cursor: pointer; transition: border-color .2s, box-shadow .2s;
+
+  &:hover:not(:disabled) { border-color: var(--df-accent); }
+  &.open, &:focus-visible { outline: none; border-color: var(--df-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--df-accent) 18%, transparent); }
+  &.empty .df-value { color: var(--df-faint); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
+}
+.df-icon { font-size: 18px; color: var(--df-accent); flex-shrink: 0; }
+.df-value { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.df-clear {
+  flex-shrink: 0; font-size: 18px; color: var(--df-faint); border-radius: 6px;
+  &:hover { color: var(--df-text); background: var(--df-hover); }
+}
+
+// ── Popover ─────────────────────────────────────────────────────────────────
+.df-popover {
+  position: fixed; z-index: 10050;
+  width: 340px; padding: 14px 16px;
+  background: var(--df-bg); border: 1px solid var(--df-line); border-radius: 16px;
+  box-shadow: var(--df-shadow);
+  color: var(--df-text);
+  animation: dfIn .14s ease;
+}
+@keyframes dfIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.df-section + .df-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--df-line); }
+
+.df-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; height: 26px; }
+.df-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--df-dim); }
+.df-spacer { flex: 1; }
+.df-any {
+  height: 22px; padding: 0 9px; border-radius: 999px;
+  border: 1px solid var(--df-line); background: transparent;
+  color: var(--df-faint); font: inherit; font-size: 11.5px; cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  &:hover { color: var(--df-text); border-color: var(--df-accent); }
+  &.on { color: var(--df-accent); border-color: color-mix(in srgb, var(--df-accent) 50%, transparent); background: color-mix(in srgb, var(--df-accent) 10%, transparent); }
+}
+.df-nav {
+  display: flex; gap: 2px;
+  button {
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    border: none; border-radius: 7px; background: transparent; color: var(--df-dim);
+    font-size: 18px; cursor: pointer;
+    &:hover { background: var(--df-hover); color: var(--df-text); }
+  }
+}
+
+.df-grid { display: grid; gap: 4px; }
+.df-years  { grid-template-columns: repeat(4, 1fr); }
+.df-months { grid-template-columns: repeat(6, 1fr); }
+.df-days   { grid-template-columns: repeat(8, 1fr); .df-cell { height: 28px; } }
+
+.df-cell {
+  height: 32px; border: none; border-radius: 8px; background: transparent;
+  color: var(--df-text); font: inherit; font-size: 13px; cursor: pointer;
+  transition: background .12s, color .12s;
+
+  &:hover:not(:disabled) { background: var(--df-hover); }
+  &:disabled { color: var(--df-faint); opacity: .4; cursor: default; }
+  &.current:not(.selected) { box-shadow: inset 0 0 0 1.5px var(--df-accent); color: var(--df-accent); font-weight: 600; }
+  &.selected {
+    background: var(--df-accent); color: var(--df-accent-ink); font-weight: 700;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--df-accent) 35%, transparent);
+  }
+}
+
+.df-foot {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--df-line);
+}
+.df-summary {
+  flex: 1; min-width: 0; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--df-accent);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  i { font-size: 15px; flex-shrink: 0; }
+}
+.df-link {
+  border: none; background: transparent; padding: 6px 2px; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 500; color: var(--df-faint);
+  &:hover { color: var(--df-text); }
+}
+.df-ok {
+  height: 30px; padding: 0 14px; border: none; border-radius: 8px;
+  background: var(--df-accent); color: var(--df-accent-ink);
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  &:hover { filter: brightness(1.07); }
+}

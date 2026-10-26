@@ -57,11 +57,14 @@
                 </div>
                 <div class="ad-field">
                     <label for="startyear">Start date <span class="req">*</span></label>
-                    <app-date-picker mode="year" inputId="startyear" name="startyear" [(ngModel)]="projectFormData.startyear" placeholder="Select start year" required></app-date-picker>
+                    <!-- Older rows only have a year: shown as the placeholder until an exact date is picked. -->
+                    <app-date-picker inputId="startyear" name="startDate" [(ngModel)]="projectFormData.startDate"
+                                     [placeholder]="projectFormData.startyear ? projectFormData.startyear + ' (pick the exact date)' : 'Select start date'" required></app-date-picker>
                 </div>
                 <div class="ad-field">
                     <label for="endyear">End date <span class="req">*</span></label>
-                    <app-date-picker mode="year" inputId="endyear" name="endyear" [(ngModel)]="projectFormData.endyear" placeholder="Select end year" required></app-date-picker>
+                    <app-date-picker inputId="endyear" name="endDate" [(ngModel)]="projectFormData.endDate"
+                                     [placeholder]="projectFormData.endyear ? projectFormData.endyear + ' (pick the exact date)' : 'Select end date'" required></app-date-picker>
                 </div>
                 <div class="ad-field">
                     <label for="totalBudget">Total budget (€)</label>

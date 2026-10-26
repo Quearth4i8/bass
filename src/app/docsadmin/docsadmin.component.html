@@ -2,7 +2,7 @@
 
   <app-admin-navbar (menuToggle)="toggleSidebar()">
     <div header-title class="header-breadcrumb">
-      <h1>Shared Folder</h1>
+      <h1>Shared Points</h1>
       <ng-container *ngIf="view === 'documents' && selectedProject">
         <i class='bx bx-chevron-right breadcrumb-sep'></i>
         <span class="breadcrumb-project" [style.color]="selectedProject.accentColor">
@@ -22,7 +22,7 @@
 
       <div class="page-head">
         <div>
-          <h1 class="page-heading">Shared folder</h1>
+          <h1 class="page-heading">Shared points</h1>
           <p class="page-sub">Documents for each portal project - open a project to browse and upload its files</p>
         </div>
       </div>

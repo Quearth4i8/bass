@@ -1,4 +1,4 @@
-import { roleLabel } from '../utilities/project-labels';
+import { projectDate, roleLabel } from '../utilities/project-labels';
 import { Injectable } from '@angular/core';
 
 export type ProjectExportFormat = 'xlsx' | 'docx' | 'pdf' | 'txt';
@@ -27,9 +27,9 @@ export class ProjectExportService {
     { header: 'Project title',   value: p => p.titreproj || '' },
     { header: 'Program',         value: p => p.programme || '' },
     { header: 'Thematic',        value: p => p.thematique || '' },
-    { header: 'Submission date', value: p => p.submissionDate || '' },
-    { header: 'Start date',      value: p => p.startyear || '' },
-    { header: 'End date',        value: p => p.endyear || '' },
+    { header: 'Submission date', value: p => projectDate(p.submissionDate) },
+    { header: 'Start date',      value: p => projectDate(p.startDate, p.startyear) },
+    { header: 'End date',        value: p => projectDate(p.endDate, p.endyear) },
     { header: 'Total budget (€)',   value: p => (p.totalBudget || p.totalBudget === 0) ? Number(p.totalBudget) : '' },
     { header: 'Partner budget (€)', value: p => (p.budget || p.budget === 0) ? Number(p.budget) : '' },
     { header: 'Status',          value: p => this.groupLabel(p.title) },

@@ -48,27 +48,52 @@
   </div>
 
   <!-- Stats strip -->
-  <div class="stats-strip stats-strip-3 fade-up" style="transition-delay:240ms">
+  <div class="stats-strip stats-strip-pie fade-up" style="transition-delay:240ms">
     <div class="stat">
       <div class="stat-value">
         <span *ngIf="totalResearchProjects !== null">{{ totalResearchProjects }}</span>
         <span *ngIf="totalResearchProjects === null" class="stat-loading">—</span>
       </div>
-      <div class="label stat-label stat-label-accent">Total Research Projects</div>
+      <div class="label stat-label stat-label-accent">Total Projects</div>
     </div>
-    <div class="stat">
+    <!-- Status figures, each with its share of the total as a bar in its pie colour.
+         Hovering one lifts its slice, and the other way round. -->
+    <div *ngFor="let st of [
+           { key: 'submitted', label: 'Submitted Projects', value: submittedResearchProjects },
+           { key: 'ongoing',   label: 'Ongoing Projects',   value: ongoingResearchProjects },
+           { key: 'achieved',  label: 'Achieved Projects',  value: achievedResearchProjects }]"
+         class="stat stat-status pie-{{ st.key }}"
+         [class.is-active]="activeKey === st.key" [class.is-dimmed]="activeKey && activeKey !== st.key"
+         (mouseenter)="activeKey = st.key" (mouseleave)="activeKey = null">
       <div class="stat-value">
-        <span *ngIf="ongoingResearchProjects !== null">{{ ongoingResearchProjects }}</span>
-        <span *ngIf="ongoingResearchProjects === null" class="stat-loading">—</span>
+        <span *ngIf="st.value !== null">{{ st.value }}</span>
+        <span *ngIf="st.value === null" class="stat-loading">—</span>
+        <span class="stat-share" *ngIf="st.value !== null">{{ share(st.key) }}%</span>
       </div>
-      <div class="label stat-label stat-label-accent">Ongoing Projects</div>
+      <div class="label stat-label stat-label-accent"><i class="stat-dot"></i>{{ st.label }}</div>
+      <div class="stat-bar"><span [style.width.%]="share(st.key)"></span></div>
     </div>
-    <div class="stat">
-      <div class="stat-value">
-        <span *ngIf="achievedResearchProjects !== null">{{ achievedResearchProjects }}</span>
-        <span *ngIf="achievedResearchProjects === null" class="stat-loading">—</span>
-      </div>
-      <div class="label stat-label stat-label-accent">Achieved Projects</div>
+
+    <div class="stat stat-pie">
+      <svg viewBox="0 0 100 100" class="pie" role="img" aria-label="Research projects by status"
+           [class.has-active]="activeKey">
+        <circle cx="50" cy="50" r="46" class="pie-track"></circle>
+        <path *ngFor="let s of pieSlices; let i = index" [attr.d]="s.d"
+              class="pie-slice pie-{{ s.key }}" [class.is-active]="activeKey === s.key"
+              [style.animation-delay.ms]="i * 90"
+              (mouseenter)="activeKey = s.key" (mouseleave)="activeKey = null">
+          <title>{{ s.label }}: {{ s.count }} ({{ s.percent }}%)</title>
+        </path>
+        <circle cx="50" cy="50" r="46" class="pie-glow"></circle>
+      </svg>
+      <ul class="pie-legend">
+        <li *ngFor="let s of pieSlices" class="pie-{{ s.key }}"
+            [class.is-active]="activeKey === s.key" [class.is-dimmed]="activeKey && activeKey !== s.key"
+            (mouseenter)="activeKey = s.key" (mouseleave)="activeKey = null">
+          <i class="stat-dot"></i><span class="pie-legend-name">{{ s.label }}</span>
+          <span class="pie-legend-pct">{{ s.percent }}%</span>
+        </li>
+      </ul>
     </div>
   </div>
 
@@ -77,7 +102,6 @@
 <section class="section">
   <div class="section-head fade-up">
     <h2 class="section-title">BASSIANA overview</h2>
-    <span class="label">est. 2026</span>
   </div>
 
   <div class="about-grid">

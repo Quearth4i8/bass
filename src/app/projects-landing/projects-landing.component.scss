@@ -328,6 +328,7 @@ app-projects-landing {
 .hero-sub {
   font-size: 15px; line-height: 1.65; color: $text-dim;
   margin: 0; max-width: 52ch;
+  text-align: justify; hyphens: auto;
 }
 
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
@@ -373,10 +374,104 @@ app-projects-landing {
   @media (max-width: 700px) { grid-template-columns: 1fr; .stat { border-right: 0; border-bottom: 1px solid $line; &:last-child { border-bottom: 0; } } }
 }
 
+/* Home page: four figures plus a pie of the statuses at the end of the row. */
+.stats-strip-pie {
+  grid-template-columns: repeat(4, 1fr) auto;
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(-n+4) { border-bottom: 1px solid $line; }
+    .stat-pie { grid-column: 1 / -1; justify-content: center; padding: 20px; }
+  }
+}
+
 .stat {
   padding: 24px 20px; border-right: 1px solid $line; position: relative;
   &:last-child { border-right: 0; }
 }
+
+// Status colours. Each status class sets --pie, read by its label dot,
+// share bar, pie slice and legend row.
+.pie-submitted { --pie: #{$warn}; }
+.pie-ongoing   { --pie: #5aa9e6; }
+.pie-achieved  { --pie: #{$accent}; }
+.pie-other     { --pie: #{$text-faint}; }
+
+.stat-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 8px; vertical-align: 1px;
+  background: var(--pie); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pie) 18%, transparent);
+}
+
+.stat-status {
+  transition: background 250ms, opacity 250ms;
+  /* A wash of the status colour rising from the bottom on hover. */
+  background: linear-gradient(to top, color-mix(in srgb, var(--pie) 0%, transparent), transparent 70%);
+  &.is-active { background: linear-gradient(to top, color-mix(in srgb, var(--pie) 10%, transparent), transparent 70%); }
+  &.is-dimmed { opacity: 0.55; }
+}
+.stat-share {
+  margin-left: 10px; font-size: 13px; font-weight: 500; letter-spacing: 0;
+  color: var(--pie); vertical-align: 6px;
+}
+.stat-bar {
+  margin-top: 14px; height: 3px; border-radius: 3px; overflow: hidden;
+  background: color-mix(in srgb, var(--pie) 14%, transparent);
+  span {
+    display: block; height: 100%; border-radius: inherit; background: var(--pie);
+    transition: width 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* The pie gets a panel of its own: no divider before it, just a glow fading
+   into the strip, with the percentages beside it. */
+.stats-strip-pie .stat:nth-last-child(2) { border-right: 0; }
+.stat-pie {
+  display: flex; align-items: center; gap: 22px;
+  padding: 16px 8px 16px 32px;
+  background:
+    radial-gradient(closest-side at 72px 50%, rgba(74,214,196,0.10), transparent),
+    linear-gradient(to right, transparent, rgba(74,214,196,0.03));
+}
+
+.pie {
+  width: 108px; height: 108px; flex-shrink: 0; overflow: visible;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.25));
+}
+.pie-track { fill: rgba(255,255,255,0.03); stroke: $line; stroke-width: 1; }
+/* A soft rim on top of the slices so the edge melts into the background. */
+.pie-glow  { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 1; pointer-events: none; }
+.pie-slice {
+  fill: var(--pie); stroke: $bg; stroke-width: 1.2; stroke-linejoin: round;
+  opacity: 0.9; transform-origin: 50px 50px; cursor: default;
+  /* backwards, not both: a held end frame would block the hover transform. */
+  animation: pie-in 800ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transition: opacity 220ms, transform 220ms;
+  &.is-active { opacity: 1; transform: scale(1.06); }
+}
+.pie.has-active .pie-slice:not(.is-active) { opacity: 0.35; }
+@keyframes pie-in {
+  from { opacity: 0; transform: scale(0.5) rotate(-60deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pie-slice { animation: none; }
+  .stat-bar span { transition: none; }
+}
+
+.pie-legend {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: $font-mono; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  li {
+    display: flex; align-items: center; color: $text-dim; white-space: nowrap;
+    transition: opacity 220ms, color 220ms;
+    &.is-active { color: $text; }
+    &.is-dimmed { opacity: 0.45; }
+  }
+  .stat-dot { width: 6px; height: 6px; box-shadow: none; }
+}
+.pie-legend-name { min-width: 84px; }
+.pie-legend-pct  { color: var(--pie); font-weight: 600; margin-left: 10px; }
 
 .stat-value { font-family: $font-mono; font-size: 30px; font-weight: 500; letter-spacing: -0.02em; color: $text; }
 .stat-unit  { font-family: $font-mono; font-size: 14px; color: $text-faint; margin-left: 2px; }
@@ -423,7 +518,7 @@ app-projects-landing {
 .card-id  { font-family: $font-mono; font-size: 10px; color: $text-faint; }
 
 .about-card {
-  p { font-size: 15px; line-height: 1.8; color: $text-dim; margin: 0 0 12px; &:last-child{margin-bottom:0} strong { color: $text; font-weight: 500; } }
+  p { font-size: 15px; line-height: 1.8; color: $text-dim; margin: 0 0 12px; text-align: justify; hyphens: auto; &:last-child{margin-bottom:0} strong { color: $text; font-weight: 500; } }
 }
 
 .about-grid {
@@ -1228,6 +1323,7 @@ app-projects-landing {
     display: grid; grid-template-columns: 28px 1fr; gap: 14px;
     padding: 14px 0; border-bottom: 1px dashed $line;
     align-items: start; font-size: 15px; line-height: 1.7; color: $text-dim;
+    text-align: justify; hyphens: auto;
     &:last-child { border-bottom: 0; padding-bottom: 0; }
     b { display: block; color: $text; font-weight: 500; margin-bottom: 2px; }
   }
@@ -2125,6 +2221,21 @@ app-projects-landing.theme-light {
   .stat-label-accent { color: #1a8f7f; }
   .scope-tag         { color: #1a8f7f; }
   .stat-loading { color: #9bb0bc; }
+  .stats-strip-pie .stat { border-bottom-color: #c5d8e6; }
+  .pie-submitted { --pie: #e0a12e; }
+  .pie-ongoing   { --pie: #3b8fd6; }
+  .pie-achieved  { --pie: #1a8f7f; }
+  .pie-other     { --pie: #a9bcc8; }
+  .stat-pie {
+    background:
+      radial-gradient(closest-side at 72px 50%, rgba(26,143,127,0.10), transparent),
+      linear-gradient(to right, transparent, rgba(26,143,127,0.03));
+  }
+  .pie          { filter: drop-shadow(0 6px 16px rgba(13,33,55,0.12)); }
+  .pie-track    { fill: rgba(13,33,55,0.03); stroke: #c5d8e6; }
+  .pie-glow     { stroke: rgba(255,255,255,0.6); }
+  .pie-slice    { stroke: #eef6fa; }
+  .pie-legend li { color: #3d5a6e; &.is-active { color: #0d2137; } }
 
   // Hero budget panel
   .budget-panel        { background: #fff; border-color: #c5d8e6; box-shadow: 0 6px 24px rgba(13,33,55,0.05); }
