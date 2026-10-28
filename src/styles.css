@@ -80,6 +80,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
    whichever stylesheet loads last) - don't move it back before PrimeNG's entries. */
 .p-toast {
   width: 360px;
+  /* saga-blue makes toasts 90% opaque; the navbar icons showed through them. */
+  opacity: 1;
 }
 .p-toast .p-toast-message {
   background: #082a3d;

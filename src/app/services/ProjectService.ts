@@ -59,6 +59,11 @@ export class ProjectService {
   getAllProjects(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/projects`);
   }
+  /** Ids of the projects that had `status` at any point during `year`, whatever their status now. */
+  getProjectIdsWithStatusInYear(status: string, year: number): Observable<number[]> {
+    const params = new HttpParams().set('status', status).set('year', String(year));
+    return this.http.get<number[]>(`${this.baseUrl}/projects/status-history`, { params });
+  }
 
   private authHeaders(): { headers: HttpHeaders } {
     const token = this.auth.getToken();

@@ -5,11 +5,6 @@
 
   <!-- Main Content -->
   <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
-    <!-- Messages -->
-    <div class="fixed-messages">
-      <p-messages></p-messages>
-    </div>
-
     <!-- Page header: what this page is, and what you can do on it -->
     <div class="page-head">
       <div>
@@ -59,7 +54,7 @@
           <p>{{ groupLabel(g.name) }}</p>
         </div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box stat-box-budget">
         <div class="stat-icon tone-blue"><i class='bx bx-euro'></i></div>
         <div class="stat-info">
           <h2>{{ compactEuro(ongoingTotalBudget) }}</h2>
@@ -67,7 +62,7 @@
           <span class="stat-sub">Ongoing projects</span>
         </div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box stat-box-budget">
         <div class="stat-icon tone-amber"><i class='bx bx-group'></i></div>
         <div class="stat-info">
           <h2>{{ compactEuro(ongoingPartnerBudget) }}</h2>
@@ -123,7 +118,7 @@
             <label>Acronym</label>
             <input type="text" placeholder="Search..." [(ngModel)]="filterValues['acronym']" (ngModelChange)="applyFilters()">
           </div>
-          <div class="filter-field filter-field-wide">
+          <div class="filter-field">
             <label>Title</label>
             <input type="text" placeholder="Search..." [(ngModel)]="filterValues['title']" (ngModelChange)="applyFilters()">
           </div>
@@ -156,6 +151,12 @@
                 <div class="dropdown-item" *ngFor="let st of statusOptions" [class.selected]="filterValues['status'] === st" (click)="pickFilter('status', st)">{{ groupLabel(st) }}</div>
               </div>
             </div>
+          </div>
+          <div class="filter-field">
+            <label>Status in year</label>
+            <input type="number" min="1900" max="2100" [placeholder]="filterValues['status'] ? 'Now (e.g. 2025)' : 'Pick a status first'"
+                   [disabled]="!filterValues['status']"
+                   [(ngModel)]="filterValues['statusYear']" (ngModelChange)="refreshStatusHistory()">
           </div>
           <div class="filter-field">
             <label>Submission date</label>

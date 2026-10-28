@@ -71,7 +71,16 @@ export class DialogContentComponent implements OnInit {
     });
   }
 
+  /**
+   * True while a save is in flight. A double-click (or Enter then a click)
+   * would otherwise send the request twice: two "updated" toasts, or two
+   * copies of a new project.
+   */
+  saving = false;
+
   onSubmit() {
+    if (this.saving) return;
+    this.saving = true;
     if (this.isEditMode && this.projectId) {
       // Update existing project
       const updatedProject = {
@@ -95,6 +104,7 @@ export class DialogContentComponent implements OnInit {
         },
         (error) => {
           console.error('Error updating project:', error);
+          this.saving = false;
         }
       );
     } else {
@@ -115,6 +125,7 @@ export class DialogContentComponent implements OnInit {
         },
         (error) => {
           console.error('Error creating project:', error);
+          this.saving = false;
         }
       );
     }

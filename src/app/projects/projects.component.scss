@@ -204,8 +204,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 .advanced-filters-inner { min-height: 0; overflow: hidden; }
 
-// 13 fields on 14 slots (Title spans two), as on the admin page, so every
-// row is full: 7 + 7, then 4 per row (last row 2), then 2 per row.
+// 14 fields (Status in year included), as on the admin page, so every row
+// is full: 7 + 7, then 4 per row (last row 2), then 2 per row.
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -247,6 +247,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
     box-sizing: border-box;
 
     &::placeholder { color: #5d7785; }
+    // Status in year, until a status is picked
+    &:disabled { opacity: .5; cursor: not-allowed; }
     // Budgets are number fields: no spinner arrows, they clash with the theme
     &[type=number] { -moz-appearance: textfield; appearance: textfield; }
     &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }

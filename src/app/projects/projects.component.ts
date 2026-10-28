@@ -1,5 +1,6 @@
 import { isRejectedStatus, matchesDate, projectDate, roleLabel, statusLabel, submissionDateText } from '../utilities/project-labels';
-import { Component, OnInit, HostBinding, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostBinding, HostListener } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/AuthService';
 import { ProjectGroupService } from '../services/ProjectGroupService';
@@ -24,7 +25,7 @@ function statusRank(title: string): number {
   templateUrl: 'projects.component.html',
   styleUrls: ['projects.component.scss'],
 })
-export class ProjectsComponent implements OnInit {
+export class ProjectsComponent implements OnInit, OnDestroy {
   @HostBinding('class.theme-light') get isLight() { return this.themeService.isLight; }
   username: string = '';
   password: string = '';
@@ -94,7 +95,8 @@ export class ProjectsComponent implements OnInit {
         submissionDate: '',
         totalBudget: '',
         budget: '',
-        status: ''
+        status: '',
+        statusYear: ''
       }));
       // Initialize dropdown state arrays
       this.partnerDropdownOpen = new Array(this.projectGroups.length).fill(false);
@@ -238,7 +240,7 @@ export class ProjectsComponent implements OnInit {
         matchesSearch(project.applicant, filters.applicant) &&
         (!filters.partenaire || project.partenaire === filters.partenaire) &&
         matchesSearch(project.thematique, filters.thematique) &&
-        (!filters.status || project.title === filters.status) &&
+        this.matchesStatus(project, index) &&
         (!filters.programme || project.programme === filters.programme) &&
         matchesSearch(project.titreproj, filters.titreproj) &&
         matchesSearch(project.acronyme, filters.acronyme) &&
@@ -251,14 +253,62 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  /**
+   * Per tab: with a year next to the status filter, the status matches the
+   * projects that had it during that year (from the backend's status history)
+   * instead of the ones that have it now. Null while that list is loading.
+   */
+  private statusHistoryIds: (Set<number> | null)[] = [];
+  private statusHistoryRequests: (Subscription | undefined)[] = [];
+
+  /** The year typed next to a tab's status filter, when it is a usable one. */
+  private statusYear(index: number): number | null {
+    const filters = this.columnFilters[index];
+    const year = Number(String(filters?.statusYear ?? '').trim());
+    return filters?.status && Number.isInteger(year) && year >= 1900 && year <= 2100 ? year : null;
+  }
+
+  /** Reloads a tab's historical status matches when its status or year changes, then refilters. */
+  refreshStatusHistory(groupTitle: string, index: number): void {
+    this.statusHistoryRequests[index]?.unsubscribe();
+    this.statusHistoryIds[index] = null;
+    const year = this.statusYear(index);
+    if (year !== null) {
+      this.statusHistoryRequests[index] = this.projectService
+        .getProjectIdsWithStatusInYear(this.columnFilters[index].status, year)
+        .subscribe({
+          next: ids => { this.statusHistoryIds[index] = new Set(ids); this.filterProjects(groupTitle, index); },
+          error: err => console.error('Error fetching status history:', err),
+        });
+    }
+    this.filterProjects(groupTitle, index);
+  }
+
+  private matchesStatus(project: any, index: number): boolean {
+    const status = this.columnFilters[index].status;
+    if (!status) return true;
+    if (this.statusYear(index) === null) return project.title === status;
+    return !!this.statusHistoryIds[index]?.has(project.id);
+  }
+
+  ngOnDestroy(): void {
+    this.statusHistoryRequests.forEach(request => request?.unsubscribe());
+  }
+
   getUniquePrograms(groupTitle: string): string[] {
     if (!this.projectData[groupTitle]) return [];
     const programs = this.projectData[groupTitle].map(project => project.programme).filter(Boolean);
     return Array.from(new Set(programs)).sort();
   }
 
-  /** Statuses present in a tab: all of them on Total, the tab's own one elsewhere. */
+  /**
+   * Statuses to filter a tab by: every status on Total (a status in a past
+   * year may be one no project has now), the tab's own one elsewhere.
+   */
   getUniqueStatuses(groupTitle: string): string[] {
+    if (groupTitle === TOTAL_KEY) {
+      return this.projectGroups.map(g => g.title).filter(t => t !== TOTAL_KEY);
+    }
     if (!this.projectData[groupTitle]) return [];
     const statuses = this.projectData[groupTitle].map(project => project.title).filter(Boolean);
     return Array.from(new Set(statuses)).sort((a, b) => statusRank(a) - statusRank(b));
@@ -308,9 +358,10 @@ export class ProjectsComponent implements OnInit {
       submissionDate: '',
       totalBudget: '',
       budget: '',
-      status: ''
+      status: '',
+      statusYear: ''
     };
-    this.filterProjects(title, index);
+    this.refreshStatusHistory(title, index);
   }
 
   toggleDropdown(index: number, field: string, event?: MouseEvent): void {
@@ -347,16 +398,18 @@ export class ProjectsComponent implements OnInit {
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     
-    // Check if we should open upward
+    // Check if we should open upward. Upward menus are anchored by their
+    // bottom edge, so a menu shorter than the max still sits on the trigger.
     const shouldOpenUp = spaceBelow < menuMaxHeight && spaceAbove > spaceBelow;
-    const top = shouldOpenUp 
-      ? Math.max(0, rect.top - menuMaxHeight - 4)
-      : rect.bottom + 4;
-    
+    const room = Math.min(menuMaxHeight, (shouldOpenUp ? spaceAbove : spaceBelow) - 8);
+
     return {
-      top: `${top}px`,
+      ...(shouldOpenUp
+        ? { top: 'auto', bottom: `${window.innerHeight - rect.top + 4}px` }
+        : { top: `${rect.bottom + 4}px`, bottom: 'auto' }),
       left: `${rect.left}px`,
       width: `${rect.width}px`,
+      'max-height': `${room}px`,
     };
   }
 
@@ -373,7 +426,12 @@ export class ProjectsComponent implements OnInit {
 
   selectOption(index: number, field: string, value: string, title: string): void {
     this.columnFilters[index][field] = value;
-    this.filterProjects(title, index);
+    if (field === 'status') {
+      if (!value) this.columnFilters[index].statusYear = '';
+      this.refreshStatusHistory(title, index);
+    } else {
+      this.filterProjects(title, index);
+    }
     // Close all dropdowns
     this.partnerDropdownOpen[index] = false;
     this.programmeDropdownOpen[index] = false;

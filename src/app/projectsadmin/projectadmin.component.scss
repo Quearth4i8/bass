@@ -164,45 +164,6 @@ a.header-btn { text-decoration: none; }
 .admin-main.sidebar-open { margin-left: 220px; }
 .admin-main:not(.sidebar-open) { margin-left: 0; }
 
-// ── Messages ───────────────────────────────────────────────────────────────
-.fixed-messages {
-  position: fixed; top: 64px; right: 0; z-index: 9999;
-  max-width: 400px; width: 360px;
-}
-
-::ng-deep .p-messages { margin: 0; }
-::ng-deep .p-messages .p-message {
-  border-radius: 0 0 $radius $radius;
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
-  border: none; border-left: 3px solid; margin: 0;
-}
-::ng-deep .p-messages .p-message.p-message-success {
-  background: $panel; border-left-color: #22c55e;
-}
-::ng-deep .p-messages .p-message.p-message-info {
-  background: $panel; border-left-color: #3b82f6;
-}
-::ng-deep .p-messages .p-message.p-message-error {
-  background: $panel; border-left-color: $danger;
-}
-::ng-deep .p-messages .p-message .p-message-icon {
-  font-size: 22px; width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 8px; flex-shrink: 0;
-}
-::ng-deep .p-messages .p-message.p-message-success .p-message-icon { color: #22c55e; background: rgba(34,197,94,.12); }
-::ng-deep .p-messages .p-message.p-message-info .p-message-icon { color: #3b82f6; background: rgba(59,130,246,.12); }
-::ng-deep .p-messages .p-message.p-message-error .p-message-icon { color: $danger; background: rgba(239,68,68,.12); }
-::ng-deep .p-messages .p-message .p-message-wrapper {
-  padding: 14px 18px; gap: 12px; display: flex; align-items: center;
-}
-::ng-deep .p-messages .p-message .p-message-close {
-  width: 26px; height: 26px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  color: $text-faint; transition: all 0.2s;
-  &:hover { background: rgba(255,255,255,.06); color: $text-dim; }
-}
-
 // ── Stats ──────────────────────────────────────────────────────────────────
 .stats-row {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -318,8 +279,8 @@ a.header-btn { text-decoration: none; }
 
 .advanced-inner { min-height: 0; overflow: hidden; }
 
-// Same layout as the public List of Projects: 13 fields on 14 slots (Title
-// spans two), so both rows are full; 4 per row, then 2, on narrower screens.
+// 14 fields (the public List of Projects' 13 plus Status in year) on 7
+// columns, so both rows are full; 4 per row, then 1, on narrower screens.
 .filter-grid {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px;
   margin-top: 16px; padding: 16px 2px 2px;
@@ -345,6 +306,8 @@ a.header-btn { text-decoration: none; }
     transition: border-color 0.2s;
     &:focus { outline: none; border-color: $accent; }
     &::placeholder { color: $text-faint; }
+    // Status in year, until a status is picked
+    &:disabled { opacity: .5; cursor: not-allowed; }
   }
 }
 
@@ -538,49 +501,6 @@ a.header-btn { text-decoration: none; }
   &.danger   { background: $danger; color: white; &:hover { background: #dc2626; } }
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────
-:host ::ng-deep .p-toast.p-component,
-:host ::ng-deep .p-toast {
-  position: fixed !important; top: 0 !important; right: 0 !important;
-  left: auto !important; bottom: auto !important; transform: none !important;
-  margin: 0 !important; width: 360px !important; z-index: 9999 !important;
-}
-
-::ng-deep .p-toast .p-toast-message {
-  border-radius: $radius; box-shadow: 0 8px 24px rgba(0,0,0,.4);
-  border: none; padding: 0; overflow: hidden; margin-bottom: 10px;
-}
-::ng-deep .p-toast .p-toast-message-content {
-  display: flex; align-items: center; padding: 14px 18px; gap: 12px;
-}
-::ng-deep .p-toast .p-toast-message-icon {
-  font-size: 22px; width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 8px; flex-shrink: 0;
-}
-::ng-deep .p-toast .p-toast-message-text { flex: 1; }
-::ng-deep .p-toast .p-toast-summary { font-size: 14px; font-weight: 600; margin: 0 0 2px 0; color: $text; }
-::ng-deep .p-toast .p-toast-detail   { font-size: 12px; color: $text-dim; margin: 0; }
-::ng-deep .p-toast .p-toast-message-success {
-  background: $panel; border-left: 3px solid #22c55e;
-  .p-toast-message-icon { color: #22c55e; background: rgba(34,197,94,.12); }
-}
-::ng-deep .p-toast .p-toast-message-info {
-  background: $panel; border-left: 3px solid #3b82f6;
-  .p-toast-message-icon { color: #3b82f6; background: rgba(59,130,246,.12); }
-}
-::ng-deep .p-toast .p-toast-message-error {
-  background: $panel; border-left: 3px solid $danger;
-  .p-toast-message-icon { color: $danger; background: rgba(239,68,68,.12); }
-}
-::ng-deep .p-toast .p-toast-close-icon {
-  width: 26px; height: 26px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  color: $text-faint; transition: all 0.2s;
-  position: absolute; top: 10px; right: 10px;
-  &:hover { background: rgba(255,255,255,.06); color: $text-dim; }
-}
-
 // ── Animations ─────────────────────────────────────────────────────────────
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp {
@@ -724,7 +644,15 @@ a.header-btn { text-decoration: none; }
   &:hover { filter: brightness(1.06); transform: translateY(-1px); }
 }
 
-.stats-row { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
+// One row on wide screens: the count cards share the width equally and the
+// two budget cards, whose labels are much longer, get more of it. Cards wrap
+// onto further rows as the screen narrows.
+.stats-row { display: flex !important; flex-wrap: wrap; }
+.stat-box { flex: 1 1 150px; min-width: 0; }
+.stat-box-budget { flex: 1.6 1 250px; }
+.stat-icon { flex-shrink: 0; }
+.stat-info { min-width: 0; }
+@media (max-width: 768px) { .stat-box, .stat-box-budget { flex-basis: 100%; } }
 .stat-info h2 small { font-size: 14px; font-weight: 600; margin-left: 2px; opacity: .75; }
 .stat-icon.tone-blue  { background: rgba(59,130,246,.12) !important; border-color: rgba(59,130,246,.25) !important; color: #60a5fa !important; }
 .stat-icon.tone-green { background: rgba(34,197,94,.12) !important;  border-color: rgba(34,197,94,.25) !important;  color: #4ade80 !important; }

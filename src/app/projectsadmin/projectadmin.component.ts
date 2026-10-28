@@ -15,6 +15,7 @@ import { ProjectGroupService } from '../services/ProjectGroupService';
 import { AuthService } from '../services/AuthService';
 import { matchesSearch } from '../shared/utils/text-search';
 import { ProjectExportService, ProjectExportFormat } from '../services/ProjectExportService';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'projectadmin',
@@ -180,7 +181,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.projectService.getAllProjects().subscribe(
       (data: any[]) => {
         this.allProjects = data.sort((a, b) => a.id - b.id);
-        this.applyFilters();
+        // A save may have changed a status, so the historical matches too.
+        this.refreshStatusHistory();
       },
       (error) => {
         console.error('Error fetching projects:', error);
@@ -309,7 +311,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   private emptyFilters(): Record<string, string> {
     return {
       coordinator: '', applicant: '', role: '', acronym: '', title: '', program: '', thematic: '',
-      status: '', submissionDate: '', startDate: '', endDate: '', totalBudget: '', budget: '',
+      status: '', statusYear: '', submissionDate: '', startDate: '', endDate: '', totalBudget: '', budget: '',
     };
   }
 
@@ -321,7 +323,44 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   resetFilters(): void {
     this.globalSearchTerm = '';
     this.filterValues = this.emptyFilters();
+    this.refreshStatusHistory();
+  }
+
+  /**
+   * With a year next to the status filter, the status matches the projects
+   * that had it during that year (from the backend's status history) instead
+   * of the ones that have it now. Null while that list is loading.
+   */
+  private statusHistoryIds: Set<number> | null = null;
+  private statusHistoryRequest?: Subscription;
+
+  /** The year typed next to the status filter, when it is a usable one. */
+  private get statusYear(): number | null {
+    const year = Number(String(this.filterValues['statusYear'] ?? '').trim());
+    return this.filterValues['status'] && Number.isInteger(year) && year >= 1900 && year <= 2100 ? year : null;
+  }
+
+  /** Reloads the historical status matches when the status or its year changes, then refilters. */
+  refreshStatusHistory(): void {
+    this.statusHistoryRequest?.unsubscribe();
+    this.statusHistoryIds = null;
+    const year = this.statusYear;
+    if (year !== null) {
+      this.statusHistoryRequest = this.projectService
+        .getProjectIdsWithStatusInYear(this.filterValues['status'], year)
+        .subscribe({
+          next: ids => { this.statusHistoryIds = new Set(ids); this.applyFilters(); },
+          error: err => console.error('Error fetching status history:', err),
+        });
+    }
     this.applyFilters();
+  }
+
+  private matchesStatus(project: any): boolean {
+    const f = this.filterValues;
+    if (!f['status']) return true;
+    if (this.statusYear === null) return project.title === f['status'];
+    return !!this.statusHistoryIds?.has(project.id);
   }
 
   /**
@@ -346,7 +385,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       matchesSearch(project.titreproj, f['title']) &&
       (!f['program'] || project.programme === f['program']) &&
       matchesSearch(project.thematique, f['thematic']) &&
-      (!f['status'] || project.title === f['status']) &&
+      this.matchesStatus(project) &&
       matchesDate(project.submissionDate, null, f['submissionDate']) &&
       matchesDate(project.startDate, project.startyear, f['startDate']) &&
       matchesDate(project.endDate, project.endyear, f['endDate']) &&
@@ -369,7 +408,9 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       text('Title', f['title']),
       f['program'] ? `Program: ${f['program']}` : '',
       text('Thematic', f['thematic']),
-      f['status'] ? `Status: ${statusLabel(f['status'])}` : '',
+      f['status'] ? (this.statusYear !== null
+        ? `Status in ${this.statusYear}: ${statusLabel(f['status'])}`
+        : `Status: ${statusLabel(f['status'])}`) : '',
       f['submissionDate'] ? `Submitted: ${describeDateFilter(f['submissionDate'])}` : '',
       f['startDate'] ? `Starts: ${describeDateFilter(f['startDate'])}` : '',
       f['endDate'] ? `Ends: ${describeDateFilter(f['endDate'])}` : '',
@@ -397,10 +438,16 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     const r = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const maxHeight = 280;
     const up = window.innerHeight - r.bottom < maxHeight && r.top > window.innerHeight - r.bottom;
+    // Upward menus are anchored by their bottom edge, so a menu shorter than
+    // the max still sits on the trigger.
+    const room = Math.min(maxHeight, (up ? r.top : window.innerHeight - r.bottom) - 8);
     this.filterMenuStyle = {
-      top: `${up ? Math.max(0, r.top - maxHeight - 4) : r.bottom + 4}px`,
+      ...(up
+        ? { top: 'auto', bottom: `${window.innerHeight - r.top + 4}px` }
+        : { top: `${r.bottom + 4}px`, bottom: 'auto' }),
       left: `${r.left}px`,
       width: `${r.width}px`,
+      'max-height': `${room}px`,
     };
     this.filterMenu = menu;
   }
@@ -408,7 +455,11 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   pickFilter(field: 'role' | 'program' | 'status', value: string): void {
     this.filterValues[field] = value;
     this.filterMenu = null;
-    this.applyFilters();
+    if (field === 'status') {
+      if (!value) this.filterValues['statusYear'] = '';
+      this.refreshStatusHistory();
+    }
+    else this.applyFilters();
   }
 
   exportMenuOpen = false;
@@ -575,6 +626,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.statusHistoryRequest?.unsubscribe();
     if (this.ref) {
       this.ref.close();
     }

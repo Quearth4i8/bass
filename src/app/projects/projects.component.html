@@ -96,7 +96,7 @@
               <label>Acronym</label>
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].acronyme" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
-            <div class="filter-field filter-field-wide">
+            <div class="filter-field">
               <label>Title</label>
               <input type="text" placeholder="Search..." [(ngModel)]="columnFilters[i].titreproj" (ngModelChange)="filterProjects(projectGroup.title, i)">
             </div>
@@ -129,6 +129,12 @@
                   <div class="dropdown-item" *ngFor="let st of getUniqueStatuses(projectGroup.title)" [class.selected]="columnFilters[i].status === st" (click)="selectOption(i, 'status', st, projectGroup.title)">{{ statusLabel(st) }}</div>
                 </div>
               </div>
+            </div>
+            <div class="filter-field">
+              <label>Status in year</label>
+              <input type="number" min="1900" max="2100" [placeholder]="columnFilters[i].status ? 'Now (e.g. 2025)' : 'Pick a status first'"
+                     [disabled]="!columnFilters[i].status"
+                     [(ngModel)]="columnFilters[i].statusYear" (ngModelChange)="refreshStatusHistory(projectGroup.title, i)">
             </div>
             <div class="filter-field">
               <label>Submission Date</label>

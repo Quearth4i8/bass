@@ -97,8 +97,8 @@
 
         <div class="ad-footer">
             <button type="button" class="ad-btn ghost" (click)="ref.close()">Cancel</button>
-            <button type="submit" class="ad-btn primary">
-                <i class='bx' [ngClass]="isEditMode ? 'bx-check' : 'bx-plus'"></i>
+            <button type="submit" class="ad-btn primary" [disabled]="saving">
+                <i class='bx' [ngClass]="saving ? 'bx-loader-alt bx-spin' : isEditMode ? 'bx-check' : 'bx-plus'"></i>
                 <span>{{ isEditMode ? 'Save changes' : 'Create project' }}</span>
             </button>
         </div>
