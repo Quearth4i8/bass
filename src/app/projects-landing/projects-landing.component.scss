@@ -110,19 +110,22 @@ app-projects-landing {
   > div { min-width: 0; }
 }
 
+/* Logo on a white tile so it reads on the teal nav. */
 .brand-mark {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
+  box-sizing: border-box; padding: 4px;
   border-radius: 8px;
+  background: #fff;
   object-fit: contain;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 4px;
-  @media (max-width: 680px) { width: 34px; height: 34px; }   // desktop look untouched
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  @media (max-width: 680px) { width: 34px; height: 34px; }
 }
 
 .brand-name {
-  font-weight: 600; font-size: 14px;
-  letter-spacing: -0.01em; color: $text;
+  font-weight: 600; font-size: 21px; line-height: 1;
+  letter-spacing: -0.02em; color: $text;
+  @media (max-width: 680px) { font-size: 17px; }
 }
 
 .brand-sub {
@@ -377,12 +380,28 @@ app-projects-landing {
 /* Home page: four figures plus a pie of the statuses at the end of the row. */
 .stats-strip-pie {
   grid-template-columns: repeat(4, 1fr) auto;
+  /* Separate cards rather than one ruled strip. */
+  gap: 14px;
+  border: 0;
   @media (max-width: 900px) {
     grid-template-columns: repeat(2, 1fr);
-    .stat:nth-child(2) { border-right: 0; }
-    .stat:nth-child(-n+4) { border-bottom: 1px solid $line; }
     .stat-pie { grid-column: 1 / -1; justify-content: center; padding: 20px; }
   }
+
+  // &.stats-strip: outranks .stat:last-child { border-right: 0 } further down.
+  &.stats-strip > .stat {
+    border: 1px solid $line;
+    border-top: 3px solid var(--pie, #{$accent});   // status colour; teal for Total
+    border-radius: $radius;
+    background-color: rgba(8,42,61,0.55);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: transform .2s ease, box-shadow .2s ease, opacity 250ms;
+  }
+  > .stat-status.is-active {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+  }
+  > .stat-pie { border-top-color: $line; }
 }
 
 .stat {
@@ -425,7 +444,6 @@ app-projects-landing {
 
 /* The pie gets a panel of its own: no divider before it, just a glow fading
    into the strip, with the percentages beside it. */
-.stats-strip-pie .stat:nth-last-child(2) { border-right: 0; }
 .stat-pie {
   display: flex; align-items: center; gap: 22px;
   padding: 16px 8px 16px 32px;
@@ -1331,6 +1349,287 @@ app-projects-landing {
 
 .mission-num { font-family: $font-mono; font-size: 11px; color: $accent; padding-top: 2px; }
 
+// ── Home layout: teal Geodatabase rail + main column ─────────────────────
+$rail-accent: $accent;   // the palette teal, shared with the hero and DB button
+$rail-deep:   #0c3f44;
+// Rail and nav colours (--rail-bg, --rail-bg-2, --rail-pill, --nav-bg) are
+// global CSS variables in src/styles.css, shared with the admin pages.
+$rail-text:   #e8f4f2;
+$rail-dim:    #a9c9c6;
+$rail-w:      200px;     // also the navbar brand block's width
+$frame-line:  rgba(255,255,255,0.08);   // rail's right edge
+$frame-corner: 28px;     // radius of the content area's top-left corner
+$rail-gap:    36px;      // rail to main column
+
+$home-fit: '(min-width: 901px) and (min-height: 700px)';
+
+.home-layout {
+  display: grid;
+  grid-template-columns: $rail-w minmax(0, 1fr);
+  gap: $rail-gap;
+  align-items: stretch;
+  margin-left: -40px;      // rail runs flush to the window's left edge
+  /* Rail stacks on top as a horizontal strip. */
+  @media (max-width: 900px) { grid-template-columns: minmax(0, 1fr); gap: 0; margin-left: 0; }
+}
+
+.geo-rail {
+  position: sticky;
+  top: 64px;               // under the sticky nav
+  z-index: 20;
+  height: calc(100dvh - 64px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;                // rail shows between the rounded tiles
+  padding: 8px;
+  /* Navbar teal (--nav-bg), so nav and rail are one colour; follows the theme. */
+  border-right: 1px solid $frame-line;
+  background: var(--nav-bg);   // same as the navbar
+
+  /* Inverted corner where nav and rail meet: a nav-coloured square with a
+     quarter circle cut out, so the content area reads as rounded top-left. */
+  &::after {
+    content: '';
+    position: absolute; top: 0; left: 100%;
+    width: $frame-corner; height: $frame-corner;
+    background: radial-gradient(circle at 100% 100%,
+      transparent calc(#{$frame-corner} - 0.75px), var(--nav-bg) calc(#{$frame-corner} + 0.75px));   // 1.5px blend = anti-aliased edge
+    pointer-events: none;
+  }
+  box-shadow: 8px 0 30px rgba(0,0,0,0.18);
+
+  @media (max-width: 900px) {
+    position: relative;
+    top: auto;
+    height: auto;
+    margin-top: 24px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 14px;
+    border: 1px solid rgba($rail-accent, 0.35);
+    border-radius: 18px;
+    padding: 14px 12px;
+    &::after { display: none; }   // no nav/rail corner when the rail is a strip
+  }
+}
+
+/* Brand block exactly as wide as the rail, name centred above it. Same on
+   every landing page so it never jumps between pages. */
+@media (min-width: 901px) {
+  .landing-container .nav-inner { padding-left: 0; }
+  .landing-container .nav .brand {
+    width: $rail-w; box-sizing: border-box;
+    align-self: stretch;               // full nav height, so the divider spans it
+    justify-content: center;
+  }
+}
+
+/* Home hero at any window size: the intro text never squeezes below ~36ch.
+   When title, text and budget panel don't fit on one row they wrap (text under
+   the title, panel onto its own line) instead of crushing the text column. */
+.home-main {
+  .hero-body  { flex-wrap: wrap; row-gap: 24px; }
+  .hero-left  { flex: 1 1 560px; flex-wrap: wrap; row-gap: 16px; }
+  .hero-sub   { flex: 1 1 36ch; min-width: min(36ch, 100%); }
+  .budget-panel { flex: 0 0 auto; }
+  /* Label on one line, "(ongoing)" on its own line under it. */
+  .budget-cell-label { white-space: nowrap; line-height: 1.6; margin-top: 10px; }
+  .budget-cell-label .scope-tag { display: block; }
+}
+
+/* One screen, no page scroll: the layout fills the window between nav and
+   footer, the hero and stats tighten up, and the overview cards scroll inside
+   themselves. Short or narrow windows keep the normal scrolling page. */
+@media #{$home-fit} {
+  /* Flex all the way down instead of subtracting nav/footer heights by hand,
+     so the page is exactly one window tall whatever those measure. */
+  .landing-container:has(.home-layout) { height: 100dvh; min-height: 0; }
+  .shell:has(.home-layout) {
+    padding-bottom: 0; min-height: 0;
+    display: flex; flex-direction: column;
+    > app-landing-about { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  }
+
+  .home-layout {
+    flex: 1 1 auto; min-height: 0;
+    .geo-rail { position: relative; top: auto; height: 100%; }
+  }
+  .home-main { overflow: hidden; }
+
+  /* Lower two zones (Sediment, Biota) open their flyout upwards so it stays inside the window. */
+  .geo-rail-item:nth-child(n+3) .geo-flyout {
+    top: auto; bottom: calc(50% - 36px);
+    &::before { top: auto; bottom: 30px; }
+  }
+
+  .home-main {
+    display: flex; flex-direction: column;
+    min-height: 0; padding-bottom: 20px;
+
+    .hero        { padding: 30px 0 0; }
+    .hero-body   { flex-direction: row; align-items: center; column-gap: 48px; margin-bottom: 0; }
+    .hero-left   { column-gap: 44px; }
+    .hero-title  { font-size: clamp(28px, 2.7vw, 44px); line-height: 1.05; }
+    /* Justified; the wider 62ch measure and hyphenation keep word gaps even. */
+    .hero-sub    {
+      font-size: 15px; line-height: 1.7; max-width: 62ch;
+      text-align: justify; hyphens: auto;
+    }
+    .budget-panel { align-self: center; }
+    .budget-cell  { padding: 18px 26px 16px; }
+    .budget-cell-value { font-size: 28px; }
+
+    .stats-strip { margin-top: 26px; }
+    .stat        { padding: 14px 18px; }
+    .stat-value  { font-size: 24px; }
+    .stat-bar    { margin-top: 10px; }
+    .stat-pie    { padding: 6px 8px 6px 24px; }
+    .pie         { width: 76px; height: 76px; }
+
+    .hero + .section { padding-top: 24px; }
+    .section {
+      flex: 1 1 auto; min-height: 0;
+      display: flex; flex-direction: column;
+    }
+    .section-head  { margin-bottom: 12px; }
+    .section-title { font-size: 20px; }
+    .about-grid    { flex: 1 1 auto; min-height: 0; }
+    .about-grid > .card {
+      min-height: 0; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: $line-2 transparent;
+    }
+    .card-head { margin-bottom: 12px; padding-bottom: 10px; }
+    .about-card p, .mission-list li { font-size: 14px; line-height: 1.65; }
+    .mission-list li { padding: 10px 0; }
+  }
+}
+
+.geo-rail-item {
+  position: relative;
+  align-self: stretch;
+  /* Desktop: the four zones are rounded photo tiles sharing the rail's
+     height, name over a gradient at the bottom. */
+  flex: 1 1 0; min-height: 0;
+  --tile-radius: 14px;
+
+  /* Selected zone: teal inner frame over the photo. */
+  &::before {
+    content: ''; position: absolute; inset: 0; z-index: 2;
+    border: 3px solid var(--rail-pill);
+    border-radius: var(--tile-radius);
+    pointer-events: none;
+    opacity: 0; transition: opacity .2s;
+  }
+  &.is-active::before { opacity: 1; }
+
+  @media (max-width: 900px) {
+    position: static; align-self: auto; flex: none;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    &::before { display: none; }
+  }
+}
+
+.geo-orb {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; padding: 0;
+  border: 0; border-radius: var(--tile-radius); overflow: hidden; cursor: pointer;
+  background: $rail-deep;
+
+  img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: saturate(.85) brightness(.78);
+    transition: filter .3s;
+  }
+
+  &:hover, &:focus-visible {
+    outline: none;
+    img { filter: saturate(1) brightness(.95); }
+  }
+
+  /* Phones: small rounded squares in the horizontal strip. */
+  @media (max-width: 900px) {
+    position: static; width: 64px; height: 64px;
+    border-radius: 22%; border: 2px solid rgba(255,255,255,0.14);
+  }
+}
+
+.geo-rail-item.is-active .geo-orb img { filter: saturate(1) brightness(1); }
+
+.geo-orb-name {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+  padding: 28px 12px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+  border-radius: 0 0 var(--tile-radius) var(--tile-radius);
+  font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: #fff;
+  text-align: center;
+  pointer-events: none;     // clicks fall through to the tile's button
+
+  @media (max-width: 900px) {
+    position: static; padding: 0; background: none;
+    font-weight: 500; color: $rail-dim;
+  }
+}
+.geo-rail-item.is-active .geo-orb-name { color: #fff; }
+
+.geo-flyout {
+  position: absolute;
+  top: calc(50% - 36px);     // arrow (30px + half its 12px) level with the circle's centre
+  left: calc(100% + 24px);   // past the rail's right edge (tile + 8px rail padding)
+  width: 340px;
+  padding: 18px 20px 20px;
+  border-radius: $radius;
+  border: 1px solid rgba($rail-accent, 0.4);
+  background: linear-gradient(180deg, $panel-2 0%, $panel 100%);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  text-align: left;
+  animation: geo-flyout-in .22s ease;
+
+  /* little arrow pointing back at the orb */
+  /* little arrow pointing back at the orb */
+  &::before {
+    content: ''; position: absolute; top: 30px; left: -7px;
+    width: 12px; height: 12px; transform: rotate(45deg);
+    background: $panel-2;
+    border-left: 1px solid rgba($rail-accent, 0.4); border-bottom: 1px solid rgba($rail-accent, 0.4);
+  }
+
+  p { margin: 0; font-size: 13px; line-height: 1.7; color: $text-dim; text-align: justify; hyphens: auto; }
+
+  /* Invisible bridge over the gap back to the tile, so moving the pointer
+     onto the flyout doesn't leave the zone and close it. */
+  &::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -26px; width: 26px;
+    @media (max-width: 900px) { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    top: calc(100% + 10px); left: 0; right: 0; width: auto;
+    &::before { display: none; }
+  }
+}
+
+@keyframes geo-flyout-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.geo-flyout-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba($rail-accent, 0.3);
+  h3 { margin: 2px 0 0; font-size: 17px; font-weight: 500; color: $text; }
+}
+.geo-flyout-tag { font-size: 9px; color: $rail-accent; }
+
+.geo-flyout-close {
+  background: none; border: 0; padding: 0 2px; cursor: pointer;
+  font-size: 22px; line-height: 1; color: rgba(#bfe3e6, 0.6);
+  &:hover { color: $rail-accent; }
+}
+
 // Geo card
 .geo-card { padding: 0; overflow: hidden; }
 
@@ -2179,14 +2478,7 @@ app-projects-landing.theme-light {
   .mission-list li b,
   .mission-list li strong { color: #0d2137 !important; }
 
-  // Nav
-  .nav { background: rgba(255,255,255,0.97); border-bottom-color: #a8c5d8; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-  .nav-mobile { background: #fff; border-color: #c5d8e6; box-shadow: 0 16px 32px rgba(13,33,55,0.12); }
-  .brand-name  { color: #0d2137; }
-  .brand-sub   { color: #4a7590; }
-  .nav-link    { color: #3d5a6e; &:hover { color: #0d2137; background: rgba(0,0,0,0.04); } &.active { color: #1a8f7f; } }
-  .nav-clock   { color: #6b8a9a; }
-  .admin-btn   { background: rgba(0,0,0,0.05); border-color: #c5d8e6; color: #3d5a6e; &:hover { color: #1a8f7f; border-color: #1a8f7f; } }
+  // Navbar colours live in the shared "Nav, both themes" block at the end of the file.
 
   // Admin dropdown
   .admin-dropdown {
@@ -2221,7 +2513,12 @@ app-projects-landing.theme-light {
   .stat-label-accent { color: #1a8f7f; }
   .scope-tag         { color: #1a8f7f; }
   .stat-loading { color: #9bb0bc; }
-  .stats-strip-pie .stat { border-bottom-color: #c5d8e6; }
+  .stats-strip-pie > .stat {
+    border-color: #c5d8e6; border-top-color: var(--pie, #1a8f7f);
+    background-color: #fff; box-shadow: 0 4px 14px rgba(13,33,55,0.05);
+  }
+  .stats-strip-pie > .stat-status.is-active { box-shadow: 0 10px 22px rgba(13,33,55,0.10); }
+  .stats-strip-pie > .stat-pie { border-top-color: #c5d8e6; }
   .pie-submitted { --pie: #e0a12e; }
   .pie-ongoing   { --pie: #3b8fd6; }
   .pie-achieved  { --pie: #1a8f7f; }
@@ -2264,6 +2561,16 @@ app-projects-landing.theme-light {
   .zone-name     { color: #fff; }
   .zone-coords   { color: rgba(255,255,255,0.6); }
 
+  // Geodatabase rail: stays dark green in light mode too, only the flyout goes light.
+  .geo-flyout {
+    background: #fff; border-color: #a9d6ce; box-shadow: 0 16px 36px rgba(13,33,55,0.14);
+    &::before { background: #fff; border-color: #a9d6ce; }
+    p { color: #3d5a6e; }
+  }
+  .geo-flyout-head  { border-bottom-color: #e2eff6; h3 { color: #0d2137; } }
+  .geo-flyout-tag   { color: #1a8f7f; }
+  .geo-flyout-close { color: #6b8a9a; &:hover { color: #1a8f7f; } }
+
   // Project cards
   .project-card { background: #fff; border-color: #c5d8e6; &:hover { border-color: #1a8f7f; } }
   .project-card--skeleton:hover { border-color: #c5d8e6; }
@@ -2298,7 +2605,7 @@ app-projects-landing.theme-light {
 
   // Footer & theme btn
   .landing-footer { border-top-color: #c5d8e6; color: #6b8a9a; }
-  .theme-btn { background: rgba(0,0,0,0.05); border-color: #c5d8e6; color: #4a7590; &:hover { color: #1a8f7f; border-color: #1a8f7f; } }
+  .theme-btn { background: rgba(255,255,255,0.55); border-color: #a9d6ce; color: #3d5a6e; &:hover { color: #1a8f7f; border-color: #1a8f7f; } }
 
   // TRIX Prediction Section
   .trix-pred-section  { background: #fafcfe; border-color: rgba(26,143,127,0.25); }
@@ -2410,4 +2717,36 @@ app-projects-landing.theme-light {
   width: 100%; padding: 0 40px; box-sizing: border-box;
   @media (max-width: 768px) { padding: 0 16px; }
   @media (max-width: 560px) { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+// ── Nav, both themes ──────────────────────────────────────────────────────
+/* The teal the rail shows behind a hovered zone (--rail-pill at 35% over
+   --rail-bg), so nav and rail read as one frame; follows the theme with them. */
+$nav-text: #e8f4f2;
+$nav-dim:  #b5d3cf;
+
+app-projects-landing,
+app-projects-landing.theme-light {
+  .nav {
+    /* Solid, not 97%: see-through it came out lighter than the rail below. */
+    background: var(--nav-bg);
+    border-bottom: 0;     // nav and rail are one colour; no seam between them
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  }
+  /* Home: the shadow would fall on the rail and darken its top edge. */
+  .landing-container:has(.home-layout) .nav { box-shadow: none; }
+  .nav-mobile { background: var(--nav-bg); border-color: rgba(255,255,255,0.08); }
+
+  .nav .brand-name { color: #fff; }
+  .nav .nav-link {
+    color: $nav-dim;
+    &:hover  { color: #fff; background: rgba(255,255,255,0.08); }
+    &.active { color: #fff; background: rgba(255,255,255,0.12); }
+  }
+  .nav .nav-clock { color: $nav-dim; }
+  .nav .theme-btn,
+  .nav .admin-btn {
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); color: $nav-text;
+    &:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.3); color: #fff; }
+  }
 }

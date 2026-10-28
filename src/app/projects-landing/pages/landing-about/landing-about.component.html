@@ -1,24 +1,40 @@
+<div class="home-layout">
+
+<!-- ── Geodatabase rail ───────────────────────────────────────────────────
+     Was a section of four cards under the overview; now a sticky green rail
+     beside the page, one round button per zone with its description in a
+     flyout. -->
+<!-- No fade-up: sliding in, the rail would uncover the page behind it. -->
+<aside class="geo-rail" aria-label="Ecosystems">
+  <div *ngFor="let zone of zones" class="geo-rail-item" [class.is-active]="activeZone === zone.id"
+       (mouseenter)="hoverZone = zone.id" (mouseleave)="hoverZone = null">
+    <button type="button" class="geo-orb" (click)="toggleZone(zone.id)"
+            [attr.aria-expanded]="activeZone === zone.id" [attr.aria-label]="zone.name">
+      <img [src]="zone.image" alt="">
+    </button>
+    <span class="geo-orb-name">{{ zone.name }}</span>
+
+    <!-- Opens on hover; a click pins it open until closed. -->
+    <div class="geo-flyout" *ngIf="activeZone === zone.id || (hoverZone === zone.id && !activeZone)"
+         role="dialog" [attr.aria-label]="zone.name">
+      <div class="geo-flyout-head">
+        <div>
+          <span class="label geo-flyout-tag">{{ zone.tag }}</span>
+          <h3>{{ zone.name }}</h3>
+        </div>
+        <button type="button" class="geo-flyout-close" (click)="activeZone = null" aria-label="Close">×</button>
+      </div>
+      <p>{{ zone.description }}</p>
+    </div>
+  </div>
+</aside>
+
+<div class="home-main">
+
 <!-- ── Hero ──────────────────────────────────────────────────────────────
      Moved here from the Overview page, which now opens straight into the
      TRIX dashboards. -->
 <section class="hero">
-
-  <div class="hero-top fade-up">
-    <div class="hero-tag">
-      <span class="label label-accent">// BASSIANA Portal</span>
-      <span class="hero-tag-line"></span>
-      <span class="label">Marine Ecosystems Database</span>
-    </div>
-    <div class="hero-actions">
-      <a routerLink="/projects" class="btn btn-ghost">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-        </svg>
-        List of Projects
-      </a>
-    </div>
-  </div>
 
   <div class="hero-body">
     <div class="hero-left">
@@ -137,21 +153,5 @@
   </div>
 </section>
 
-<!-- ── Geodatabase ────────────────────────────────────────────────────────
-     Was its own /geodatabase page and navbar entry; it is short enough to
-     read as the section below the overview rather than a page of its own. -->
-<section class="section">
-  <div class="section-head fade-up">
-    <h2 class="section-title">Geodatabase</h2>
-    <span class="label">geospatial analysis · 04 zones</span>
-  </div>
-  <div class="card geo-card fade-up" style="transition-delay:60ms">
-    <div class="geo-head">
-      <div>
-        <h3>Coverage across ecosystem types</h3>
-        <p>Sampling sites span open ocean, coastal beaches, lagoons and mangrove fringes. Each zone supports its own parameter set and sampling cadence.</p>
-      </div>
-    </div>
-    <app-landscape-cards></app-landscape-cards>
-  </div>
-</section>
+</div>
+</div>

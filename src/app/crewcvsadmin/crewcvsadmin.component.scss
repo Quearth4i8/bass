@@ -52,7 +52,7 @@
 }
 
 .admin-main {
-  flex: 1; min-width: 0; margin-left: 220px; margin-top: 64px; padding: 28px;
+  flex: 1; min-width: 0; margin-left: 200px; margin-top: 64px; padding: 28px;
   display: flex; flex-direction: column; transition: margin-left 0.3s;
   &:not(.sidebar-open) { margin-left: 0; }
 }

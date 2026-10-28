@@ -25,7 +25,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 .admin-sidebar {
-  position: fixed; top: 64px; left: 0; bottom: 0; width: 220px;
+  position: fixed; top: 64px; left: 0; bottom: 0; width: 200px;
   background: $bg-2; border-right: 1px solid $line;
   display: flex; flex-direction: column; z-index: 999;
   transition: transform 0.3s ease;
@@ -44,7 +44,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 }
 
 .admin-main {
-  flex: 1; margin-left: 220px; margin-top: 64px; padding: 28px;
+  flex: 1; margin-left: 200px; margin-top: 64px; padding: 28px;
   display: flex; flex-direction: column; overflow-x: hidden; transition: margin-left 0.3s;
   &:not(.sidebar-open) { margin-left: 0; }
 }

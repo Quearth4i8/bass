@@ -42,8 +42,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 .header-right { display: flex; align-items: center; gap: 10px; }
 
 .header-breadcrumb { display: flex; align-items: center; gap: 8px; }
-.header-breadcrumb h1 { font-size: 18px; font-weight: 600; color: $text; margin: 0; }
-.breadcrumb-sep { color: $line-2; font-size: 18px; }
+.header-breadcrumb h1 { font-size: 18px; font-weight: 600; color: #fff; margin: 0; }   // on the teal admin header in both themes
+.breadcrumb-sep { color: rgba(255,255,255,0.45); font-size: 18px; }
 .breadcrumb-project { font-size: 15px; font-weight: 600; transition: color 0.2s; }
 
 .menu-toggle {
@@ -106,7 +106,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 .admin-sidebar {
-  position: fixed; top: 64px; left: 0; bottom: 0; width: 220px;
+  position: fixed; top: 64px; left: 0; bottom: 0; width: 200px;
   background: $bg-2; border-right: 1px solid $line;
   display: flex; flex-direction: column; z-index: 999;
   transition: transform 0.3s ease;
@@ -126,7 +126,7 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
 
 // ── Main ───────────────────────────────────────────────────────────────────
 .admin-main {
-  margin-left: 220px; margin-top: 64px; padding: 28px;
+  margin-left: 200px; margin-top: 64px; padding: 28px;
   // border-box: with the padding outside the min-height the page was always
   // 56px taller than the window, so it could scroll the explorer under the header.
   box-sizing: border-box;
@@ -1077,10 +1077,8 @@ $font-mono:  'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
   background: #f0f7fb; color: #0d2137;
 
   .admin-header  { background: #ffffff; border-bottom-color: #c5d8e6; }
-  .header-breadcrumb h1 { color: #0d2137; }
   .page-heading { color: #0d2137; }
   .page-sub { color: #64748b; }
-  .breadcrumb-sep { color: #c5d8e6; }
   .menu-toggle, .theme-btn { background: #f1f5f9; border-color: #c5d8e6; color: #4a7590; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
   .header-btn { background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e; &:hover { border-color: #1a8f7f; color: #0d2137; } }
   .user-avatar { background: #e4eff6; border-color: #c5d8e6; color: #1a8f7f; }

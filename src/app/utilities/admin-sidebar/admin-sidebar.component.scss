@@ -1,17 +1,14 @@
-$bg-2:       #061f2e;
-$panel:      #082a3d;
-$line:       #103a4f;
-$text:       #e8f1f5;
-$text-dim:   #9fb3bf;
-$accent:     #4ad6c4;
+// Frame colours (--rail-bg, --rail-bg-2, --rail-pill) are global CSS
+// variables in src/styles.css, shared with the landing pages' Ecosystems rail.
+$rail-dim:   #a9c9c6;
 $radius:     10px;
 
 .admin-sidebar {
   position: fixed;
   top: 64px; left: 0; bottom: 0;
-  width: 220px;
-  background: $bg-2;
-  border-right: 1px solid $line;
+  width: 200px;   // same as the landing Ecosystems rail ($rail-w)
+  background: var(--nav-bg);   // same as the navbar
+  border-right: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;
   z-index: 999;
@@ -34,7 +31,7 @@ $radius:     10px;
   gap: 12px;
   padding: 11px 14px;
   border-radius: $radius;
-  color: $text-dim;
+  color: $rail-dim;
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
@@ -42,16 +39,10 @@ $radius:     10px;
 
   i { font-size: 18px; }
 
-  &:hover  { background: $panel; color: $text; }
-  &.active { background: $panel; color: $accent; border-left: 2px solid $accent; padding-left: 12px; }
+  // Same states as the landing rail: faint pill on hover, filled pill when active.
+  &:hover  { background: color-mix(in srgb, var(--rail-pill) 35%, transparent); color: #fff; }
+  &.active { background: var(--rail-pill); color: #fff; }
 }
 
-// Light theme
-:host-context(.theme-light) {
-  .admin-sidebar { background: #ffffff; border-right-color: #c5d8e6; }
-  .nav-item {
-    color: #3d5a6e;
-    &:hover  { background: #f0f7fb; color: #1a8f7f; }
-    &.active { background: #e4eff6; color: #1a8f7f; border-left-color: #1a8f7f; }
-  }
-}
+// The sidebar stays dark teal in the light theme too, like the landing rail,
+// so it needs no light-theme overrides.

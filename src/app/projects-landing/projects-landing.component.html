@@ -5,16 +5,14 @@
     <div class="nav-inner">
       <div class="brand">
         <img class="brand-mark" src="assets/logo/logo.png" alt="Bassiana logo">
-        <div>
-          <div class="brand-name">BASSIANA</div>
-          <div class="brand-sub">Marine Ecosystems DB</div>
-        </div>
+        <div class="brand-name">BASSIANA</div>
       </div>
 
       <div class="nav-links">
         <button class="nav-link" routerLink="/home" routerLinkActive="active">Home</button>
         <button class="nav-link" routerLink="/index" routerLinkActive="active">Index</button>
-        <button class="nav-link" routerLink="/our-projects" routerLinkActive="active">Projects</button>
+        <button class="nav-link" routerLink="/our-projects" routerLinkActive="active">Projects Portal</button>
+        <button class="nav-link" routerLink="/projects" routerLinkActive="active">Projects List</button>
         <button class="nav-link" routerLink="/team" routerLinkActive="active">Team</button>
         <button class="nav-link" routerLink="/outputs" routerLinkActive="active">Relevant Outputs</button>
       </div>
@@ -78,7 +76,8 @@
     <div class="nav-mobile" *ngIf="mobileMenuOpen">
       <button class="nav-link" routerLink="/home" routerLinkActive="active" (click)="mobileMenuOpen = false">Home</button>
       <button class="nav-link" routerLink="/index" routerLinkActive="active" (click)="mobileMenuOpen = false">Index</button>
-      <button class="nav-link" routerLink="/our-projects" routerLinkActive="active" (click)="mobileMenuOpen = false">Projects</button>
+      <button class="nav-link" routerLink="/our-projects" routerLinkActive="active" (click)="mobileMenuOpen = false">Projects Portal</button>
+      <button class="nav-link" routerLink="/projects" routerLinkActive="active" (click)="mobileMenuOpen = false">Projects List</button>
       <button class="nav-link" routerLink="/team" routerLinkActive="active" (click)="mobileMenuOpen = false">Team</button>
       <button class="nav-link" routerLink="/outputs" routerLinkActive="active" (click)="mobileMenuOpen = false">Relevant Outputs</button>
     </div>

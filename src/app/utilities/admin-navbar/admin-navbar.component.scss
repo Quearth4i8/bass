@@ -15,12 +15,21 @@ $text-dim: #9fb3bf;
 $accent:   #4ad6c4;
 $danger:   #ef4444;
 $radius:   10px;
+// Header sits on the shared frame teal (--nav-bg, src/styles.css) in both themes.
+$nav-text: #e8f4f2;
+$nav-dim:  #b5d3cf;
+
+// Translucent-white control on the teal header.
+@mixin on-teal {
+  background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); color: $nav-text;
+  &:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.3); color: #fff; }
+}
 
 // ── Header ─────────────────────────────────────────────────────────────────
 .admin-header {
   position: fixed; top: 0; left: 0; right: 0; height: 64px;
-  background: $panel-2; border-bottom: 1px solid $line-2;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  background: var(--nav-bg); border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 24px; z-index: 1000;
 }
@@ -33,16 +42,16 @@ $radius:   10px;
   border-radius: $radius; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: $text-dim; font-size: 20px; transition: all 0.2s; flex-shrink: 0;
-  &:hover { border-color: $accent; color: $accent; }
+  @include on-teal;
 }
 
-.page-title { font-size: 18px; font-weight: 600; color: $text; margin: 0; }
+.page-title { font-size: 18px; font-weight: 600; color: #fff; margin: 0; }
 
 // ── Projected header-title styles (breadcrumb) ─────────────────────────────
 ::ng-deep [header-title] {
   display: flex; align-items: center; gap: 10px;
-  h1 { font-size: 18px; font-weight: 600; color: $text; margin: 0; }
-  .breadcrumb-sep { font-size: 20px; color: $text-dim; }
+  h1 { font-size: 18px; font-weight: 600; color: #fff; margin: 0; }
+  .breadcrumb-sep { font-size: 20px; color: $nav-dim; }
   .breadcrumb-project { font-size: 16px; font-weight: 600; }
 }
 
@@ -57,7 +66,7 @@ $radius:   10px;
   padding: 8px 14px; border: 1px solid $line; background: $panel;
   border-radius: $radius; font-size: 13px; font-weight: 500; color: $text-dim;
   cursor: pointer; transition: all 0.2s; text-decoration: none; white-space: nowrap;
-  &:hover { border-color: $line-2; color: $text; }
+  @include on-teal;
   &.primary { background: $accent; border-color: $accent; color: $bg-2; font-weight: 600;
     &:hover { filter: brightness(1.08); }
   }
@@ -71,7 +80,7 @@ $radius:   10px;
   display: flex; align-items: center; justify-content: center;
   color: $text-dim; font-size: 20px; text-decoration: none;
   transition: all 0.2s; flex-shrink: 0;
-  &:hover { border-color: $accent; color: $accent; }
+  @include on-teal;
 }
 
 .theme-btn {
@@ -79,15 +88,15 @@ $radius:   10px;
   border-radius: $radius; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: $text-dim; font-size: 18px; transition: all 0.2s; flex-shrink: 0;
-  &:hover { border-color: $accent; color: $accent; }
+  @include on-teal;
 }
 
 // ── User menu ──────────────────────────────────────────────────────────────
 .user-menu { position: relative; display: flex; align-items: center; }
 
 .user-avatar {
-  width: 36px; height: 36px; border-radius: 50%; background: $panel-2;
-  border: 1px solid $line-2; display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: $accent; font-size: 18px; flex-shrink: 0; transition: all 0.2s;
   &:hover { border-color: $accent; }
 }
@@ -160,20 +169,11 @@ $radius:   10px;
 // ── Light theme ────────────────────────────────────────────────────────────
 :host(.theme-light) {
   color-scheme: light;
-  .admin-header { background: #ffffff; border-bottom-color: #a8c5d8; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
-  .menu-toggle, .theme-btn, .icon-btn { background: #f1f5f9; border-color: #c5d8e6; color: #4a7590; &:hover { border-color: #1a8f7f; color: #1a8f7f; } }
-  .page-title { color: #0d2137; }
-  .user-avatar { background: #e4eff6; border-color: #c5d8e6; color: #1a8f7f; }
+  // Header and its controls stay on the teal frame; only the dropdown and modal go light.
   .dropdown-menu { background: white; border-color: #c5d8e6; &::before { background: white; border-color: #c5d8e6; } }
   .modal-dialog { background: white; border-color: #c5d8e6; }
   .modal-header { border-bottom-color: #c5d8e6; h3 { color: #0d2137; } }
   .modal-body p { color: #3d5a6e; }
   .modal-footer { background: #f8fafc; }
   .btn-cancel { border-color: #c5d8e6; color: #3d5a6e; &:hover { background: #f0f7fb; } }
-
-  ::ng-deep .header-btn {
-    background: #f1f5f9; border-color: #c5d8e6; color: #3d5a6e;
-    &:hover { border-color: #1a8f7f; color: #0d2137; }
-    &.primary { background: #1a8f7f; border-color: #1a8f7f; color: white; }
-  }
 }

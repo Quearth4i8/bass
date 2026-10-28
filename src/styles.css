@@ -63,6 +63,26 @@ html.portal-shell-active {
 
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+/* ---------------------------------------------------------------
+   Frame colours: the teal sidebar and navbar, shared by the public
+   landing pages (Ecosystems rail + nav) and the admin pages (admin
+   sidebar + header). ThemeService sets body[data-theme].
+   --nav-bg is the rail's hover tint (pill at 35% over the rail); it is
+   declared in both blocks so it recomputes from that theme's values.
+   --------------------------------------------------------------- */
+:root {
+  --rail-bg:   #0a2c30;   /* dark mode: deeper, quieter teal */
+  --rail-bg-2: #061c20;
+  --rail-pill: #15705f;
+  --nav-bg: color-mix(in srgb, var(--rail-pill) 35%, var(--rail-bg));
+}
+body[data-theme="light"] {
+  --rail-bg:   #0e3a3d;   /* light mode: deep petrol teal */
+  --rail-bg-2: #0a2a2e;
+  --rail-pill: #1a8f7f;   /* brand teal */
+  --nav-bg: color-mix(in srgb, var(--rail-pill) 35%, var(--rail-bg));
+}
+
 /* Toast Notifications - Position at top right */
 .p-toast {
   top: 0 !important;

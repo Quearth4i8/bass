@@ -1,7 +1,8 @@
-import { Component, AfterViewInit, DestroyRef, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { Component, AfterViewInit, DestroyRef, ElementRef, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ProjectService } from '../../../services/ProjectService';
+import { LANDSCAPE_CARDS } from '../../../home/landscape-cards/landscape-cards.component';
 
 interface PieSlice { key: string; label: string; count: number; percent: number; d: string; }
 
@@ -26,6 +27,12 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
   // Budget panel, over Ongoing projects only.
   totalProjectsBudget: number | null = null;
   totalPartnersBudget: number | null = null;
+
+  // Geodatabase rail: the zone whose flyout is pinned open by a click, and
+  // the one under the pointer, whose flyout shows while hovered.
+  zones = LANDSCAPE_CARDS;
+  activeZone: string | null = null;
+  hoverZone: string | null = null;
 
   private io?: IntersectionObserver;
 
@@ -92,6 +99,19 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
     this.totalProjectsBudget = projects.reduce((sum, p) => sum + (Number(p.totalBudget) || 0), 0);
     this.totalPartnersBudget = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
   }
+
+  toggleZone(id: string): void {
+    this.activeZone = this.activeZone === id ? null : id;
+  }
+
+  /** A click anywhere outside the rail, or Escape, closes the open flyout. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    if (this.activeZone && !(e.target as HTMLElement).closest('.geo-rail')) this.activeZone = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.activeZone = null; }
 
   /** 0 -> "€0", 850 000 -> "€850K", 1 250 000 -> "€1.25M". */
   compactEuro(value: number): string {
