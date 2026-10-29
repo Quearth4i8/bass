@@ -135,7 +135,7 @@
       <p>The Ecosystems Database provides a structure gathering vast amounts of high-quality data with efficient access. It holds over 50 environmental parameters (Biological, Chemical, Physical, Physico-chemical, Sedimentological and Fishery data). The data concern freshwater and marine ecosystems such as streams, rivers, lakes, and lagoons.</p>
     </article>
 
-    <article class="card fade-up" style="transition-delay:120ms">
+    <article class="card mission-card fade-up" style="transition-delay:120ms">
       <div class="card-head">
         <div class="card-head-l">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="card-ico"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -143,15 +143,39 @@
         </div>
         <span class="card-id">04 GOALS</span>
       </div>
-      <ul class="mission-list">
-        <li><span class="mission-num">01</span><span>Gather the data of different type of Marine and coastal ecosystems.</span></li>
-        <li><span class="mission-num">02</span><span>Creating a centralized data repository for further use.</span></li>
-        <li><span class="mission-num">03</span><span>Have a preliminary incite on the spatial and temporal variabilities of the ecosystem's status applying statistical and numerical tools.</span></li>
-        <li><span class="mission-num">04</span><span>Provide an updated and accessible data for policy makers, environmental managers, researchers, and marine ecosystem stakeholders.</span></li>
-      </ul>
+
+      <div class="mission-body">
+        <ul class="mission-list">
+          <li><span class="mission-num">01</span><span>Gather the data of different type of Marine and coastal ecosystems.</span></li>
+          <li><span class="mission-num">02</span><span>Creating a centralized data repository for further use.</span></li>
+          <li><span class="mission-num">03</span><span>Have a preliminary incite on the spatial and temporal variabilities of the ecosystem's status applying statistical and numerical tools.</span></li>
+          <li><span class="mission-num">04</span><span>Provide an updated and accessible data for policy makers, environmental managers, researchers, and marine ecosystem stakeholders.</span></li>
+        </ul>
+
+        <!-- Relevant Outputs reel beside the goals: the featured videos play one
+             after another, video only; a click expands the current one.
+             No fade-up: it appears after the fade observer has run. -->
+        <div class="reel" *ngIf="reel.length">
+          <button type="button" class="reel-media" #reelThumb (click)="openReel()"
+                  [attr.aria-label]="'Expand video: ' + reel[reelIndex].title">
+            <video *ngFor="let v of [reel[reelIndex]]" #reelVideo [src]="v.videoUrl"
+                   [muted]="true" autoplay playsinline [loop]="reel.length === 1"
+                   (loadedmetadata)="playMuted($event)" (ended)="nextReel()" (error)="nextReel()"></video>
+            <span class="reel-expand"><i class='bx bx-expand-alt'></i></span>
+          </button>
+        </div>
+      </div>
     </article>
   </div>
 </section>
 
 </div>
+</div>
+
+<!-- Expanded reel video. Outside the layout so no transformed ancestor
+     (fade-up) traps its position:fixed. -->
+<div class="reel-overlay" *ngIf="reelOpen" [class.closing]="reelClosing" (click)="closeReel()">
+  <div class="reel-stage" #reelStage (click)="$event.stopPropagation()">
+    <video #reelBig [src]="reel[reelIndex].videoUrl" controls autoplay playsinline (ended)="nextReel()"></video>
+  </div>
 </div>

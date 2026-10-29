@@ -1349,6 +1349,53 @@ app-projects-landing {
 
 .mission-num { font-family: $font-mono; font-size: 11px; color: $accent; padding-top: 2px; }
 
+// ── Our Mission: goals list, Relevant Outputs reel to its right ───────────
+.mission-body {
+  display: grid; grid-template-columns: minmax(0, 1fr) 38%; gap: 20px; align-items: stretch;
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+.reel { min-width: 0; display: flex; }
+
+.reel-media {
+  position: relative; display: block; width: 100%; min-height: 150px; align-self: stretch;   // as tall as the goals list
+  padding: 0; border: 0; border-radius: 0; overflow: hidden;
+  background: transparent; cursor: zoom-in;   // no frame: the video's own white edges blend into the card
+  video {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+    animation: reelIn .5s ease;   // each new video fades in over the last
+  }
+  .reel-expand {
+    position: absolute; right: 8px; bottom: 8px;
+    width: 28px; height: 28px; border-radius: 8px;
+    display: grid; place-items: center;
+    background: rgba(3,20,32,0.6); color: #fff; font-size: 16px;
+    opacity: 0; transform: scale(.9); transition: opacity .2s ease, transform .2s ease;
+  }
+  &:hover .reel-expand, &:focus-visible .reel-expand { opacity: 1; transform: none; }
+  &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
+}
+@keyframes reelIn { from { opacity: 0; } to { opacity: 1; } }
+
+
+// Expanded video
+.reel-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center; padding: 24px;
+  background: rgba(2,12,20,0.78); backdrop-filter: blur(6px);
+  animation: reelFade .3s ease;
+  &.closing { animation: reelFadeOut .32s ease forwards; }
+}
+@keyframes reelFade    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes reelFadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+.reel-stage {
+  width: min(960px, 100%); transform-origin: top left;
+  border-radius: 14px; overflow: hidden;
+  background: $panel; border: 1px solid $line;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+  video { display: block; width: 100%; aspect-ratio: 16/9; max-height: calc(100dvh - 48px); background: #000; }
+}
+
 // ── Home layout: teal Geodatabase rail + main column ─────────────────────
 $rail-accent: $accent;   // the palette teal, shared with the hero and DB button
 $rail-deep:   #0c3f44;
@@ -1853,7 +1900,7 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
 }
 
 .avatar {
-  width: 80px; height: 100px;
+  width: 112px; height: 140px;
   border-radius: 10px;
   display: grid; place-items: center;
   font-family: $font-mono; font-weight: 600; font-size: 22px;
@@ -1868,16 +1915,7 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
   object-position: center 15%;
 }
 
-.avatar-lg { width: 96px; height: 118px; border-radius: 12px; }
-
-.avatar-dot {
-  position: absolute; bottom: -4px; right: -4px;
-  width: 13px; height: 13px; border-radius: 50%;
-  background: $accent; border: 2px solid $panel;
-  z-index: 1;
-}
-
-.admin-member .avatar-dot { border-color: $panel; }
+.avatar-lg { width: 124px; height: 155px; border-radius: 12px; }
 
 .member-info {
   display: flex; flex-direction: column; justify-content: center;
@@ -1947,15 +1985,6 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
   &:hover { background: rgba(255,255,255,0.1); border-color: $accent-2; color: $accent; }
 }
 
-// ── TBA card ─────────────────────────────────────────────────────────────
-.tba-avatar {
-  background: rgba(255,255,255,0.04);
-  border: 2px dashed $line-2;
-  color: $text-faint; font-size: 28px;
-  i { line-height: 1; }
-}
-.tba-name { color: $text-faint; font-style: italic; font-weight: 400; }
-.member-tba { opacity: 0.6; border-style: dashed; }
 
 // ── Relevant Outputs section ─────────────────────────────────────────────
 
@@ -2596,11 +2625,7 @@ app-projects-landing.theme-light {
   .member-meta   { border-top-color: #e2eff6; color: #6b8a9a; }
   .meta-accent   { color: #1a8f7f; }
   .meta-dir      { color: #7c5cbf; }
-  .tba-avatar    { background: rgba(0,0,0,0.03); border-color: #c5d8e6; color: #9bb0bc; }
-  .tba-name      { color: #9bb0bc; }
   .avatar        { box-shadow: 0 0 0 1px #c5d8e6; }
-  .avatar-dot    { border-color: #fff; }
-  .admin-member .avatar-dot { border-color: #fff; }
   .dir-member    { border-color: rgba(124,92,191,0.25); &:hover { border-color: #7c5cbf; } }
 
   // Footer & theme btn
@@ -2749,4 +2774,9 @@ app-projects-landing.theme-light {
     background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); color: $nav-text;
     &:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.3); color: #fff; }
   }
+}
+
+// Reel, light theme
+app-projects-landing.theme-light {
+  .reel-stage  { border-color: #c5d8e6; }
 }

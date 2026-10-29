@@ -7,7 +7,7 @@ $radius:     10px;
   position: fixed;
   top: 64px; left: 0; bottom: 0;
   width: 200px;   // same as the landing Ecosystems rail ($rail-w)
-  background: var(--nav-bg);   // same as the navbar
+  background: var(--rail-bg);   // darker than the navbar (--nav-bg)
   border-right: 1px solid rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;

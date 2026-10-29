@@ -4,6 +4,7 @@
  * template: the `name` here must match the card's <app-cv-link name>.
  */
 export const LANDING_TEAM_PEOPLE: { name: string; role: string; group: string }[] = [
+  { name: "Zohra Lili Chabaane", role: "President of IRESA", group: "president of iresa" },
   { name: "Hechmi Missaoui", role: "General Director", group: "directors" },
   { name: "Saloua Sadok", role: "General Director", group: "directors" },
   { name: "Azaza Mohamed Salah", role: "General Director", group: "directors" },
