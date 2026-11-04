@@ -1,13 +1,13 @@
-.page-loader { display: flex; align-items: center; justify-content: center; min-height: 60vh; .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.8s linear infinite; } }
+.page-loader { display: flex; align-items: center; justify-content: center; min-height: 60vh; .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,143,127,0.15); border-top-color: #1a8f7f; border-radius: 50%; animation: spin 0.8s linear infinite; } }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: #c5cce0; display: block; margin-bottom: 16px; } p { color: #88909e; font-size: 15px; } }
+.empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: var(--pg-line); display: block; margin-bottom: 16px; } p { color: var(--pg-dim); font-size: 15px; } }
 .events-search-bar {
   max-width: 700px; margin: -6px auto 0; position: relative; z-index: 2; padding: 0 32px;
   .events-search-box {
     display: flex; align-items: center; gap: 10px;
     height: 48px; padding: 0 18px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--pg-card);
+    border: 1px solid var(--pg-line-soft);
     border-radius: 999px;
     box-shadow: 0 3px 14px rgba(0,0,0,0.05);
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -15,7 +15,7 @@
       border-color: var(--portal-accent, #4fc3f7);
       box-shadow: 0 3px 18px rgba(0,0,0,0.08);
     }
-    .search-leading { font-size: 18px; color: #a0aec0; flex-shrink: 0; }
+    .search-leading { font-size: 18px; color: var(--pg-dim); flex-shrink: 0; }
 
     /* Decorative: the field already filters as you type, so this is an
        affordance rather than a control - hence the span and aria-hidden. */
@@ -29,17 +29,17 @@
     }
     input {
       flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-      font-size: 14px; color: #1a2a4a;
-      &::placeholder { color: #a0aec0; }
+      font-size: 14px; color: var(--pg-text);
+      &::placeholder { color: var(--pg-dim); }
     }
   }
   .events-search-clear {
     display: flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; padding: 0; flex-shrink: 0;
     border: none; border-radius: 50%;
-    background: #f1f5f9; color: #64748b; cursor: pointer;
+    background: var(--pg-card-2); color: var(--pg-dim); cursor: pointer;
     i { font-size: 15px; }
-    &:hover { background: #e2e8f0; color: #1a2a4a; }
+    &:hover { background: var(--pg-card-2); color: var(--pg-text); }
   }
 }
 
@@ -48,9 +48,9 @@
 
   .event-card {
     display: flex;
-    background: #fff;
-    border: 1px solid #e8edf3;
-    border-radius: 18px;
+    background: var(--pg-card);
+    border: 1px solid var(--pg-line-soft);
+    border-radius: 10px;
     box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 8px 24px -12px rgba(16,24,40,0.12);
     overflow: hidden;
     margin-bottom: 20px;
@@ -112,7 +112,7 @@
 
     /* The day is the thing you scan for, so it carries the weight. */
     .event-daynum {
-      font-size: 46px; font-weight: 800; line-height: 1;
+      font-size: 46px; font-weight: 600; line-height: 1;
       margin: 4px 0 6px;
       font-variant-numeric: tabular-nums;
     }
@@ -137,12 +137,12 @@
     }
 
     .range-label {
-      font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em;
+      font-size: 9.5px; font-weight: 600; letter-spacing: 0.16em;
       text-transform: uppercase; color: rgba(255,255,255,0.7);
     }
 
     .range-day {
-      font-size: 34px; font-weight: 800; line-height: 1.05;
+      font-size: 34px; font-weight: 600; line-height: 1.05;
       margin: 2px 0 3px;
       font-variant-numeric: tabular-nums;
     }
@@ -182,7 +182,7 @@
     }
 
     .event-title {
-      font-size: 20px; font-weight: 800; color: #1a2a4a;
+      font-size: 20px; font-weight: 600; color: var(--pg-text);
       line-height: 1.42; margin: 0;
       letter-spacing: -0.01em;
     }
@@ -217,7 +217,7 @@
       row-gap: 18px;
       margin: 0 0 20px;
       padding-top: 18px;
-      border-top: 1px solid #edf2f7;
+      border-top: 1px solid var(--pg-line-soft);
     }
 
     .fact {
@@ -234,12 +234,12 @@
 
       &:first-child { padding-left: 0; }
       &:last-child { padding-right: 0; }
-      & + .fact { border-left: 1px solid #edf2f7; }
+      & + .fact { border-left: 1px solid var(--pg-line-soft); }
 
       dt {
         font-size: 10px; font-weight: 700;
         text-transform: uppercase; letter-spacing: 0.12em;
-        color: #8a97a8;
+        color: var(--pg-dim);
         margin-bottom: 4px;
       }
 
@@ -254,7 +254,7 @@
 
       dd {
         margin: 0;
-        font-size: 14px; line-height: 1.5; color: #2d3748; font-weight: 600;
+        font-size: 14px; line-height: 1.5; color: var(--pg-text); font-weight: 600;
         overflow-wrap: anywhere;
       }
     }
@@ -265,7 +265,7 @@
        above, which gave a list of twenty names a third of the card to wrap
        in, and put it nowhere near the presentation it belongs to. */
     .event-talk {
-      border-top: 1px solid #edf2f7;
+      border-top: 1px solid var(--pg-line-soft);
       padding-top: 18px;
     }
 
@@ -294,20 +294,20 @@
       display: block;
       font-size: 10px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.12em;
-      color: #8a97a8;
+      color: var(--pg-dim);
       margin-bottom: 4px;
     }
 
     .talk-value {
       margin: 0;
-      font-size: 14px; line-height: 1.55; color: #2d3748; font-weight: 600;
+      font-size: 14px; line-height: 1.55; color: var(--pg-text); font-weight: 600;
       overflow-wrap: anywhere;
     }
 
     .talk-presentation {
       margin-top: 18px;
       padding-top: 18px;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--pg-line-soft);
     }
 
     /* Each point gets the card's full width and wraps on its own terms. The
@@ -324,7 +324,7 @@
       li {
         position: relative;
         padding-left: 20px;
-        font-size: 14.5px; line-height: 1.65; color: #4a5568;
+        font-size: 14.5px; line-height: 1.65; color: var(--pg-body);
 
         &::before {
           content: '';
@@ -339,7 +339,7 @@
 
     .presentation-text {
       margin: 10px 0 0;
-      font-size: 14.5px; line-height: 1.75; color: #4a5568;
+      font-size: 14.5px; line-height: 1.75; color: var(--pg-body);
       text-align: justify; hyphens: auto;
     }
   }

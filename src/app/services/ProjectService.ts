@@ -65,6 +65,11 @@ export class ProjectService {
     return this.http.get<number[]>(`${this.baseUrl}/projects/status-history`, { params });
   }
 
+  /** Every recorded status change (admin only), grouped by project and in date order within each. */
+  getStatusChanges(): Observable<ProjectStatusChange[]> {
+    return this.http.get<ProjectStatusChange[]>(`${this.baseUrl}/projects/status-history/changes`);
+  }
+
   private authHeaders(): { headers: HttpHeaders } {
     const token = this.auth.getToken();
     return {
@@ -81,4 +86,17 @@ export class ProjectService {
   deleteProject(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/projects/${id}`, this.authHeaders());
   }
+}
+
+/**
+ * One status a project took on. It holds it from `changedAt` until its next
+ * change. `changedBy` is "seed" for the starting rows guessed for projects
+ * that existed before status history was recorded.
+ */
+export interface ProjectStatusChange {
+  id: number;
+  projectId: number;
+  status: string;
+  changedAt: string;
+  changedBy: string | null;
 }

@@ -83,6 +83,40 @@ body[data-theme="light"] {
   --nav-bg: color-mix(in srgb, var(--rail-pill) 35%, var(--rail-bg));
 }
 
+/* ---------------------------------------------------------------
+   Page colours for the project portal pages (/portal/:slug/...), the
+   landing pages' palette in both themes: dark is the baseline, light
+   below. Logo tiles stay white in both (the logos need it).
+   --------------------------------------------------------------- */
+:root {
+  --pg-bg:        #031420;
+  --pg-bg-glow-1: rgba(74,214,196,0.06);
+  --pg-bg-glow-2: rgba(27,85,115,0.18);
+  --pg-card:      #082a3d;
+  --pg-card-2:    #0a3142;   /* hovered / inset panels */
+  --pg-line:      #103a4f;
+  --pg-line-soft: #0c3346;
+  --pg-text:      #e8f1f5;   /* headings, strong text */
+  --pg-body:      #9fb3bf;   /* paragraphs */
+  --pg-dim:       #6f8b99;   /* labels, captions */
+  --pg-shadow:    rgba(0,0,0,0.28);
+  --pg-accent:    #4ad6c4;
+}
+body[data-theme="light"] {
+  --pg-bg:        #f0f7fb;
+  --pg-bg-glow-1: rgba(26,143,127,0.06);
+  --pg-bg-glow-2: rgba(27,85,115,0.06);
+  --pg-card:      #ffffff;
+  --pg-card-2:    #f5f9fb;
+  --pg-line:      #c5d8e6;
+  --pg-line-soft: #e2eff6;
+  --pg-text:      #0d2137;
+  --pg-body:      #3d5a6e;
+  --pg-dim:       #6b8a9a;
+  --pg-shadow:    rgba(13,33,55,0.04);
+  --pg-accent:    #1a8f7f;
+}
+
 /* Toast Notifications - Position at top right */
 .p-toast {
   top: 0 !important;

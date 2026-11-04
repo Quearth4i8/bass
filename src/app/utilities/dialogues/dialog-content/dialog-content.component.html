@@ -53,18 +53,18 @@
                 </div>
                 <div class="ad-field">
                     <label for="submissionDate">Submission date</label>
-                    <app-date-picker inputId="submissionDate" name="submissionDate" [(ngModel)]="projectFormData.submissionDate" placeholder="Select submission date"></app-date-picker>
+                    <app-date-filter exact inputId="submissionDate" name="submissionDate" [(ngModel)]="projectFormData.submissionDate" placeholder="Select submission date"></app-date-filter>
                 </div>
                 <div class="ad-field">
                     <label for="startyear">Start date <span class="req">*</span></label>
                     <!-- Older rows only have a year: shown as the placeholder until an exact date is picked. -->
-                    <app-date-picker inputId="startyear" name="startDate" [(ngModel)]="projectFormData.startDate"
-                                     [placeholder]="projectFormData.startyear ? projectFormData.startyear + ' (pick the exact date)' : 'Select start date'" required></app-date-picker>
+                    <app-date-filter exact inputId="startyear" name="startDate" [(ngModel)]="projectFormData.startDate" [defaultYear]="projectFormData.startyear"
+                                     [placeholder]="projectFormData.startyear ? projectFormData.startyear + ' (pick the exact date)' : 'Select start date'" required></app-date-filter>
                 </div>
                 <div class="ad-field">
                     <label for="endyear">End date <span class="req">*</span></label>
-                    <app-date-picker inputId="endyear" name="endDate" [(ngModel)]="projectFormData.endDate"
-                                     [placeholder]="projectFormData.endyear ? projectFormData.endyear + ' (pick the exact date)' : 'Select end date'" required></app-date-picker>
+                    <app-date-filter exact inputId="endyear" name="endDate" [(ngModel)]="projectFormData.endDate" [defaultYear]="projectFormData.endyear"
+                                     [placeholder]="projectFormData.endyear ? projectFormData.endyear + ' (pick the exact date)' : 'Select end date'" required></app-date-filter>
                 </div>
                 <div class="ad-field">
                     <label for="totalBudget">Total budget (€)</label>

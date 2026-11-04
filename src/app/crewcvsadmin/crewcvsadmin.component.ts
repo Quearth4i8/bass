@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AutosizeDirective } from './autosize.directive';
 import { CvHintDirective } from './cv-hint.directive';
-import { UpbuttonComponent } from '../utilities/Upbutton/upbutton.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService } from 'primeng/api';
 import { AdminNavbarComponent } from '../utilities/admin-navbar/admin-navbar.component';
@@ -48,7 +47,7 @@ interface PendingConfirm {
 @Component({
   selector: 'app-crewcvsadmin',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, AutosizeDirective, CvHintDirective, UpbuttonComponent, AdminNavbarComponent, AdminSidebarComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, AutosizeDirective, CvHintDirective, AdminNavbarComponent, AdminSidebarComponent],
   templateUrl: './crewcvsadmin.component.html',
   styleUrls: ['./crewcvsadmin.component.scss'],
 })

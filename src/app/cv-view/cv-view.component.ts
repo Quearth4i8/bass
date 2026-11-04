@@ -3,7 +3,6 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ThemeService } from '../services/ThemeService';
-import { UpbuttonComponent } from '../utilities/Upbutton/upbutton.component';
 import { CrewCv, CrewCvService, CvSection, CvSectionKind, normalizeCv, sectionNumber } from '../services/CrewCvService';
 import { CvExportService } from '../services/CvExportService';
 
@@ -103,7 +102,7 @@ function mostlyLabeled(entries: ViewEntry[]): boolean {
 @Component({
   selector: 'app-cv-view',
   standalone: true,
-  imports: [CommonModule, RouterLink, UpbuttonComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './cv-view.component.html',
   styleUrls: ['./cv-view.component.scss'],
 })

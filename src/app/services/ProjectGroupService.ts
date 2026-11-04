@@ -39,9 +39,6 @@ export class ProjectGroupService {
     };
   }
 
-  createProjectGroup(projectGroup: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/projectgroups`, projectGroup, this.authHeaders());
-  }
   deleteProjectGroupByTitle(title: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/projectgroups/title/${title}`, this.authHeaders());
   }

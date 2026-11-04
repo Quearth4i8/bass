@@ -18,6 +18,7 @@ import { filter } from 'rxjs/operators';
 import { PortalProjectContextService } from '../../portal/services/portal-project-context.service';
 import { PortalBrandMode } from '../../portal/models/portal-project.model';
 import { PORTAL_TOP_NAV_LINKS } from '../../portal/portal-top-nav-links';
+import { ThemeService } from '../../services/ThemeService';
 
 @Component({
   selector: 'app-navbar2',
@@ -81,6 +82,7 @@ export class Navbar2Component implements OnInit, AfterViewChecked, OnDestroy {
     private readonly router: Router,
     private readonly destroyRef: DestroyRef,
     @Optional() private readonly portalContext: PortalProjectContextService | null,
+    readonly themeService: ThemeService,
   ) {
     this.applyUrl(this.router.url);
 

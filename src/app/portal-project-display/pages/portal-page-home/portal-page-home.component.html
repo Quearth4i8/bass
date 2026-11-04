@@ -35,7 +35,8 @@
 
   <section class="body">
     <div class="logo-strip" [class.static]="!isLogoMarqueeActive">
-        <div class="logo-track" [class.static]="!isLogoMarqueeActive">
+        <div class="logo-track" [class.static]="!isLogoMarqueeActive"
+             [style.animation-duration]="logoMarqueeDuration">
           <div class="logo-item"
                *ngFor="let logo of loopedPartnerLogos">
             <!-- Not lazy: the track scrolls continuously, so every logo is

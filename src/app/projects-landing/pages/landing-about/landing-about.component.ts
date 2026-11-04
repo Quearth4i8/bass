@@ -49,8 +49,10 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reelVideo') private reelVideo?: ElementRef<HTMLVideoElement>;
   @ViewChild('reelStage') private reelStage?: ElementRef<HTMLElement>;
   @ViewChild('reelBig') private reelBig?: ElementRef<HTMLVideoElement>;
+  @ViewChild('aboutGrid') private aboutGrid?: ElementRef<HTMLElement>;
 
   private io?: IntersectionObserver;
+  private gridObserver?: ResizeObserver;
 
   constructor(
     private projectService: ProjectService,
@@ -103,6 +105,9 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
           .forEach((o: any) => videos.push({ videoUrl: o.videoUrl, title: o.title, projectSlug: full.slug }));
       });
       this.reel = videos;
+      // The previews row only now exists, which changes the column's width.
+      const grid = this.aboutGrid?.nativeElement;
+      if (grid) this.sizeReelColumn(grid);
     });
   }
 
@@ -229,7 +234,29 @@ export class LandingAboutComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     this.el.nativeElement.querySelectorAll('.fade-up:not(.in)')
       .forEach((e: Element) => this.io!.observe(e));
+
+    const grid = this.aboutGrid?.nativeElement;
+    if (grid) {
+      this.gridObserver = new ResizeObserver(() => this.sizeReelColumn(grid));
+      this.gridObserver.observe(grid);
+    }
   }
 
-  ngOnDestroy(): void { this.io?.disconnect(); }
+  /**
+   * In the fit-to-screen layout the row's height is set by the window, so a
+   * fixed-width video column got taller and thinner as the page was zoomed
+   * out, and the video was cropped at the sides. Width it from the height
+   * instead, so the video keeps its 4:3 frame; the About card takes the rest.
+   */
+  private sizeReelColumn(grid: HTMLElement): void {
+    const fit = matchMedia('(min-width: 901px) and (min-height: 700px)').matches;
+    if (!fit) { grid.style.removeProperty('--reel-col'); return; }
+    const h = grid.clientHeight;
+    // Reel (4:3) + 10px gap + a row of four 4:3 previews (8px gaps) = h, solved
+    // for the width; without previews the reel alone is the height.
+    const w = this.reel.length > 1 ? (h - 5.5) * 16 / 15 : h * 4 / 3;
+    grid.style.setProperty('--reel-col', Math.round(Math.min(w, grid.clientWidth * 0.45)) + 'px');
+  }
+
+  ngOnDestroy(): void { this.io?.disconnect(); this.gridObserver?.disconnect(); }
 }

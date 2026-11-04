@@ -1,7 +1,7 @@
 /* Loader and generic empty state */
-.page-loader { display: flex; align-items: center; justify-content: center; min-height: 60vh; .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.8s linear infinite; } }
+.page-loader { display: flex; align-items: center; justify-content: center; min-height: 60vh; .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,143,127,0.15); border-top-color: var(--pg-accent); border-radius: 50%; animation: spin 0.8s linear infinite; } }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: #c5cce0; display: block; margin-bottom: 16px; } p { color: #88909e; font-size: 15px; } }
+.empty-state { text-align: center; padding: 80px 20px; i { font-size: 60px; color: var(--pg-line); display: block; margin-bottom: 16px; } p { color: var(--pg-dim); font-size: 15px; } }
 
 
 /* --- CAROUSEL SCSS (Mirrored from original carousel.component.scss) --- */
@@ -248,7 +248,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: rgba(219, 219, 219, 0.273);
+  background-color: transparent;   // the shell's page background, per theme
 }
 
 .hero-container {
@@ -287,7 +287,8 @@
   flex-wrap: nowrap;
   align-items: stretch;
   width: max-content;
-  /* Spacing lives on the items, not here as `gap`. The track holds the logo
+  /* Duration is set from the template, scaled to the track length.
+     Spacing lives on the items, not here as `gap`. The track holds the logo
      list twice and loops by translating -50%, but with a gap the half-way
      point lands mid-gap rather than exactly one set along, so every cycle
      snapped back by half a gap. Per-item margin makes the two halves
@@ -375,9 +376,9 @@
   gap: 48px;
   width: 100%;
   flex-wrap: wrap;
-  background: #ffffff;
-  border-radius: 28px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: var(--pg-card);
+  border-radius: 10px;
+  border: 1px solid var(--pg-line);
   padding: 48px;
   box-sizing: border-box;
   box-shadow:
@@ -414,20 +415,21 @@
 
 .text-section-left>h1,
 .text-section-right>h1 {
-  font-size: clamp(24px, 3vw, 34px);
-  font-weight: 900;
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   line-height: 1.2;
   margin: 12px 0 0;
-  color: #1a2a4a;
+  color: var(--pg-text);
   font-family: inherit;
 }
 
 h5 {
-  font-size: 16.5px;
-  line-height: 1.85;
+  font-size: 15px;
+  line-height: 1.8;
   font-weight: 400;
   margin: 0;
-  color: #475569;
+  color: var(--pg-body);
   font-family: inherit;
   text-align: justify; hyphens: auto;
 }
@@ -437,7 +439,7 @@ h5 {
   min-width: 280px;
   max-width: 48%;
   aspect-ratio: 4 / 3;
-  border-radius: 20px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);

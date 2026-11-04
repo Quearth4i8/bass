@@ -3,7 +3,7 @@
   display: flex; align-items: center; justify-content: center; min-height: 60vh;
   .spinner {
     width: 48px; height: 48px;
-    border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a;
+    border: 4px solid rgba(26,143,127,0.15); border-top-color: #1a8f7f;
     border-radius: 50%; animation: spin 0.8s linear infinite;
   }
 }
@@ -11,8 +11,8 @@
 
 .empty-state {
   text-align: center; padding: 80px 20px;
-  i { font-size: 60px; color: #c5cce0; display: block; margin-bottom: 16px; }
-  p { color: #88909e; font-size: 15px; }
+  i { font-size: 60px; color: var(--pg-line); display: block; margin-bottom: 16px; }
+  p { color: var(--pg-dim); font-size: 15px; }
 }
 
 /* ── Page Header ──────────────────────────────────── */
@@ -32,8 +32,8 @@
 
   .page-section-title {
     font-size: clamp(28px, 4vw, 40px);
-    font-weight: 900;
-    color: #1a2a4a;
+    font-weight: 600;
+    color: var(--pg-text);
     margin-bottom: 20px;
   }
 
@@ -47,61 +47,32 @@
 
 /* ── Content Container ────────────────────────────── */
 .content-container {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 40px 40px 100px;
+  padding: 24px 40px 72px;
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 20px;
 
+  /* Landing card (projects-landing .card, light theme): white, thin border,
+     10px radius, no accent bar or hover lift. */
   .rich-paragraph {
     position: relative;
-    font-size: 17px;
-    line-height: 1.85;
-    color: #334155;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--pg-body);
     text-align: justify; hyphens: auto;
-    padding: 60px;
-    background: #ffffff;
-    border-radius: 32px;
-    box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.04),
-      0 4px 6px -2px rgba(0, 0, 0, 0.02),
-      0 40px 60px -15px rgba(0, 0, 0, 0.03);
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 28px 32px;
+    background: var(--pg-card);
+    border-radius: 10px;
+    border: 1px solid var(--pg-line);
+    box-shadow: 0 6px 24px var(--pg-shadow);
     overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 8px;
-      height: 100%;
-      background: linear-gradient(to bottom, var(--portal-accent, #4fc3f7), color-mix(in srgb, var(--portal-accent, #4fc3f7), #000 25%));
-      opacity: 0.9;
-    }
-
-    &:nth-child(even) {
-      &::before {
-        left: auto;
-        right: 0;
-      }
-    }
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.06),
-        0 10px 10px -5px rgba(0, 0, 0, 0.03);
-    }
 
     ::ng-deep {
       p {
         margin-bottom: 1.6em;
         &:last-child { margin-bottom: 0; }
       }
-      strong { color: #0f172a; font-weight: 800; }
+      strong { color: var(--pg-text); font-weight: 600; }
 
       font[size="1"] { font-size: 13px; }
       font[size="2"] { font-size: 15px; }
@@ -115,10 +86,9 @@
         display: block;
         max-width: 100%;
         height: auto;
-        border-radius: 20px;
-        margin: 40px auto;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 10px;
+        margin: 24px auto;
+        border: 1px solid var(--pg-line);
       }
 
       ul, ol {
@@ -128,7 +98,7 @@
           margin-bottom: 12px;
           &::marker {
             color: var(--portal-accent, #4fc3f7);
-            font-weight: 800;
+            font-weight: 600;
           }
         }
       }
@@ -136,19 +106,15 @@
   }
 }
 
-@media (max-width: 1200px) {
-  .page-header { padding-top: 160px; }
-}
-
 @media (max-width: 768px) {
   .content-container {
-    padding: 20px 16px 60px;
-    gap: 30px;
-    .rich-paragraph { padding: 40px 25px; font-size: 16px; border-radius: 24px; }
+    padding: 16px 16px 52px;
+    gap: 16px;
+    .rich-paragraph { padding: 22px 20px; }
   }
 }
 @media (min-width: 769px) and (max-width: 1100px) {
-  .content-container { padding: 40px 24px 80px; }
+  .content-container { padding: 24px 24px 72px; }
 }
 
 /* ── Loader, held back ──────────────────────────────────────────────────────

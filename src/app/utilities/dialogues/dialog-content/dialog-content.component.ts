@@ -195,7 +195,7 @@ export class DialogContentComponent implements OnInit {
   }
 
   togglePartenaireDropdown(event: MouseEvent): void {
-    event.stopPropagation();
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
     this.partenaireDropdownOpen = !this.partenaireDropdownOpen;
     this.groupDropdownOpen = false;
     if (this.partenaireDropdownOpen) {
@@ -234,7 +234,7 @@ export class DialogContentComponent implements OnInit {
   }
 
   toggleGroupDropdown(event: MouseEvent): void {
-    event.stopPropagation();
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
     this.groupDropdownOpen = !this.groupDropdownOpen;
     this.partenaireDropdownOpen = false;
     if (this.groupDropdownOpen) {

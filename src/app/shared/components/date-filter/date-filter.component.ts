@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, forwardRef,
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, booleanAttribute, forwardRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -9,9 +9,9 @@ interface DateParts { year: number | null; month: number | null; day: number | n
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
-/** "2024-04-*" -> { year: 2024, month: 4, day: null }; '' -> all null. */
+/** "2024-04-*" -> { year: 2024, month: 4, day: null }; '' -> all null. A time after the date is ignored. */
 function parseParts(v: unknown): DateParts {
-  const [y, m, d] = String(v ?? '').split('-');
+  const [y, m, d] = String(v ?? '').slice(0, 10).split('-');
   const num = (s: string | undefined) => (s && s !== '*' && Number.isInteger(+s) && +s > 0 ? +s : null);
   return { year: num(y), month: num(m), day: num(d) };
 }
@@ -37,6 +37,10 @@ export function describeDateFilter(v: unknown): string {
  * The value is "YYYY-MM-DD" with "*" for the parts left open ("*-04-*"), or
  * '' with nothing set; `matchesDate` in project-labels reads it.
  *
+ * With [exact] it picks one date for a form instead: same layout, no "Any",
+ * and the value is "YYYY-MM-DD" once year, month and day are all picked
+ * ('' until then, so `required` holds the form back).
+ *
  * The popover is position: fixed, placed like app-date-picker's, so it is
  * not clipped by scrolling containers.
  */
@@ -51,6 +55,10 @@ export function describeDateFilter(v: unknown): string {
 })
 export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   @Input() placeholder = 'Any date';
+  @Input({ transform: booleanAttribute }) exact = false;
+  @Input() inputId?: string;
+  /** Exact mode: the year to start from while there is no date (older rows only have a year). */
+  @Input() defaultYear: number | string | null = null;
 
   open = false;
   disabled = false;
@@ -82,7 +90,22 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   // ── Display ─────────────────────────────────────────────────────────────────
 
   get isEmpty(): boolean { return !this.parts.year && !this.parts.month && !this.parts.day; }
+  get isComplete(): boolean { return !!(this.parts.year && this.parts.month && this.parts.day); }
   get label(): string { return describeDateFilter(this.serialize()); }
+
+  /** What the trigger shows: in exact mode only a whole date counts as a value. */
+  get hasValue(): boolean { return this.exact ? this.isComplete : !this.isEmpty; }
+
+  /** Exact mode's footer: the date, or which parts are still missing ("Apr 2023 · pick a day"). */
+  get progress(): string {
+    if (this.isComplete) return this.label;
+    const { year, month, day } = this.parts;
+    const missing = [!year && 'year', !month && 'month', !day && 'day'].filter(Boolean) as string[];
+    const picked = [day, month && this.months[month - 1].short, year].filter(Boolean).join(' ');
+    const ask = missing.length === 3 ? 'Pick a year, month and day'
+      : `pick a ${missing.join(' and ')}`;
+    return picked ? `${picked} · ${ask}` : ask;
+  }
 
   get years(): number[] {
     return Array.from({ length: 8 }, (_, i) => this.yearEnd - 7 + i);
@@ -102,11 +125,15 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   private static current: DateFilterComponent | null = null;
 
   toggle(event: MouseEvent): void {
-    event.stopPropagation();
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
     if (this.disabled) return;
     if (this.open) { this.close(); return; }
     if (DateFilterComponent.current && DateFilterComponent.current !== this) DateFilterComponent.current.close();
     DateFilterComponent.current = this;
+    if (this.exact && this.isEmpty) {
+      const fallback = Number(this.defaultYear);
+      if (Number.isInteger(fallback) && fallback > 0) this.parts = { ...this.parts, year: fallback };
+    }
     const y = this.parts.year;
     if (y && (y > this.yearEnd || y < this.yearEnd - 7)) this.yearEnd = y + 1;
     this.open = true;
@@ -139,9 +166,20 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   /** Picks a part, or clears it when it is already picked (null = "Any"). */
   set(part: keyof DateParts, value: number | null, event: Event): void {
     event.stopPropagation();
-    this.parts = { ...this.parts, [part]: this.parts[part] === value ? null : value };
+    // Exact mode keeps a picked part on a second click: there is no "Any" to fall back to.
+    const toggleOff = !this.exact && this.parts[part] === value;
+    this.parts = { ...this.parts, [part]: toggleOff ? null : value };
     // A month change can strand the day (31 -> February): drop it then.
     if (this.parts.day && this.dayDisabled(this.parts.day)) this.parts.day = null;
+    this.onChange(this.serialize());
+    this.cdr.markForCheck();
+  }
+
+  today(event: Event): void {
+    event.stopPropagation();
+    const now = new Date();
+    this.parts = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+    this.yearEnd = Math.max(this.yearEnd, now.getFullYear());
     this.onChange(this.serialize());
     this.cdr.markForCheck();
   }
@@ -159,7 +197,7 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   }
 
   private serialize(): string {
-    if (this.isEmpty) return '';
+    if (this.isEmpty || (this.exact && !this.isComplete)) return '';
     const { year, month, day } = this.parts;
     const pad = (n: number | null) => (n ? String(n).padStart(2, '0') : '*');
     return `${year ?? '*'}-${pad(month)}-${pad(day)}`;

@@ -136,12 +136,12 @@ export class DatePickerComponent implements ControlValueAccessor, OnDestroy {
   // ── Interaction ─────────────────────────────────────────────────────────────
 
   toggle(event: MouseEvent): void {
-    event.stopPropagation();
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
     if (this.disabled) return;
     this.open ? this.close() : this.openPicker();
   }
 
-  /** The picker whose popover is open: opening another one closes it (the trigger stops the click, so it never sees an outside click). */
+  /** The picker whose popover is open: opening another one closes it (a backstop to the outside-click check). */
   private static current: DatePickerComponent | null = null;
 
   private openPicker(): void {

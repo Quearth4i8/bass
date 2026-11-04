@@ -536,12 +536,43 @@ app-projects-landing {
 .card-id  { font-family: $font-mono; font-size: 10px; color: $text-faint; }
 
 .about-card {
-  p { font-size: 15px; line-height: 1.8; color: $text-dim; margin: 0 0 12px; text-align: justify; hyphens: auto; &:last-child{margin-bottom:0} strong { color: $text; font-weight: 500; } }
+  /* Justified, but no hyphenation: it split words ("oc-curring"). */
+  p { font-size: 14px; line-height: 1.65; color: $text-dim; margin: 0 0 10px; text-align: justify; hyphens: none;
+      &::first-letter { font-weight: 700; color: $text; } &:last-child{margin-bottom:0} strong { color: $text; font-weight: 500; } }
 }
 
 .about-grid {
-  display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px;
+  // --reel-col is set from the row height in the fit layout (landing-about.component.ts).
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--reel-col, clamp(260px, 28%, 400px)); gap: 20px;
   @media (max-width: 860px) { grid-template-columns: 1fr; }
+}
+// Two text columns and a 2×2 goals grid keep the card short.
+.about-text {
+  column-count: 2; column-gap: 28px;
+  p { break-inside: avoid; }
+  p:nth-child(2) { break-after: column; }   // two paragraphs per column, kept in this order
+  @media (max-width: 1100px) { column-count: 1; }
+}
+// Our Mission: its own tinted panel under the text, so it reads as a
+// separate block rather than a second copy of the card's heading.
+.about-card .mission-panel {
+  margin-top: 16px; padding: 12px 18px 10px;
+  border-radius: 10px;
+  background: rgba(74,214,196,0.05); border: 1px solid rgba(74,214,196,0.14);
+  .mission-head { margin: 0 0 2px; padding-bottom: 0; border-bottom: 0; }
+}
+.about-card .mission-list {
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px;
+  li, li:last-child {
+    padding: 8px 0; border-bottom: 0; text-align: justify; hyphens: none;   // no separators
+    grid-template-columns: 30px 1fr; gap: 12px;
+  }
+  // The number as a small badge, level with the first line.
+  .mission-num {
+    display: grid; place-items: center; height: 20px; margin-top: 1px; padding: 0;
+    border-radius: 6px; background: rgba(74,214,196,0.12); font-size: 10px;
+  }
+  @media (max-width: 1100px) { grid-template-columns: 1fr; }
 }
 
 // ── Hero body ─────────────────────────────────────────────────────────────
@@ -1350,16 +1381,34 @@ app-projects-landing {
 .mission-num { font-family: $font-mono; font-size: 11px; color: $accent; padding-top: 2px; }
 
 // ── Our Mission: goals list, Relevant Outputs reel to its right ───────────
-.mission-body {
-  display: grid; grid-template-columns: minmax(0, 1fr) 38%; gap: 20px; align-items: stretch;
-  @media (max-width: 560px) { grid-template-columns: 1fr; }
+// Right column: the reel on top, its previews filling the rest.
+.overview-side {
+  min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 10px;
 }
-.reel { min-width: 0; display: flex; }
+// Previews of the reel's videos: a row of small tiles under it.
+.reel-queue { flex-shrink: 0; }
+.reel-queue-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.reel-thumb {
+  position: relative; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; cursor: pointer;
+  border: 1px solid $line; border-radius: 8px; background: #000;
+  opacity: 0.55; transition: opacity .2s ease, border-color .2s ease;
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+  &:hover { opacity: 0.85; }
+  &.is-current { opacity: 1; border-color: $accent; }
+  &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
+}
+
+// Stretches so the previews under it end level with the About card.
+.reel {
+  min-width: 0; min-height: 0; display: flex; flex: 1 1 auto;
+  @media (max-width: 860px) { flex: none; aspect-ratio: 4 / 3; }   // stacked: no card to match
+}
 
 .reel-media {
-  position: relative; display: block; width: 100%; min-height: 150px; align-self: stretch;   // as tall as the goals list
-  padding: 0; border: 0; border-radius: 0; overflow: hidden;
-  background: transparent; cursor: zoom-in;   // no frame: the video's own white edges blend into the card
+  position: relative; display: block; width: 100%; align-self: stretch;
+  padding: 0; border: 0; border-radius: 10px; overflow: hidden;
+  background: #000; cursor: zoom-in;
   video {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
     animation: reelIn .5s ease;   // each new video fades in over the last
@@ -1405,7 +1454,7 @@ $rail-text:   #e8f4f2;
 $rail-dim:    #a9c9c6;
 $rail-w:      200px;     // also the navbar brand block's width
 $frame-line:  rgba(255,255,255,0.08);   // rail's right edge
-$frame-corner: 28px;     // radius of the content area's top-left corner
+$frame-corner: 16px;     // radius of the content area's top-left corner
 $rail-gap:    36px;      // rail to main column
 
 $home-fit: '(min-width: 901px) and (min-height: 700px)';
@@ -1433,8 +1482,7 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
   gap: 8px;                // rail shows between the rounded tiles
   padding: 8px;
   /* Navbar teal (--nav-bg), so nav and rail are one colour; follows the theme. */
-  border-right: 1px solid $frame-line;
-  background: var(--nav-bg);   // same as the navbar
+  background: var(--nav-bg);   // same as the navbar; no edge line, so it runs straight into the corner
 
   /* Inverted corner where nav and rail meet: a nav-coloured square with a
      quarter circle cut out, so the content area reads as rounded top-left. */
@@ -1446,7 +1494,9 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
       transparent calc(#{$frame-corner} - 0.75px), var(--nav-bg) calc(#{$frame-corner} + 0.75px));   // 1.5px blend = anti-aliased edge
     pointer-events: none;
   }
-  box-shadow: 8px 0 30px rgba(0,0,0,0.18);
+  /* drop-shadow, not box-shadow: it follows the corner's curve too, so the
+     shadow bends round it instead of stopping square at the rail's edge. */
+  filter: drop-shadow(6px 0 16px rgba(0,0,0,0.16));
 
   @media (max-width: 900px) {
     position: relative;
@@ -1550,8 +1600,14 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
       scrollbar-width: thin; scrollbar-color: $line-2 transparent;
     }
     .card-head { margin-bottom: 12px; padding-bottom: 10px; }
-    .about-card p, .mission-list li { font-size: 14px; line-height: 1.65; }
-    .mission-list li { padding: 10px 0; }
+    .about-grid > .card { padding: 16px 20px; }
+    /* Grows with the screen, by whichever of width (line length) and height
+       (card height) is tighter: 13px on a laptop, up to 20px on big screens,
+       so the text stays readable and fills the card instead of shrinking
+       into its top half. */
+    .about-card p, .mission-list li { font-size: clamp(13px, min(0.76vw, 1.45vh), 20px); line-height: 1.6; }
+    .about-card p { margin-bottom: 6px; }
+    .about-card .mission-panel { margin-top: 8px; padding-top: 9px; padding-bottom: 6px; }
   }
 }
 
@@ -2582,6 +2638,10 @@ app-projects-landing.theme-light {
   .card-ico     { color: #1a8f7f; }
   .mission-list li { border-bottom-color: #e2eff6; color: #3d5a6e; b { color: #0d2137; } }
   .mission-num  { color: #1a8f7f; }
+  .about-card p::first-letter { color: #0d2137; }
+  .about-card .mission-panel { background: rgba(26,143,127,0.04); border-color: rgba(26,143,127,0.14); }
+  .about-card .mission-num   { background: rgba(26,143,127,0.10); }
+  .reel-thumb   { border-color: #c5d8e6; &.is-current { border-color: #1a8f7f; } }
 
   // Geo card
   .geo-card      { background: #fff; border-color: #c5d8e6; }
@@ -2630,6 +2690,9 @@ app-projects-landing.theme-light {
 
   // Footer & theme btn
   .landing-footer { border-top-color: #c5d8e6; color: #6b8a9a; }
+  .footer-org strong { color: #0d2137; }
+  .footer-orb { background: linear-gradient(160deg, rgba(47,184,164,0.85), rgba(26,143,127,0.85)); box-shadow: 0 0 0 4px rgba(26,143,127,0.08); }
+  .footer-rule { background: linear-gradient(90deg, transparent, rgba(26,143,127,0.4)); &:last-of-type { background: linear-gradient(90deg, rgba(26,143,127,0.4), transparent); } }
   .theme-btn { background: rgba(255,255,255,0.55); border-color: #a9d6ce; color: #3d5a6e; &:hover { color: #1a8f7f; border-color: #1a8f7f; } }
 
   // TRIX Prediction Section
@@ -2733,15 +2796,58 @@ app-projects-landing.theme-light {
 
 // ── Footer ────────────────────────────────────────────────────────────────
 .landing-footer {
-  border-top: 1px solid $line; margin-top: auto; padding: 28px 0;
+  border-top: 1px solid $line; margin-top: auto; padding: 16px 0;
   font-family: $font-mono; font-size: 11px; color: $text-faint;
 }
 
+/* One row in two equal halves around the circle, so it sits at the page's
+   centre whatever the text lengths: copyright … INSTM ─ ● ─ DNCC … tagline. */
 .footer-inner {
-  display: flex; justify-content: space-between; align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px auto 44px minmax(0, 1fr);
+  align-items: center; column-gap: 14px;
   width: 100%; padding: 0 40px; box-sizing: border-box;
-  @media (max-width: 768px) { padding: 0 16px; }
-  @media (max-width: 560px) { flex-direction: column; gap: 8px; text-align: center; }
+  @media (max-width: 1200px) { grid-template-columns: minmax(0, 1fr) 18px auto 18px minmax(0, 1fr); column-gap: 10px; }
+  /* Narrow: institutions and circle on one row, copyright and tagline under. */
+  @media (max-width: 900px) {
+    padding: 0 16px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); row-gap: 10px;
+    .footer-side { display: contents; }
+    .footer-rule { display: none; }
+    .footer-org-l { grid-area: 1 / 1; }
+    .footer-orb   { grid-area: 1 / 2; }
+    .footer-org-r { grid-area: 1 / 3; }
+    .footer-side-l .footer-note { grid-area: 2 / 1; }
+    .footer-side-r .footer-note { grid-area: 2 / 3; justify-self: end; }
+  }
+}
+.footer-side {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; min-width: 0;
+}
+.footer-note { white-space: nowrap; }
+
+.footer-org {
+  display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  strong {
+    font-family: 'Geist', 'Inter', system-ui, sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: $text; line-height: 1.2;
+  }
+  span { font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3; }
+}
+.footer-org-l { align-items: flex-end; text-align: right; }
+.footer-org-r { align-items: flex-start; text-align: left; }
+
+.footer-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba($accent, 0.45));
+  &:last-of-type { background: linear-gradient(90deg, rgba($accent, 0.45), transparent); }
+}
+
+/* A quiet teal dot in a faint ring: just enough to anchor the centre. */
+.footer-orb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(160deg, rgba($accent, 0.85), rgba(#1a8f7f, 0.85));
+  box-shadow: 0 0 0 4px rgba($accent, 0.10);
 }
 
 // ── Nav, both themes ──────────────────────────────────────────────────────

@@ -38,7 +38,6 @@ import { DialogContentComponent } from './utilities/dialogues/dialog-content/dia
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
-import { ProjectGroupDialogComponent } from './utilities/dialogues/project-group-dialog/project-group-dialog.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DropdownModule } from 'primeng/dropdown';
 import { ToastModule } from 'primeng/toast';
@@ -97,7 +96,6 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
     DocsadminComponent,
     ConfirmDialogComponent,
     DialogContentComponent,
-    ProjectGroupDialogComponent,
     ConfirmDeleteGroupDialogComponent,
     ProjectsLandingComponent,
     ManagementComponent,

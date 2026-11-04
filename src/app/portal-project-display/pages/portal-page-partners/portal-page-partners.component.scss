@@ -5,14 +5,14 @@ $logo-tooltip-bg: color-mix(in srgb, var(--portal-accent, #1a5f7a), #0a1c30 58%)
 
 .page-loader {
   display: flex; align-items: center; justify-content: center; min-height: 60vh;
-  .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,42,74,0.15); border-top-color: #1a2a4a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .spinner { width: 48px; height: 48px; border: 4px solid rgba(26,143,127,0.15); border-top-color: var(--pg-accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .empty-state {
   text-align: center; padding: 80px 20px;
-  i { font-size: 56px; color: #c5cce0; display: block; margin-bottom: 14px; }
-  p { color: #88909e; font-size: 15px; }
+  i { font-size: 56px; color: var(--pg-line); display: block; margin-bottom: 14px; }
+  p { color: var(--pg-dim); font-size: 15px; }
 }
 
 // Standard centered header — matches all other portal pages
@@ -24,13 +24,13 @@ $logo-tooltip-bg: color-mix(in srgb, var(--portal-accent, #1a5f7a), #0a1c30 58%)
   &.section-header {
     padding-top: 56px;
     background: transparent;
-    border-top: 1px solid rgba(215,225,235,0.8);
+    border-top: 1px solid var(--pg-line);
   }
 
   .page-section-title {
     font-size: clamp(28px, 4vw, 40px);
     font-weight: 900;
-    color: #1a2a4a;
+    color: var(--pg-text);
     margin-bottom: 20px;
   }
 

@@ -11,6 +11,7 @@ import { PortalProjectsListComponent } from './management/portal-projects-list/p
 import { AdminGuard } from './auth/admin.guard';
 import { CrewcvsadminComponent } from './crewcvsadmin/crewcvsadmin.component';
 import { CvViewComponent } from './cv-view/cv-view.component';
+import { StatusHistoryComponent } from './projectsadmin/status-history/status-history.component';
 
 // Portal public display
 import { PortalProjectDisplayComponent } from './portal-project-display/portal-project-display.component';
@@ -35,6 +36,7 @@ import { LandingOutputsComponent } from './projects-landing/pages/landing-output
 const routes: Routes = [
   // Specific routes matched before the shell catch-all
   { path: 'projectadmin', component: ProjectAdminComponent, canActivate: [AdminGuard] },
+  { path: 'projectadmin/status-history', component: StatusHistoryComponent, canActivate: [AdminGuard] },
   { path: 'shared-folder', component: DocsadminComponent, canActivate: [AdminGuard] },
   { path: 'docsadmin', redirectTo: 'shared-folder', pathMatch: 'full' },
   { path: 'budget-charts', component: BudgetChartsComponent },

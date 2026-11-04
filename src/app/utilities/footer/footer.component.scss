@@ -10,6 +10,9 @@
 }
 
 .footer-wave {
+  /* Flat edge now, as on the landing pages; the wave markup is kept so it can
+     come back by deleting this line. */
+  display: none;
   line-height: 0; // kills the inline-descender gap under the svg
 
   svg {
@@ -37,10 +40,11 @@
   }
 }
 
-/* Dark band, so the footer closes the page instead of fading into it. */
+/* The landing navbar's teal (global --nav-bg), so the page is framed by the
+   same colour top and bottom. */
 .footer-body {
-  background: #10243d;
-  padding: 8px 0 14px;
+  background: var(--nav-bg);
+  padding: 14px 0 16px;
 }
 
 @media (max-width: 1024px) {
@@ -58,9 +62,11 @@
 /* A copyright notice, not a heading - it was an <h3>, which is why it came out
    1.2rem and bold. */
 .footer-copyright {
-  font-size: 0.85rem;
+  font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.72);
   margin: 0;
 }
 

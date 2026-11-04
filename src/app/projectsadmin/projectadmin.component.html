@@ -29,9 +29,10 @@
             </button>
           </div>
         </div>
-        <button type="button" class="btn-ghost" (click)="showDialog2()">
-          <i class='bx bx-folder-plus'></i><span>New group</span>
-        </button>
+        <a routerLink="/projectadmin/status-history" class="btn-ghost"
+           title="Each project's statuses over time">
+          <i class='bx bx-history'></i><span>Status history</span>
+        </a>
         <button type="button" class="btn-primary" (click)="showDialog()">
           <i class='bx bx-plus'></i><span>New project</span>
         </button>
@@ -57,17 +58,17 @@
       <div class="stat-box stat-box-budget">
         <div class="stat-icon tone-blue"><i class='bx bx-euro'></i></div>
         <div class="stat-info">
-          <h2>{{ compactEuro(ongoingTotalBudget) }}</h2>
+          <h2>{{ compactEuro(filteredTotalBudget) }}</h2>
           <p>Total project budget</p>
-          <span class="stat-sub">Ongoing projects</span>
+          <span class="stat-sub" [title]="activeFilter || 'All projects (no filter)'">{{ budgetScope }}</span>
         </div>
       </div>
       <div class="stat-box stat-box-budget">
         <div class="stat-icon tone-amber"><i class='bx bx-group'></i></div>
         <div class="stat-info">
-          <h2>{{ compactEuro(ongoingPartnerBudget) }}</h2>
+          <h2>{{ compactEuro(filteredPartnerBudget) }}</h2>
           <p>Partner project budget</p>
-          <span class="stat-sub">Ongoing projects</span>
+          <span class="stat-sub" [title]="activeFilter || 'All projects (no filter)'">{{ budgetScope }}</span>
         </div>
       </div>
     </div>
@@ -140,7 +141,7 @@
             <input type="text" placeholder="Search..." [(ngModel)]="filterValues['thematic']" (ngModelChange)="applyFilters()">
           </div>
           <div class="filter-field">
-            <label>Status</label>
+            <label>Current status</label>
             <div class="custom-dropdown filter-dropdown" [class.open]="filterMenu === 'status'">
               <div class="dropdown-trigger" (click)="toggleFilterMenu('status', $event)">
                 <span class="dropdown-value">{{ filterValues['status'] ? groupLabel(filterValues['status']) : 'All' }}</span>
@@ -151,12 +152,6 @@
                 <div class="dropdown-item" *ngFor="let st of statusOptions" [class.selected]="filterValues['status'] === st" (click)="pickFilter('status', st)">{{ groupLabel(st) }}</div>
               </div>
             </div>
-          </div>
-          <div class="filter-field">
-            <label>Status in year</label>
-            <input type="number" min="1900" max="2100" [placeholder]="filterValues['status'] ? 'Now (e.g. 2025)' : 'Pick a status first'"
-                   [disabled]="!filterValues['status']"
-                   [(ngModel)]="filterValues['statusYear']" (ngModelChange)="refreshStatusHistory()">
           </div>
           <div class="filter-field">
             <label>Submission date</label>
@@ -177,6 +172,63 @@
           <div class="filter-field">
             <label>Partner budget</label>
             <input type="number" min="0" placeholder="e.g. 500000" [(ngModel)]="filterValues['budget']" (ngModelChange)="applyFilters()">
+          </div>
+          <!-- Historical status: from the status history, not the current status -->
+          <div class="filter-field history-filter">
+            <label><i class='bx bx-history'></i>Historical status</label>
+            <div class="history-trigger" [class.active]="historyActive" [class.open]="historyPanelOpen">
+              <button type="button" class="history-btn" (click)="toggleHistoryPanel($event)"
+                      [title]="historyActive ? 'Change the status or year' : 'Find projects that had a status during a given year'">
+                <i class='bx' [ngClass]="historyLoading ? 'bx-loader-alt bx-spin' : 'bx-calendar-event'"></i>
+                <span *ngIf="!historyActive">Search by year…</span>
+                <span *ngIf="historyActive" class="history-value">
+                  <b [ngClass]="'tone-' + groupTone(historyStatus)">{{ groupLabel(historyStatus) }}</b> in {{ historyYear }}
+                </span>
+              </button>
+              <button type="button" class="history-clear" *ngIf="historyActive" (click)="clearHistory()"
+                      title="Clear the status-in-a-year filter" aria-label="Clear the status-in-a-year filter">
+                <i class='bx bx-x'></i>
+              </button>
+            </div>
+
+            <div class="history-panel" *ngIf="historyPanelOpen" [ngStyle]="historyPanelStyle" role="dialog" aria-label="Status in a year">
+              <div class="hp-head">
+                <strong><i class='bx bx-history'></i>Find projects by past status</strong>
+                <span>Projects that had a status at any point during a year, whatever their status is today.</span>
+              </div>
+
+              <div class="hp-section">
+                <span class="hp-label"><em>1</em>Status</span>
+                <div class="hp-chips">
+                  <button type="button" class="hp-chip" *ngFor="let st of statusOptions"
+                          [ngClass]="'tone-' + groupTone(st)" [class.selected]="draftStatus === st"
+                          (click)="draftStatus = st">
+                    <i class='bx' [ngClass]="groupIcon(st)"></i>{{ groupLabel(st) }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="hp-section">
+                <span class="hp-label"><em>2</em>Year</span>
+                <div class="hp-years">
+                  <button type="button" class="hp-year" *ngFor="let y of historyYears"
+                          [class.selected]="draftYear === y" (click)="draftYear = y">{{ y }}</button>
+                </div>
+              </div>
+
+              <p class="hp-summary">
+                Show projects that were
+                <b>{{ draftStatus ? groupLabel(draftStatus) : 'any status' }}</b>
+                during <b>{{ draftYear ?? 'a year' }}</b>
+              </p>
+
+              <div class="hp-actions">
+                <button type="button" class="btn-ghost" (click)="historyPanelOpen = false">Cancel</button>
+                <button type="button" class="btn-primary" [disabled]="!draftStatus || draftYear === null" (click)="applyHistory()">
+                  <i class='bx bx-search'></i><span>Show projects</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         </div>
@@ -227,6 +279,10 @@
               </td>
               <td class="col-actions">
                 <div class="action-btns">
+                  <a class="btn-icon history" routerLink="/projectadmin/status-history"
+                     [queryParams]="{ project: project.id }" title="Status history">
+                    <i class='bx bx-history'></i>
+                  </a>
                   <button class="btn-icon edit" (click)="showDialog(project)" title="Edit">
                     <i class='bx bx-pencil'></i>
                   </button>
@@ -247,7 +303,7 @@
       <div class="page-size">
         <span>Rows per page</span>
         <div class="ps-picker" [class.open]="pageSizeMenuOpen">
-          <button type="button" class="ps-trigger" (click)="pageSizeMenuOpen = !pageSizeMenuOpen; $event.stopPropagation()"
+          <button type="button" class="ps-trigger" (click)="pageSizeMenuOpen = !pageSizeMenuOpen"
                   aria-haspopup="listbox" [attr.aria-expanded]="pageSizeMenuOpen">
             <span>{{ pageSize }}</span><i class='bx bx-chevron-up'></i>
           </button>

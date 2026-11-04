@@ -1,8 +1,9 @@
 <!-- The shell itself never scrolls: the fixed nav sits on top and `.portal-scroll`
      below it is the page's scroll container, so the scrollbar starts under the
      header instead of running the full viewport height beside it. -->
+<!-- --portal-accent is the landing palette teal for every project (set in the
+     stylesheet); bind portalAccentHex here again to bring back per-project colours. -->
 <div class="portal-shell"
-     [style.--portal-accent]="portalAccentHex"
      [style.--portal-nav-h]="portalNavHeightPx">
 
   <!-- Nothing themed renders until the project is known: --portal-accent is
@@ -39,6 +40,5 @@
       <app-footer></app-footer>
     </div>
 
-    <app-upbutton [scrollContainer]="portalScroll"></app-upbutton>
   </ng-container>
 </div>

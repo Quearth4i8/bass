@@ -1,0 +1,123 @@
+<div class="admin-layout">
+  <app-admin-navbar pageTitle="Status history" (menuToggle)="toggleSidebar()"></app-admin-navbar>
+
+  <app-admin-sidebar [collapsed]="!isSidebarVisible"></app-admin-sidebar>
+
+  <main class="admin-main" [class.sidebar-open]="isSidebarVisible">
+    <div class="page-head">
+      <a routerLink="/projectadmin" class="back-link"><i class='bx bx-arrow-back'></i>Projects</a>
+      <h1 class="page-heading">Status history</h1>
+      <p class="page-sub">Click a project to see the statuses it went through, and when. Click a number in the year table to list those projects.</p>
+    </div>
+
+    <div class="panel state" *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Loading history…</div>
+    <div class="panel state error" *ngIf="error"><i class='bx bx-error-circle'></i> {{ error }}</div>
+
+    <ng-container *ngIf="!loading && !error">
+      <div class="toolbar">
+        <div class="search">
+          <i class='bx bx-search'></i>
+          <input type="text" [(ngModel)]="search" placeholder="Find a project by acronym, title or coordinator…" aria-label="Find a project">
+        </div>
+        <div class="chips" role="group" aria-label="Current status">
+          <button type="button" class="chip" [class.on]="!status && !yearFilter" (click)="status = ''; yearFilter = null">
+            All <span class="count">{{ rows.length }}</span>
+          </button>
+          <button type="button" class="chip" *ngFor="let s of currentStatuses" [class.on]="status === s" (click)="status = s; yearFilter = null">
+            <span class="dot" [ngClass]="'tone-' + statusTone(s)"></span>{{ statusLabel(s) }}
+            <span class="count">{{ countFor(s) }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="layout">
+      <section class="panel list">
+        <div class="year-banner" *ngIf="yearFilter">
+          <span>
+            <strong>{{ filteredRows.length }}</strong> project{{ filteredRows.length === 1 ? '' : 's' }}
+            {{ filteredRows.length === 1 ? 'was' : 'were' }}
+            <span class="pill sm" [ngClass]="'tone-' + statusTone(yearFilter.status)">{{ statusLabel(yearFilter.status) }}</span>
+            during <strong>{{ yearFilter.year }}</strong>
+          </span>
+          <button type="button" class="banner-clear" (click)="yearFilter = null" title="Show every project">
+            <i class='bx bx-x'></i>Clear
+          </button>
+        </div>
+
+        <div class="empty" *ngIf="!filteredRows.length">No project matches.</div>
+
+        <div class="row" *ngFor="let r of filteredRows" [attr.data-project]="r.project.id" [class.open]="expanded.has(r.project.id)">
+          <button type="button" class="row-head" (click)="toggle(r.project.id)" [attr.aria-expanded]="expanded.has(r.project.id)">
+            <span class="acronym">{{ r.project.acronyme || '—' }}</span>
+            <span class="title" [title]="r.project.titreproj || ''">{{ r.project.titreproj || '—' }}</span>
+            <span class="meta">
+              <ng-container *ngIf="r.periods.length > 1">{{ r.periods.length - 1 }} change{{ r.periods.length === 2 ? '' : 's' }}</ng-container>
+              <ng-container *ngIf="r.periods.length <= 1">No changes</ng-container>
+            </span>
+            <span class="pill" *ngIf="r.project.title" [ngClass]="'tone-' + statusTone(r.project.title)">{{ statusLabel(r.project.title) }}</span>
+            <i class='bx bx-chevron-down chevron'></i>
+          </button>
+
+          <div class="row-body" [class.show]="expanded.has(r.project.id)">
+            <div class="row-body-clip">
+            <div class="row-body-content" *ngIf="rendered.has(r.project.id)">
+            <p class="empty" *ngIf="!r.periods.length">No status recorded for this project yet.</p>
+
+            <ng-container *ngIf="r.periods.length">
+              <div class="bar" aria-hidden="true">
+                <span *ngFor="let seg of bar(r.periods)" class="seg" [ngClass]="'tone-' + statusTone(seg.period.status)"
+                      [style.width.%]="seg.width" [title]="statusLabel(seg.period.status)"></span>
+              </div>
+
+              <ol class="timeline">
+                <li *ngFor="let p of r.periods; let last = last" [class.current]="last">
+                  <span class="node" [ngClass]="'tone-' + statusTone(p.status)"></span>
+                  <span class="pill sm" [ngClass]="'tone-' + statusTone(p.status)">{{ statusLabel(p.status) }}</span>
+                  <span class="when">
+                    {{ formatDate(p.from) }} → {{ p.to ? formatDate(p.to) : 'today' }}
+                    <span class="dim">· {{ duration(p.from, p.to) }}</span>
+                  </span>
+                </li>
+              </ol>
+            </ng-container>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel overview">
+        <header class="overview-head">
+          <h2>Year by year</h2>
+          <p>Projects that had each status at some point during the year.</p>
+        </header>
+        <div class="overview-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="year-col">Year</th>
+                <th *ngFor="let s of statuses" [title]="statusLabel(s)">
+                  <span class="dot" [ngClass]="'tone-' + statusTone(s)"></span>{{ statusLabel(s) }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of overview" [class.picked]="row.year === yearFilter?.year">
+                <th class="year-col">{{ row.year }}</th>
+                <td *ngFor="let s of statuses">
+                  <button type="button" class="cell" [disabled]="!row.counts[s]" [ngStyle]="cellStyle(s, row.counts[s])"
+                          [class.selected]="row.year === yearFilter?.year && s === yearFilter?.status"
+                          [title]="row.counts[s] + ' ' + (statusLabel(s) | lowercase) + ' in ' + row.year"
+                          (click)="pickCell(s, row.year)">
+                    {{ row.counts[s] || '–' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </aside>
+      </div>
+    </ng-container>
+  </main>
+</div>

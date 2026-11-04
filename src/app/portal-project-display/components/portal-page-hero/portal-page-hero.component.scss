@@ -1,58 +1,28 @@
-/* ── Shared page hero ───────────────────────────────────────────────────── */
+/* ── Shared page title ──────────────────────────────────────────────────────
+   The landing pages' title type (projects-landing .section-title): a plain
+   title with a mono label under it, centred, on the page background. */
 :host { display: block; }
 
 .page-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  /* Shorter than it was: with the badge and standfirst gone, the title is all
-     the band has to hold. */
-  padding: 46px clamp(16px, 2.4vw, 40px) 84px;
+  padding: 56px 40px 8px;
+  box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
   text-align: center;
-  background: linear-gradient(135deg,
-              color-mix(in srgb, var(--portal-accent, #1a5f7a), #000 30%),
-              var(--portal-accent, #1a5f7a));
-
-  .hero-bg {
-    position: absolute; inset: 0; z-index: -2;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-
-  /* A neutral darkening scrim, not an accent wash. Tinting with the project
-     colour recoloured the whole photograph; this only darkens enough to keep
-     the title legible and leaves the image its own colours. */
-  .hero-tint {
-    position: absolute; inset: 0; z-index: -1;
-    background: linear-gradient(180deg,
-                rgba(8, 20, 34, 0.52) 0%,
-                rgba(8, 20, 34, 0.40) 55%,
-                rgba(8, 20, 34, 0.30) 100%);
-  }
-
-  .hero-inner {
-    display: flex; flex-direction: column; align-items: center;
-  }
-
-  .hero-title {
-    font-size: clamp(30px, 4vw, 46px);
-    font-weight: 800; color: #fff; margin: 0;
-    line-height: 1.15; letter-spacing: -0.01em;
-  }
-
-  /* Curves the band into the page rather than cutting it with a hard edge. */
-  .hero-wave {
-    position: absolute; left: 0; right: 0; bottom: -1px;
-    line-height: 0;
-    svg { display: block; width: 100%; height: 68px; }
-    path { fill: #f4f7fb; }
-  }
 }
 
-@media (max-width: 640px) {
-  .page-hero {
-    padding: 30px 16px 62px;
-    .hero-wave svg { height: 44px; }
-  }
+.hero-title {
+  margin: 0;
+  font-size: 30px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2;
+  color: var(--pg-text);
 }
 
+.hero-label {
+  font-family: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--pg-dim);
+}
+
+@media (max-width: 768px) {
+  .page-hero { padding: 36px 16px 0; }
+  .hero-title { font-size: 26px; }
+}

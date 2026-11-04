@@ -119,7 +119,17 @@
   display: block;
   height: 100vh;
   overflow: hidden;
-  background: #f4f7fb;
+  /* Same page as the landing site, in both themes (--pg-* in src/styles.css):
+     background, type and the
+     palette teal as every portal's accent, so a project portal reads as part
+     of BASSIANA rather than a separate site. */
+  background:
+    radial-gradient(1200px 600px at 85% -10%, var(--pg-bg-glow-1), transparent 60%),
+    radial-gradient(900px 500px at 10% 40%, var(--pg-bg-glow-2), transparent 60%),
+    var(--pg-bg);
+  color: var(--pg-text);
+  font-family: 'Geist', 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 
   /* Overwritten at runtime with the nav's measured height (see component). */
   --portal-nav-h: 56px;
@@ -130,6 +140,7 @@
 .portal-shell {
   height: 100vh;
   overflow: hidden;
+  --portal-accent: var(--pg-accent);   // landing palette teal, for every project (per theme)
 }
 
 /* The one and only scroller for portal pages. It is pinned rather than laid out
@@ -180,7 +191,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f4f6fb;
+  background: #f0f7fb;
   animation: portal-boot-in 0.7s ease 260ms both;
 }
 

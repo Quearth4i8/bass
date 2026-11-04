@@ -306,9 +306,97 @@ a.header-btn { text-decoration: none; }
     transition: border-color 0.2s;
     &:focus { outline: none; border-color: $accent; }
     &::placeholder { color: $text-faint; }
-    // Status in year, until a status is picked
-    &:disabled { opacity: .5; cursor: not-allowed; }
   }
+}
+
+// Historical status: a button (not an input) that opens a status + year picker
+.history-trigger {
+  display: flex; height: 40px;
+  border: 1px dashed $accent-2; border-radius: 8px;
+  background: rgba(74,214,196,.05);
+  transition: border-color .2s, background .2s;
+  &:hover, &.open { border-color: $accent; background: rgba(74,214,196,.1); }
+  &.active { border-style: solid; border-color: $accent; background: rgba(74,214,196,.12); }
+}
+.history-btn {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; background: none; border: 0; cursor: pointer;
+  font-family: $font-sans; font-size: 13px; font-weight: 600; color: $accent;
+  i { font-size: 17px; flex-shrink: 0; }
+  span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+.history-value {
+  color: $text; font-weight: 500;
+  b { font-weight: 700; }
+}
+.history-clear {
+  width: 32px; flex-shrink: 0; display: grid; place-items: center;
+  background: none; border: 0; border-left: 1px solid rgba(74,214,196,.25);
+  color: $text-dim; cursor: pointer; font-size: 18px;
+  &:hover { color: #f87171; }
+}
+.tone-blue  { color: #60a5fa; }
+.tone-green { color: #4ade80; }
+.tone-amber { color: #fbbf24; }
+.tone-red   { color: #f87171; }
+.tone-grey  { color: #94a3b8; }
+
+// Fixed, as the filter panel clips anything that overflows it
+.history-panel {
+  position: fixed; z-index: 10000;
+  display: flex; flex-direction: column; gap: 14px; padding: 16px;
+  background: $panel-2; border: 1px solid $line-2; border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.45);
+  animation: dropdownSlide .15s ease;
+}
+.hp-head {
+  display: flex; flex-direction: column; gap: 4px;
+  strong { display: flex; align-items: center; gap: 6px; font-size: 14px; color: $text; i { color: $accent; font-size: 17px; } }
+  span { font-size: 12px; line-height: 1.45; color: $text-dim; }
+}
+.hp-section { display: flex; flex-direction: column; gap: 8px; }
+.hp-label {
+  display: flex; align-items: center; gap: 7px;
+  font-family: $font-mono; font-size: 11px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: $text-faint;
+  em {
+    font-style: normal; width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 10px;
+    background: rgba(74,214,196,.14); color: $accent;
+  }
+}
+.hp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hp-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px; cursor: pointer;
+  background: $bg-2; border: 1px solid $line-2;
+  font-family: $font-sans; font-size: 12.5px; font-weight: 600;
+  transition: background .15s, border-color .15s;
+  i { font-size: 15px; }
+  &:hover { border-color: currentColor; }
+  &.selected { border-color: currentColor; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px currentColor; }
+}
+.hp-years {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+  max-height: 112px; overflow-y: auto; padding-right: 2px;
+}
+.hp-year {
+  height: 32px; border-radius: 8px; cursor: pointer;
+  background: $bg-2; border: 1px solid $line-2; color: $text-dim;
+  font-family: $font-mono; font-size: 12.5px; font-weight: 600;
+  &:hover { border-color: $accent; color: $text; }
+  &.selected { background: $accent; border-color: $accent; color: $bg; }
+}
+.hp-summary {
+  margin: 0; padding: 10px 12px; border-radius: 8px;
+  background: rgba(74,214,196,.06); border: 1px solid rgba(74,214,196,.18);
+  font-size: 12.5px; color: $text-dim;
+  b { color: $text; }
+}
+.hp-actions {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  .btn-ghost, .btn-primary { height: 36px; padding: 0 14px; font-size: 13px; }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; }
 }
 
 // ── Table ──────────────────────────────────────────────────────────────────
@@ -368,7 +456,8 @@ a.header-btn { text-decoration: none; }
   width: 30px; height: 30px; border: 1px solid $line; border-radius: 6px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   font-size: 15px; transition: all 0.2s; background: $panel-2; color: $text-dim;
-  &.edit:hover  { border-color: $accent;   color: $accent;   background: rgba(74,214,196,.08); }
+  text-decoration: none;
+  &.edit:hover, &.history:hover { border-color: $accent; color: $accent; background: rgba(74,214,196,.08); }
   &.save:hover  { border-color: #22c55e;   color: #22c55e;   background: rgba(34,197,94,.08); }
   &.delete:hover{ border-color: $danger;   color: $danger;   background: rgba(239,68,68,.08); }
 }
@@ -593,7 +682,7 @@ a.header-btn { text-decoration: none; }
   .cell-input, .cell-select { background: #f8fafc; border-color: #c5d8e6; color: #0d2137; }
   .btn-icon {
     background: #f1f5f9; border-color: #e2e8f0; color: #64748b;
-    &.edit:hover   { border-color: #1a8f7f; color: #1a8f7f; background: rgba(26,143,127,.08); }
+    &.edit:hover, &.history:hover { border-color: #1a8f7f; color: #1a8f7f; background: rgba(26,143,127,.08); }
     &.save:hover   { border-color: #16a34a; color: #16a34a; background: rgba(22,163,74,.08); }
     &.delete       { border-color: #fee2e2; color: #ef4444; background: #fff5f5; }
     &.delete:hover { border-color: #ef4444; color: white;   background: #ef4444; }
@@ -628,6 +717,7 @@ a.header-btn { text-decoration: none; }
 .page-actions { display: flex; gap: 10px; }
 
 .btn-ghost, .btn-primary {
+  text-decoration: none;
   display: inline-flex; align-items: center; gap: 8px;
   height: 40px; padding: 0 16px; border-radius: $radius;
   font-family: $font-sans; font-size: 13.5px; font-weight: 600; cursor: pointer;
@@ -670,7 +760,7 @@ a.header-btn { text-decoration: none; }
 .col-thematic { min-width: 180px; max-width: 260px; }
 .col-period { min-width: 110px; white-space: nowrap; font-family: $font-mono; font-size: 12.5px; }
 .col-group { min-width: 120px; }
-.col-actions { min-width: 90px !important; }
+.col-actions { min-width: 126px !important; }
 
 .cell-title { font-weight: 600; color: $text; }
 .acronym-badge {
@@ -732,6 +822,30 @@ a.header-btn { text-decoration: none; }
   }
   .page-size { color: #64748b; select { background: #ffffff; border-color: #c5d8e6; color: #0d2137; } }
   .page-current { color: #64748b; }
+
+  .tone-blue  { color: #2563eb; }
+  .tone-green { color: #16a34a; }
+  .tone-amber { color: #b45309; }
+  .tone-red   { color: #dc2626; }
+  .tone-grey  { color: #475569; }
+  .history-trigger {
+    border-color: #1a8f7f; background: rgba(26,143,127,.05);
+    &:hover, &.open { background: rgba(26,143,127,.1); }
+    &.active { background: rgba(26,143,127,.1); }
+  }
+  .history-btn { color: #1a8f7f; }
+  .history-value { color: #0d2137; }
+  .history-clear { color: #64748b; border-left-color: rgba(26,143,127,.25); &:hover { color: #dc2626; } }
+  .history-panel { background: #ffffff; border-color: #c5d8e6; box-shadow: 0 16px 40px rgba(13,33,55,.16); }
+  .hp-head { strong { color: #0d2137; i { color: #1a8f7f; } } span { color: #64748b; } }
+  .hp-label { color: #64748b; em { background: rgba(26,143,127,.12); color: #1a8f7f; } }
+  .hp-chip { background: #f8fafc; border-color: #c5d8e6; &.selected { background: #ffffff; border-color: currentColor; } }
+  .hp-year {
+    background: #f8fafc; border-color: #c5d8e6; color: #3d5a6e;
+    &:hover { border-color: #1a8f7f; color: #0d2137; }
+    &.selected { background: #1a8f7f; border-color: #1a8f7f; color: #ffffff; }
+  }
+  .hp-summary { background: rgba(26,143,127,.06); border-color: rgba(26,143,127,.2); color: #3d5a6e; b { color: #0d2137; } }
 }
 
 // ── Download (export) menu ─────────────────────────────────────────────────
@@ -811,7 +925,10 @@ a.header-btn { text-decoration: none; }
 
 // Budget cards: label on one line, what it covers on a quieter second line.
 .stat-info p { white-space: nowrap; }
-.stat-sub { display: block; margin-top: 2px; font-size: 11.5px; color: $text-faint; }
+.stat-sub {
+  display: block; margin-top: 2px; font-size: 11.5px; color: $text-faint;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 .admin-layout.theme-light {
   .data-table {

@@ -32,6 +32,12 @@
     </nav>
 
     <div class="portal-nav-actions">
+      <!-- Same light/dark switch as the landing navbar. -->
+      <button type="button" class="portal-theme-btn" (click)="themeService.toggle()"
+              [title]="themeService.isLight ? 'Switch to dark' : 'Switch to light'"
+              [attr.aria-label]="themeService.isLight ? 'Switch to dark' : 'Switch to light'">
+        <i class="bx" [class.bx-sun]="!themeService.isLight" [class.bx-moon]="themeService.isLight"></i>
+      </button>
       <app-custom-button></app-custom-button>
 
       <!-- Always laid out so collapsing never changes the bar's geometry;

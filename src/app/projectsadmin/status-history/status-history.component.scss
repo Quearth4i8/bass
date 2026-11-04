@@ -1,0 +1,234 @@
+// Same palette as the other admin pages (crew-cvs, wikiadmin), as variables
+// so the light theme only has to swap tokens.
+:host {
+  --bg: #031420;
+  --panel: #082a3d;
+  --panel-2: #0a3142;
+  --line: #103a4f;
+  --line-2: #1b5573;
+  --text: #e8f1f5;
+  --text-dim: #9fb3bf;
+  --text-faint: #5d7785;
+  --accent: #4ad6c4;
+  --accent-soft: rgba(74, 214, 196, 0.1);
+  --danger: #f2727f;
+  --warn: #f5b94a;
+  --warn-soft: rgba(245, 185, 74, 0.1);
+  --input: #061f2e;
+  --radius: 10px;
+  --font-sans: 'Geist', 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
+
+  --blue: #60a5fa;   --blue-soft: rgba(59, 130, 246, .14);
+  --green: #4ade80;  --green-soft: rgba(34, 197, 94, .14);
+  --amber: #fbbf24;  --amber-soft: rgba(245, 158, 11, .14);
+  --red: #f87171;    --red-soft: rgba(239, 68, 68, .14);
+  --grey: #94a3b8;   --grey-soft: rgba(148, 163, 184, .14);
+  display: block;
+}
+
+:host(.theme-light) {
+  --bg: #f0f7fb;
+  --panel: #ffffff;
+  --panel-2: #f5f9fb;
+  --line: #d6e8f0;
+  --line-2: #c5d8e6;
+  --text: #0d2137;
+  --text-dim: #4a7590;
+  --text-faint: #8aa3b3;
+  --accent: #1a8f7f;
+  --accent-soft: rgba(26, 143, 127, 0.08);
+  --danger: #c93545;
+  --warn: #b7791f;
+  --warn-soft: #fffbeb;
+  --input: #ffffff;
+
+  --blue: #2563eb;   --blue-soft: #eff6ff;
+  --green: #16a34a;  --green-soft: #f0fdf4;
+  --amber: #b45309;  --amber-soft: #fffbeb;
+  --red: #dc2626;    --red-soft: #fef2f2;
+  --grey: #475569;   --grey-soft: #f1f5f9;
+}
+
+* { box-sizing: border-box; }
+
+// ── Admin shell ───────────────────────────────────────────────────────────
+.admin-layout {
+  display: flex; min-height: 100vh;
+  background: var(--bg); font-family: var(--font-sans); color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.admin-main {
+  flex: 1; min-width: 0; margin-left: 200px; margin-top: 64px; padding: 28px;
+  display: flex; flex-direction: column; gap: 16px; transition: margin-left 0.3s;
+  &:not(.sidebar-open) { margin-left: 0; }
+}
+
+.page-head { display: flex; flex-direction: column; align-items: flex-start; }
+.page-heading { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.page-sub { margin: 4px 0 0; font-size: 13px; color: var(--text-dim); }
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-dim); text-decoration: none;
+  &:hover { color: var(--accent); }
+}
+
+.dim { color: var(--text-dim); font-weight: 400; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.state {
+  padding: 28px; display: flex; align-items: center; gap: 10px; color: var(--text-dim);
+  &.error { color: var(--danger); }
+}
+.empty { margin: 0; padding: 24px 8px; text-align: center; color: var(--text-dim); font-size: 13px; }
+
+// ── Status pills and dots ─────────────────────────────────────────────────
+@each $tone in blue, green, amber, red, grey {
+  .pill.tone-#{$tone} { color: var(--#{$tone}); background: var(--#{$tone}-soft); }
+  .dot.tone-#{$tone}, .node.tone-#{$tone}, .seg.tone-#{$tone} { background: var(--#{$tone}); }
+}
+.pill {
+  display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  &.sm { padding: 2px 8px; font-size: 11.5px; }
+}
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+// ── Search and status chips ───────────────────────────────────────────────
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.search {
+  position: relative; flex: 1 1 320px;
+  i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 16px; }
+  input {
+    width: 100%; height: 40px; padding: 0 12px 0 36px; border-radius: var(--radius);
+    border: 1px solid var(--line-2); background: var(--input); color: var(--text); font: 13px var(--font-sans);
+    &:focus { outline: none; border-color: var(--accent); }
+    &::placeholder { color: var(--text-faint); }
+  }
+}
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 12px;
+  border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel);
+  color: var(--text-dim); font: 600 12.5px var(--font-sans); cursor: pointer;
+  &:hover { color: var(--text); border-color: var(--accent); }
+  &.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .count { font: 600 11px var(--font-mono); color: var(--text-faint); }
+  &.on .count { color: var(--accent); }
+}
+
+// ── Project list ──────────────────────────────────────────────────────────
+.list { overflow: hidden; }
+.row { border-top: 1px solid var(--line); &:first-of-type { border-top: 0; } }
+.row-head {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  padding: 13px 18px; border: 0; background: transparent; text-align: left;
+  color: var(--text); font-family: var(--font-sans); cursor: pointer;
+  &:hover { background: var(--panel-2); }
+}
+.row.open .row-head { background: var(--panel-2); }
+.acronym {
+  flex: 0 0 auto; min-width: 90px; padding: 3px 8px; border-radius: 5px; text-align: center;
+  font: 700 10.5px var(--font-mono); letter-spacing: .04em;
+  color: var(--accent); background: var(--accent-soft);
+}
+.title { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { flex-shrink: 0; font-size: 12px; color: var(--text-faint); }
+.chevron { flex-shrink: 0; font-size: 20px; color: var(--text-faint); transition: transform .2s; }
+.row.open .chevron { transform: rotate(180deg); color: var(--accent); }
+
+.row-head { transition: background .2s ease; }
+
+/* Opens to its real height, both ways: a grid row going 0fr -> 1fr animates to
+   the content's own size (as the Projects page's filter panel). The padding
+   lives inside the clipped box, so it travels with the content. */
+.row-body {
+  display: grid; grid-template-rows: 0fr; opacity: 0;
+  background: var(--panel-2);
+  transition: grid-template-rows .28s cubic-bezier(.2, .8, .2, 1), opacity .2s ease;
+  &.show { grid-template-rows: 1fr; opacity: 1; }
+}
+.row-body-clip { min-height: 0; overflow: hidden; }
+.row-body-content {
+  padding: 14px 18px 18px 122px;
+  transform: translateY(-6px); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.row-body.show .row-body-content { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .row-body, .row-body-content, .chevron { transition: none; }
+}
+
+.bar {
+  display: flex; gap: 2px; height: 8px; margin-bottom: 16px; max-width: 640px;
+  border-radius: 999px; overflow: hidden; background: var(--line);
+}
+
+.timeline {
+  list-style: none; margin: 0; padding: 0;
+  li {
+    position: relative; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 0 0 14px 24px; font-size: 13px;
+    // The line linking each status to the next.
+    &::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: -2px; width: 2px; background: var(--line-2); }
+    &:last-child { padding-bottom: 0; &::before { display: none; } }
+  }
+  .node { position: absolute; left: 0; top: 5px; width: 12px; height: 12px; border-radius: 50%; }
+  li.current .node { box-shadow: 0 0 0 3px var(--panel-2), 0 0 0 5px var(--accent); }
+}
+.when { font-weight: 500; }
+
+@media (max-width: 768px) {
+  .admin-main { margin-left: 0; padding: 16px; }
+  .row-head { flex-wrap: wrap; gap: 8px 10px; padding: 12px 14px; }
+  .title { flex-basis: 100%; order: 5; white-space: normal; }
+  .meta { margin-left: auto; }
+  .row-body-content { padding: 12px 14px 16px; }
+}
+
+// ── List + year table ─────────────────────────────────────────────────────
+.layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: start;
+  @media (max-width: 1200px) { grid-template-columns: 1fr; }
+}
+
+.year-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; font-size: 13.5px;
+  background: var(--accent-soft); border-bottom: 1px solid var(--line);
+  > span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+}
+.banner-clear {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding: 5px 10px; border-radius: 7px; border: 1px solid var(--line-2); background: var(--panel);
+  color: var(--text-dim); font: 600 12px var(--font-sans); cursor: pointer;
+  i { font-size: 16px; }
+  &:hover { color: var(--danger); border-color: var(--danger); }
+}
+
+.overview { padding: 16px 16px 10px; position: sticky; top: 80px; }
+.overview-head {
+  margin-bottom: 10px;
+  h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  p { margin: 3px 0 0; font-size: 12px; color: var(--text-dim); }
+}
+.overview-scroll { max-height: calc(100vh - 200px); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+.overview table {
+  border-collapse: separate; border-spacing: 4px; font-size: 12.5px;
+  th, td { padding: 0; text-align: center; white-space: nowrap; }
+  thead th {
+    position: sticky; top: 0; z-index: 1; background: var(--panel);
+    padding: 0 4px 6px; font-size: 11.5px; font-weight: 600; color: var(--text-dim);
+    .dot { margin-right: 5px; vertical-align: 1px; }
+  }
+  .year-col { text-align: left; padding-right: 8px; font: 600 12px var(--font-mono); color: var(--text-dim); }
+  thead .year-col { font-family: var(--font-sans); }
+  tr.picked .year-col { color: var(--accent); }
+}
+.cell {
+  width: 64px; height: 30px; border-radius: 7px; border: 1px solid transparent;
+  background: transparent; color: var(--text); font: 600 12.5px var(--font-mono); cursor: pointer;
+  transition: border-color .15s, transform .15s;
+  &:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+  &:disabled { color: var(--text-faint); cursor: default; }
+  &.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+}

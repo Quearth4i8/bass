@@ -122,3 +122,12 @@
   font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
   &:hover { filter: brightness(1.07); }
 }
+
+// ── Exact mode (one date for a form) ────────────────────────────────────────
+// Where the filter has "Any", each part shows whether it is picked yet.
+.df-step {
+  display: inline-flex; font-size: 16px; color: var(--df-faint);
+  &.done { color: var(--df-accent); }
+}
+.df-summary.pending { color: var(--df-dim); font-weight: 500; }
+.df-today { color: var(--df-accent); font-weight: 600; &:hover { color: var(--df-accent); text-decoration: underline; } }

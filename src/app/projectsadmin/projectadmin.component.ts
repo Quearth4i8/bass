@@ -1,4 +1,4 @@
-import { matchesDate, projectDate, roleLabel, statusLabel, submissionDateText } from '../utilities/project-labels';
+import { matchesDate, projectDate, roleLabel, statusLabel, statusTone, submissionDateText } from '../utilities/project-labels';
 import { describeDateFilter } from '../shared/components/date-filter/date-filter.component';
 import { ProjectService } from '../services/ProjectService';
 import { SidebarService } from '../services/sidebarservice';
@@ -10,7 +10,6 @@ import { DialogContentComponent } from '../utilities/dialogues/dialog-content/di
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogProjectDeleteComponent } from '../utilities/dialogues/confirmation-dialog-project-delete/confirmation-dialog-project-delete.component';
 import { MessageService } from 'primeng/api';
-import { ProjectGroupDialogComponent } from '../utilities/dialogues/project-group-dialog/project-group-dialog.component';
 import { ProjectGroupService } from '../services/ProjectGroupService';
 import { AuthService } from '../services/AuthService';
 import { matchesSearch } from '../shared/utils/text-search';
@@ -69,12 +68,21 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     if (!target.closest('.filter-dropdown')) {
       this.filterMenu = null;
     }
+    if (!target.closest('.history-filter')) {
+      this.historyPanelOpen = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.historyPanelOpen = false;
   }
 
   onContentScroll(): void {
     this.pageSizeDropdownOpen = false;
     this.pageDropdownOpen = false;
     this.filterMenu = null;
+    this.historyPanelOpen = false;
   }
 
   showDialog(project?: any) {
@@ -107,38 +115,6 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.messageService.add({
       severity: 'success',
       detail: 'Project added successfully',
-      life: 2000,
-      closable: false,
-      sticky: false,
-      styleClass: 'custom-success-message'
-    });
-  }
-
-  showDialog2() {
-    this.ref = this.dialogService.open(ProjectGroupDialogComponent, {
-      dismissableMask: true,
-      closable: true,
-      // The header is hidden globally (styles.css); with it rendered, PrimeNG's
-      // focusOnShow recurses forever when it finds nothing to focus.
-      showHeader: false,
-      focusOnShow: false,
-      style: { width: '520px', 'max-width': '95vw' }
-    });
-
-    if (this.ref) {
-      this.ref.onClose.subscribe((result) => {
-        if (result === 'success') {
-          this.showSuccessMessage2();
-          this.fetchProjects();
-        }
-      });
-    }
-  }
-
-  showSuccessMessage2() {
-    this.messageService.add({
-      severity: 'success',
-      detail: 'Project group added successfully',
       life: 2000,
       closable: false,
       sticky: false,
@@ -181,8 +157,10 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     this.projectService.getAllProjects().subscribe(
       (data: any[]) => {
         this.allProjects = data.sort((a, b) => a.id - b.id);
-        // A save may have changed a status, so the historical matches too.
-        this.refreshStatusHistory();
+        this.historyYears = this.yearsCovered();
+        // A save may have changed a status, so the past-status matches too.
+        if (this.historyActive) this.loadHistory();
+        else this.applyFilters();
       },
       (error) => {
         console.error('Error fetching projects:', error);
@@ -287,11 +265,12 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  @HostListener('window:scroll', ['$event'])
+  @HostListener('window:scroll')
   onWindowScroll(): void {
     this.pageSizeDropdownOpen = false;
     this.pageDropdownOpen = false;
     this.filterMenu = null;
+    this.historyPanelOpen = false;
   }
 
   selectGroup(index: number, value: string): void {
@@ -311,56 +290,119 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   private emptyFilters(): Record<string, string> {
     return {
       coordinator: '', applicant: '', role: '', acronym: '', title: '', program: '', thematic: '',
-      status: '', statusYear: '', submissionDate: '', startDate: '', endDate: '', totalBudget: '', budget: '',
+      status: '', submissionDate: '', startDate: '', endDate: '', totalBudget: '', budget: '',
     };
   }
 
   get hasFilters(): boolean {
-    return !!(this.globalSearchTerm.trim() || Object.values(this.filterValues).some(v => String(v ?? '').trim()));
+    return !!(this.globalSearchTerm.trim() || this.historyActive
+      || Object.values(this.filterValues).some(v => String(v ?? '').trim()));
   }
 
   /** Clears the search box and every advanced filter. */
   resetFilters(): void {
     this.globalSearchTerm = '';
     this.filterValues = this.emptyFilters();
-    this.refreshStatusHistory();
+    this.clearHistory();
   }
 
-  /**
-   * With a year next to the status filter, the status matches the projects
-   * that had it during that year (from the backend's status history) instead
-   * of the ones that have it now. Null while that list is loading.
-   */
-  private statusHistoryIds: Set<number> | null = null;
-  private statusHistoryRequest?: Subscription;
+  // "Historical status": the projects that held a status at any point during a
+  // year, from the backend's status history, whatever their status is now.
+  historyStatus = '';
+  historyYear: number | null = null;
+  /** What the panel shows until "Show projects" applies it. */
+  draftStatus = '';
+  draftYear: number | null = null;
+  historyPanelOpen = false;
+  historyPanelStyle: Record<string, string> = {};
+  historyLoading = false;
+  /** The years offered in the panel, newest first. */
+  historyYears: number[] = [];
+  /** Ids of the projects matching the applied status and year; null while loading. */
+  private historyIds: Set<number> | null = null;
+  private historyRequest?: Subscription;
 
-  /** The year typed next to the status filter, when it is a usable one. */
-  private get statusYear(): number | null {
-    const year = Number(String(this.filterValues['statusYear'] ?? '').trim());
-    return this.filterValues['status'] && Number.isInteger(year) && year >= 1900 && year <= 2100 ? year : null;
+  get historyActive(): boolean {
+    return !!this.historyStatus && this.historyYear !== null;
   }
 
-  /** Reloads the historical status matches when the status or its year changes, then refilters. */
-  refreshStatusHistory(): void {
-    this.statusHistoryRequest?.unsubscribe();
-    this.statusHistoryIds = null;
-    const year = this.statusYear;
-    if (year !== null) {
-      this.statusHistoryRequest = this.projectService
-        .getProjectIdsWithStatusInYear(this.filterValues['status'], year)
-        .subscribe({
-          next: ids => { this.statusHistoryIds = new Set(ids); this.applyFilters(); },
-          error: err => console.error('Error fetching status history:', err),
-        });
-    }
+  /** From this year back to the earliest year any project was submitted or started. */
+  private yearsCovered(): number[] {
+    const now = new Date().getFullYear();
+    const found = this.allProjects
+      .flatMap(p => [p.startyear, p.submissionDate, p.startDate])
+      .map(v => Number(String(v ?? '').match(/\d{4}/)?.[0]))
+      .filter(y => y >= 1990 && y <= now);
+    const years: number[] = [];
+    for (let y = now; y >= Math.min(now, ...found); y--) years.push(y);
+    return years;
+  }
+
+  /** Opens the panel under (or above) its button, with the applied choice, or Ongoing this year. */
+  toggleHistoryPanel(event: MouseEvent): void {
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
+    this.filterMenu = null;
+    if (this.historyPanelOpen) { this.historyPanelOpen = false; return; }
+    this.draftStatus = this.historyStatus
+      || this.statusOptions.find(s => statusTone(s) === 'blue') || this.statusOptions[0] || '';
+    this.draftYear = this.historyYear ?? this.historyYears[0] ?? new Date().getFullYear();
+
+    // The trigger, not the button inside it, so the panel lines up with its border.
+    const r = (event.currentTarget as HTMLElement).closest('.history-trigger')!.getBoundingClientRect();
+    // clientWidth leaves out the scrollbar, which innerWidth counts.
+    const viewport = document.documentElement.clientWidth;
+    const width = Math.min(380, viewport - 32);
+    const height = 430;
+    const up = window.innerHeight - r.bottom < height && r.top > window.innerHeight - r.bottom;
+    this.historyPanelStyle = {
+      ...(up
+        ? { top: 'auto', bottom: `${window.innerHeight - r.top + 6}px` }
+        : { top: `${r.bottom + 6}px`, bottom: 'auto' }),
+      // Right-aligned with the trigger, so it opens inward rather than off the page.
+      left: `${Math.max(16, Math.min(r.right - width, viewport - width - 16))}px`,
+      width: `${width}px`,
+    };
+    this.historyPanelOpen = true;
+  }
+
+  applyHistory(): void {
+    if (!this.draftStatus || this.draftYear === null) return;
+    this.historyStatus = this.draftStatus;
+    this.historyYear = this.draftYear;
+    this.historyPanelOpen = false;
+    this.loadHistory();
+  }
+
+  clearHistory(): void {
+    this.historyRequest?.unsubscribe();
+    this.historyStatus = '';
+    this.historyYear = null;
+    this.historyIds = null;
+    this.historyLoading = false;
     this.applyFilters();
   }
 
-  private matchesStatus(project: any): boolean {
-    const f = this.filterValues;
-    if (!f['status']) return true;
-    if (this.statusYear === null) return project.title === f['status'];
-    return !!this.statusHistoryIds?.has(project.id);
+  /** Fetches the ids for the applied status and year, then refilters. */
+  private loadHistory(): void {
+    this.historyRequest?.unsubscribe();
+    this.historyIds = null;
+    this.historyLoading = true;
+    this.applyFilters();
+    this.historyRequest = this.projectService
+      .getProjectIdsWithStatusInYear(this.historyStatus, this.historyYear!)
+      .subscribe({
+        next: ids => {
+          this.historyIds = new Set(ids);
+          this.historyLoading = false;
+          this.applyFilters();
+        },
+        error: err => {
+          console.error('Error fetching status history:', err);
+          this.historyLoading = false;
+          this.messageService.add({ severity: 'error', summary: 'Status history', detail: 'The past statuses could not be loaded.' });
+          this.clearHistory();
+        },
+      });
   }
 
   /**
@@ -385,7 +427,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       matchesSearch(project.titreproj, f['title']) &&
       (!f['program'] || project.programme === f['program']) &&
       matchesSearch(project.thematique, f['thematic']) &&
-      this.matchesStatus(project) &&
+      (!f['status'] || project.title === f['status']) &&
+      (!this.historyActive || !!this.historyIds?.has(project.id)) &&
       matchesDate(project.submissionDate, null, f['submissionDate']) &&
       matchesDate(project.startDate, project.startyear, f['startDate']) &&
       matchesDate(project.endDate, project.endyear, f['endDate']) &&
@@ -408,9 +451,8 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
       text('Title', f['title']),
       f['program'] ? `Program: ${f['program']}` : '',
       text('Thematic', f['thematic']),
-      f['status'] ? (this.statusYear !== null
-        ? `Status in ${this.statusYear}: ${statusLabel(f['status'])}`
-        : `Status: ${statusLabel(f['status'])}`) : '',
+      f['status'] ? `Status: ${statusLabel(f['status'])}` : '',
+      this.historyActive ? `${statusLabel(this.historyStatus)} in ${this.historyYear}` : '',
       f['submissionDate'] ? `Submitted: ${describeDateFilter(f['submissionDate'])}` : '',
       f['startDate'] ? `Starts: ${describeDateFilter(f['startDate'])}` : '',
       f['endDate'] ? `Ends: ${describeDateFilter(f['endDate'])}` : '',
@@ -433,7 +475,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   toggleFilterMenu(menu: 'role' | 'program' | 'status', event: MouseEvent): void {
-    event.stopPropagation();
+    // No stopPropagation: the click must reach the document so other open dropdowns close.
     if (this.filterMenu === menu) { this.filterMenu = null; return; }
     const r = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const maxHeight = 280;
@@ -455,11 +497,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   pickFilter(field: 'role' | 'program' | 'status', value: string): void {
     this.filterValues[field] = value;
     this.filterMenu = null;
-    if (field === 'status') {
-      if (!value) this.filterValues['statusYear'] = '';
-      this.refreshStatusHistory();
-    }
-    else this.applyFilters();
+    this.applyFilters();
   }
 
   exportMenuOpen = false;
@@ -527,20 +565,42 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   readonly roleLabel = roleLabel;
   readonly projectDate = projectDate;
 
-  /** First budget card: the whole-project (all partners) budget of every Ongoing project. */
-  get ongoingTotalBudget(): number {
-    return this.sumBudget('ONGOING', 'totalBudget');
+  /** First budget card: the whole-project (all partners) budget of the projects the filters let through. */
+  get filteredTotalBudget(): number {
+    return this.sumBudget('totalBudget');
   }
 
-  /** Second budget card: our partner share of every Ongoing project. */
-  get ongoingPartnerBudget(): number {
-    return this.sumBudget('ONGOING', 'budget');
+  /** Second budget card: our partner share of the projects the filters let through. */
+  get filteredPartnerBudget(): number {
+    return this.sumBudget('budget');
   }
 
-  private sumBudget(status: string, field: 'totalBudget' | 'budget'): number {
-    return this.projects
-      .filter(p => (p.title || '').toUpperCase().includes(status))
-      .reduce((sum, p) => sum + (Number(p[field]) || 0), 0);
+  private sumBudget(field: 'totalBudget' | 'budget'): number {
+    return this.projects.reduce((sum, p) => sum + (Number(p[field]) || 0), 0);
+  }
+
+  /** What the budget cards add up: "All projects", "Rejected projects", "Ongoing in 2023" or "12 filtered projects". */
+  get budgetScope(): string {
+    if (!this.hasFilters) return 'All projects';
+    if (this.historyActive && this.onlyFilter('history')) return `${statusLabel(this.historyStatus)} in ${this.historyYear}`;
+    const statuses = Array.from(new Set(this.projects.map(p => p.title).filter(Boolean)));
+    if (statuses.length === 1 && this.onlyFilter('status', statuses[0])) return `${statusLabel(statuses[0])} projects`;
+    const n = this.projects.length;
+    return `${n} filtered project${n === 1 ? '' : 's'}`;
+  }
+
+  /**
+   * Whether `kind` is the only filter in use. A status may come from the
+   * Current status dropdown or from a search for it ("rejected"), but not from
+   * a search for something else whose matches happen to share one status.
+   */
+  private onlyFilter(kind: 'status' | 'history', status = ''): boolean {
+    const others = Object.entries(this.filterValues)
+      .some(([key, v]) => key !== 'status' && String(v ?? '').trim());
+    if (others) return false;
+    const search = this.globalSearchTerm.trim();
+    if (kind === 'history') return !this.filterValues['status'] && !search;
+    return !this.historyActive && (!search || matchesSearch(statusLabel(status), search));
   }
 
   /** 0 -> "€0", 850 000 -> "€850K", 1 250 000 -> "€1.25M". */
@@ -558,12 +618,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
 
   /** Colour family for a group's pill and stat icon. */
   groupTone(title: string): string {
-    const t = (title || '').toUpperCase();
-    if (t.includes('ONGOING')) return 'blue';
-    if (t.includes('ACHIEVED')) return 'green';
-    if (t.includes('SUBMITTED')) return 'amber';
-    if (t.includes('REJECTED')) return 'red';
-    return 'grey';
+    return statusTone(title);
   }
 
   groupIcon(title: string): string {
@@ -626,7 +681,7 @@ export class ProjectAdminComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.statusHistoryRequest?.unsubscribe();
+    this.historyRequest?.unsubscribe();
     if (this.ref) {
       this.ref.close();
     }

@@ -1,16 +1,18 @@
-<button type="button" class="df-trigger" [class.open]="open" [class.empty]="isEmpty"
+<button type="button" class="df-trigger" [id]="inputId || null" [class.open]="open" [class.empty]="!hasValue"
         [disabled]="disabled" (click)="toggle($event)" aria-haspopup="dialog" [attr.aria-expanded]="open">
   <i class='bx bx-calendar df-icon'></i>
-  <span class="df-value">{{ isEmpty ? placeholder : label }}</span>
+  <span class="df-value">{{ hasValue ? label : (exact && !isEmpty ? progress : placeholder) }}</span>
   <i class='bx bx-x df-clear' *ngIf="!isEmpty" (click)="clear($event)" title="Clear"></i>
 </button>
 
-<div class="df-popover" *ngIf="open" [ngStyle]="popoverStyle" role="dialog" aria-label="Filter by date" (click)="$event.stopPropagation()">
+<div class="df-popover" *ngIf="open" [ngStyle]="popoverStyle" role="dialog"
+     [attr.aria-label]="exact ? 'Choose a date' : 'Filter by date'" (click)="$event.stopPropagation()">
 
   <section class="df-section">
     <div class="df-head">
       <span class="df-title">Year</span>
-      <button type="button" class="df-any" [class.on]="!parts.year" (click)="set('year', null, $event)">Any</button>
+      <button type="button" class="df-any" *ngIf="!exact" [class.on]="!parts.year" (click)="set('year', null, $event)">Any</button>
+      <span class="df-step" *ngIf="exact" [class.done]="parts.year"><i class='bx' [ngClass]="parts.year ? 'bx-check' : 'bx-radio-circle'"></i></span>
       <span class="df-spacer"></span>
       <div class="df-nav">
         <button type="button" (click)="shiftYears(-1, $event)" aria-label="Earlier years"><i class='bx bx-chevron-left'></i></button>
@@ -27,7 +29,8 @@
   <section class="df-section">
     <div class="df-head">
       <span class="df-title">Month</span>
-      <button type="button" class="df-any" [class.on]="!parts.month" (click)="set('month', null, $event)">Any</button>
+      <button type="button" class="df-any" *ngIf="!exact" [class.on]="!parts.month" (click)="set('month', null, $event)">Any</button>
+      <span class="df-step" *ngIf="exact" [class.done]="parts.month"><i class='bx' [ngClass]="parts.month ? 'bx-check' : 'bx-radio-circle'"></i></span>
     </div>
     <div class="df-grid df-months">
       <button type="button" class="df-cell" *ngFor="let m of months" [title]="m.name"
@@ -39,7 +42,8 @@
   <section class="df-section">
     <div class="df-head">
       <span class="df-title">Day</span>
-      <button type="button" class="df-any" [class.on]="!parts.day" (click)="set('day', null, $event)">Any</button>
+      <button type="button" class="df-any" *ngIf="!exact" [class.on]="!parts.day" (click)="set('day', null, $event)">Any</button>
+      <span class="df-step" *ngIf="exact" [class.done]="parts.day"><i class='bx' [ngClass]="parts.day ? 'bx-check' : 'bx-radio-circle'"></i></span>
     </div>
     <div class="df-grid df-days">
       <button type="button" class="df-cell" *ngFor="let d of days"
@@ -49,8 +53,12 @@
   </section>
 
   <div class="df-foot">
-    <span class="df-summary"><i class='bx bx-filter-alt'></i>{{ isEmpty ? 'Any date' : label }}</span>
+    <span class="df-summary" *ngIf="!exact"><i class='bx bx-filter-alt'></i>{{ isEmpty ? 'Any date' : label }}</span>
+    <span class="df-summary" *ngIf="exact" [class.pending]="!isComplete">
+      <i class='bx' [ngClass]="isComplete ? 'bx-calendar-check' : 'bx-calendar'"></i>{{ progress }}
+    </span>
     <button type="button" class="df-link" *ngIf="!isEmpty" (click)="clear($event)">Clear</button>
+    <button type="button" class="df-link df-today" *ngIf="exact" (click)="today($event)">Today</button>
     <button type="button" class="df-ok" (click)="done($event)">Done</button>
   </div>
 </div>

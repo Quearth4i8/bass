@@ -135,10 +135,27 @@ export class PortalPageHomeComponent implements OnInit, OnDestroy, AfterViewInit
     return (this.project?.content.home.partnerLogos?.length ?? 0) >= PortalPageHomeComponent.MARQUEE_MIN_LOGOS;
   }
 
-  // Duplicated once so the marquee track can scroll from 0 to -50% and loop seamlessly.
-  // Left as-is (no duplication) when the marquee is inactive, so the logos just render once.
+  // Tiles in each half of the marquee track. A half has to be wider than the
+  // strip, or the end of the track scrolls into view before the loop restarts
+  // and the right side sits empty; 20 tiles clear even an ultrawide screen.
+  private static readonly MARQUEE_HALF_TILES = 20;
+  private static readonly MARQUEE_SECONDS_PER_SET = 30;
+
+  // The logo set repeated until one half is wide enough, then that half
+  // doubled, so the track can scroll from 0 to -50% and loop seamlessly.
+  // Left as-is (no repetition) when the marquee is inactive.
   get loopedPartnerLogos(): PortalPartnerLogo[] {
     const logos = this.project?.content.home.partnerLogos ?? [];
-    return this.isLogoMarqueeActive ? [...logos, ...logos] : logos;
+    if (!this.isLogoMarqueeActive) return logos;
+    const half: PortalPartnerLogo[] = [];
+    while (half.length < PortalPageHomeComponent.MARQUEE_HALF_TILES) half.push(...logos);
+    return [...half, ...half];
+  }
+
+  // 30s per copy of the logo set in a half, so the speed is what it was
+  // before the half held more than one copy.
+  get logoMarqueeDuration(): string {
+    const sets = this.loopedPartnerLogos.length / 2 / (this.project?.content.home.partnerLogos?.length || 1);
+    return sets * PortalPageHomeComponent.MARQUEE_SECONDS_PER_SET + 's';
   }
 }
