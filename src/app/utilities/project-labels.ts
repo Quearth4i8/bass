@@ -82,7 +82,7 @@ export function isRejectedStatus(groupTitle: string | null | undefined): boolean
   return /REJECTED/i.test(groupTitle || '');
 }
 
-/** Colour family per status: blue / green / amber / red, grey for anything else. */
+/** Colour family per status: blue / green / amber / red, grey for Canceled and anything else. */
 export function statusTone(groupTitle: string | null | undefined): 'blue' | 'green' | 'amber' | 'red' | 'grey' {
   const t = (groupTitle || '').toUpperCase();
   if (t.includes('ONGOING')) return 'blue';
@@ -90,4 +90,54 @@ export function statusTone(groupTitle: string | null | undefined): 'blue' | 'gre
   if (t.includes('SUBMITTED')) return 'amber';
   if (t.includes('REJECTED')) return 'red';
   return 'grey';
+}
+
+/**
+ * The statuses a project goes through, matching the backend's rules: a status
+ * only moves forward, Submitted -> Ongoing or Rejected, Ongoing -> Achieved or
+ * Canceled. Each stage keeps the date the project took it in `dateField`;
+ * Ongoing's is the project's start date (it runs from start to end date).
+ */
+export type StatusStage = 'SUBMITTED' | 'ONGOING' | 'REJECTED' | 'ACHIEVED' | 'CANCELED';
+
+const STAGE_PREVIOUS: Record<StatusStage, StatusStage | null> = {
+  SUBMITTED: null,
+  ONGOING: 'SUBMITTED',
+  REJECTED: 'SUBMITTED',
+  ACHIEVED: 'ONGOING',
+  CANCELED: 'ONGOING',
+};
+
+export const STAGE_DATE_FIELD: Record<StatusStage, string> = {
+  SUBMITTED: 'submissionDate',
+  ONGOING: 'startDate',
+  REJECTED: 'rejectedDate',
+  ACHIEVED: 'achievedDate',
+  CANCELED: 'canceledDate',
+};
+
+/** "ONGOING PROJECTS" -> 'ONGOING'; null for a status outside the tree. "CANCELLED" counts as Canceled. */
+export function statusStage(groupTitle: string | null | undefined): StatusStage | null {
+  const t = (groupTitle || '').toUpperCase();
+  if (t.includes('CANCEL')) return 'CANCELED';
+  return (['SUBMITTED', 'ONGOING', 'REJECTED', 'ACHIEVED'] as StatusStage[]).find(s => t.includes(s)) ?? null;
+}
+
+/** The stages a project goes through to reach `stage`, Submitted first. */
+export function stagePath(stage: StatusStage): StatusStage[] {
+  const path: StatusStage[] = [];
+  for (let s: StatusStage | null = stage; s; s = STAGE_PREVIOUS[s]) path.unshift(s);
+  return path;
+}
+
+/**
+ * Whether a project at `from` may be given `to`: the same status, one further
+ * along its branch, or anything when `from` is outside the tree (an older row
+ * without a status).
+ */
+export function canMoveStatus(from: string | null | undefined, to: string): boolean {
+  const a = statusStage(from);
+  const b = statusStage(to);
+  if (!a) return true;
+  return !!b && stagePath(b).includes(a);
 }

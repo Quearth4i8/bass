@@ -12,7 +12,7 @@ import { matchesSearch, normalizeSearch } from '../shared/utils/text-search';
 const TOTAL_KEY = 'TOTAL PROJECTS';
 
 /** Tab order after Total; any status not listed here goes last. */
-const STATUS_ORDER = ['SUBMITTED', 'REJECTED', 'ONGOING', 'ACHIEVED'];
+const STATUS_ORDER = ['SUBMITTED', 'REJECTED', 'ONGOING', 'ACHIEVED', 'CANCEL'];
 
 function statusRank(title: string): number {
   const t = (title || '').toUpperCase();
@@ -339,6 +339,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       'SUBMITTED PROJECTS': 'bx-send',
       'REJECTED PROJECTS':  'bx-x-circle',
       'ONGOING PROJECTS':   'bx-time-five',
+      'CANCELED PROJECTS':  'bx-block',
       [TOTAL_KEY]:          'bx-layer',
     };
     return icons[title] || 'bx-folder';

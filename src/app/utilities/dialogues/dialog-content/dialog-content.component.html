@@ -52,7 +52,7 @@
                     <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Research theme" required>
                 </div>
                 <div class="ad-field">
-                    <label for="submissionDate">Submission date</label>
+                    <label for="submissionDate">Submission date <span class="req" *ngIf="dateRequired('SUBMITTED')">*</span></label>
                     <app-date-filter exact inputId="submissionDate" name="submissionDate" [(ngModel)]="projectFormData.submissionDate" placeholder="Select submission date"></app-date-filter>
                 </div>
                 <div class="ad-field">
@@ -85,17 +85,26 @@
                             <i class='bx bx-chevron-down'></i>
                         </div>
                         <div class="dropdown-menu" *ngIf="groupDropdownOpen" [ngStyle]="groupMenuStyle" [class.opens-up]="groupOpensUp">
-                            <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title">
+                            <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title"
+                                 [class.disabled]="!canPick(title)" [attr.title]="canPick(title) ? null : 'A project can\'t go back from ' + statusLabel(originalTitle)">
                                 <span class="di-label"><span class="status-dot" [ngClass]="'tone-' + statusTone(title)"></span>{{ statusLabel(title) }}</span>
                                 <i class='bx bx-check di-check' *ngIf="projectFormData.title === title"></i>
                             </div>
                         </div>
                     </div>
+                    <span class="ad-hint" *ngIf="isEditMode">Statuses only move forward: Submitted → Ongoing or Rejected, Ongoing → Achieved or Canceled.</span>
+                </div>
+                <!-- The day the project took each status on its way to the current one. -->
+                <div class="ad-field" *ngFor="let d of statusDates; trackBy: trackStage">
+                    <label [for]="d.field">{{ d.label }} <span class="req" *ngIf="dateRequired(d.stage)">*</span></label>
+                    <app-date-filter exact [inputId]="d.field" [name]="d.field" [(ngModel)]="projectFormData[d.field]"
+                                     [placeholder]="'Date the project became ' + (statusLabel(d.stage) | lowercase)"></app-date-filter>
                 </div>
             </div>
         </div>
 
         <div class="ad-footer">
+            <span class="ad-error footer-error" *ngIf="errorMessage"><i class='bx bx-error-circle'></i>{{ errorMessage }}</span>
             <button type="button" class="ad-btn ghost" (click)="ref.close()">Cancel</button>
             <button type="submit" class="ad-btn primary" [disabled]="saving">
                 <i class='bx' [ngClass]="saving ? 'bx-loader-alt bx-spin' : isEditMode ? 'bx-check' : 'bx-plus'"></i>

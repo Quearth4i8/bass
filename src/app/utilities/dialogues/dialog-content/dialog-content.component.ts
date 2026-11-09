@@ -3,7 +3,7 @@ import { DynamicDialogRef, DialogService, DynamicDialogConfig } from 'primeng/dy
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
 import { ThemeService } from 'src/app/services/ThemeService';
 import { ProjectService } from 'src/app/services/ProjectService';
-import { PROJECT_ROLES, roleLabel, statusLabel, statusTone } from 'src/app/utilities/project-labels';
+import { PROJECT_ROLES, STAGE_DATE_FIELD, StatusStage, canMoveStatus, roleLabel, stagePath, statusLabel, statusStage, statusTone } from 'src/app/utilities/project-labels';
 
 @Component({
   selector: 'app-dialog-content',
@@ -23,6 +23,10 @@ export class DialogContentComponent implements OnInit {
   groupOpensUp: boolean = false;
   isEditMode: boolean = false;
   projectId: number | null = null;
+  /** The status the project had when the dialog opened: it can only move forward from it. */
+  originalTitle = '';
+  /** Why the last save was refused, from the checks below or the backend. */
+  errorMessage = '';
   projectFormData: any = {
     responsable: '',
     partenaire: '',
@@ -38,6 +42,9 @@ export class DialogContentComponent implements OnInit {
     title: '',
     applicant: '',
     submissionDate: '',
+    rejectedDate: '',
+    achievedDate: '',
+    canceledDate: '',
     totalBudget: '',
   };
 
@@ -56,12 +63,13 @@ export class DialogContentComponent implements OnInit {
       this.isEditMode = true;
       this.projectId = this.config.data.project.id;
       this.projectFormData = { ...this.config.data.project };
+      this.originalTitle = this.config.data.project.title || '';
     }
   }
 
   getProjectGroupTitles(): void {
-    // In the brief's order: Ongoing, Achieved, Submitted, Rejected (others last).
-    const rank = ['ONGOING', 'ACHIEVED', 'SUBMITTED', 'REJECTED'];
+    // In the brief's order: Ongoing, Achieved, Submitted, Rejected, Canceled (others last).
+    const rank = ['ONGOING', 'ACHIEVED', 'SUBMITTED', 'REJECTED', 'CANCEL'];
     const pos = (t: string) => {
       const i = rank.findIndex(r => (t || '').toUpperCase().includes(r));
       return i < 0 ? rank.length : i;
@@ -78,8 +86,85 @@ export class DialogContentComponent implements OnInit {
    */
   saving = false;
 
+  /** Whether the status can be picked: statuses only move forward from the one the project had. */
+  canPick(title: string): boolean {
+    return !this.isEditMode || canMoveStatus(this.originalTitle, title);
+  }
+
+  /**
+   * The date fields of the statuses the project went through after Ongoing.
+   * Submitted's is the submission date and Ongoing's the start date, both
+   * already in the form.
+   */
+  get statusDates(): { stage: StatusStage; field: string; label: string }[] {
+    const stage = statusStage(this.projectFormData.title);
+    if (!stage) return [];
+    return stagePath(stage).filter(s => s !== 'SUBMITTED' && s !== 'ONGOING').map(s => ({
+      stage: s,
+      field: STAGE_DATE_FIELD[s],
+      label: `${statusLabel(s)} date`,
+    }));
+  }
+
+  /** The list is rebuilt on every check: keep each date field by its stage so it isn't recreated. */
+  trackStage(_: number, d: { stage: StatusStage }): StatusStage {
+    return d.stage;
+  }
+
+  /** A status the project has just taken needs the date it took it; earlier ones may be left unknown. */
+  dateRequired(stage: StatusStage): boolean {
+    const current = statusStage(this.projectFormData.title);
+    return stage === current && (!this.isEditMode || statusStage(this.originalTitle) !== current);
+  }
+
+  /** The same checks as the backend, so the admin hears about them before the round trip. */
+  private validate(): string {
+    const current = statusStage(this.projectFormData.title);
+    if (!current) return '';
+    if (this.dateRequired(current) && !this.projectFormData[STAGE_DATE_FIELD[current]]) {
+      return current === 'SUBMITTED'
+        ? "Give the project's submission date."
+        : current === 'ONGOING'
+        ? "Give the project's start date."
+        : `Give the date the project became ${statusLabel(current)}.`;
+    }
+    // Dates are "YYYY-MM-DD", so comparing the strings compares the days.
+    let last: StatusStage | null = null;
+    for (const stage of stagePath(current)) {
+      const date = this.projectFormData[STAGE_DATE_FIELD[stage]];
+      if (!date) continue;
+      if (last && date < this.projectFormData[STAGE_DATE_FIELD[last]]) {
+        const name = (s: StatusStage) => s === 'ONGOING' ? 'start' : statusLabel(s);
+        return `The ${name(stage)} date can't be before the ${name(last)} date.`;
+      }
+      last = stage;
+    }
+    return '';
+  }
+
+  /**
+   * The status dates to send, empty ones as null. The backend drops those off
+   * the project's path. The start date goes with the other dates.
+   */
+  private statusDatesPayload(): Record<string, any> {
+    return Object.fromEntries(Object.values(STAGE_DATE_FIELD)
+      .filter(field => field !== STAGE_DATE_FIELD.ONGOING)
+      .map(field => [field, this.emptyToNull(this.projectFormData[field])]));
+  }
+
+  private saveFailed(error: any): void {
+    console.error('Error saving project:', error);
+    // A refused status or date comes back as 400 with the reason as text.
+    this.errorMessage = error?.status === 400 && typeof error.error === 'string'
+      ? error.error
+      : 'The project could not be saved. Please try again.';
+    this.saving = false;
+  }
+
   onSubmit() {
     if (this.saving) return;
+    this.errorMessage = this.validate();
+    if (this.errorMessage) return;
     this.saving = true;
     if (this.isEditMode && this.projectId) {
       // Update existing project
@@ -94,7 +179,7 @@ export class DialogContentComponent implements OnInit {
         title: this.projectFormData.title,
         ...this.datesPayload(),
         applicant: this.projectFormData.applicant || null,
-        submissionDate: this.projectFormData.submissionDate || null,
+        ...this.statusDatesPayload(),
         totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
       };
       this.projectService.updateProject(this.projectId, updatedProject).subscribe(
@@ -102,10 +187,7 @@ export class DialogContentComponent implements OnInit {
           console.log('Project updated successfully:', response);
           this.ref.close('success');
         },
-        (error) => {
-          console.error('Error updating project:', error);
-          this.saving = false;
-        }
+        (error) => this.saveFailed(error)
       );
     } else {
       // Create new project
@@ -115,7 +197,7 @@ export class DialogContentComponent implements OnInit {
         ...this.projectFormData,
         ...this.datesPayload(),
         applicant: this.projectFormData.applicant || null,
-        submissionDate: this.projectFormData.submissionDate || null,
+        ...this.statusDatesPayload(),
         totalBudget: this.emptyToNull(this.projectFormData.totalBudget),
       };
       this.projectService.createProject(created).subscribe(
@@ -123,10 +205,7 @@ export class DialogContentComponent implements OnInit {
           console.log('Project created successfully:', response);
           this.ref.close('success');
         },
-        (error) => {
-          console.error('Error creating project:', error);
-          this.saving = false;
-        }
+        (error) => this.saveFailed(error)
       );
     }
   }
@@ -247,7 +326,9 @@ export class DialogContentComponent implements OnInit {
   }
 
   selectGroup(value: string): void {
+    if (!this.canPick(value)) return;
     this.projectFormData.title = value;
+    this.errorMessage = '';
     this.groupDropdownOpen = false;
     this.groupMenuStyle = {};
     this.groupOpensUp = false;

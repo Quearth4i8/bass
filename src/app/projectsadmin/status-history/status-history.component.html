@@ -46,7 +46,7 @@
 
         <div class="empty" *ngIf="!filteredRows.length">No project matches.</div>
 
-        <div class="row" *ngFor="let r of filteredRows" [attr.data-project]="r.project.id" [class.open]="expanded.has(r.project.id)">
+        <div class="row" *ngFor="let r of filteredRows; trackBy: trackRow" [attr.data-project]="r.project.id" [class.open]="expanded.has(r.project.id)">
           <button type="button" class="row-head" (click)="toggle(r.project.id)" [attr.aria-expanded]="expanded.has(r.project.id)">
             <span class="acronym">{{ r.project.acronyme || '—' }}</span>
             <span class="title" [title]="r.project.titreproj || ''">{{ r.project.titreproj || '—' }}</span>
@@ -70,21 +70,41 @@
               </div>
 
               <ol class="timeline">
-                <li *ngFor="let p of r.periods; let last = last" [class.current]="last">
+                <li *ngFor="let p of r.periods; let i = index; let last = last; trackBy: trackPeriod" [class.current]="last">
                   <span class="node" [ngClass]="'tone-' + statusTone(p.status)"></span>
                   <span class="pill sm" [ngClass]="'tone-' + statusTone(p.status)">{{ statusLabel(p.status) }}</span>
                   <span class="when">
-                    {{ formatDate(p.from) }} → {{ p.to ? formatDate(p.to) : 'today' }}
-                    <span class="dim">· {{ duration(p.from, p.to) }}</span>
+                    <ng-container *ngTemplateOutlet="dateCell; context: { r: r, p: p }"></ng-container>
+                    <ng-container *ngIf="isOngoing(p)">
+                      <span class="arrow">→</span>
+                      <ng-container *ngIf="r.periods[i + 1] as next; else present">
+                        <ng-container *ngTemplateOutlet="dateCell; context: { r: r, p: next }"></ng-container>
+                      </ng-container>
+                      <ng-template #present>
+                        <ng-container *ngIf="endDate(r) as end; else noEnd">{{ formatDate(end) }}</ng-container>
+                        <ng-template #noEnd><span class="dim">present</span></ng-template>
+                      </ng-template>
+                    </ng-container>
                   </span>
                 </li>
               </ol>
+              <p class="save-state" *ngIf="savingId === r.project.id"><i class='bx bx-loader-alt bx-spin'></i> Saving…</p>
+              <p class="save-state error" *ngIf="saveError?.projectId === r.project.id"><i class='bx bx-error-circle'></i> {{ saveError?.message }}</p>
             </ng-container>
             </div>
             </div>
           </div>
         </div>
       </section>
+
+      <!-- A status date, editable in place. Without a stored date it shows the guessed one, faded. -->
+      <ng-template #dateCell let-r="r" let-p="p">
+        <span class="date-edit" *ngIf="p.field; else plainDate">
+          <app-date-filter exact [ngModel]="dateValue(r, p)" (ngModelChange)="onDatePicked(r, p, $event)"
+                           [defaultYear]="p.from.getFullYear()" [placeholder]="formatDate(p.from)"></app-date-filter>
+        </span>
+        <ng-template #plainDate>{{ formatDate(p.from) }}</ng-template>
+      </ng-template>
 
       <aside class="panel overview">
         <header class="overview-head">

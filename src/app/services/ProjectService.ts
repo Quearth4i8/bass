@@ -65,9 +65,9 @@ export class ProjectService {
     return this.http.get<number[]>(`${this.baseUrl}/projects/status-history`, { params });
   }
 
-  /** Every recorded status change (admin only), grouped by project and in date order within each. */
-  getStatusChanges(): Observable<ProjectStatusChange[]> {
-    return this.http.get<ProjectStatusChange[]>(`${this.baseUrl}/projects/status-history/changes`);
+  /** Every project's status timeline (admin only), grouped by project and in date order within each. */
+  getStatusChanges(): Observable<ProjectStatusStep[]> {
+    return this.http.get<ProjectStatusStep[]>(`${this.baseUrl}/projects/status-history/changes`);
   }
 
   private authHeaders(): { headers: HttpHeaders } {
@@ -89,14 +89,14 @@ export class ProjectService {
 }
 
 /**
- * One status a project took on. It holds it from `changedAt` until its next
- * change. `changedBy` is "seed" for the starting rows guessed for projects
- * that existed before status history was recorded.
+ * One status a project took on, built from the project's status dates
+ * (submissionDate, startDate for Ongoing...). It holds it from `date` until its next
+ * step. `estimated` is true when the project has no date for that status and
+ * `date` is a guess (Ongoing from the start date, Achieved from the end date).
  */
-export interface ProjectStatusChange {
-  id: number;
+export interface ProjectStatusStep {
   projectId: number;
   status: string;
-  changedAt: string;
-  changedBy: string | null;
+  date: string;
+  estimated: boolean;
 }

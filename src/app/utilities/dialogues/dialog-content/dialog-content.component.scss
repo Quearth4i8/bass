@@ -5,3 +5,8 @@
 ::ng-deep .p-dialog-content {
   overflow: visible !important;
 }
+
+// A status the project can't move to from its current one.
+.dropdown-item.disabled { opacity: .4; cursor: not-allowed; }
+
+.footer-error { margin-right: auto; }

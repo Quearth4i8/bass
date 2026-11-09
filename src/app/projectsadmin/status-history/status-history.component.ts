@@ -8,9 +8,10 @@ import { AdminNavbarComponent } from '../../utilities/admin-navbar/admin-navbar.
 import { AdminSidebarComponent } from '../../utilities/admin-sidebar/admin-sidebar.component';
 import { SidebarService } from '../../services/sidebarservice';
 import { ThemeService } from '../../services/ThemeService';
-import { ProjectService, ProjectStatusChange } from '../../services/ProjectService';
+import { ProjectService, ProjectStatusStep } from '../../services/ProjectService';
 import { ProjectGroupService } from '../../services/ProjectGroupService';
-import { statusLabel, statusTone } from '../../utilities/project-labels';
+import { STAGE_DATE_FIELD, statusLabel, statusStage, statusTone } from '../../utilities/project-labels';
+import { DateFilterComponent } from '../../shared/components/date-filter/date-filter.component';
 import { matchesSearch } from '../../shared/utils/text-search';
 
 /** A stretch of time during which a project held one status. `to` is null for its current status. */
@@ -18,6 +19,8 @@ interface Period {
   status: string;
   from: Date;
   to: Date | null;
+  /** The project field holding the date it took this status ('startDate' for Ongoing...); null for a status outside the tree. */
+  field: string | null;
 }
 
 /** A project with its status timeline, oldest period first. */
@@ -31,15 +34,15 @@ interface Row {
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Status history of the research projects, from the backend's record of every
- * status change: one list of projects, most recently changed first, each
+ * Status history of the research projects, from the date each project took
+ * each of its statuses: one list of projects, most recently changed first, each
  * opening onto its timeline, and next to it a year-by-status count table whose
  * cells narrow the list to the projects behind that number.
  */
 @Component({
   selector: 'app-status-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AdminNavbarComponent, AdminSidebarComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavbarComponent, AdminSidebarComponent, DateFilterComponent],
   templateUrl: './status-history.component.html',
   styleUrls: ['./status-history.component.scss'],
 })
@@ -76,6 +79,13 @@ export class StatusHistoryComponent implements OnInit {
   /** A cell of the year table: lists the projects that held `status` during `year`. */
   yearFilter: { status: string; year: number } | null = null;
 
+  /** The project whose status date is being saved. */
+  savingId: number | null = null;
+  /** Why the last date change was refused, shown under that project's timeline. */
+  saveError: { projectId: number; message: string } | null = null;
+  /** Saves waiting a moment, so a date still being picked (year, then month...) is sent once. */
+  private pendingSaves = new Map<string, ReturnType<typeof setTimeout>>();
+
   constructor(
     private projectService: ProjectService,
     private projectGroupService: ProjectGroupService,
@@ -91,6 +101,12 @@ export class StatusHistoryComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(v => this.isSidebarVisible = v);
 
+    this.fetch(true);
+    this.destroyRef.onDestroy(() => this.pendingSaves.forEach(t => clearTimeout(t)));
+  }
+
+  /** Loads projects and timelines; again after a date is changed, so the timeline and year table follow. */
+  private fetch(first: boolean): void {
     forkJoin({
       projects: this.projectService.getAllProjects(),
       groups: this.projectGroupService.getProjectGroups(),
@@ -99,14 +115,69 @@ export class StatusHistoryComponent implements OnInit {
       next: ({ projects, groups, changes }) => {
         this.load(projects, groups.map(g => g.title), changes);
         this.loading = false;
-        this.openFromUrl();
+        this.savingId = null;
+        if (first) this.openFromUrl();
       },
       error: err => {
         console.error('Error loading status history:', err);
         this.error = 'The status history could not be loaded.';
         this.loading = false;
+        this.savingId = null;
       },
     });
+  }
+
+  /** The date stored for the period's status; '' when the project has none yet (its timeline shows a guess). */
+  dateValue(row: Row, period: Period): string {
+    return period.field ? (row.project[period.field] || '') : '';
+  }
+
+  /** A date picked on the timeline: saved to the project once the admin stops picking. */
+  onDatePicked(row: Row, period: Period, value: string): void {
+    const field = period.field;
+    if (!field || !value || value === row.project[field]) return;
+    const key = `${row.project.id}:${field}`;
+    clearTimeout(this.pendingSaves.get(key));
+    this.pendingSaves.set(key, setTimeout(() => {
+      this.pendingSaves.delete(key);
+      this.saveDate(row, field, value);
+    }, 800));
+  }
+
+  private saveDate(row: Row, field: string, value: string): void {
+    this.saveError = null;
+    this.savingId = row.project.id;
+    const changes: Record<string, any> = { [field]: value };
+    // The start year goes with the start date (Ongoing's date).
+    if (field === 'startDate') changes['startyear'] = Number(value.slice(0, 4));
+    this.projectService.updateProject(row.project.id, { ...row.project, ...changes }).subscribe({
+      next: () => this.fetch(false),
+      error: err => {
+        console.error('Error saving status date:', err);
+        this.savingId = null;
+        // A date out of order comes back as 400 with the reason as text.
+        this.saveError = {
+          projectId: row.project.id,
+          message: err?.status === 400 && typeof err.error === 'string' ? err.error : 'The date could not be saved.',
+        };
+      },
+    });
+  }
+
+  /**
+   * Ongoing is shown as a span from the start date, up to the date the project
+   * became Achieved or Canceled, or else its end date.
+   */
+  isOngoing(period: Period): boolean {
+    return statusStage(period.status) === 'ONGOING';
+  }
+
+  trackRow(_: number, row: Row): number {
+    return row.project.id;
+  }
+
+  trackPeriod(_: number, period: Period): string {
+    return period.status;
   }
 
   toggleSidebar(): void {
@@ -114,8 +185,8 @@ export class StatusHistoryComponent implements OnInit {
     this.sidebarService.toggleSidebar();
   }
 
-  private load(projects: any[], groupTitles: string[], changes: ProjectStatusChange[]): void {
-    const byProject = new Map<number, ProjectStatusChange[]>();
+  private load(projects: any[], groupTitles: string[], changes: ProjectStatusStep[]): void {
+    const byProject = new Map<number, ProjectStatusStep[]>();
     for (const c of changes) {
       const list = byProject.get(c.projectId) ?? [];
       list.push(c);
@@ -123,12 +194,14 @@ export class StatusHistoryComponent implements OnInit {
     }
 
     this.rows = projects.map(project => {
-      const changes = (byProject.get(project.id) ?? [])
-        .sort((a, b) => parseDate(a.changedAt).getTime() - parseDate(b.changedAt).getTime() || a.id - b.id);
+      // Already in status order: Submitted, then Ongoing... (two can share a day).
+      // A step without a readable date would turn every year computation into NaN and empty the year table.
+      const changes = (byProject.get(project.id) ?? []).filter(c => !isNaN(parseDate(c.date).getTime()));
       const periods = changes.map((row, i) => ({
         status: row.status,
-        from: parseDate(row.changedAt),
-        to: i + 1 < changes.length ? parseDate(changes[i + 1].changedAt) : null,
+        from: parseDate(row.date),
+        to: i + 1 < changes.length ? parseDate(changes[i + 1].date) : null,
+        field: (stage => stage ? STAGE_DATE_FIELD[stage] : null)(statusStage(row.status)),
       }));
       return { project, periods, lastChange: periods.length ? periods[periods.length - 1].from : null };
     }).sort((a, b) => (b.lastChange?.getTime() ?? 0) - (a.lastChange?.getTime() ?? 0)
@@ -136,8 +209,8 @@ export class StatusHistoryComponent implements OnInit {
 
     const known = new Set(groupTitles.map(normalize));
     const extra = changes.map(c => c.status).filter(st => st && !known.has(normalize(st)));
-    // Same order as the project dialog: Ongoing, Achieved, Submitted, Rejected, then others.
-    const rank = ['ONGOING', 'ACHIEVED', 'SUBMITTED', 'REJECTED'];
+    // Same order as the project dialog: Ongoing, Achieved, Submitted, Rejected, Canceled, then others.
+    const rank = ['ONGOING', 'ACHIEVED', 'SUBMITTED', 'REJECTED', 'CANCEL'];
     const pos = (t: string) => {
       const i = rank.findIndex(r => normalize(t).includes(r));
       return i < 0 ? rank.length : i;
@@ -145,6 +218,7 @@ export class StatusHistoryComponent implements OnInit {
     this.statuses = [...groupTitles, ...Array.from(new Set(extra))].sort((a, b) => pos(a) - pos(b));
 
     const now = new Date().getFullYear();
+    this.years = [];
     const first = Math.min(now, ...this.rows.filter(r => r.periods.length).map(r => r.periods[0].from.getFullYear()));
     for (let y = now; y >= first; y--) this.years.push(y);
 
@@ -219,22 +293,14 @@ export class StatusHistoryComponent implements OnInit {
     }));
   }
 
-  formatDate(date: Date): string {
-    return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  /** The project's end date, for an Ongoing span not closed by a later status; null without one. */
+  endDate(row: Row): Date | null {
+    const end = row.project.endDate;
+    return end ? parseDate(end) : null;
   }
 
-  /** "2 yr 3 mo", "5 mo", "12 days". */
-  duration(from: Date, to: Date | null): string {
-    const end = to ?? new Date();
-    let months = (end.getFullYear() - from.getFullYear()) * 12 + end.getMonth() - from.getMonth();
-    if (end.getDate() < from.getDate()) months--;
-    if (months < 1) {
-      const days = Math.max(Math.round((end.getTime() - from.getTime()) / 86_400_000), 0);
-      return days === 1 ? '1 day' : `${days} days`;
-    }
-    const years = Math.floor(months / 12);
-    const rest = months % 12;
-    return [years ? `${years} yr` : '', rest ? `${rest} mo` : ''].filter(Boolean).join(' ');
+  formatDate(date: Date): string {
+    return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
   }
 }
 
@@ -249,8 +315,8 @@ function normalize(status: string | null | undefined): string {
   return (status || '').trim().toUpperCase();
 }
 
-/** A LocalDateTime from the backend: an ISO string, or [y, m, d, h, min, ...] if serialized as an array. */
+/** A LocalDate from the backend, "2024-03-14" (or [2024, 3, 14] if serialized as an array), as local midnight. */
 function parseDate(value: string | number[]): Date {
-  if (Array.isArray(value)) return new Date(value[0], value[1] - 1, value[2], value[3] ?? 0, value[4] ?? 0);
-  return new Date(value);
+  const [y, m, d] = Array.isArray(value) ? value : String(value ?? '').split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
