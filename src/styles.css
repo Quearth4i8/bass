@@ -61,6 +61,13 @@ html.portal-shell-active {
   scrollbar-gutter: auto;
 }
 
+/* A modal PrimeNG dialog locks scrolling with .p-overflow-hidden on <body>,
+   but the window scroll lives on <html> here, so lock that too. The gutter
+   stays reserved, so the page doesn't shift. */
+html:has(> body.p-overflow-hidden) {
+  overflow: hidden;
+}
+
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* ---------------------------------------------------------------
@@ -221,4 +228,16 @@ body.gallery-lightbox-open header.portal-shell-nav {
 }
 body.gallery-lightbox-open .portal-scroll {
   overflow-y: hidden;
+}
+
+/* ── Phone layout (admin pages) ───────────────────────────────────────────
+   Every admin page reserves 200px on the left for the sidebar. On phones the
+   sidebar is an overlay drawer instead (it starts closed, see SidebarService),
+   so the page always runs full width with a tighter gutter. Component styles
+   are scoped, hence !important. */
+@media (max-width: 1024px) {
+  .admin-main, .admin-main.sidebar-open { margin-left: 0 !important; }
+}
+@media (max-width: 600px) {
+  .admin-main { padding: 18px 16px !important; }
 }

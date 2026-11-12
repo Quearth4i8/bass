@@ -6,7 +6,47 @@
   overflow: visible !important;
 }
 
-// A status the project can't move to from its current one.
-.dropdown-item.disabled { opacity: .4; cursor: not-allowed; }
+// One row per status: its name, then the date the project took it.
+.stage-list {
+  display: flex; flex-direction: column; margin-top: 8px;   // under the status dropdown
+  border: 1px solid $line; border-radius: 8px; overflow: hidden;
+}
+.stage-row {
+  // The x column is kept on every row, so all the date fields line up.
+  display: grid; grid-template-columns: 120px 1fr 30px; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  & + & { border-top: 1px solid $line; }
+  &.current { background: rgba(74,214,196,.06); }
+  // A status the project can't take from where it is now.
+  &.locked { opacity: .45; }
+  // One x per reached row (the column on the right), not the date field's own as well.
+  ::ng-deep .df-clear { display: none; }
+}
+.stage-name {
+  display: flex; align-items: center; gap: 8px; min-width: 0;
+  font-size: 13px; font-weight: 600; color: $text;
+}
+// The label, with "Current" under it on the project's status.
+.stage-text { display: flex; flex-direction: column; gap: 1px; line-height: 1.25; }
+.stage-now {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: $accent;
+}
+.stage-drop {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 7px; background: transparent; color: $text-faint;
+  font-size: 18px; cursor: pointer;
+  &:hover { color: $text; background: rgba(255,255,255,.06); }
+}
+@media (max-width: 480px) {
+  .stage-row { grid-template-columns: 1fr 30px; app-date-filter { grid-column: 1; grid-row: 2; } .stage-drop { grid-column: 2; grid-row: 2; } }
+}
+
+.admin-dialog.theme-light {
+  .stage-list, .stage-row + .stage-row { border-color: #e2edf4; }
+  .stage-row.current { background: rgba(26,143,127,.06); }
+  .stage-name { color: #0d2137; }
+  .stage-now { color: #1a8f7f; }
+  .stage-drop { color: #9fb3bf; &:hover { color: #0d2137; background: #f0f7fb; } }
+}
 
 .footer-error { margin-right: auto; }

@@ -46,65 +46,75 @@
 
         <div class="empty" *ngIf="!filteredRows.length">No project matches.</div>
 
+        <div class="cols list-head" *ngIf="filteredRows.length">
+          <span>Acronym</span>
+          <span>Project title</span>
+          <span>Changes</span>
+          <span>Status</span>
+          <span></span>
+        </div>
+
         <div class="row" *ngFor="let r of filteredRows; trackBy: trackRow" [attr.data-project]="r.project.id" [class.open]="expanded.has(r.project.id)">
-          <button type="button" class="row-head" (click)="toggle(r.project.id)" [attr.aria-expanded]="expanded.has(r.project.id)">
-            <span class="acronym">{{ r.project.acronyme || '—' }}</span>
+          <button type="button" class="cols row-head" (click)="toggle(r.project.id)" [attr.aria-expanded]="expanded.has(r.project.id)">
+            <span class="acronym" [title]="r.project.acronyme || ''">{{ r.project.acronyme || '—' }}</span>
             <span class="title" [title]="r.project.titreproj || ''">{{ r.project.titreproj || '—' }}</span>
             <span class="meta">
               <ng-container *ngIf="r.periods.length > 1">{{ r.periods.length - 1 }} change{{ r.periods.length === 2 ? '' : 's' }}</ng-container>
               <ng-container *ngIf="r.periods.length <= 1">No changes</ng-container>
             </span>
-            <span class="pill" *ngIf="r.project.title" [ngClass]="'tone-' + statusTone(r.project.title)">{{ statusLabel(r.project.title) }}</span>
+            <span class="status-cell">
+              <span class="pill" *ngIf="r.project.title" [ngClass]="'tone-' + statusTone(r.project.title)">{{ statusLabel(r.project.title) }}</span>
+            </span>
             <i class='bx bx-chevron-down chevron'></i>
           </button>
 
           <div class="row-body" [class.show]="expanded.has(r.project.id)">
             <div class="row-body-clip">
             <div class="row-body-content" *ngIf="rendered.has(r.project.id)">
-            <p class="empty" *ngIf="!r.periods.length">No status recorded for this project yet.</p>
+            <p class="empty" *ngIf="!r.periods.length">No status recorded for this project yet: give its submission date below.</p>
 
-            <ng-container *ngIf="r.periods.length">
-              <div class="bar" aria-hidden="true">
+              <div class="bar" aria-hidden="true" *ngIf="r.periods.length">
                 <span *ngFor="let seg of bar(r.periods)" class="seg" [ngClass]="'tone-' + statusTone(seg.period.status)"
                       [style.width.%]="seg.width" [title]="statusLabel(seg.period.status)"></span>
               </div>
 
-              <ol class="timeline">
-                <li *ngFor="let p of r.periods; let i = index; let last = last; trackBy: trackPeriod" [class.current]="last">
-                  <span class="node" [ngClass]="'tone-' + statusTone(p.status)"></span>
-                  <span class="pill sm" [ngClass]="'tone-' + statusTone(p.status)">{{ statusLabel(p.status) }}</span>
-                  <span class="when">
-                    <ng-container *ngTemplateOutlet="dateCell; context: { r: r, p: p }"></ng-container>
-                    <ng-container *ngIf="isOngoing(p)">
-                      <span class="arrow">→</span>
-                      <ng-container *ngIf="r.periods[i + 1] as next; else present">
-                        <ng-container *ngTemplateOutlet="dateCell; context: { r: r, p: next }"></ng-container>
-                      </ng-container>
-                      <ng-template #present>
-                        <ng-container *ngIf="endDate(r) as end; else noEnd">{{ formatDate(end) }}</ng-container>
-                        <ng-template #noEnd><span class="dim">present</span></ng-template>
-                      </ng-template>
+              <!-- The status tree, left to right. Coloured links are the way the project went; dashed boxes are where it can go next. -->
+              <div class="flow-scroll">
+                <div class="flow" role="list" aria-label="Status workflow">
+                  <svg class="flow-lines" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden="true">
+                    <path *ngFor="let e of r.edges" [attr.d]="e.path" vector-effect="non-scaling-stroke"
+                          class="edge" [ngClass]="['is-' + e.state, 'tone-' + e.tone]"></path>
+                  </svg>
+                  <div class="flow-labels" aria-hidden="true">
+                    <ng-container *ngFor="let e of r.edges">
+                      <span class="edge-label" *ngIf="e.label" [style.left.%]="e.x / 6" [style.top.%]="e.y / 4">{{ e.label }}</span>
                     </ng-container>
-                  </span>
-                </li>
-              </ol>
+                  </div>
+
+                  <div class="flow-node" *ngFor="let n of r.nodes; trackBy: trackNode" role="listitem"
+                       [style.grid-column]="n.col" [style.grid-row]="n.row + ' / span 2'" [ngClass]="['is-' + n.state, 'tone-' + statusTone(n.title)]">
+                    <div class="fn-head">
+                      <span class="dot" [ngClass]="'tone-' + statusTone(n.title)"></span>
+                      <span class="fn-name">{{ statusLabel(n.title) }}</span>
+                      <span class="fn-tag" *ngIf="n.state === 'current'">Current</span>
+                      <span class="fn-tag next" *ngIf="n.state === 'next'">Next</span>
+                    </div>
+                    <app-date-filter *ngIf="n.state !== 'off'; else notReached" exact
+                                     [ngModel]="dateValue(r, n)" (ngModelChange)="onDatePicked(r, n, $event)" (cleared)="clearDate(r, n)"
+                                     [defaultYear]="n.period ? n.period.from.getFullYear() : null"
+                                     placeholder="Pick the date"></app-date-filter>
+                    <ng-template #notReached><span class="fn-off">Not reached</span></ng-template>
+                    <span class="fn-note" *ngIf="nodeNote(r, n) as note">{{ note }}</span>
+                  </div>
+                </div>
+              </div>
               <p class="save-state" *ngIf="savingId === r.project.id"><i class='bx bx-loader-alt bx-spin'></i> Saving…</p>
               <p class="save-state error" *ngIf="saveError?.projectId === r.project.id"><i class='bx bx-error-circle'></i> {{ saveError?.message }}</p>
-            </ng-container>
             </div>
             </div>
           </div>
         </div>
       </section>
-
-      <!-- A status date, editable in place. Without a stored date it shows the guessed one, faded. -->
-      <ng-template #dateCell let-r="r" let-p="p">
-        <span class="date-edit" *ngIf="p.field; else plainDate">
-          <app-date-filter exact [ngModel]="dateValue(r, p)" (ngModelChange)="onDatePicked(r, p, $event)"
-                           [defaultYear]="p.from.getFullYear()" [placeholder]="formatDate(p.from)"></app-date-filter>
-        </span>
-        <ng-template #plainDate>{{ formatDate(p.from) }}</ng-template>
-      </ng-template>
 
       <aside class="panel overview">
         <header class="overview-head">

@@ -92,7 +92,8 @@
   color: var(--df-text); font: inherit; font-size: 13px; cursor: pointer;
   transition: background .12s, color .12s;
 
-  &:hover:not(:disabled) { background: var(--df-hover); }
+  // Not on the picked cell: its white text would vanish on the pale hover.
+  &:hover:not(:disabled):not(.selected) { background: var(--df-hover); }
   &:disabled { color: var(--df-faint); opacity: .4; cursor: default; }
   &.current:not(.selected) { box-shadow: inset 0 0 0 1.5px var(--df-accent); color: var(--df-accent); font-weight: 600; }
   &.selected {

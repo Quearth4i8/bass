@@ -3,7 +3,7 @@ import { DynamicDialogRef, DialogService, DynamicDialogConfig } from 'primeng/dy
 import { ProjectGroupService } from 'src/app/services/ProjectGroupService';
 import { ThemeService } from 'src/app/services/ThemeService';
 import { ProjectService } from 'src/app/services/ProjectService';
-import { PROJECT_ROLES, STAGE_DATE_FIELD, StatusStage, canMoveStatus, roleLabel, stagePath, statusLabel, statusStage, statusTone } from 'src/app/utilities/project-labels';
+import { PROJECT_ROLES, STAGES, STAGE_DATE_FIELD, StatusStage, laterStages, previousStage, roleLabel, stagePath, stageTitle, statusLabel, statusStage, statusTone } from 'src/app/utilities/project-labels';
 
 @Component({
   selector: 'app-dialog-content',
@@ -16,15 +16,23 @@ export class DialogContentComponent implements OnInit {
   readonly statusLabel = statusLabel;
   readonly statusTone = statusTone;
   partenaireDropdownOpen: boolean = false;
-  groupDropdownOpen: boolean = false;
   partenaireMenuStyle: { [key: string]: string } = {};
-  groupMenuStyle: { [key: string]: string } = {};
   partenaireOpensUp: boolean = false;
-  groupOpensUp: boolean = false;
   isEditMode: boolean = false;
   projectId: number | null = null;
-  /** The status the project had when the dialog opened: it can only move forward from it. */
+  /** The status the project had when the dialog opened. */
   originalTitle = '';
+  /**
+   * A status counted as reached without its date: an older project's status
+   * when the dialog opened undated, or the one picked in the status dropdown.
+   * Still counted until it is dated or taken off.
+   */
+  undatedStage: StatusStage | null = null;
+  statusDropdownOpen = false;
+  statusMenuStyle: { [key: string]: string } = {};
+  statusOpensUp = false;
+  /** One row per status, each with the date the project took it. */
+  readonly stageRows = STAGES.map(stage => ({ stage, field: STAGE_DATE_FIELD[stage], label: statusLabel(stage) }));
   /** Why the last save was refused, from the checks below or the backend. */
   errorMessage = '';
   projectFormData: any = {
@@ -42,6 +50,7 @@ export class DialogContentComponent implements OnInit {
     title: '',
     applicant: '',
     submissionDate: '',
+    ongoingDate: '',
     rejectedDate: '',
     achievedDate: '',
     canceledDate: '',
@@ -64,6 +73,8 @@ export class DialogContentComponent implements OnInit {
       this.projectId = this.config.data.project.id;
       this.projectFormData = { ...this.config.data.project };
       this.originalTitle = this.config.data.project.title || '';
+      const stage = statusStage(this.originalTitle);
+      if (stage && !this.projectFormData[STAGE_DATE_FIELD[stage]]) this.undatedStage = stage;
     }
   }
 
@@ -86,69 +97,142 @@ export class DialogContentComponent implements OnInit {
    */
   saving = false;
 
-  /** Whether the status can be picked: statuses only move forward from the one the project had. */
-  canPick(title: string): boolean {
-    return !this.isEditMode || canMoveStatus(this.originalTitle, title);
+  /** The status dropdown's options, in workflow order. */
+  readonly stageOptions = STAGES;
+
+  toggleStatusDropdown(event: MouseEvent): void {
+    this.statusDropdownOpen = !this.statusDropdownOpen;
+    if (this.statusDropdownOpen) {
+      const result = this.computeMenuStyleFromEvent(event);
+      this.statusMenuStyle = result.style;
+      this.statusOpensUp = result.opensUp;
+    }
   }
 
   /**
-   * The date fields of the statuses the project went through after Ongoing.
-   * Submitted's is the submission date and Ongoing's the start date, both
-   * already in the form.
+   * Pre-selects the status: it and the statuses before it count as reached
+   * (dates left empty), the others are greyed out. Dates off its path go.
    */
-  get statusDates(): { stage: StatusStage; field: string; label: string }[] {
-    const stage = statusStage(this.projectFormData.title);
-    if (!stage) return [];
-    return stagePath(stage).filter(s => s !== 'SUBMITTED' && s !== 'ONGOING').map(s => ({
-      stage: s,
-      field: STAGE_DATE_FIELD[s],
-      label: `${statusLabel(s)} date`,
-    }));
+  selectStage(stage: StatusStage): void {
+    this.statusDropdownOpen = false;
+    const path = stagePath(stage);
+    STAGES.filter(s => !path.includes(s)).forEach(s => this.projectFormData[STAGE_DATE_FIELD[s]] = '');
+    this.undatedStage = stage;
+    this.fillStageDatesFromPeriod();
+    this.syncStatus();
   }
 
-  /** The list is rebuilt on every check: keep each date field by its stage so it isn't recreated. */
+  /** Stage dates filled in from the start/end date (and not changed by hand since). */
+  private autoFilled = new Set<StatusStage>();
+
+  /**
+   * Start date -> Ongoing date, end date -> Achieved date, for statuses the
+   * project has reached, while that date is empty or still the filled-in one.
+   * Editing the stage date by hand stops it following.
+   */
+  fillStageDatesFromPeriod(): void {
+    const sources: [StatusStage, string][] = [['ONGOING', 'startDate'], ['ACHIEVED', 'endDate']];
+    const reached = this.reachedStages;
+    for (const [stage, source] of sources) {
+      const field = STAGE_DATE_FIELD[stage];
+      if (!reached.has(stage) || (this.projectFormData[field] && !this.autoFilled.has(stage))) continue;
+      this.projectFormData[field] = this.projectFormData[source] || '';
+      this.autoFilled.add(stage);
+    }
+  }
+
+  /** The stages the project has reached: each dated one and the ones before it. */
+  get reachedStages(): Set<StatusStage> {
+    const reached = new Set<StatusStage>();
+    for (const stage of STAGES) {
+      if (this.projectFormData[STAGE_DATE_FIELD[stage]] || stage === this.undatedStage) stagePath(stage).forEach(s => reached.add(s));
+    }
+    return reached;
+  }
+
+  /** The project's status: the furthest stage it has reached; null before it has a submission date. */
+  get currentStage(): StatusStage | null {
+    let current: StatusStage | null = null;
+    this.reachedStages.forEach(s => {
+      if (!current || stagePath(s).length > stagePath(current).length) current = s;
+    });
+    return current;
+  }
+
+  /** A stage already reached, or one the current status can move on to (Submitted first). */
+  canSet(stage: StatusStage): boolean {
+    const current = this.currentStage;
+    return this.reachedStages.has(stage) || (current ? previousStage(stage) === current : stage === 'SUBMITTED');
+  }
+
+  /** Why a greyed-out stage can't be set yet. */
+  blockedReason(stage: StatusStage): string {
+    const current = this.currentStage;
+    if (current && !stagePath(stage).includes(current)) {
+      return `A ${statusLabel(current).toLowerCase()} project can't become ${statusLabel(stage).toLowerCase()}. Clear the ${statusLabel(current).toLowerCase()} date to step back.`;
+    }
+    return `Give the ${statusLabel(previousStage(stage) || 'SUBMITTED').toLowerCase()} date first.`;
+  }
+
+  /** Reached without a date of its own (an older project, or a stage skipped over). */
+  isUndated(stage: StatusStage): boolean {
+    return this.reachedStages.has(stage) && !this.projectFormData[STAGE_DATE_FIELD[stage]];
+  }
+
+  onStageDate(stage: StatusStage, value: string): void {
+    if (value !== this.projectFormData[STAGE_DATE_FIELD[stage]]) this.autoFilled.delete(stage);
+    this.projectFormData[STAGE_DATE_FIELD[stage]] = value;
+    this.syncStatus();
+  }
+
+  /**
+   * Taking a stage's date off means the project never got there: the stages
+   * after it go too, and the status steps back to the one before.
+   */
+  clearStage(stage: StatusStage): void {
+    const dropped = [stage, ...laterStages(stage)];
+    dropped.forEach(s => { this.projectFormData[STAGE_DATE_FIELD[s]] = ''; this.autoFilled.delete(s); });
+    if (this.undatedStage && dropped.includes(this.undatedStage)) this.undatedStage = null;
+    this.syncStatus();
+  }
+
+  /** The status follows the dates. */
+  private syncStatus(): void {
+    const current = this.currentStage;
+    this.errorMessage = '';
+    this.projectFormData.title = !current ? ''
+      : current === statusStage(this.originalTitle) ? this.originalTitle
+      : stageTitle(current, this.projectGroupTitles);
+  }
+
+  /** The rows never change, but keep each date field by its stage all the same. */
   trackStage(_: number, d: { stage: StatusStage }): StatusStage {
     return d.stage;
   }
 
-  /** A status the project has just taken needs the date it took it; earlier ones may be left unknown. */
-  dateRequired(stage: StatusStage): boolean {
-    const current = statusStage(this.projectFormData.title);
-    return stage === current && (!this.isEditMode || statusStage(this.originalTitle) !== current);
-  }
-
-  /** The same checks as the backend, so the admin hears about them before the round trip. */
+  /**
+   * A status is needed, and its dates must be in order, the same as the
+   * backend checks, so the admin hears about it before the round trip.
+   */
   private validate(): string {
-    const current = statusStage(this.projectFormData.title);
-    if (!current) return '';
-    if (this.dateRequired(current) && !this.projectFormData[STAGE_DATE_FIELD[current]]) {
-      return current === 'SUBMITTED'
-        ? "Give the project's submission date."
-        : current === 'ONGOING'
-        ? "Give the project's start date."
-        : `Give the date the project became ${statusLabel(current)}.`;
-    }
+    const current = this.currentStage;
+    if (!current) return "Pick the project's status.";
     // Dates are "YYYY-MM-DD", so comparing the strings compares the days.
     let last: StatusStage | null = null;
     for (const stage of stagePath(current)) {
       const date = this.projectFormData[STAGE_DATE_FIELD[stage]];
       if (!date) continue;
       if (last && date < this.projectFormData[STAGE_DATE_FIELD[last]]) {
-        const name = (s: StatusStage) => s === 'ONGOING' ? 'start' : statusLabel(s);
-        return `The ${name(stage)} date can't be before the ${name(last)} date.`;
+        return `The ${statusLabel(stage)} date can't be before the ${statusLabel(last)} date.`;
       }
       last = stage;
     }
     return '';
   }
 
-  /**
-   * The status dates to send, empty ones as null. The backend drops those off
-   * the project's path. The start date goes with the other dates.
-   */
+  /** The status dates to send, empty ones as null. The backend drops those off the project's path. */
   private statusDatesPayload(): Record<string, any> {
     return Object.fromEntries(Object.values(STAGE_DATE_FIELD)
-      .filter(field => field !== STAGE_DATE_FIELD.ONGOING)
       .map(field => [field, this.emptyToNull(this.projectFormData[field])]));
   }
 
@@ -212,9 +296,8 @@ export class DialogContentComponent implements OnInit {
 
   onDialogBodyScroll(): void {
     this.partenaireDropdownOpen = false;
-    this.groupDropdownOpen = false;
+    this.statusDropdownOpen = false;
     this.partenaireMenuStyle = {};
-    this.groupMenuStyle = {};
   }
 
   private computeMenuStyleFromEvent(event: MouseEvent): { style: { [key: string]: string }, opensUp: boolean } {
@@ -276,7 +359,6 @@ export class DialogContentComponent implements OnInit {
   togglePartenaireDropdown(event: MouseEvent): void {
     // No stopPropagation: the click must reach the document so other open dropdowns close.
     this.partenaireDropdownOpen = !this.partenaireDropdownOpen;
-    this.groupDropdownOpen = false;
     if (this.partenaireDropdownOpen) {
       const result = this.computeMenuStyleFromEvent(event);
       this.partenaireMenuStyle = result.style;
@@ -312,28 +394,6 @@ export class DialogContentComponent implements OnInit {
     return v === '' || v === undefined ? null : v;
   }
 
-  toggleGroupDropdown(event: MouseEvent): void {
-    // No stopPropagation: the click must reach the document so other open dropdowns close.
-    this.groupDropdownOpen = !this.groupDropdownOpen;
-    this.partenaireDropdownOpen = false;
-    if (this.groupDropdownOpen) {
-      const result = this.computeMenuStyleFromEvent(event);
-      this.groupMenuStyle = result.style;
-      this.groupOpensUp = result.opensUp;
-    } else {
-      this.groupOpensUp = false;
-    }
-  }
-
-  selectGroup(value: string): void {
-    if (!this.canPick(value)) return;
-    this.projectFormData.title = value;
-    this.errorMessage = '';
-    this.groupDropdownOpen = false;
-    this.groupMenuStyle = {};
-    this.groupOpensUp = false;
-  }
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
@@ -341,11 +401,9 @@ export class DialogContentComponent implements OnInit {
     const clickedOnMenu = target.closest('.dropdown-menu') !== null;
     if (!clickedOnDropdown && !clickedOnMenu) {
       this.partenaireDropdownOpen = false;
-      this.groupDropdownOpen = false;
       this.partenaireMenuStyle = {};
-      this.groupMenuStyle = {};
       this.partenaireOpensUp = false;
-      this.groupOpensUp = false;
+      this.statusDropdownOpen = false;
     }
   }
 }

@@ -551,7 +551,9 @@ app-projects-landing {
   column-count: 2; column-gap: 28px;
   p { break-inside: avoid; }
   p:nth-child(2) { break-after: column; }   // two paragraphs per column, kept in this order
-  @media (max-width: 1100px) { column-count: 1; }
+  // One column: drop the forced break too, or it spills paragraphs 3–4 into an
+  // off-screen second column.
+  @media (max-width: 1100px) { column-count: 1; p:nth-child(2) { break-after: auto; } }
 }
 // Our Mission: its own tinted panel under the text, so it reads as a
 // separate block rather than a second copy of the card's heading.
@@ -1116,9 +1118,20 @@ app-projects-landing {
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: 34% 66%;
+  grid-template-columns: minmax(0, 34fr) minmax(0, 66fr);
   position: relative;
   min-height: 260px;
+
+  /* Phones: no room beside the map for two gauge cards. Map on top (kept
+     small), region rows full width under it. */
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+    min-height: 0;
+    .trix-map-visual { justify-self: center; width: min(46%, 180px); padding: 0; }
+    .trix-map-rows   { padding-left: 0; }
+    .trix-no-regions { margin-left: 0; }
+  }
 }
 
 .trix-map-visual {
@@ -1536,6 +1549,16 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
   /* Label on one line, "(ongoing)" on its own line under it. */
   .budget-cell-label { white-space: nowrap; line-height: 1.6; margin-top: 10px; }
   .budget-cell-label .scope-tag { display: block; }
+
+  /* Stacked hero (column direction): the flex-bases above would become
+     heights (560px / 36ch) and leave a big empty gap. The fit layout below
+     switches back to a row and restores them. */
+  @media (max-width: 1280px) {
+    .hero-left { flex-basis: auto; }
+  }
+  @media (max-width: 860px) {
+    .hero-sub { flex-basis: auto; }
+  }
 }
 
 /* One screen, no page scroll: the layout fills the window between nav and
@@ -1569,7 +1592,7 @@ $home-fit: '(min-width: 901px) and (min-height: 700px)';
 
     .hero        { padding: 30px 0 0; }
     .hero-body   { flex-direction: row; align-items: center; column-gap: 48px; margin-bottom: 0; }
-    .hero-left   { column-gap: 44px; }
+    .hero-left   { column-gap: 44px; flex-basis: 560px; }
     .hero-title  { font-size: clamp(28px, 2.7vw, 44px); line-height: 1.05; }
     /* Justified; the wider 62ch measure and hyphenation keep word gaps even. */
     .hero-sub    {

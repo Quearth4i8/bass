@@ -1,5 +1,5 @@
 <aside class="admin-sidebar" [class.collapsed]="collapsed">
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" (click)="onNavClick($event)">
     <!-- Not exact: Status history (/projectadmin/status-history) is a subpage of Projects. -->
     <a routerLink="/projectadmin" class="nav-item"
        routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">

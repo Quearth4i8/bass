@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, booleanAttribute, forwardRef,
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, booleanAttribute, forwardRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -59,6 +59,11 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
   @Input() inputId?: string;
   /** Exact mode: the year to start from while there is no date (older rows only have a year). */
   @Input() defaultYear: number | string | null = null;
+  /**
+   * The x was used. Unlike the value turning '' (which exact mode also sends
+   * while a date is only partly picked), this always means "no date".
+   */
+  @Output() cleared = new EventEmitter<void>();
 
   open = false;
   disabled = false;
@@ -138,6 +143,8 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
     if (y && (y > this.yearEnd || y < this.yearEnd - 7)) this.yearEnd = y + 1;
     this.open = true;
     this.place();
+    // Again once drawn, with the popover's real size.
+    requestAnimationFrame(() => this.place());
     // Capture phase: scrolls inside a dialog body do not bubble to window.
     window.addEventListener('scroll', this.reposition, true);
   }
@@ -188,6 +195,7 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
     event.stopPropagation();
     this.parts = { year: null, month: null, day: null };
     this.onChange('');
+    this.cleared.emit();
     this.close();
   }
 
@@ -220,8 +228,9 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
     const trigger = this.host.nativeElement.querySelector('.df-trigger') as HTMLElement | null;
     if (!trigger) return;
     const r = trigger.getBoundingClientRect();
-    const height = 430;
-    const width = 340;
+    const popover = this.host.nativeElement.querySelector('.df-popover') as HTMLElement | null;
+    const height = popover?.offsetHeight || 480;
+    const width = popover?.offsetWidth || 340;
 
     // Fixed positioning is relative to the nearest transformed ancestor, if any.
     let frame: DOMRect | null = null;
@@ -236,10 +245,12 @@ export class DateFilterComponent implements ControlValueAccessor, OnDestroy {
     const below = viewH - r.bottom;
     const up = below < height + 8 && r.top > below;
     const left = Math.max(8, Math.min(r.left, viewW - width - 8));
+    // Kept inside the window: where neither side has room it overlaps the field rather than being cut off.
+    // Never under the 64px fixed navbar while the window has room below it (phones).
+    const minTop = viewH - height - 8 >= 72 ? 72 : 8;
+    const top = Math.max(minTop, Math.min(up ? r.top - height - 6 : r.bottom + 6, viewH - height - 8));
 
-    this.popoverStyle = up
-      ? { top: 'auto', bottom: `${(frame ? frame.height : viewH) - (r.top - top0) + 6}px`, left: `${left - left0}px` }
-      : { top: `${r.bottom - top0 + 6}px`, bottom: 'auto', left: `${left - left0}px` };
+    this.popoverStyle = { top: `${top - top0}px`, bottom: 'auto', left: `${left - left0}px` };
     this.cdr.markForCheck();
   }
 }

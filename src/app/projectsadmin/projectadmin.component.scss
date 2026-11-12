@@ -797,8 +797,8 @@ a.header-btn { text-decoration: none; }
 .page-current { font-family: $font-mono; font-size: 12.5px; color: $text-dim; min-width: 52px; text-align: center; }
 
 @media (max-width: 768px) {
-  .page-actions { width: 100%; }
-  .btn-ghost, .btn-primary { flex: 1; justify-content: center; }
+  .page-actions { width: 100%; flex-wrap: wrap; }   // three buttons don't fit one phone row
+  .btn-ghost, .btn-primary { flex: 1 1 auto; justify-content: center; }
 }
 
 // ── Redesign, light ─────────────────────────────────────────────────────────

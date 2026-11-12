@@ -85,7 +85,9 @@
 // ── Status pills and dots ─────────────────────────────────────────────────
 @each $tone in blue, green, amber, red, grey {
   .pill.tone-#{$tone} { color: var(--#{$tone}); background: var(--#{$tone}-soft); }
-  .dot.tone-#{$tone}, .node.tone-#{$tone}, .seg.tone-#{$tone} { background: var(--#{$tone}); }
+  .dot.tone-#{$tone}, .seg.tone-#{$tone} { background: var(--#{$tone}); }
+  .flow-node.tone-#{$tone} { --tone: var(--#{$tone}); --tone-soft: var(--#{$tone}-soft); }
+  .edge.tone-#{$tone} { --tone: var(--#{$tone}); }
 }
 .pill {
   display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
@@ -119,22 +121,47 @@
 
 // ── Project list ──────────────────────────────────────────────────────────
 .list { overflow: hidden; }
-.row { border-top: 1px solid var(--line); &:first-of-type { border-top: 0; } }
+// Same tracks for the header and every row, so a long acronym or title
+// cannot push the columns out of line.
+.cols {
+  display: grid;
+  // Fixed tracks on every row: a long acronym or title cannot shove the next column.
+  grid-template-columns: 160px minmax(0, 1fr) 104px 112px 24px;
+  align-items: center;
+  column-gap: 16px;
+}
+.list-head {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.row {
+  border-top: 1px solid var(--line); &:first-of-type { border-top: 0; }
+  // Not Bootstrap's grid .row: drop its -12px side margins and the 12px
+  // padding it gives children, which pushed the opened body 12px in from the
+  // header (acronym, bar and diagram didn't line up).
+  display: block; margin: 0;
+  > .row-body { padding-left: 0; padding-right: 0; }   // not the header: it keeps its own 18px
+}
+.list-head + .row { border-top: 0; }
 .row-head {
-  width: 100%; display: flex; align-items: center; gap: 14px;
+  width: 100%;
   padding: 13px 18px; border: 0; background: transparent; text-align: left;
   color: var(--text); font-family: var(--font-sans); cursor: pointer;
   &:hover { background: var(--panel-2); }
 }
 .row.open .row-head { background: var(--panel-2); }
 .acronym {
-  flex: 0 0 auto; min-width: 90px; padding: 3px 8px; border-radius: 5px; text-align: center;
+  justify-self: start; max-width: 100%; padding: 3px 8px; border-radius: 5px; text-align: center;
   font: 700 10.5px var(--font-mono); letter-spacing: .04em;
   color: var(--accent); background: var(--accent-soft);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.title { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta { flex-shrink: 0; font-size: 12px; color: var(--text-faint); }
-.chevron { flex-shrink: 0; font-size: 20px; color: var(--text-faint); transition: transform .2s; }
+.title { min-width: 0; font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { font-size: 12px; color: var(--text-faint); white-space: nowrap; }
+.status-cell { display: flex; align-items: center; min-width: 0; }
+.chevron { justify-self: end; font-size: 20px; color: var(--text-faint); transition: transform .2s; }
 .row.open .chevron { transform: rotate(180deg); color: var(--accent); }
 
 .row-head { transition: background .2s ease; }
@@ -150,7 +177,7 @@
 }
 .row-body-clip { min-height: 0; overflow: hidden; }
 .row-body-content {
-  padding: 14px 18px 18px 122px;
+  padding: 12px 18px 16px;
   transform: translateY(-6px); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
 }
 .row-body.show .row-body-content { transform: none; }
@@ -159,36 +186,109 @@
 }
 
 .bar {
-  display: flex; gap: 2px; height: 8px; margin-bottom: 16px; max-width: 640px;
+  display: flex; gap: 2px; height: 6px; margin-bottom: 12px;   // full row width, like the flow under it
   border-radius: 999px; overflow: hidden; background: var(--line);
 }
 
-.timeline {
-  list-style: none; margin: 0; padding: 0;
-  li {
-    position: relative; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    padding: 0 0 14px 24px; font-size: 13px;
-    // The line linking each status to the next.
-    &::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: -2px; width: 2px; background: var(--line-2); }
-    &:last-child { padding-bottom: 0; &::before { display: none; } }
-  }
-  .node { position: absolute; left: 0; top: 5px; width: 12px; height: 12px; border-radius: 50%; }
-  li.current .node { box-shadow: 0 0 0 3px var(--panel-2), 0 0 0 5px var(--accent); }
+// ── Status workflow ───────────────────────────────────────────────────────
+// Three columns, four rows: each box covers two rows and sits on their
+// centre, and the links are drawn centre to centre underneath (hidden by the
+// opaque boxes), so the drawing stretches with the width without the boxes
+// moving off the lines. The rows are tall enough to hold the boxes, so
+// nothing spills out and the diagram never scrolls up and down.
+.flow-scroll { overflow-x: auto; overflow-y: hidden; padding: 6px 0 10px; }   // room for the current box's glow
+.flow {
+  position: relative; display: grid;
+  // Wide and short: full row width, 42px rows + 6px gaps (a box spans two
+  // rows, enough for one with a note), ~190px tall. The gap keeps stacked boxes (Rejected over Ongoing) apart.
+  // Boxes fill their columns; the links run in the 9% column gaps (FLOW_GAP in the component).
+  grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(4, 42px); row-gap: 6px; column-gap: 9%;
+  min-width: 640px;
 }
-.when { font-weight: 500; }
+.flow-lines, .flow-labels { grid-column: 1 / -1; grid-row: 1 / -1; width: 100%; height: 100%; }
+.flow-lines { overflow: visible; }
+.edge {
+  fill: none; stroke: var(--line-2); stroke-width: 1.5; stroke-linecap: round;
+  &.is-off { stroke-dasharray: 2 5; opacity: .6; }
+  &.is-next { stroke: var(--accent); stroke-dasharray: 6 5; opacity: .8; }
+  &.is-taken { stroke: var(--tone); stroke-width: 2.5; }
+}
+.flow-labels { position: relative; pointer-events: none; z-index: 2; }
+.edge-label {
+  position: absolute; transform: translate(-50%, -50%);
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  background: var(--panel); border: 1px solid var(--line-2);
+  font: 600 11px var(--font-mono); color: var(--text-dim);
+}
 
+.flow-node {
+  position: relative; z-index: 1; align-self: center;
+  // Fills its column: the links start and end at its edges (see FLOW_COL in the component).
+  width: 100%;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 7px 10px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--line-2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+  transition: border-color .15s, box-shadow .15s;
+
+  // Slimmer date field than the form default.
+  ::ng-deep .df-trigger { height: 28px; padding: 0 8px; gap: 7px; font-size: 12.5px; border-radius: 7px; }
+  ::ng-deep .df-icon { font-size: 15px; }
+
+  &.is-done { border-color: color-mix(in srgb, var(--tone) 45%, var(--line-2)); }
+  &.is-current {
+    border-color: var(--tone);
+    background: linear-gradient(var(--tone-soft), var(--tone-soft)), var(--panel);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 18%, transparent), 0 10px 24px rgba(0, 0, 0, .18);
+  }
+  &.is-next { border-style: dashed; border-color: var(--accent); }
+  // Each box is its own stacking layer (z-index: 1), which traps its date
+  // picker's popover under the boxes after it: lift the one with a picker open.
+  &:has(.df-popover) { z-index: 10; }
+  // Faded through its content, not the box, so the links stay hidden behind it.
+  &.is-off { border-style: dashed; background: var(--panel-2); > * { opacity: .5; } }
+}
+.fn-head { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.fn-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fn-tag {
+  margin-left: auto; padding: 1px 6px; border-radius: 999px; flex-shrink: 0;
+  font-size: 9px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--tone); background: var(--tone-soft);
+  &.next { color: var(--accent); background: var(--accent-soft); }
+}
+.fn-off { font-size: 11.5px; color: var(--text-faint); padding: 0; }
+.fn-note { font-size: 10.5px; line-height: 1.2; color: var(--text-dim); }
+
+/* Phones: no sideways scrolling. Each row is a small card (acronym + status +
+   chevron, title under it, changes count last) and the workflow diagram
+   becomes a vertical list of its boxes, since its links need ~720px. */
 @media (max-width: 768px) {
   .admin-main { margin-left: 0; padding: 16px; }
-  .row-head { flex-wrap: wrap; gap: 8px 10px; padding: 12px 14px; }
-  .title { flex-basis: 100%; order: 5; white-space: normal; }
-  .meta { margin-left: auto; }
+  .list-head { display: none; }
+  .row-head.cols {
+    grid-template-columns: auto minmax(0, 1fr) 24px;
+    grid-template-areas: "acr status chev" "title title title" "meta meta meta";
+    row-gap: 6px; column-gap: 10px;
+    padding: 12px 14px;
+    .acronym     { grid-area: acr; }
+    .status-cell { grid-area: status; justify-content: flex-end; }
+    .chevron     { grid-area: chev; }
+    .title       { grid-area: title; white-space: normal; }
+    .meta        { grid-area: meta; }
+  }
   .row-body-content { padding: 12px 14px 16px; }
+
+  .flow-scroll { overflow: visible; padding: 0; }
+  .flow { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .flow-lines, .flow-labels { display: none; }
+  .flow-node { width: 100%; max-width: none; }
 }
 
 // ── List + year table ─────────────────────────────────────────────────────
 .layout {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: start;
-  @media (max-width: 1200px) { grid-template-columns: 1fr; }
+  // minmax(0, …): a bare 1fr grows to the year table's width and widens the page on phones.
+  @media (max-width: 1200px) { grid-template-columns: minmax(0, 1fr); }
 }
 
 .year-banner {
@@ -233,10 +333,6 @@
   &.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 }
 
-// Status dates are edited in place: a compact date picker per date.
-.when { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.date-edit { display: inline-block; width: 150px; }
-.arrow { color: var(--text-dim); }
 .save-state {
   display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 12px; color: var(--text-dim);
   &.error { color: var(--danger); }

@@ -52,18 +52,14 @@
                     <input type="text" id="thematique" name="thematique" [(ngModel)]="projectFormData.thematique" placeholder="Research theme" required>
                 </div>
                 <div class="ad-field">
-                    <label for="submissionDate">Submission date <span class="req" *ngIf="dateRequired('SUBMITTED')">*</span></label>
-                    <app-date-filter exact inputId="submissionDate" name="submissionDate" [(ngModel)]="projectFormData.submissionDate" placeholder="Select submission date"></app-date-filter>
-                </div>
-                <div class="ad-field">
-                    <label for="startyear">Start date <span class="req">*</span></label>
+                    <label>Start date <span class="req">*</span></label>
                     <!-- Older rows only have a year: shown as the placeholder until an exact date is picked. -->
-                    <app-date-filter exact inputId="startyear" name="startDate" [(ngModel)]="projectFormData.startDate" [defaultYear]="projectFormData.startyear"
+                    <app-date-filter exact inputId="startyear" name="startDate" [ngModel]="projectFormData.startDate" (ngModelChange)="projectFormData.startDate = $event; fillStageDatesFromPeriod()" [defaultYear]="projectFormData.startyear"
                                      [placeholder]="projectFormData.startyear ? projectFormData.startyear + ' (pick the exact date)' : 'Select start date'" required></app-date-filter>
                 </div>
                 <div class="ad-field">
-                    <label for="endyear">End date <span class="req">*</span></label>
-                    <app-date-filter exact inputId="endyear" name="endDate" [(ngModel)]="projectFormData.endDate" [defaultYear]="projectFormData.endyear"
+                    <label>End date <span class="req">*</span></label>
+                    <app-date-filter exact inputId="endyear" name="endDate" [ngModel]="projectFormData.endDate" (ngModelChange)="projectFormData.endDate = $event; fillStageDatesFromPeriod()" [defaultYear]="projectFormData.endyear"
                                      [placeholder]="projectFormData.endyear ? projectFormData.endyear + ' (pick the exact date)' : 'Select end date'" required></app-date-filter>
                 </div>
                 <div class="ad-field">
@@ -74,31 +70,47 @@
                     <label for="budget">Partner budget (€) <span class="req">*</span></label>
                     <input type="number" id="budget" name="budget" [(ngModel)]="projectFormData.budget" placeholder="INSTM share" required>
                 </div>
+                <!-- The dropdown pre-selects the status (its path counts as reached, dates optional); after that the status follows the dates as before. -->
                 <div class="ad-field">
                     <label>Status <span class="req">*</span></label>
-                    <div class="custom-dropdown" [class.open]="groupDropdownOpen">
-                        <div class="dropdown-trigger" (click)="toggleGroupDropdown($event)">
-                            <span [class.is-placeholder]="!projectFormData.title" class="dt-value">
-                                <span class="status-dot" *ngIf="projectFormData.title" [ngClass]="'tone-' + statusTone(projectFormData.title)"></span>
-                                {{ projectFormData.title ? statusLabel(projectFormData.title) : 'Select status' }}
+                    <div class="custom-dropdown" [class.open]="statusDropdownOpen">
+                        <div class="dropdown-trigger" (click)="toggleStatusDropdown($event)">
+                            <span class="dt-value" *ngIf="currentStage; else noStatus">
+                                <span class="status-dot" [ngClass]="'tone-' + statusTone(currentStage)"></span>{{ statusLabel(currentStage) }}
                             </span>
+                            <ng-template #noStatus>
+                                <span class="is-placeholder">Select current status</span>
+                            </ng-template>
                             <i class='bx bx-chevron-down'></i>
                         </div>
-                        <div class="dropdown-menu" *ngIf="groupDropdownOpen" [ngStyle]="groupMenuStyle" [class.opens-up]="groupOpensUp">
-                            <div class="dropdown-item" *ngFor="let title of projectGroupTitles" (click)="selectGroup(title)" [class.selected]="projectFormData.title === title"
-                                 [class.disabled]="!canPick(title)" [attr.title]="canPick(title) ? null : 'A project can\'t go back from ' + statusLabel(originalTitle)">
-                                <span class="di-label"><span class="status-dot" [ngClass]="'tone-' + statusTone(title)"></span>{{ statusLabel(title) }}</span>
-                                <i class='bx bx-check di-check' *ngIf="projectFormData.title === title"></i>
+                        <div class="dropdown-menu" *ngIf="statusDropdownOpen" [ngStyle]="statusMenuStyle" [class.opens-up]="statusOpensUp">
+                            <div class="dropdown-item" *ngFor="let stage of stageOptions" (click)="selectStage(stage)" [class.selected]="currentStage === stage">
+                                <span class="di-label dt-value"><span class="status-dot" [ngClass]="'tone-' + statusTone(stage)"></span>{{ statusLabel(stage) }}</span>
+                                <i class='bx bx-check di-check' *ngIf="currentStage === stage"></i>
                             </div>
                         </div>
                     </div>
-                    <span class="ad-hint" *ngIf="isEditMode">Statuses only move forward: Submitted → Ongoing or Rejected, Ongoing → Achieved or Canceled.</span>
-                </div>
-                <!-- The day the project took each status on its way to the current one. -->
-                <div class="ad-field" *ngFor="let d of statusDates; trackBy: trackStage">
-                    <label [for]="d.field">{{ d.label }} <span class="req" *ngIf="dateRequired(d.stage)">*</span></label>
-                    <app-date-filter exact [inputId]="d.field" [name]="d.field" [(ngModel)]="projectFormData[d.field]"
-                                     [placeholder]="'Date the project became ' + (statusLabel(d.stage) | lowercase)"></app-date-filter>
+
+                    <!-- Hidden until a status is picked (or the project already has one). -->
+                    <div class="stage-list" *ngIf="currentStage">
+                        <div class="stage-row" *ngFor="let row of stageRows; trackBy: trackStage"
+                             [class.locked]="!canSet(row.stage)" [class.current]="currentStage === row.stage"
+                             [attr.title]="canSet(row.stage) ? null : blockedReason(row.stage)">
+                            <span class="stage-name">
+                                <span class="status-dot" [ngClass]="'tone-' + statusTone(row.stage)"></span>
+                                <span class="stage-text">
+                                    {{ row.label }}
+                                    <span class="stage-now" *ngIf="currentStage === row.stage">Current</span>
+                                </span>
+                            </span>
+                            <app-date-filter exact [name]="row.field" [ngModel]="projectFormData[row.field]" [disabled]="!canSet(row.stage)"
+                                             (ngModelChange)="onStageDate(row.stage, $event)" (cleared)="clearStage(row.stage)"
+                                             [placeholder]="isUndated(row.stage) ? 'Date unknown, pick it' : 'Date it became ' + (row.label | lowercase)"></app-date-filter>
+                            <button type="button" class="stage-drop" *ngIf="reachedStages.has(row.stage)" (click)="clearStage(row.stage)"
+                                    title="Take this status off" aria-label="Take this status off"><i class='bx bx-x'></i></button>
+                        </div>
+                    </div>
+                    <span class="ad-hint" *ngIf="currentStage">Submitted → Ongoing or Rejected, Ongoing → Achieved or Canceled. Clearing a date steps the project back, dropping the statuses after it.</span>
                 </div>
             </div>
         </div>
